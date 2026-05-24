@@ -1,0 +1,11 @@
+name: Sync plugins
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "TODO: implement registry sync workflow"
