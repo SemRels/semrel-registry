@@ -1,0 +1,38 @@
+# Security Policy
+
+## Supported Versions
+
+| Version | Supported |
+|---------|-----------|
+| `main` (pre-release) | ✅ |
+
+Once stable releases are published this table will list supported version ranges.
+
+## Reporting a Vulnerability
+
+**Please do not open a public GitHub Issue for security vulnerabilities.**
+
+Report security issues privately via **[GitHub Security Advisories](https://github.com/SemRels/semrel-registry/security/advisories/new)**.
+
+You can also reach the maintainers listed in [MAINTAINERS.md](MAINTAINERS.md).
+
+### What to include
+
+- Description of the vulnerability and its potential impact
+- Steps to reproduce or a proof-of-concept (if available)
+- Affected versions
+- Any suggested mitigations
+
+### Response SLA
+
+| Action | Target |
+|--------|--------|
+| Initial acknowledgement | 48 hours |
+| Status update | 7 days |
+| Patch / mitigation | 90 days |
+
+We follow responsible disclosure. We will coordinate a public disclosure date with you.
+
+## Repository Scope
+
+This policy applies to all code, automation, and documentation maintained in semrel-registry.
