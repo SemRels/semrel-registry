@@ -22,7 +22,7 @@ This guide outlines the expected publish flow for go-semrel plugin authors.
 
 ## 4. Submit to the registry
 
-- open a pull request against `go-semrel-registry`
+- open a pull request against `semrel-registry`
 - include links to the plugin repository and release
 - mention any breaking changes or runtime requirements
 

@@ -1,6 +1,6 @@
-# Contributing to go-semrel-registry
+# Contributing to semrel-registry
 
-Thanks for contributing to the go-semrel registry.
+Thanks for contributing to the semrel registry.
 
 ## Scope
 

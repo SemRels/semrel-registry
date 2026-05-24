@@ -1,4 +1,4 @@
-# go-semrel-registry
+# semrel-registry
 
 Central registry for go-semrel plugins.
 
