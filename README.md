@@ -12,10 +12,10 @@ Central registry for go-semrel plugins.
 
 The registry is the canonical source for published go-semrel plugins.
 
-1. Plugin authors publish versioned releases from their plugin repository.
-2. Plugin metadata is submitted to this repository.
-3. CI validates submitted metadata against the registry schema.
-4. CI rebuilds `plugins.json` and publishes it from the repository root.
+1. Plugin authors publish versioned GitHub Releases in [`SemRels/go-semrel-plugins`](https://github.com/SemRels/go-semrel-plugins).
+2. Release tags, binary asset names, and checksum files follow the registry naming conventions.
+3. GitHub Actions validates release metadata against the registry schema.
+4. GitHub Actions rebuilds `plugins.json` and publishes it from the repository root.
 5. Consumers can fetch the index via GitHub Pages today and `registry.semrel.io` later.
 
 `plugins.json` is intentionally kept in the repository root so it can be served directly by GitHub Pages.
@@ -33,5 +33,16 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 - `api/` - Go web service skeleton for the upcoming dynamic registry backend
 - `schemas/` - JSON schemas for registry payloads
 - `docs/` - contributor, API, and publishing documentation
-- `.github/workflows/` - automation for validation and registry synchronization
+- `web/` - Astro-based landing page and documentation for `registry.semrel.io`
+- `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
+
+## Web app development
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+The Astro site runs on `http://localhost:3000`, builds static files into `web/dist`, and mirrors the repository root `plugins.json` into `web/public/plugins.json` during install/build.

@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { loadRegistry } from '../lib/registry';
+
+const registry = loadRegistry();
+const pluginCount = registry.plugins.length;
+const generatedAt = registry.generatedAt
+  ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(registry.generatedAt))
+  : 'Updated automatically when metadata changes';
+
+const features = [
+  {
+    title: 'Easy discovery',
+    icon: '🔍',
+    copy: 'Search plugin metadata by category, author, tags, and release channel from a single static index.',
+  },
+  {
+    title: 'Auto-download',
+    icon: '⬇️',
+    copy: 'Registry-aware clients can resolve the latest release metadata and download platform-specific assets automatically.',
+  },
+  {
+    title: 'Verified',
+    icon: '✅',
+    copy: 'Every published version includes release dates, compatibility hints, and SHA-256 checksums for validation.',
+  },
+];
+---
+
+<Layout title="registry.semrel.io | Plugin Registry for go-semrel" description="Discover verified go-semrel plugins, raw registry metadata, and integration docs.">
+  <div class="container">
+    <section class="hero section">
+      <div class="hero__grid">
+        <div>
+          <p class="section-kicker">Plugin registry</p>
+          <h1>Plugin Registry for go-semrel</h1>
+          <p>
+            registry.semrel.io is the public discovery layer for go-semrel plugins. It pairs a static
+            <code>plugins.json</code> index with human-friendly docs so teams can browse releases now and upgrade to a richer API later.
+          </p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="/plugins/">Browse Plugins</a>
+            <a class="button button--ghost" href="/docs/">Read Documentation</a>
+          </div>
+        </div>
+        <div class="info-grid">
+          <article class="metric">
+            <span class="section-kicker">Published plugins</span>
+            <div class="metric-value">{pluginCount}</div>
+            <p class="muted">The current registry index is empty until plugin metadata lands, but the discovery flow is ready.</p>
+          </article>
+          <article class="metric">
+            <span class="section-kicker">Registry payload</span>
+            <div class="metric-value">v{registry.schemaVersion}</div>
+            <p class="muted">Served from <a href="/plugins.json">/plugins.json</a> for automation, mirrors, and future API compatibility.</p>
+          </article>
+          <article class="metric">
+            <span class="section-kicker">Last generated</span>
+            <div class="metric-value">Static</div>
+            <p class="muted">{generatedAt}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section-kicker">Why teams use it</p>
+      <div class="feature-grid">
+        {features.map((feature) => (
+          <article class="card">
+            <h2>{feature.icon} {feature.title}</h2>
+            <p class="section-copy">{feature.copy}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section quick-links">
+      <article class="card">
+        <p class="section-kicker">Discovery workflow</p>
+        <h2>Ship a usable registry MVP today</h2>
+        <p class="section-copy">The website is fully static, GitHub Pages friendly, and ready for a later upgrade to a dedicated API or admin surface.</p>
+        <div class="cta-row">
+          <a class="button button--ghost" href="/plugins/">Plugin overview</a>
+          <a class="button button--ghost" href="/docs/">API reference</a>
+        </div>
+      </article>
+      <article class="card">
+        <p class="section-kicker">For maintainers</p>
+        <h2>Contribute plugin metadata</h2>
+        <p class="section-copy">Plugin authors submit validated metadata through the registry repository, then automation refreshes the published index.</p>
+        <a class="button button--ghost" href="https://github.com/GoSemantics/go-semrel-registry/blob/main/docs/release-guide.md">Read the release guide</a>
+      </article>
+    </section>
+  </div>
+</Layout>

@@ -1,11 +1,141 @@
-name: Sync plugins
+name: Sync plugins registry
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+  repository_dispatch:
+    types:
+      - sync-plugins
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-plugins
+  cancel-in-progress: false
 
 jobs:
-  placeholder:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder
-        run: echo "TODO: implement registry sync workflow"
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify required tooling
+        run: |
+          jq --version
+          curl --version | head -n 1
+          node --version
+
+      # Fetch the release catalogue first so parsing and validation stay in repository code.
+      - name: Fetch plugin releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_SOURCE_OWNER: ${{ vars.PLUGIN_SOURCE_OWNER || 'SemRels' }}
+          PLUGIN_SOURCE_REPO: ${{ vars.PLUGIN_SOURCE_REPO || 'go-semrel-plugins' }}
+        shell: bash
+        run: |
+          set +e
+          mkdir -p .github/.cache
+          rm -f .github/.cache/releases-page-*.json .github/.cache/releases.json
+
+          page=1
+          fetched=0
+
+          while true; do
+            page_file=".github/.cache/releases-page-${page}.json"
+            success=0
+
+            for attempt in 1 2 3; do
+              if curl --silent --show-error --location --fail \
+                --header "Accept: application/vnd.github+json" \
+                --header "Authorization: Bearer ${GH_TOKEN}" \
+                --header "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/repos/${PLUGIN_SOURCE_OWNER}/${PLUGIN_SOURCE_REPO}/releases?per_page=100&page=${page}" \
+                -o "${page_file}"; then
+                if jq -e 'type == "array"' "${page_file}" >/dev/null 2>&1; then
+                  success=1
+                  break
+                fi
+              fi
+
+              echo "::warning::Release fetch failed for page ${page} (attempt ${attempt}/3)."
+              sleep $((attempt * 2))
+            done
+
+            if [ "${success}" -ne 1 ]; then
+              echo "::warning::Giving up on release fetch after page ${page}."
+              break
+            fi
+
+            count=$(jq 'length' "${page_file}")
+            fetched=$((fetched + count))
+
+            if [ "${count}" -lt 100 ]; then
+              break
+            fi
+
+            page=$((page + 1))
+          done
+
+          if compgen -G ".github/.cache/releases-page-*.json" > /dev/null; then
+            jq -s 'add' .github/.cache/releases-page-*.json > .github/.cache/releases.json
+          else
+            echo '[]' > .github/.cache/releases.json
+          fi
+
+          echo "Fetched ${fetched} release records."
+
+      # Build plugins.json from release tags, assets and checksum files with graceful skipping.
+      - name: Sync plugins.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_SOURCE_OWNER: ${{ vars.PLUGIN_SOURCE_OWNER || 'SemRels' }}
+          PLUGIN_SOURCE_REPO: ${{ vars.PLUGIN_SOURCE_REPO || 'go-semrel-plugins' }}
+        run: |
+          node .github/scripts/sync-plugins.js \
+            --releases .github/.cache/releases.json \
+            --plugins plugins.json \
+            --schema schemas/plugin-metadata.json \
+            --summary .github/.cache/sync-summary.json
+
+      - name: Validate generated plugins registry
+        continue-on-error: true
+        run: node .github/scripts/validate-plugins.js plugins.json schemas/plugin-metadata.json
+
+      - name: Publish workflow summary
+        if: always()
+        run: |
+          node -e "const fs=require('fs'); const summaryPath='.github/.cache/sync-summary.json'; const summary=fs.existsSync(summaryPath)?JSON.parse(fs.readFileSync(summaryPath,'utf8')):{processedReleases:0,syncedPlugins:0,newVersions:[],skippedReleases:[],warnings:['No sync summary was generated.']}; const lines=['# Plugin sync summary','', '- Source: '+(summary.sourceRepository||'unknown'), '- Processed releases: '+(summary.processedReleases||0), '- Synced plugins: '+(summary.syncedPlugins||0), '- New versions: '+((summary.newVersions||[]).length), '']; if ((summary.newVersions||[]).length) { lines.push('## New or updated versions',''); for (const item of summary.newVersions) lines.push('- '+item); lines.push(''); } if ((summary.skippedReleases||[]).length) { lines.push('## Skipped releases',''); for (const item of summary.skippedReleases) lines.push('- '+item); lines.push(''); } if ((summary.warnings||[]).length) { lines.push('## Warnings',''); for (const item of summary.warnings) lines.push('- '+item); lines.push(''); } fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));"
+
+      - name: Commit and push plugins.json
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if git diff --quiet -- plugins.json; then
+            echo "No plugin registry changes detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add plugins.json
+
+          if ! git commit -m "chore: sync plugins registry [skip ci]"; then
+            echo "::warning::No commit created."
+            exit 0
+          fi
+
+          if ! git push origin HEAD:main; then
+            echo "::warning::Failed to push plugins.json to main."
+          fi
