@@ -2,3 +2,10 @@ Thumbs.db
 .DS_Store
 *.log
 *.tmp
+
+.env
+.env.local
+postgres_data/
+api/api
+node_modules/
+dist/

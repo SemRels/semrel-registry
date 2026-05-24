@@ -30,6 +30,7 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 
 ## Repository layout
 
+- `api/` - Go web service skeleton for the upcoming dynamic registry backend
 - `schemas/` - JSON schemas for registry payloads
 - `docs/` - contributor, API, and publishing documentation
 - `.github/workflows/` - automation for validation and registry synchronization
