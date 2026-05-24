@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugin-metadata.json",
+  "title": "semrel plugin metadata registry schema",
+  "description": "JSON Schema 2020-12 for the semrel plugin registry. The document root is an object with a required plugins array. Each plugin entry describes discovery metadata and one or more released versions that semrel can download, verify and load.",
+  "$comment": "GitHub-based registry MVP; later deployable behind registry.semrel.io or a web API/admin panel. Example GitHub release tag naming convention: provider-github-v0.1.0. Generate SHA-256 checksum files with: sha256sum binary > binary.sha256. Cross-check gRPCVersion with ADR-001 Protobuf package versioning (for example: v1).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plugins"
+  ],
+  "properties": {
+    "plugins": {
+      "type": "array",
+      "description": "Registry entries for available semrel plugins. Each item documents a plugin identifier, metadata for discovery, and versioned binary releases for every supported target platform.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/plugin"
+      }
+    }
+  },
+  "$defs": {
+    "httpUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://",
+      "description": "HTTP or HTTPS URL. Useful for plugin homepages, repositories and downloadable release assets."
+    },
+    "spdxLicense": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9.-]+(?:\\+[A-Za-z0-9.-]+)?$",
+      "description": "SPDX license identifier, for example Apache-2.0 or MIT."
+    },
+    "pluginName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$",
+      "description": "Stable plugin identifier used by the registry and downloader, for example provider-github. Lowercase kebab-case is recommended."
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$",
+      "description": "Semantic Versioning 2.0.0 string, for example 0.1.0 or 1.2.3-rc.1."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$",
+      "description": "Hex-encoded SHA-256 checksum for a platform-specific binary asset."
+    },
+    "checksums": {
+      "type": "object",
+      "description": "Required SHA-256 checksums for all supported platforms. Store the checksum of the distributable binary or archive that downloadUrl refers to. Generate checksum files with: sha256sum binary > binary.sha256.",
+      "additionalProperties": false,
+      "required": [
+        "linux_amd64",
+        "linux_arm64",
+        "darwin_amd64",
+        "darwin_arm64",
+        "windows_amd64",
+        "windows_arm64"
+      ],
+      "properties": {
+        "linux_amd64": {
+          "$ref": "#/$defs/sha256"
+        },
+        "linux_arm64": {
+          "$ref": "#/$defs/sha256"
+        },
+        "darwin_amd64": {
+          "$ref": "#/$defs/sha256"
+        },
+        "darwin_arm64": {
+          "$ref": "#/$defs/sha256"
+        },
+        "windows_amd64": {
+          "$ref": "#/$defs/sha256"
+        },
+        "windows_arm64": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "description": "Optional compatibility hints used by semrel to decide whether a plugin release can be installed. minSemrelVersion controls the minimum supported go-semrel version; gRPCVersion tracks the ADR-001 protobuf service generation, for example v1.",
+      "additionalProperties": false,
+      "properties": {
+        "minSemrelVersion": {
+          "$ref": "#/$defs/semver"
+        },
+        "gRPCVersion": {
+          "type": "string",
+          "pattern": "^v[0-9]+(?:[A-Za-z0-9._-]*)?$",
+          "description": "Plugin protocol / protobuf package generation, aligned with ADR-001 versioning such as v1 or v2."
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "description": "A concrete published plugin release. downloadUrl points to the release asset for this version. For GitHub-hosted releases, a tag such as provider-github-v0.1.0 is recommended.",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "releaseDate",
+        "downloadUrl",
+        "checksums"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "releaseDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Release timestamp in ISO 8601 / RFC 3339 date-time format, for example 2026-05-24T12:00:00Z."
+        },
+        "changelog": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional per-version changelog or summary of notable changes."
+        },
+        "downloadUrl": {
+          "$ref": "#/$defs/httpUrl"
+        },
+        "checksums": {
+          "$ref": "#/$defs/checksums"
+        },
+        "compatibility": {
+          "$ref": "#/$defs/compatibility"
+        },
+        "prerelease": {
+          "type": "boolean",
+          "description": "Marks the release as prerelease so clients can opt in or out of unstable versions."
+        }
+      }
+    },
+    "plugin": {
+      "type": "object",
+      "description": "Plugin metadata entry. Required fields are name, description, author, license, category and versions. Optional fields such as homepage, repository and tags support discovery and future registry UI features.",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "author",
+        "license",
+        "category",
+        "versions"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/pluginName"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short human-readable description of the plugin."
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Primary maintainer, team or organization responsible for the plugin."
+        },
+        "homepage": {
+          "$ref": "#/$defs/httpUrl"
+        },
+        "repository": {
+          "$ref": "#/$defs/httpUrl"
+        },
+        "license": {
+          "$ref": "#/$defs/spdxLicense"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "provider",
+            "ci-condition",
+            "commit-analyzer",
+            "changelog-generator",
+            "files-updater",
+            "hooks"
+          ],
+          "description": "semrel plugin category. Values align with the ADR-001 gRPC service groups and the plugin SDK constants."
+        },
+        "tags": {
+          "type": "array",
+          "description": "Optional search and discovery labels, for example vcs, github, release or ci.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "versions": {
+          "type": "array",
+          "description": "Version history for this plugin. At least one release entry is required so a registry client can download a binary and verify it.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/version"
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "plugins": [
+        {
+          "name": "provider-github",
+          "description": "GitHub provider plugin for creating releases, uploading assets and reading repository metadata.",
+          "author": "GoSemantics",
+          "homepage": "https://registry.semrel.io/plugins/provider-github",
+          "repository": "https://github.com/GoSemantics/provider-github",
+          "license": "Apache-2.0",
+          "category": "provider",
+          "tags": [
+            "vcs",
+            "github",
+            "releases"
+          ],
+          "versions": [
+            {
+              "version": "0.1.0",
+              "releaseDate": "2026-05-24T12:00:00Z",
+              "changelog": "Initial public release with GitHub release creation, asset uploads and commit lookup support.",
+              "downloadUrl": "https://github.com/GoSemantics/provider-github/releases/download/provider-github-v0.1.0/provider-github-v0.1.0.tar.gz",
+              "checksums": {
+                "linux_amd64": "1111111111111111111111111111111111111111111111111111111111111111",
+                "linux_arm64": "2222222222222222222222222222222222222222222222222222222222222222",
+                "darwin_amd64": "3333333333333333333333333333333333333333333333333333333333333333",
+                "darwin_arm64": "4444444444444444444444444444444444444444444444444444444444444444",
+                "windows_amd64": "5555555555555555555555555555555555555555555555555555555555555555",
+                "windows_arm64": "6666666666666666666666666666666666666666666666666666666666666666"
+              },
+              "compatibility": {
+                "minSemrelVersion": "0.1.5",
+                "gRPCVersion": "v1"
+              },
+              "prerelease": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+---
+import FilterTags from '../components/FilterTags.astro';
+import PluginCard from '../components/PluginCard.astro';
+import SearchBar from '../components/SearchBar.astro';
+import Layout from '../layouts/Layout.astro';
+import { getCategories, loadRegistry } from '../lib/registry';
+
+const registry = loadRegistry();
+const plugins = [...registry.plugins].sort((left, right) => left.name.localeCompare(right.name));
+const categories = getCategories(plugins);
+---
+
+<Layout title="Plugin Directory | registry.semrel.io" description="Browse published go-semrel plugins, release metadata, and download instructions.">
+  <div class="container" data-plugin-directory>
+    <section class="section plugin-page__intro">
+      <div>
+        <p class="section-kicker">Plugin directory</p>
+        <h1 class="section-heading">Browse verified plugins</h1>
+        <p class="section-copy">
+          Search the registry index by name, author, category, tag, or release channel. Each card exposes
+          the latest download URL plus release metadata pulled from <a href="/plugins.json">plugins.json</a>.
+        </p>
+      </div>
+      <div class="cta-row">
+        <span class="status-pill">Static build • client-side filters</span>
+        <a class="button button--ghost" href="/docs/">API and integration docs</a>
+      </div>
+    </section>
+
+    <section class="control-panel section">
+      <SearchBar total={plugins.length} />
+      <FilterTags categories={categories} />
+    </section>
+
+    <div class="results-bar" aria-live="polite">
+      <p class="muted"><span data-results-count>{plugins.length}</span> plugin{plugins.length === 1 ? '' : 's'} shown</p>
+      <a href="/plugins.json">Open raw JSON</a>
+    </div>
+
+    {plugins.length > 0 ? (
+      <div class="plugin-grid">
+        {plugins.map((plugin) => <PluginCard plugin={plugin} />)}
+      </div>
+    ) : (
+      <div class="empty-state" data-empty-state>
+        <h2>No plugins published yet</h2>
+        <p>The UI is wired to the registry index already. As soon as plugin metadata lands in <code>plugins.json</code>, cards will render here automatically.</p>
+      </div>
+    )}
+
+    {plugins.length > 0 && (
+      <div class="empty-state" data-filter-empty-state hidden>
+        <h2>No plugins match the current filters</h2>
+        <p>Try another search term, switch back to all categories, or include prereleases.</p>
+      </div>
+    )}
+  </div>
+
+  <script is:inline>
+    (() => {
+      const directory = document.querySelector('[data-plugin-directory]');
+
+      if (!directory) {
+        return;
+      }
+
+      const searchInput = directory.querySelector('[data-plugin-search]');
+      const cards = [...directory.querySelectorAll('[data-plugin-card]')];
+      const categoryButtons = [...directory.querySelectorAll('[data-filter-category]')];
+      const releaseButtons = [...directory.querySelectorAll('[data-filter-release]')];
+      const resultCount = directory.querySelector('[data-results-count]');
+      const filterEmptyState = directory.querySelector('[data-filter-empty-state]');
+      let activeCategory = 'all';
+      let activeRelease = 'all';
+
+      const syncPressedState = (buttons, key, value) => {
+        buttons.forEach((button) => {
+          const selected = button.dataset[key] === value;
+          button.setAttribute('aria-pressed', String(selected));
+          button.classList.toggle('is-selected', selected);
+        });
+      };
+
+      const applyFilters = () => {
+        const searchTerm = (searchInput instanceof HTMLInputElement ? searchInput.value : '').trim().toLowerCase();
+        let visible = 0;
+
+        cards.forEach((card) => {
+          const haystack = [card.dataset.name, card.dataset.author, card.dataset.category, card.dataset.tags].join(' ');
+          const matchesSearch = searchTerm.length === 0 || haystack.includes(searchTerm);
+          const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+          const matchesRelease = activeRelease === 'all' || card.dataset.releaseChannel === activeRelease;
+          const shouldShow = matchesSearch && matchesCategory && matchesRelease;
+
+          card.hidden = !shouldShow;
+
+          if (shouldShow) {
+            visible += 1;
+          }
+        });
+
+        if (resultCount) {
+          resultCount.textContent = String(visible);
+        }
+
+        if (filterEmptyState instanceof HTMLElement) {
+          filterEmptyState.hidden = visible !== 0;
+        }
+      };
+
+      if (searchInput instanceof HTMLInputElement) {
+        searchInput.addEventListener('input', applyFilters);
+      }
+
+      categoryButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          activeCategory = button.dataset.filterCategory || 'all';
+          syncPressedState(categoryButtons, 'filterCategory', activeCategory);
+          applyFilters();
+        });
+      });
+
+      releaseButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          activeRelease = button.dataset.filterRelease || 'all';
+          syncPressedState(releaseButtons, 'filterRelease', activeRelease);
+          applyFilters();
+        });
+      });
+
+      syncPressedState(categoryButtons, 'filterCategory', activeCategory);
+      syncPressedState(releaseButtons, 'filterRelease', activeRelease);
+      applyFilters();
+    })();
+  </script>
+</Layout>

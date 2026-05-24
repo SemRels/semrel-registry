@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'registry.semrel.io',
+  description = 'Discover verified go-semrel plugins and registry documentation.',
+} = Astro.props;
+
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/plugins/', label: 'Plugins' },
+  { href: '/docs/', label: 'Docs' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="container site-header__inner">
+          <a class="brand" href="/">
+            <span class="brand__mark">SR</span>
+            <span>
+              <strong>registry.semrel.io</strong>
+              <small>go-semrel plugin registry</small>
+            </span>
+          </a>
+          <nav aria-label="Primary">
+            <ul class="site-nav">
+              {navItems.map((item) => {
+                const isActive = item.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(item.href);
+
+                return (
+                  <li>
+                    <a class={isActive ? 'is-active' : undefined} href={item.href}>{item.label}</a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main id="content" class="site-main">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <div class="container site-footer__grid">
+          <div>
+            <p class="footer-heading">registry.semrel.io</p>
+            <p class="muted">A static registry front-end for discovering, validating, and documenting go-semrel plugins.</p>
+          </div>
+          <div>
+            <p class="footer-heading">Resources</p>
+            <ul class="footer-links">
+              <li><a href="/plugins/">Browse plugins</a></li>
+              <li><a href="/docs/">Registry docs</a></li>
+              <li><a href="/plugins.json">Raw plugins.json</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-heading">GitHub</p>
+            <ul class="footer-links">
+              <li><a href="https://github.com/GoSemantics/semrel">Main repo</a></li>
+              <li><a href="https://semrel.io">Documentation</a></li>
+              <li><a href="https://github.com/GoSemantics/go-semrel-registry">Registry repo</a></li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

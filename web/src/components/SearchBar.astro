@@ -1,0 +1,22 @@
+---
+interface Props {
+  total: number;
+}
+
+const { total } = Astro.props;
+---
+
+<div class="control-panel__search">
+  <label class="search-field" for="plugin-search">
+    <span>Search plugins</span>
+    <input
+      id="plugin-search"
+      name="plugin-search"
+      type="search"
+      placeholder="Search by name, author, category, or tag"
+      autocomplete="off"
+      data-plugin-search
+    />
+  </label>
+  <p class="search-meta">Filtering {total} published {total === 1 ? 'plugin' : 'plugins'}.</p>
+</div>
