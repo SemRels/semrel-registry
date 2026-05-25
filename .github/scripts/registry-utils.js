@@ -9,11 +9,10 @@ const REQUIRED_CHECKSUM_KEYS = [
 
 const VALID_CATEGORIES = new Set([
   'provider',
-  'ci-condition',
-  'commit-analyzer',
-  'changelog-generator',
-  'files-updater',
-  'hooks'
+  'analyzer',
+  'condition',
+  'hook',
+  'updater'
 ]);
 
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
@@ -25,6 +24,20 @@ const SHA256_PATTERN = /^[A-Fa-f0-9]{64}$/;
 function deriveCategory(pluginName) {
   for (const category of VALID_CATEGORIES) {
     if (pluginName === category || pluginName.startsWith(category + '-')) {
+      return category;
+    }
+  }
+
+  const legacyPrefixes = new Map([
+    ['provider-', 'provider'],
+    ['analyzer-', 'analyzer'],
+    ['condition-', 'condition'],
+    ['hook-', 'hook'],
+    ['updater-', 'updater']
+  ]);
+
+  for (const [prefix, category] of legacyPrefixes) {
+    if (pluginName.startsWith(prefix)) {
       return category;
     }
   }
@@ -252,10 +265,6 @@ function validatePlugin(plugin, index) {
   if (!Array.isArray(plugin.versions)) {
     errors.push(`${prefix}.versions must be an array.`);
   } else {
-    if (plugin.versions.length === 0) {
-      errors.push(`${prefix}.versions must not be empty.`);
-    }
-
     const seenVersions = new Set();
     plugin.versions.forEach((version, versionIndex) => {
       for (const error of validateVersion(version, plugin.name || pluginLabel, versionIndex)) {

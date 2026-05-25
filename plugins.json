@@ -1,7 +1,384 @@
 {
-    "schemaVersion":  1,
-    "generatedAt":  null,
-    "plugins":  [
-
-                ]
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-25T00:00:00Z",
+  "plugins": [
+    {
+      "name": "bitbucket",
+      "description": "Bitbucket releases provider",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/provider-bitbucket",
+      "tags": [
+        "bitbucket",
+        "provider",
+        "releases"
+      ],
+      "versions": []
+    },
+    {
+      "name": "git",
+      "description": "Git provider",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/provider-git",
+      "tags": [
+        "git",
+        "provider",
+        "repository"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gitea",
+      "description": "Gitea releases provider",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/provider-gitea",
+      "tags": [
+        "gitea",
+        "provider",
+        "releases"
+      ],
+      "versions": []
+    },
+    {
+      "name": "github",
+      "description": "GitHub releases provider",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/provider-github",
+      "tags": [
+        "github",
+        "provider",
+        "releases"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gitlab",
+      "description": "GitLab releases provider",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/provider-gitlab",
+      "tags": [
+        "gitlab",
+        "provider",
+        "releases"
+      ],
+      "versions": []
+    },
+    {
+      "name": "conventional",
+      "description": "Conventional commits analyzer",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "analyzer",
+      "repository": "https://github.com/SemRels/analyzer-conventional",
+      "tags": [
+        "analyzer",
+        "commits",
+        "conventional"
+      ],
+      "versions": []
+    },
+    {
+      "name": "default",
+      "description": "Default version analyzer",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "analyzer",
+      "repository": "https://github.com/SemRels/analyzer-default",
+      "tags": [
+        "analyzer",
+        "default",
+        "semver"
+      ],
+      "versions": []
+    },
+    {
+      "name": "generic",
+      "description": "Generic external condition",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "condition",
+      "repository": "https://github.com/SemRels/condition-generic",
+      "tags": [
+        "condition",
+        "generic",
+        "workflow"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gitea-actions",
+      "description": "Gitea Actions condition",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "condition",
+      "repository": "https://github.com/SemRels/condition-gitea-actions",
+      "tags": [
+        "condition",
+        "gitea-actions",
+        "ci"
+      ],
+      "versions": []
+    },
+    {
+      "name": "github-actions",
+      "description": "GitHub Actions condition",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "condition",
+      "repository": "https://github.com/SemRels/condition-github-actions",
+      "tags": [
+        "condition",
+        "github-actions",
+        "ci"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gitlab-ci",
+      "description": "GitLab CI condition",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "condition",
+      "repository": "https://github.com/SemRels/condition-gitlab-ci",
+      "tags": [
+        "condition",
+        "gitlab-ci",
+        "ci"
+      ],
+      "versions": []
+    },
+    {
+      "name": "email",
+      "description": "Email notification hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-email",
+      "tags": [
+        "email",
+        "hook",
+        "notifications"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gitplugin",
+      "description": "Git plugin execution hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-gitplugin",
+      "tags": [
+        "git",
+        "hook",
+        "plugin"
+      ],
+      "versions": []
+    },
+    {
+      "name": "jira",
+      "description": "Jira integration hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-jira",
+      "tags": [
+        "hook",
+        "integration",
+        "jira"
+      ],
+      "versions": []
+    },
+    {
+      "name": "matrix",
+      "description": "Matrix notification hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-matrix",
+      "tags": [
+        "hook",
+        "matrix",
+        "notifications"
+      ],
+      "versions": []
+    },
+    {
+      "name": "slack",
+      "description": "Slack notification hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-slack",
+      "tags": [
+        "hook",
+        "notifications",
+        "slack"
+      ],
+      "versions": []
+    },
+    {
+      "name": "cargo",
+      "description": "Cargo dependency updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-cargo",
+      "tags": [
+        "cargo",
+        "dependencies",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "docker",
+      "description": "Docker image updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-docker",
+      "tags": [
+        "docker",
+        "images",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "go",
+      "description": "Go module updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-go",
+      "tags": [
+        "go",
+        "modules",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "gradle",
+      "description": "Gradle dependency updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-gradle",
+      "tags": [
+        "dependencies",
+        "gradle",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "helm",
+      "description": "Helm chart updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-helm",
+      "tags": [
+        "helm",
+        "charts",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "homebrew",
+      "description": "Homebrew formula updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-homebrew",
+      "tags": [
+        "formula",
+        "homebrew",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "maven",
+      "description": "Maven dependency updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-maven",
+      "tags": [
+        "dependencies",
+        "maven",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "npm",
+      "description": "npm package updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-npm",
+      "tags": [
+        "npm",
+        "packages",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "nuget",
+      "description": "NuGet package updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-nuget",
+      "tags": [
+        "nuget",
+        "packages",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "python",
+      "description": "Python dependency updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-python",
+      "tags": [
+        "python",
+        "dependencies",
+        "updater"
+      ],
+      "versions": []
+    },
+    {
+      "name": "terraform",
+      "description": "Terraform module updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-terraform",
+      "tags": [
+        "terraform",
+        "modules",
+        "updater"
+      ],
+      "versions": []
+    }
+  ]
 }

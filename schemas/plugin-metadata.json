@@ -3,17 +3,30 @@
   "$id": "https://registry.semrel.io/schemas/plugin-metadata.json",
   "title": "semrel plugin metadata registry schema",
   "description": "JSON Schema 2020-12 for the semrel plugin registry. The document root is an object with a required plugins array. Each plugin entry describes discovery metadata and one or more released versions that semrel can download, verify and load.",
-  "$comment": "GitHub-based registry MVP; later deployable behind registry.semrel.io or a web API/admin panel. Example GitHub release tag naming convention: provider-github-v0.1.0. Generate SHA-256 checksum files with: sha256sum binary > binary.sha256. Cross-check gRPCVersion with ADR-001 Protobuf package versioning (for example: v1).",
+  "$comment": "GitHub-based registry MVP; later deployable behind registry.semrel.io or a web API/admin panel. Official plugins currently publish from separate SemRels repositories and upload platform binaries plus .sha256 files per release. Cross-check gRPCVersion with ADR-001 Protobuf package versioning (for example: v1).",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "plugins"
   ],
   "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Registry schema version. Unknown fields are ignored by current semrel clients, but the registry keeps this marker for future migrations."
+    },
+    "generatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Timestamp when plugins.json was last regenerated, or null for bootstrap data."
+    },
     "plugins": {
       "type": "array",
       "description": "Registry entries for available semrel plugins. Each item documents a plugin identifier, metadata for discovery, and versioned binary releases for every supported target platform.",
-      "minItems": 1,
+      "minItems": 0,
       "items": {
         "$ref": "#/$defs/plugin"
       }
@@ -36,7 +49,7 @@
       "type": "string",
       "minLength": 1,
       "pattern": "^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$",
-      "description": "Stable plugin identifier used by the registry and downloader, for example provider-github. Lowercase kebab-case is recommended."
+      "description": "Stable plugin identifier used by the registry and downloader, for example github or github-actions. Lowercase kebab-case is recommended."
     },
     "semver": {
       "type": "string",
@@ -174,13 +187,12 @@
           "type": "string",
           "enum": [
             "provider",
-            "ci-condition",
-            "commit-analyzer",
-            "changelog-generator",
-            "files-updater",
-            "hooks"
+            "analyzer",
+            "condition",
+            "hook",
+            "updater"
           ],
-          "description": "semrel plugin category. Values align with the ADR-001 gRPC service groups and the plugin SDK constants."
+          "description": "semrel plugin category used by semrel.yaml and the registry discovery UX."
         },
         "tags": {
           "type": "array",
@@ -193,8 +205,8 @@
         },
         "versions": {
           "type": "array",
-          "description": "Version history for this plugin. At least one release entry is required so a registry client can download a binary and verify it.",
-          "minItems": 1,
+          "description": "Version history for this plugin. Empty arrays are allowed for registered plugins that do not have published binaries yet.",
+          "minItems": 0,
           "items": {
             "$ref": "#/$defs/version"
           }
@@ -204,41 +216,22 @@
   },
   "examples": [
     {
+      "schemaVersion": 1,
+      "generatedAt": "2026-05-25T00:00:00Z",
       "plugins": [
         {
-          "name": "provider-github",
-          "description": "GitHub provider plugin for creating releases, uploading assets and reading repository metadata.",
-          "author": "GoSemantics",
-          "homepage": "https://registry.semrel.io/plugins/provider-github",
-          "repository": "https://github.com/GoSemantics/provider-github",
+          "name": "github",
+          "description": "GitHub releases provider",
+          "author": "semrel Authors",
+          "repository": "https://github.com/SemRels/provider-github",
           "license": "Apache-2.0",
           "category": "provider",
           "tags": [
-            "vcs",
             "github",
+            "provider",
             "releases"
           ],
-          "versions": [
-            {
-              "version": "0.1.0",
-              "releaseDate": "2026-05-24T12:00:00Z",
-              "changelog": "Initial public release with GitHub release creation, asset uploads and commit lookup support.",
-              "downloadUrl": "https://github.com/GoSemantics/provider-github/releases/download/provider-github-v0.1.0/provider-github-v0.1.0.tar.gz",
-              "checksums": {
-                "linux_amd64": "1111111111111111111111111111111111111111111111111111111111111111",
-                "linux_arm64": "2222222222222222222222222222222222222222222222222222222222222222",
-                "darwin_amd64": "3333333333333333333333333333333333333333333333333333333333333333",
-                "darwin_arm64": "4444444444444444444444444444444444444444444444444444444444444444",
-                "windows_amd64": "5555555555555555555555555555555555555555555555555555555555555555",
-                "windows_arm64": "6666666666666666666666666666666666666666666666666666666666666666"
-              },
-              "compatibility": {
-                "minSemrelVersion": "0.1.5",
-                "gRPCVersion": "v1"
-              },
-              "prerelease": false
-            }
-          ]
+          "versions": []
         }
       ]
     }
