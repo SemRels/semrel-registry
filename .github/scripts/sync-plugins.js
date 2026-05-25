@@ -1,15 +1,45 @@
-#!/usr/bin/env node
+// SPDX-License-Identifier: Apache-2.0
+// SPDX-FileCopyrightText: 2026 The semrel Authors
 
 const fs = require('fs');
 const path = require('path');
 const {
   REQUIRED_CHECKSUM_KEYS,
-  deriveCategory,
-  buildDescription,
-  buildTags,
   sortVersionsDescending,
   validatePlugin
 } = require('./registry-utils');
+
+const CATEGORY_ORDER = ['provider', 'analyzer', 'condition', 'hook', 'updater'];
+const OFFICIAL_PLUGINS = [
+  { repo: 'provider-github', name: 'github', category: 'provider', description: 'GitHub releases provider', tags: ['github', 'provider', 'releases'] },
+  { repo: 'provider-gitlab', name: 'gitlab', category: 'provider', description: 'GitLab releases provider', tags: ['gitlab', 'provider', 'releases'] },
+  { repo: 'provider-gitea', name: 'gitea', category: 'provider', description: 'Gitea releases provider', tags: ['gitea', 'provider', 'releases'] },
+  { repo: 'provider-git', name: 'git', category: 'provider', description: 'Git provider', tags: ['git', 'provider', 'repository'] },
+  { repo: 'provider-bitbucket', name: 'bitbucket', category: 'provider', description: 'Bitbucket releases provider', tags: ['bitbucket', 'provider', 'releases'] },
+  { repo: 'analyzer-conventional', name: 'conventional', category: 'analyzer', description: 'Conventional commits analyzer', tags: ['analyzer', 'commits', 'conventional'] },
+  { repo: 'analyzer-default', name: 'default', category: 'analyzer', description: 'Default version analyzer', tags: ['analyzer', 'default', 'semver'] },
+  { repo: 'condition-github-actions', name: 'github-actions', category: 'condition', description: 'GitHub Actions condition', tags: ['condition', 'github-actions', 'ci'] },
+  { repo: 'condition-generic', name: 'generic', category: 'condition', description: 'Generic external condition', tags: ['condition', 'generic', 'workflow'] },
+  { repo: 'condition-gitea-actions', name: 'gitea-actions', category: 'condition', description: 'Gitea Actions condition', tags: ['condition', 'gitea-actions', 'ci'] },
+  { repo: 'condition-gitlab-ci', name: 'gitlab-ci', category: 'condition', description: 'GitLab CI condition', tags: ['condition', 'gitlab-ci', 'ci'] },
+  { repo: 'hook-slack', name: 'slack', category: 'hook', description: 'Slack notification hook', tags: ['hook', 'notifications', 'slack'] },
+  { repo: 'hook-email', name: 'email', category: 'hook', description: 'Email notification hook', tags: ['email', 'hook', 'notifications'] },
+  { repo: 'hook-matrix', name: 'matrix', category: 'hook', description: 'Matrix notification hook', tags: ['hook', 'matrix', 'notifications'] },
+  { repo: 'hook-jira', name: 'jira', category: 'hook', description: 'Jira integration hook', tags: ['hook', 'integration', 'jira'] },
+  { repo: 'hook-gitplugin', name: 'gitplugin', category: 'hook', description: 'Git plugin execution hook', tags: ['git', 'hook', 'plugin'] },
+  { repo: 'updater-go', name: 'go', category: 'updater', description: 'Go module updater', tags: ['go', 'modules', 'updater'] },
+  { repo: 'updater-npm', name: 'npm', category: 'updater', description: 'npm package updater', tags: ['npm', 'packages', 'updater'] },
+  { repo: 'updater-docker', name: 'docker', category: 'updater', description: 'Docker image updater', tags: ['docker', 'images', 'updater'] },
+  { repo: 'updater-gradle', name: 'gradle', category: 'updater', description: 'Gradle dependency updater', tags: ['dependencies', 'gradle', 'updater'] },
+  { repo: 'updater-python', name: 'python', category: 'updater', description: 'Python dependency updater', tags: ['python', 'dependencies', 'updater'] },
+  { repo: 'updater-helm', name: 'helm', category: 'updater', description: 'Helm chart updater', tags: ['helm', 'charts', 'updater'] },
+  { repo: 'updater-cargo', name: 'cargo', category: 'updater', description: 'Cargo dependency updater', tags: ['cargo', 'dependencies', 'updater'] },
+  { repo: 'updater-maven', name: 'maven', category: 'updater', description: 'Maven dependency updater', tags: ['dependencies', 'maven', 'updater'] },
+  { repo: 'updater-nuget', name: 'nuget', category: 'updater', description: 'NuGet package updater', tags: ['nuget', 'packages', 'updater'] },
+  { repo: 'updater-homebrew', name: 'homebrew', category: 'updater', description: 'Homebrew formula updater', tags: ['formula', 'homebrew', 'updater'] },
+  { repo: 'updater-terraform', name: 'terraform', category: 'updater', description: 'Terraform module updater', tags: ['terraform', 'modules', 'updater'] }
+];
+const SEMVER_SOURCE = '(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?';
 
 function parseArgs(argv) {
   const args = {};
@@ -31,7 +61,7 @@ function parseArgs(argv) {
 function readJson(filePath, fallback) {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
+  } catch {
     return fallback;
   }
 }
@@ -51,6 +81,10 @@ function escapeWorkflowMessage(message) {
 function warning(summary, message) {
   summary.warnings.push(message);
   process.stdout.write(`::warning::${escapeWorkflowMessage(message)}\n`);
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 async function fetchWithRetry(url, options, retries, summary, label) {
@@ -73,6 +107,24 @@ async function fetchWithRetry(url, options, retries, summary, label) {
   throw lastError;
 }
 
+async function fetchJson(url, token, summary, label) {
+  const response = await fetchWithRetry(
+    url,
+    {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'User-Agent': 'semrel-registry-sync'
+      }
+    },
+    3,
+    summary,
+    label
+  );
+
+  return response.json();
+}
+
 async function fetchText(url, token, summary, label) {
   const response = await fetchWithRetry(
     url,
@@ -80,7 +132,7 @@ async function fetchText(url, token, summary, label) {
       headers: {
         Accept: 'application/octet-stream',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'User-Agent': 'go-semrel-registry-sync'
+        'User-Agent': 'semrel-registry-sync'
       }
     },
     3,
@@ -92,21 +144,39 @@ async function fetchText(url, token, summary, label) {
 }
 
 async function fetchRepoMetadata(owner, repo, token, summary) {
-  const response = await fetchWithRetry(
+  return fetchJson(
     `https://api.github.com/repos/${owner}/${repo}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'User-Agent': 'go-semrel-registry-sync'
-      }
-    },
-    3,
+    token,
     summary,
     `Repository metadata fetch for ${owner}/${repo}`
   );
+}
 
-  return response.json();
+async function fetchReleases(owner, repo, token, summary) {
+  const releases = [];
+
+  for (let page = 1; page <= 10; page += 1) {
+    const pageData = await fetchJson(
+      `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100&page=${page}`,
+      token,
+      summary,
+      `Release fetch for ${owner}/${repo} page ${page}`
+    ).catch((error) => {
+      warning(summary, `Skipping ${owner}/${repo} because releases could not be fetched: ${error.message}`);
+      return null;
+    });
+
+    if (!Array.isArray(pageData)) {
+      break;
+    }
+
+    releases.push(...pageData);
+    if (pageData.length < 100) {
+      break;
+    }
+  }
+
+  return releases;
 }
 
 function extractChecksum(content) {
@@ -115,13 +185,20 @@ function extractChecksum(content) {
 }
 
 function detectPlatform(assetName, pluginName) {
-  const escaped = pluginName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = assetName.match(new RegExp(`^${escaped}-(linux|darwin|windows)-(amd64|arm64)(?:\\.exe)?$`));
-  if (!match) {
-    return null;
+  const escapedName = escapeRegExp(pluginName);
+  const patterns = [
+    new RegExp(`^semrel-plugin-${escapedName}_(linux|darwin|windows)_(amd64|arm64)(?:\\.exe)?$`),
+    new RegExp(`^plugin-(linux|darwin|windows)-(amd64|arm64)(?:\\.exe)?$`)
+  ];
+
+  for (const pattern of patterns) {
+    const match = assetName.match(pattern);
+    if (match) {
+      return `${match[1]}_${match[2]}`;
+    }
   }
 
-  return `${match[1]}_${match[2]}`;
+  return null;
 }
 
 async function resolveChecksums(release, pluginName, token, summary) {
@@ -156,16 +233,17 @@ async function resolveChecksums(release, pluginName, token, summary) {
   const checksums = {};
   for (const key of REQUIRED_CHECKSUM_KEYS) {
     const checksumAsset = checksumAssets[key];
-    const rawContent = typeof checksumAsset.content === 'string'
-      ? checksumAsset.content
-      : await fetchText(
-          checksumAsset.browser_download_url || checksumAsset.url,
-          token,
-          summary,
-          `Checksum download for ${pluginName} ${release.tag_name} ${key}`
-        );
+    const checksum = extractChecksum(
+      await fetchText(
+        checksumAsset.browser_download_url || checksumAsset.url,
+        token,
+        summary,
+        `Checksum download for ${pluginName} ${release.tag_name} ${key}`
+      ).catch((error) => {
+        throw new Error(`Could not read ${checksumAsset.name}: ${error.message}`);
+      })
+    );
 
-    const checksum = extractChecksum(rawContent);
     if (!checksum) {
       return { error: `Checksum asset ${checksumAsset.name} did not contain a SHA-256 value.` };
     }
@@ -176,59 +254,63 @@ async function resolveChecksums(release, pluginName, token, summary) {
   return { checksums, binaryUrls };
 }
 
-function buildPluginShell(pluginName, repoMetadata, defaults) {
-  const category = deriveCategory(pluginName);
-  if (!category) {
-    return { error: `Could not derive category from plugin name ${pluginName}.` };
+function parseVersionFromTag(tag, repo, pluginName) {
+  const candidates = [
+    new RegExp(`^v(${SEMVER_SOURCE})$`),
+    new RegExp(`^${escapeRegExp(repo)}-v(${SEMVER_SOURCE})$`),
+    new RegExp(`^${escapeRegExp(pluginName)}-v(${SEMVER_SOURCE})$`)
+  ];
+
+  for (const candidate of candidates) {
+    const match = String(tag || '').match(candidate);
+    if (match) {
+      return match[1];
+    }
   }
 
+  return null;
+}
+
+function buildPluginEntry(spec, owner, repoMetadata, existingPlugin) {
+  const repository = repoMetadata?.html_url || `https://github.com/${owner}/${spec.repo}`;
   return {
-    name: pluginName,
-    description: buildDescription(pluginName, category),
-    author: repoMetadata.owner?.login || defaults.owner,
-    homepage: repoMetadata.homepage || repoMetadata.html_url || defaults.repositoryUrl,
-    repository: repoMetadata.html_url || defaults.repositoryUrl,
-    license: repoMetadata.license?.spdx_id && repoMetadata.license.spdx_id !== 'NOASSERTION'
-      ? repoMetadata.license.spdx_id
-      : defaults.license,
-    category,
-    tags: buildTags(pluginName, category),
-    versions: []
+    name: spec.name,
+    description: spec.description,
+    author: existingPlugin?.author || 'semrel Authors',
+    license: existingPlugin?.license || (repoMetadata?.license?.spdx_id && repoMetadata.license.spdx_id !== 'NOASSERTION' ? repoMetadata.license.spdx_id : 'Apache-2.0'),
+    category: spec.category,
+    repository,
+    tags: Array.isArray(existingPlugin?.tags) && existingPlugin.tags.length > 0 ? existingPlugin.tags : spec.tags,
+    versions: Array.isArray(existingPlugin?.versions) ? existingPlugin.versions : []
   };
 }
 
-function mergePlugin(existingPlugin, shellPlugin) {
-  if (!existingPlugin) {
-    return shellPlugin;
-  }
+function samePluginData(previousRegistry, nextPlugins) {
+  const previousPlugins = Array.isArray(previousRegistry?.plugins) ? previousRegistry.plugins : [];
+  return JSON.stringify(previousPlugins) === JSON.stringify(nextPlugins);
+}
 
-  return {
-    ...existingPlugin,
-    description: existingPlugin.description || shellPlugin.description,
-    author: existingPlugin.author || shellPlugin.author,
-    homepage: existingPlugin.homepage || shellPlugin.homepage,
-    repository: existingPlugin.repository || shellPlugin.repository,
-    license: existingPlugin.license || shellPlugin.license,
-    category: existingPlugin.category || shellPlugin.category,
-    tags: Array.isArray(existingPlugin.tags) && existingPlugin.tags.length > 0 ? existingPlugin.tags : shellPlugin.tags,
-    versions: Array.isArray(existingPlugin.versions) ? existingPlugin.versions : []
-  };
+function comparePlugin(left, right) {
+  const leftCategory = CATEGORY_ORDER.indexOf(left.category);
+  const rightCategory = CATEGORY_ORDER.indexOf(right.category);
+  if (leftCategory !== rightCategory) {
+    return leftCategory - rightCategory;
+  }
+  return left.name.localeCompare(right.name);
 }
 
 async function main() {
   const args = parseArgs(process.argv);
-  const releasesPath = path.resolve(args.releases || '.github/.cache/releases.json');
   const pluginsPath = path.resolve(args.plugins || 'plugins.json');
   const summaryPath = path.resolve(args.summary || '.github/.cache/sync-summary.json');
   const schemaPath = path.resolve(args.schema || 'schemas/plugin-metadata.json');
-  const repoMetadataPath = args['repo-metadata'] ? path.resolve(args['repo-metadata']) : null;
-
   const owner = process.env.PLUGIN_SOURCE_OWNER || 'SemRels';
-  const repo = process.env.PLUGIN_SOURCE_REPO || 'go-semrel-plugins';
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
+  const generatedAtOverride = process.env.PLUGIN_GENERATED_AT || '';
 
   const summary = {
-    sourceRepository: `${owner}/${repo}`,
+    sourceOrganization: owner,
+    processedRepositories: 0,
     processedReleases: 0,
     syncedPlugins: 0,
     newVersions: [],
@@ -240,18 +322,7 @@ async function main() {
     warning(summary, `Schema file not found at ${schemaPath}. Validation will use built-in checks only.`);
   }
 
-  const releases = readJson(releasesPath, []);
   const registry = readJson(pluginsPath, { schemaVersion: 1, generatedAt: null, plugins: [] });
-  const repoMetadata = repoMetadataPath
-    ? readJson(repoMetadataPath, {})
-    : await fetchRepoMetadata(owner, repo, token, summary).catch(() => ({}));
-
-  if (!Array.isArray(releases)) {
-    warning(summary, `Release payload at ${releasesPath} is not an array. Nothing to sync.`);
-    writeJson(summaryPath, summary);
-    return;
-  }
-
   const pluginsMap = new Map();
   for (const plugin of Array.isArray(registry.plugins) ? registry.plugins : []) {
     if (plugin && typeof plugin.name === 'string') {
@@ -259,99 +330,82 @@ async function main() {
     }
   }
 
-  const defaults = {
-    owner,
-    repositoryUrl: `https://github.com/${owner}/${repo}`,
-    license: 'NOASSERTION'
-  };
+  for (const spec of OFFICIAL_PLUGINS) {
+    summary.processedRepositories += 1;
+    const existingPlugin = pluginsMap.get(spec.name);
+    const repoMetadata = await fetchRepoMetadata(owner, spec.repo, token, summary).catch(() => ({}));
+    const plugin = buildPluginEntry(spec, owner, repoMetadata, existingPlugin);
+    const versionsByNumber = new Map((plugin.versions || []).map((version) => [version.version, version]));
 
-  const releasePattern = /^([a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?)-v((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)$/;
+    const releases = await fetchReleases(owner, spec.repo, token, summary);
+    for (const release of releases) {
+      summary.processedReleases += 1;
 
-  for (const release of releases) {
-    summary.processedReleases += 1;
+      if (release?.draft) {
+        summary.skippedReleases.push(`${spec.repo}:${release.tag_name || 'unknown-tag'} (draft)`);
+        continue;
+      }
 
-    if (release?.draft) {
-      summary.skippedReleases.push(`${release.tag_name || 'unknown-tag'} (draft)`);
-      continue;
+      const version = parseVersionFromTag(release?.tag_name, spec.repo, spec.name);
+      if (!version) {
+        summary.skippedReleases.push(`${spec.repo}:${release?.tag_name || 'unknown-tag'} (invalid tag pattern)`);
+        continue;
+      }
+
+      const checksumResult = await resolveChecksums(release, spec.name, token, summary).catch((error) => ({
+        error: error.message
+      }));
+      if (checksumResult.error) {
+        warning(summary, checksumResult.error);
+        summary.skippedReleases.push(`${spec.repo}:${release.tag_name} (${checksumResult.error})`);
+        continue;
+      }
+
+      const versionEntry = {
+        version,
+        releaseDate: release.published_at || release.created_at || new Date().toISOString(),
+        downloadUrl: checksumResult.binaryUrls.linux_amd64 || Object.values(checksumResult.binaryUrls)[0] || release.html_url,
+        checksums: checksumResult.checksums,
+        prerelease: Boolean(release.prerelease)
+      };
+
+      const changelog = String(release.body || '').trim();
+      if (changelog) {
+        versionEntry.changelog = changelog;
+      }
+
+      if (!versionsByNumber.has(version)) {
+        summary.newVersions.push(`${spec.name}@${version}`);
+      }
+      versionsByNumber.set(version, versionEntry);
     }
 
-    const tag = release?.tag_name || '';
-    const match = tag.match(releasePattern);
-    if (!match) {
-      summary.skippedReleases.push(`${tag || 'unknown-tag'} (invalid tag pattern)`);
-      continue;
-    }
-
-    const pluginName = match[1];
-    const version = match[2];
-    const shellPlugin = buildPluginShell(pluginName, repoMetadata, defaults);
-    if (shellPlugin.error) {
-      warning(summary, shellPlugin.error);
-      summary.skippedReleases.push(`${tag} (${shellPlugin.error})`);
-      continue;
-    }
-
-    const checksumResult = await resolveChecksums(release, pluginName, token, summary).catch((error) => ({
-      error: error.message
-    }));
-
-    if (checksumResult.error) {
-      warning(summary, checksumResult.error);
-      summary.skippedReleases.push(`${tag} (${checksumResult.error})`);
-      continue;
-    }
-
-    const plugin = mergePlugin(pluginsMap.get(pluginName), shellPlugin);
-    const versionEntry = {
-      version,
-      releaseDate: release.published_at || release.created_at || new Date().toISOString(),
-      downloadUrl: release.html_url || checksumResult.binaryUrls.linux_amd64,
-      checksums: checksumResult.checksums,
-      prerelease: Boolean(release.prerelease)
-    };
-
-    const changelog = String(release.body || '').trim();
-    if (changelog) {
-      versionEntry.changelog = changelog;
-    }
-
-    const versionsByNumber = new Map();
-    for (const existingVersion of plugin.versions || []) {
-      versionsByNumber.set(existingVersion.version, existingVersion);
-    }
-
-    if (!versionsByNumber.has(version)) {
-      summary.newVersions.push(`${pluginName}@${version}`);
-    }
-
-    versionsByNumber.set(version, versionEntry);
     plugin.versions = sortVersionsDescending(Array.from(versionsByNumber.values()));
-
-    const validationErrors = validatePlugin(plugin, pluginName);
+    const validationErrors = validatePlugin(plugin, spec.name);
     if (validationErrors.length > 0) {
-      warning(summary, `Skipping ${pluginName} because validation failed: ${validationErrors.join(' | ')}`);
-      summary.skippedReleases.push(`${tag} (validation failed)`);
+      warning(summary, `Skipping ${spec.name} because validation failed: ${validationErrors.join(' | ')}`);
       continue;
     }
 
-    pluginsMap.set(pluginName, plugin);
+    pluginsMap.set(spec.name, plugin);
   }
 
-  const finalPlugins = Array.from(pluginsMap.values())
-    .filter((plugin) => validatePlugin(plugin, plugin.name).length === 0)
-    .sort((left, right) => left.name.localeCompare(right.name));
+  const finalPlugins = OFFICIAL_PLUGINS
+    .map((spec) => pluginsMap.get(spec.name))
+    .filter(Boolean)
+    .sort(comparePlugin);
 
   summary.syncedPlugins = finalPlugins.length;
-
   const nextRegistry = {
     schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
+    generatedAt: samePluginData(registry, finalPlugins)
+      ? (registry.generatedAt === undefined ? null : registry.generatedAt)
+      : (generatedAtOverride || new Date().toISOString()),
     plugins: finalPlugins
   };
 
   writeJson(pluginsPath, nextRegistry);
   writeJson(summaryPath, summary);
-
   process.stdout.write(`Synced ${summary.syncedPlugins} plugins and ${summary.newVersions.length} versions.\n`);
 }
 
