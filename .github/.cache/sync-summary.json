@@ -1,0 +1,10 @@
+{
+  "sourceRepository": "SemRels/semrel-plugins",
+  "processedReleases": 1,
+  "syncedPlugins": 1,
+  "newVersions": [
+    "provider-test@0.0.1"
+  ],
+  "skippedReleases": [],
+  "warnings": []
+}
