@@ -400,6 +400,51 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 		fn    func() (bool, string)
 	}
 
+	// Detect language by presence of go.mod or Cargo.toml.
+	hasGoMod, _    := checkGHFile(owner, repo, "go.mod")
+	hasCargo, _    := checkGHFile(owner, repo, "Cargo.toml")
+
+	var lang string
+	switch {
+	case hasGoMod:
+		lang = "go"
+	case hasCargo:
+		lang = "rust"
+	default:
+		lang = "unknown"
+	}
+
+	// Language-specific manifest + entry-point checks.
+	var manifestCheck, entrypointCheck check
+	switch lang {
+	case "rust":
+		manifestCheck = check{
+			"lang_manifest", "Cargo.toml present (Rust)",
+			func() (bool, string) { return checkGHFile(owner, repo, "Cargo.toml") },
+		}
+		entrypointCheck = check{
+			"lang_entrypoint", "src/main.rs or src/lib.rs present",
+			func() (bool, string) {
+				if ok, _ := checkGHFile(owner, repo, "src/main.rs"); ok {
+					return true, ""
+				}
+				if ok, _ := checkGHFile(owner, repo, "src/lib.rs"); ok {
+					return true, ""
+				}
+				return false, "neither src/main.rs nor src/lib.rs found"
+			},
+		}
+	default: // "go" or unknown — default to Go expectations
+		manifestCheck = check{
+			"lang_manifest", "go.mod present (Go)",
+			func() (bool, string) { return checkGHFile(owner, repo, "go.mod") },
+		}
+		entrypointCheck = check{
+			"lang_entrypoint", "cmd/plugin/ entry point present",
+			func() (bool, string) { return checkGHFile(owner, repo, "cmd/plugin") },
+		}
+	}
+
 	checks := []check{
 		{
 			"naming",
@@ -421,10 +466,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 		{"security_workflow", ".github/workflows/security.yml present", func() (bool, string) {
 			return checkGHFile(owner, repo, ".github/workflows/security.yml")
 		}},
-		{"go_mod", "go.mod present", func() (bool, string) { return checkGHFile(owner, repo, "go.mod") }},
-		{"cmd_plugin", "cmd/plugin/ entry point present", func() (bool, string) {
-			return checkGHFile(owner, repo, "cmd/plugin")
-		}},
+		manifestCheck,
+		entrypointCheck,
 		{
 			"registry_sync",
 			"release.yml triggers registry sync",
@@ -450,9 +493,10 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 		result.Checks = append(result.Checks, ValidationCheck{ID: ch.id, Label: ch.label, Passed: passed, Message: msg})
 	}
 
+	langLabel := map[string]string{"go": "Go", "rust": "Rust", "unknown": "unknown language"}[lang]
 	result.Valid = allPassed
 	if allPassed {
-		result.Summary = fmt.Sprintf("%s/%s passes all SemRels standards ✓", owner, repo)
+		result.Summary = fmt.Sprintf("%s/%s passes all SemRels standards ✓ (%s)", owner, repo, langLabel)
 	} else {
 		failed := 0
 		for _, ch := range result.Checks {
@@ -460,7 +504,7 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 				failed++
 			}
 		}
-		result.Summary = fmt.Sprintf("%d check(s) failed — plugin does not meet SemRels standards", failed)
+		result.Summary = fmt.Sprintf("%d check(s) failed (%s) — plugin does not meet SemRels standards", failed, langLabel)
 	}
 	return result
 }
