@@ -180,3 +180,15 @@ export function clearToken(): void {
 export function hasToken(): boolean {
   return Boolean(localStorage.getItem('admin_token'));
 }
+
+// ---- Auth config ----
+
+export interface AuthConfig {
+  githubOAuthEnabled: boolean;
+  loginURL: string;
+}
+
+export async function getAuthConfig(): Promise<AuthConfig> {
+  const resp = await fetch('/auth/config');
+  return resp.json() as Promise<AuthConfig>;
+}

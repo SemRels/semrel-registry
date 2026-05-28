@@ -6,6 +6,7 @@ import (
 	"github.com/SemRels/semrel-registry/api/config"
 	"github.com/SemRels/semrel-registry/api/database"
 	"github.com/SemRels/semrel-registry/api/handlers"
+	"github.com/SemRels/semrel-registry/api/middleware"
 	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
@@ -43,26 +44,37 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	router := gin.New()
 	router.Use(handlers.ErrorHandler(), handlers.RequestLogger(), handlers.CORSMiddleware())
 
+	// GitHub OAuth routes (public).
+	authHandler := handlers.NewAuthHandler()
+	router.GET("/auth/github", authHandler.Redirect)
+	router.GET("/auth/github/callback", authHandler.Callback)
+	router.GET("/auth/config", authHandler.Config)
+
 	router.GET("/health", handlers.Health())
 
 	api := router.Group("/api/v1")
+
+	// Public read endpoints.
 	pluginHandler := handlers.NewPluginHandler(pluginService)
 	api.GET("/plugins", pluginHandler.ListPlugins)
 	api.GET("/plugins/:id", pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
 
-	admin := handlers.NewAdminHandler(pluginService)
-	api.GET("/stats", admin.GetStats)
+	adminHandler := handlers.NewAdminHandler(pluginService)
+	api.GET("/stats", adminHandler.GetStats)
 
-	adminRoutes := api.Group("")
-	adminRoutes.Use(handlers.RequireAdminToken())
-	adminRoutes.POST("/plugins", pluginHandler.CreatePlugin)
-	adminRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
-	adminRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
-	adminRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
-	adminRoutes.POST("/admin/sync", admin.SyncPlugins)
-	adminRoutes.POST("/admin/sync-file", admin.SyncFromFile)
-	adminRoutes.GET("/admin/status", admin.Status)
+	// Protected endpoints — accept GitHub JWT or legacy ADMIN_TOKEN.
+	requireAdmin := middleware.RequireAdmin(authHandler)
+	protected := api.Group("")
+	protected.Use(requireAdmin)
+	protected.GET("/auth/me", authHandler.Me)
+	protected.POST("/plugins", pluginHandler.CreatePlugin)
+	protected.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
+	protected.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
+	protected.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
+	protected.POST("/admin/sync", adminHandler.SyncPlugins)
+	protected.POST("/admin/sync-file", adminHandler.SyncFromFile)
+	protected.GET("/admin/status", adminHandler.Status)
 
 	return router
 }

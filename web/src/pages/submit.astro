@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Submit a Plugin · registry.semrel.io" description="Propose a new plugin for the go-semrel registry.">
+  <div class="container">
+
+    <div class="hero">
+      <h1>Submit a Plugin</h1>
+      <p>Fill in the form below — it will open a pre-filled GitHub Issue in the registry repository for review by the maintainers.</p>
+    </div>
+
+    <div class="card" style="max-width:640px;margin-top:1.5rem" id="submit-form">
+      <div class="field">
+        <label for="f-name">Plugin name *</label>
+        <input id="f-name" class="search-input" placeholder="provider-gitlab" required style="width:100%" />
+        <small class="muted">Use the format <code>category-name</code>, e.g. <code>updater-pypi</code></small>
+      </div>
+      <div class="field" style="margin-top:.75rem">
+        <label for="f-repo">Repository URL *</label>
+        <input id="f-repo" class="search-input" placeholder="https://github.com/you/provider-gitlab" required style="width:100%" />
+      </div>
+      <div class="field" style="margin-top:.75rem">
+        <label for="f-cat">Category *</label>
+        <select id="f-cat" class="search-input" style="width:100%">
+          <option value="provider">provider</option>
+          <option value="analyzer">analyzer</option>
+          <option value="condition">condition</option>
+          <option value="hook">hook</option>
+          <option value="updater">updater</option>
+        </select>
+      </div>
+      <div class="field" style="margin-top:.75rem">
+        <label for="f-desc">Description *</label>
+        <textarea id="f-desc" class="search-input" rows="3" placeholder="Short description of what this plugin does." required style="width:100%;resize:vertical"></textarea>
+      </div>
+      <div class="field" style="margin-top:.75rem">
+        <label for="f-author">Author / maintainer</label>
+        <input id="f-author" class="search-input" placeholder="Your GitHub username" style="width:100%" />
+      </div>
+      <div class="field" style="margin-top:.75rem">
+        <label for="f-license">License</label>
+        <input id="f-license" class="search-input" placeholder="Apache-2.0" value="Apache-2.0" style="width:100%" />
+      </div>
+
+      <div class="alert" id="submit-error" hidden style="margin-top:.75rem;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#fca5a5;padding:.5rem .75rem;border-radius:6px;font-size:.8125rem"></div>
+
+      <button type="button" id="submit-btn" class="button button--primary" style="margin-top:1rem">
+        Open GitHub Issue →
+      </button>
+    </div>
+
+    <div class="section" style="margin-top:2rem;max-width:640px">
+      <p class="section-title">Review process</p>
+      <div class="card" style="padding:0;overflow:hidden">
+        {[
+          ['1', 'Submit the form', 'A pre-filled GitHub Issue is opened in semrel-registry.'],
+          ['2', 'Maintainer review', 'A maintainer verifies the plugin implements the semrel plugin interface.'],
+          ['3', 'Merge to plugins.json', 'Approved plugins are added to the registry index via pull request.'],
+          ['4', 'Auto-sync', 'The registry API picks up the new entry on next sync.'],
+        ].map(([n, title, desc]) => (
+          <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;padding:.625rem .875rem;border-bottom:1px solid var(--border);align-items:start;font-size:var(--fs-sm);last-child:border:none">
+            <code style="color:var(--accent);font-weight:700">{n}</code>
+            <div><strong>{title}</strong><div class="muted" style="font-size:var(--fs-xs)">{desc}</div></div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script is:inline>
+  document.getElementById('submit-btn')?.addEventListener('click', () => {
+    const name    = document.getElementById('f-name').value.trim();
+    const repo    = document.getElementById('f-repo').value.trim();
+    const cat     = document.getElementById('f-cat').value;
+    const desc    = document.getElementById('f-desc').value.trim();
+    const author  = document.getElementById('f-author').value.trim();
+    const license = document.getElementById('f-license').value.trim() || 'Apache-2.0';
+    const errEl   = document.getElementById('submit-error');
+
+    if (!name || !repo || !desc) {
+      errEl.textContent = 'Please fill in name, repository URL and description.';
+      errEl.hidden = false;
+      return;
+    }
+    errEl.hidden = true;
+
+    const body = [
+      '## Plugin Proposal',
+      '',
+      `**Name:** \`${name}\``,
+      `**Category:** ${cat}`,
+      `**Repository:** ${repo}`,
+      `**Description:** ${desc}`,
+      `**Author:** ${author || '(not specified)'}`,
+      `**License:** ${license}`,
+      '',
+      '## Checklist',
+      '',
+      '- [ ] Plugin implements the semrel stdio plugin interface',
+      '- [ ] Repository is public',
+      '- [ ] Has a README with usage instructions',
+      '- [ ] Licensed under an OSI-approved license',
+      '',
+      '---',
+      '*Submitted via registry.semrel.io/submit*',
+    ].join('\n');
+
+    const url = new URL('https://github.com/SemRels/semrel-registry/issues/new');
+    url.searchParams.set('title', `[Plugin Proposal] ${name}`);
+    url.searchParams.set('body', body);
+    url.searchParams.set('labels', 'plugin-proposal');
+
+    window.open(url.toString(), '_blank');
+  });
+</script>
