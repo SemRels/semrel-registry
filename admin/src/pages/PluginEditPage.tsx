@@ -44,7 +44,7 @@ export default function PluginEditPage() {
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
-        <div className="card" style={{ maxWidth: 640 }}>
+        <div className="card" style={{ maxWidth: 640, margin: '0 auto' }}>
           <form onSubmit={(e) => { void handleSubmit(e); }}>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
               <div className="field">

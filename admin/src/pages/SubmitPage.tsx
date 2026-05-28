@@ -64,7 +64,7 @@ export default function SubmitPage() {
 
   if (submitted) {
     return (
-      <div style={{ maxWidth: 600, margin: '2rem auto' }}>
+      <div className="page__body page__body--form">
         <div className="alert" style={{ background: 'var(--success-subtle, #1a3a2a)', borderColor: 'var(--success, #3fb950)', color: 'var(--success, #3fb950)', padding: '1.25rem', borderRadius: 8 }}>
           <strong>Plugin submitted for review!</strong>
           <p style={{ marginTop: '.5rem', marginBottom: 0 }}>
@@ -77,7 +77,7 @@ export default function SubmitPage() {
   }
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto' }}>
+    <div className="page__body page__body--form">
       <h1 style={{ fontSize: 'var(--fs-xl)', marginBottom: '.25rem' }}>Submit a Plugin</h1>
       <p className="muted" style={{ marginBottom: '1.5rem' }}>
         Community plugins must be hosted on GitHub and follow the{' '}
