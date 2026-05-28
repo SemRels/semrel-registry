@@ -1,79 +1,31 @@
 ---
 import type { Plugin } from '../lib/registry';
-import { formatReleaseDate, getCategoryLabel, getLatestVersion, getReleaseChannel } from '../lib/registry';
+import { getCategoryLabel, getLatestVersion } from '../lib/registry';
 
 interface Props {
   plugin: Plugin;
 }
 
 const { plugin } = Astro.props;
-const latestVersion = getLatestVersion(plugin);
-const releaseChannel = getReleaseChannel(plugin);
-const tags = plugin.tags ?? [];
+const latest = getLatestVersion(plugin);
+const tags   = (plugin.tags ?? []).join(' ').toLowerCase();
+const catClass = `badge badge--${plugin.category}`;
 ---
 
-<details
-  class="plugin-card"
+<a
+  class="plugin-row"
+  href={`/plugins/${plugin.name}/`}
   data-plugin-card
   data-name={plugin.name.toLowerCase()}
   data-author={plugin.author.toLowerCase()}
   data-category={plugin.category}
-  data-tags={tags.join(' ').toLowerCase()}
-  data-release-channel={releaseChannel}
+  data-tags={tags}
+  data-release-channel={latest?.prerelease ? 'prerelease' : 'stable'}
 >
-  <summary class="plugin-card__summary">
-    <div>
-      <div class="plugin-card__title-row">
-        <h2><a class="plugin-name-link" href={`/plugins/${plugin.name}/`}>{plugin.name}</a></h2>
-        <span class="category-badge">{getCategoryLabel(plugin.category)}</span>
-      </div>
-      <p class="plugin-card__description">{plugin.description}</p>
-    </div>
-    <div class="plugin-card__meta">
-      <span><strong>Author:</strong> {plugin.author}</span>
-      <span><strong>License:</strong> {plugin.license}</span>
-      <span><strong>Latest:</strong> {latestVersion ? `v${latestVersion.version}` : 'Not published yet'}</span>
-      <span><strong>Released:</strong> {latestVersion ? formatReleaseDate(latestVersion.releaseDate) : 'TBD'}</span>
-      <span><strong>Channel:</strong> {releaseChannel}</span>
-    </div>
-    {tags.length > 0 && (
-      <ul class="tag-list" aria-label="Plugin tags">
-        {tags.map((tag) => <li>{tag}</li>)}
-      </ul>
-    )}
-  </summary>
-
-  <div class="plugin-card__details">
-    <div class="plugin-card__actions">
-      {plugin.repository && <a class="button button--ghost" href={plugin.repository}>Repository</a>}
-      {plugin.homepage && <a class="button button--ghost" href={plugin.homepage}>Docs</a>}
-      {latestVersion && <a class="button button--ghost" href={latestVersion.downloadUrl}>Latest download</a>}
-    </div>
-
-    {latestVersion ? (
-      <div class="plugin-card__detail-grid">
-        <section>
-          <h3>Download instructions</h3>
-          <ol class="detail-list">
-            <li>Download the latest asset from the release URL.</li>
-            <li>Verify the SHA-256 checksum for your target platform.</li>
-            <li>Place the binary in <code>.semrel/&lt;GOOS&gt;_&lt;GOARCH&gt;/{plugin.name}/{latestVersion.version}/</code>.</li>
-          </ol>
-          <pre><code>{`# Direct download
-${latestVersion.downloadUrl}`}</code></pre>
-        </section>
-        <section>
-          <h3>Compatibility</h3>
-          <ul class="detail-list">
-            <li><strong>Release date:</strong> {formatReleaseDate(latestVersion.releaseDate)}</li>
-            <li><strong>Minimum semrel:</strong> {latestVersion.compatibility?.minSemrelVersion ?? 'Not specified'}</li>
-            <li><strong>gRPC version:</strong> {latestVersion.compatibility?.gRPCVersion ?? 'Not specified'}</li>
-            <li><strong>Prerelease:</strong> {latestVersion.prerelease ? 'Yes' : 'No'}</li>
-          </ul>
-        </section>
-      </div>
-    ) : (
-      <p class="empty-inline">No version metadata has been published for this plugin yet.</p>
-    )}
-  </div>
-</details>
+  <span class="plugin-row__name">{plugin.name}</span>
+  <span class="plugin-row__desc">{plugin.description}</span>
+  <span class="plugin-row__right">
+    {latest && <code class="muted" style="font-size:0.75rem">v{latest.version}</code>}
+    <span class={catClass}>{getCategoryLabel(plugin.category)}</span>
+  </span>
+</a>

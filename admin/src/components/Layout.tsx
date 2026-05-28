@@ -3,46 +3,34 @@ import { clearToken } from '../lib/api';
 
 export default function Layout() {
   const navigate = useNavigate();
-
-  function handleLogout() {
-    clearToken();
-    navigate('/login');
-  }
-
   return (
-    <div className="app-shell">
+    <div className="app">
       <aside className="sidebar">
-        <a href="/" className="sidebar__brand">
-          <span className="brand-mark">SR</span>
-          <span>
-            <strong>registry.semrel.io</strong>
-            <small>Admin Panel</small>
-          </span>
+        <a href="http://localhost:3000" className="sidebar__brand" target="_blank" rel="noopener">
+          <span className="sidebar__brand-mark">SR</span>
+          <span>Admin Panel</span>
         </a>
-
-        <span className="sidebar__section">Registry</span>
-        <NavLink to="/" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          📊 Dashboard
-        </NavLink>
-        <NavLink to="/plugins" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          🔌 Plugins
-        </NavLink>
-
-        <span className="sidebar__section" style={{ marginTop: 'auto' }}>Account</span>
-        <a
-          href="http://localhost:3000"
-          target="_blank"
-          rel="noopener"
-          className="nav-item"
-        >
-          ↗ Open registry
-        </a>
-        <button type="button" className="nav-item" onClick={handleLogout}>
-          🔓 Logout
-        </button>
+        <nav className="sidebar__nav">
+          <NavLink to="/" end className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            Dashboard
+          </NavLink>
+          <NavLink to="/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            Plugins
+          </NavLink>
+          <a href="http://localhost:3000" className="sidebar__link" target="_blank" rel="noopener">
+            Registry ↗
+          </a>
+          <a href="http://localhost:8080/api/v1/plugins" className="sidebar__link" target="_blank" rel="noopener">
+            Raw API ↗
+          </a>
+        </nav>
+        <div className="sidebar__footer">
+          <button className="sidebar__logout" type="button" onClick={() => { clearToken(); navigate('/login'); }}>
+            Sign out
+          </button>
+        </div>
       </aside>
-
-      <main className="main-content">
+      <main className="page">
         <Outlet />
       </main>
     </div>

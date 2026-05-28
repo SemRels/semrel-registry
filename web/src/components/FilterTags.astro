@@ -2,32 +2,20 @@
 import type { PluginCategory } from '../lib/registry';
 import { getCategoryLabel } from '../lib/registry';
 
-interface Props {
-  categories: PluginCategory[];
-}
-
+interface Props { categories: PluginCategory[]; }
 const { categories } = Astro.props;
 ---
 
-<div class="control-panel__filters" aria-label="Plugin filters">
-  <div>
-    <p class="filter-heading">Category</p>
-    <div class="pill-row" role="toolbar" aria-label="Filter by category">
-      <button class="pill-button is-selected" type="button" data-filter-category="all" aria-pressed="true">All</button>
-      {categories.map((category) => (
-        <button class="pill-button" type="button" data-filter-category={category} aria-pressed="false">
-          {getCategoryLabel(category)}
-        </button>
-      ))}
-    </div>
-  </div>
-
-  <div>
-    <p class="filter-heading">Release channel</p>
-    <div class="pill-row" role="toolbar" aria-label="Filter by release channel">
-      <button class="pill-button is-selected" type="button" data-filter-release="all" aria-pressed="true">All</button>
-      <button class="pill-button" type="button" data-filter-release="stable" aria-pressed="false">Stable</button>
-      <button class="pill-button" type="button" data-filter-release="prerelease" aria-pressed="false">Prerelease</button>
-    </div>
-  </div>
+<div class="filter-group" role="toolbar" aria-label="Filter by category">
+  <button class="pill is-selected" type="button" data-filter-category="all" aria-pressed="true">All</button>
+  {categories.map(c => (
+    <button class="pill" type="button" data-filter-category={c} aria-pressed="false">
+      {getCategoryLabel(c)}
+    </button>
+  ))}
+</div>
+<div class="filter-group" role="toolbar" aria-label="Filter by release channel" style="margin-left:0.5rem">
+  <button class="pill is-selected" type="button" data-filter-release="all" aria-pressed="true">All</button>
+  <button class="pill" type="button" data-filter-release="stable" aria-pressed="false">Stable</button>
+  <button class="pill" type="button" data-filter-release="prerelease" aria-pressed="false">Pre</button>
 </div>

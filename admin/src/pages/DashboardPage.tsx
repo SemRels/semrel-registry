@@ -2,98 +2,55 @@ import { useEffect, useState } from 'react';
 import { getStats, syncFromFile } from '../lib/api';
 import type { Stats, SyncResult } from '../lib/api';
 
-const CATEGORY_ICONS: Record<string, string> = {
-  provider: '🔗',
-  analyzer: '🔍',
-  condition: '⚡',
-  hook: '🪝',
-  updater: '⬆️',
-};
-
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState('');
-  const [syncing, setSyncing] = useState(false);
+  const [stats, setStats]       = useState<Stats | null>(null);
+  const [error, setError]       = useState('');
+  const [syncing, setSyncing]   = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
 
   useEffect(() => {
-    getStats()
-      .then(setStats)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed to load stats'));
+    getStats().then(setStats).catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed'));
   }, []);
 
   async function handleSync() {
-    setSyncing(true);
-    setSyncResult(null);
+    setSyncing(true); setSyncResult(null); setError('');
     try {
-      const result = await syncFromFile();
-      setSyncResult(result);
-      const updated = await getStats();
-      setStats(updated);
+      const r = await syncFromFile();
+      setSyncResult(r);
+      setStats(await getStats());
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Sync failed');
-    } finally {
-      setSyncing(false);
-    }
+    } finally { setSyncing(false); }
   }
 
   return (
     <>
-      <div className="flex-between" style={{ marginBottom: '0.25rem' }}>
-        <h1 className="page-title">Dashboard</h1>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => { void handleSync(); }}
-          disabled={syncing}
-        >
-          {syncing ? <><span className="spinner" /> Syncing…</> : '⟳ Sync from plugins.json'}
+      <div className="page__header">
+        <h1 className="page__title">Dashboard</h1>
+        <button type="button" className="btn btn--primary" onClick={() => { void handleSync(); }} disabled={syncing}>
+          {syncing ? 'Syncing…' : '⟳ Sync plugins.json'}
         </button>
       </div>
-      <p className="page-subtitle">Registry statistics and quick actions.</p>
+      <div className="page__body">
+        {error      && <div className="alert alert--error">{error}</div>}
+        {syncResult && <div className="alert alert--success">Sync done — created: {syncResult.created}, updated: {syncResult.updated}, failed: {syncResult.failed}</div>}
 
-      {error && <div className="alert alert-error">{error}</div>}
-      {syncResult && (
-        <div className="alert alert-success">
-          Sync complete — created: {syncResult.created}, updated: {syncResult.updated}, failed: {syncResult.failed}
-        </div>
-      )}
-
-      {!stats && !error && (
-        <div className="loading-block">
-          <span className="spinner" /> Loading stats…
-        </div>
-      )}
-
-      {stats && (
-        <>
-          <div className="grid-4 mt-2">
-            <div className="metric-card">
-              <div className="metric-label">Total Plugins</div>
-              <div className="metric-value">{stats.totalPlugins}</div>
+        {!stats && !error && <p className="muted">Loading…</p>}
+        {stats && (
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-card__label">Total</div>
+              <div className="stat-card__value">{stats.totalPlugins}</div>
             </div>
             {Object.entries(stats.categories).map(([cat, count]) => (
-              <div key={cat} className="metric-card">
-                <div className="metric-label">{CATEGORY_ICONS[cat] ?? '📦'} {cat}</div>
-                <div className="metric-value">{count}</div>
+              <div key={cat} className="stat-card">
+                <div className="stat-card__label">{cat}</div>
+                <div className="stat-card__value">{count}</div>
               </div>
             ))}
           </div>
-
-          <div className="card mt-3">
-            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Quick Actions</h2>
-            <div className="flex-row">
-              <a href="/plugins" className="btn btn-ghost">🔌 Manage Plugins</a>
-              <a href="http://localhost:3000" target="_blank" rel="noopener" className="btn btn-ghost">
-                ↗ Open Registry Web UI
-              </a>
-              <a href="http://localhost:8080/api/v1/plugins" target="_blank" rel="noopener" className="btn btn-ghost">
-                ↗ Raw API
-              </a>
-            </div>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </>
   );
 }

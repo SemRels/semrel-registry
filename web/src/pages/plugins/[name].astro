@@ -7,382 +7,104 @@ import {
   getLatestVersion,
   getSortedVersions,
 } from '../../lib/registry';
-import type { Plugin } from '../../lib/registry';
 
 export async function getStaticPaths() {
   const registry = await fetchRegistry();
   return registry.plugins.map((plugin) => ({
     params: { name: plugin.name },
-    props: { plugin },
+    props:  { plugin },
   }));
 }
 
-interface Props {
-  plugin: Plugin;
-}
-
-const { plugin } = Astro.props;
-const latestVersion = getLatestVersion(plugin);
-const sortedVersions = getSortedVersions(plugin);
-const tags = plugin.tags ?? [];
-
-const categoryColor: Record<string, string> = {
-  provider: 'badge--provider',
-  analyzer: 'badge--analyzer',
-  condition: 'badge--condition',
-  hook: 'badge--hook',
-  updater: 'badge--updater',
-};
+const { plugin }       = Astro.props;
+const latest           = getLatestVersion(plugin);
+const sortedVersions   = getSortedVersions(plugin);
+const tags             = plugin.tags ?? [];
+const catClass         = `badge badge--${plugin.category}`;
 ---
 
-<Layout
-  title={`${plugin.name} · registry.semrel.io`}
-  description={plugin.description}
->
+<Layout title={`${plugin.name} · registry.semrel.io`} description={plugin.description}>
   <div class="container">
-    <nav class="breadcrumb">
-      <a href="/plugins/">← All Plugins</a>
-    </nav>
 
-    <section class="plugin-detail section">
-      <div class="plugin-detail__header">
-        <div>
-          <div class="plugin-detail__title-row">
-            <h1>{plugin.name}</h1>
-            <span class={`category-badge ${categoryColor[plugin.category] ?? ''}`}>
-              {getCategoryLabel(plugin.category)}
-            </span>
-          </div>
-          <p class="plugin-detail__description">{plugin.description}</p>
-          <div class="plugin-detail__meta-row">
-            <span><strong>Author:</strong> {plugin.author}</span>
-            <span><strong>License:</strong> {plugin.license}</span>
-            {latestVersion && (
-              <span>
-                <strong>Latest:</strong> v{latestVersion.version}
-              </span>
-            )}
-          </div>
-          {tags.length > 0 && (
-            <ul class="tag-list" aria-label="Plugin tags">
-              {tags.map((tag) => <li>{tag}</li>)}
-            </ul>
-          )}
-        </div>
+    <p class="breadcrumb"><a href="/plugins/">← Plugins</a></p>
 
-        <div class="plugin-detail__actions">
-          {plugin.repository && (
-            <a class="button button--primary" href={plugin.repository} target="_blank" rel="noopener">
-              Repository ↗
-            </a>
-          )}
-          {plugin.homepage && (
-            <a class="button button--ghost" href={plugin.homepage} target="_blank" rel="noopener">
-              Documentation ↗
-            </a>
-          )}
-          {latestVersion && (
-            <a class="button button--ghost" href={latestVersion.downloadUrl} target="_blank" rel="noopener">
-              Download latest ↗
-            </a>
-          )}
+    <div class="plugin-detail__header">
+      <div>
+        <div class="plugin-detail__title-row">
+          <h1>{plugin.name}</h1>
+          <span class={catClass}>{getCategoryLabel(plugin.category)}</span>
         </div>
+        <p class="plugin-detail__description">{plugin.description}</p>
+        <div class="plugin-detail__meta">
+          <span>by {plugin.author}</span>
+          <span>{plugin.license}</span>
+          {latest && <span>latest <code>v{latest.version}</code></span>}
+        </div>
+        {tags.length > 0 && (
+          <ul class="tag-list">
+            {tags.map(t => <li>{t}</li>)}
+          </ul>
+        )}
       </div>
-    </section>
+      <div class="plugin-detail__actions">
+        {plugin.repository && <a class="button" href={plugin.repository} target="_blank" rel="noopener">Repository ↗</a>}
+        {latest?.downloadUrl && <a class="button" href={latest.downloadUrl} target="_blank" rel="noopener">Download ↗</a>}
+      </div>
+    </div>
 
-    {latestVersion && (
-      <section class="section">
-        <h2 class="section-heading">Installation</h2>
+    {latest && (
+      <div class="section">
+        <p class="section-title">Installation</p>
         <div class="install-grid">
           <div class="card">
-            <h3>Via go install</h3>
+            <h3>go install</h3>
             <pre><code>go install github.com/SemRels/{plugin.name}/cmd/plugin@latest</code></pre>
           </div>
           <div class="card">
-            <h3>Direct download</h3>
-            <pre><code>{`# Download the binary
-curl -L ${latestVersion.downloadUrl} -o ${plugin.name}.tar.gz
-tar -xzf ${plugin.name}.tar.gz
-
-# Place in the expected plugin path
-mkdir -p ~/.semrel/plugins
-mv ${plugin.name} ~/.semrel/plugins/`}</code></pre>
-          </div>
-          <div class="card">
-            <h3>semrel.yaml configuration</h3>
-            <pre><code>{`plugins:
-  - name: ${plugin.name}
-    path: ~/.semrel/plugins/${plugin.name}`}</code></pre>
+            <h3>semrel.yaml</h3>
+            <pre><code>{`plugins:\n  - name: ${plugin.name}`}</code></pre>
           </div>
         </div>
-      </section>
+      </div>
     )}
 
     {sortedVersions.length > 0 && (
-      <section class="section">
-        <h2 class="section-heading">Version History</h2>
-        <div class="versions-timeline">
-          {sortedVersions.map((v, index) => (
-            <article class={`version-entry ${index === 0 ? 'version-entry--latest' : ''}`}>
-              <div class="version-entry__header">
-                <span class="version-entry__tag">
-                  v{v.version}
-                  {index === 0 && <span class="latest-badge">latest</span>}
-                  {v.prerelease && <span class="pre-badge">pre-release</span>}
-                </span>
-                <span class="version-entry__date">{formatReleaseDate(v.releaseDate)}</span>
-              </div>
-
-              {v.changelog && (
-                <p class="version-entry__changelog">{v.changelog}</p>
-              )}
-
-              <details class="version-entry__details">
-                <summary>Checksums & download</summary>
-                <div class="checksum-grid">
-                  <div>
-                    <strong>Download URL</strong>
-                    <pre><code>{v.downloadUrl}</code></pre>
-                  </div>
-                  {v.checksums && Object.keys(v.checksums).length > 0 && (
-                    <div>
-                      <strong>SHA-256 checksums</strong>
-                      <table class="checksum-table">
-                        <thead>
-                          <tr><th>Platform</th><th>Hash</th></tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(v.checksums).map(([platform, hash]) => (
-                            <tr>
-                              <td><code>{platform}</code></td>
-                              <td><code class="hash">{hash}</code></td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                  {v.compatibility && (
-                    <div>
-                      <strong>Compatibility</strong>
-                      <ul class="compat-list">
-                        {v.compatibility.minSemrelVersion && (
-                          <li>Min semrel: <code>{v.compatibility.minSemrelVersion}</code></li>
-                        )}
-                        {v.compatibility.gRPCVersion && (
-                          <li>gRPC: <code>{v.compatibility.gRPCVersion}</code></li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </details>
-            </article>
-          ))}
+      <div class="section">
+        <p class="section-title">Versions</p>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="versions-table">
+            <thead>
+              <tr><th>Version</th><th>Released</th><th>Channel</th></tr>
+            </thead>
+            <tbody>
+              {sortedVersions.map((v, i) => (
+                <tr>
+                  <td>
+                    <span class="version-tag">v{v.version}</span>
+                    {i === 0 && <span class="latest-badge">latest</span>}
+                    {v.prerelease && <span class="pre-badge">pre</span>}
+                  </td>
+                  <td class="muted">{formatReleaseDate(v.releaseDate)}</td>
+                  <td class="muted">{v.prerelease ? 'prerelease' : 'stable'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </section>
+      </div>
     )}
 
     {sortedVersions.length === 0 && (
-      <section class="section">
-        <div class="empty-state">
-          <h2>No releases yet</h2>
-          <p>This plugin has been registered but no version has been published yet.</p>
-          {plugin.repository && (
-            <a class="button button--ghost" href={`${plugin.repository}/releases`} target="_blank" rel="noopener">
-              Watch releases on GitHub ↗
-            </a>
-          )}
-        </div>
-      </section>
+      <div class="empty-state">
+        <h2>No releases yet</h2>
+        <p>Plugin is registered but no version has been published.</p>
+        {plugin.repository && (
+          <a class="button" href={`${plugin.repository}/releases`} target="_blank" rel="noopener" style="margin-top:0.75rem">
+            Watch releases on GitHub ↗
+          </a>
+        )}
+      </div>
     )}
+
   </div>
 </Layout>
-
-<style>
-  .breadcrumb {
-    padding: 1.5rem 0 0;
-    font-size: 0.9rem;
-  }
-
-  .breadcrumb a {
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-
-  .breadcrumb a:hover {
-    color: var(--accent);
-  }
-
-  .plugin-detail__header {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  .plugin-detail__title-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-  }
-
-  .plugin-detail__title-row h1 {
-    margin: 0;
-    font-size: 2rem;
-  }
-
-  .plugin-detail__description {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    margin: 0.5rem 0 1rem;
-  }
-
-  .plugin-detail__meta-row {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-  }
-
-  .plugin-detail__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .install-grid {
-    display: grid;
-    gap: 1.25rem;
-  }
-
-  .install-grid pre {
-    margin: 0.5rem 0 0;
-    overflow-x: auto;
-  }
-
-  .versions-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .version-entry {
-    background: var(--bg-muted);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem 1.5rem;
-  }
-
-  .version-entry--latest {
-    border-color: var(--accent-strong);
-    background: var(--bg-elevated);
-  }
-
-  .version-entry__header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
-
-  .version-entry__tag {
-    font-family: monospace;
-    font-size: 1.1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .latest-badge {
-    font-family: inherit;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: var(--accent-soft);
-    color: var(--accent-strong);
-    padding: 0.15em 0.5em;
-    border-radius: 999px;
-  }
-
-  .pre-badge {
-    font-family: inherit;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: rgba(251, 191, 36, 0.15);
-    color: var(--warning);
-    padding: 0.15em 0.5em;
-    border-radius: 999px;
-  }
-
-  .version-entry__date {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  .version-entry__changelog {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin: 0 0 0.75rem;
-  }
-
-  .version-entry__details summary {
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--accent);
-    margin-top: 0.5rem;
-  }
-
-  .checksum-grid {
-    display: grid;
-    gap: 1rem;
-    margin-top: 0.75rem;
-  }
-
-  .checksum-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-  }
-
-  .checksum-table th,
-  .checksum-table td {
-    text-align: left;
-    padding: 0.3rem 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .hash {
-    font-size: 0.75rem;
-    word-break: break-all;
-  }
-
-  .compat-list {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0 0;
-    font-size: 0.875rem;
-  }
-
-  .compat-list li {
-    padding: 0.2rem 0;
-  }
-
-  .badge--provider { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
-  .badge--analyzer { background: rgba(34, 197, 94, 0.15); color: #86efac; }
-  .badge--condition { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
-  .badge--hook { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-  .badge--updater { background: rgba(14, 165, 233, 0.15); color: #7dd3fc; }
-</style>
