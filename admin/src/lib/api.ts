@@ -57,6 +57,7 @@ export interface Plugin {
   category: string;
   repository: string;
   license: string;
+  status: string; // "active" | "pending" | "rejected"
   tags: string[];
   versions?: PluginVersion[];
   latestVersion?: string;
@@ -99,6 +100,7 @@ export async function listPlugins(params?: {
   category?: string;
   search?: string;
   author?: string;
+  status?: string;
 }): Promise<PluginListResponse> {
   const qs = new URLSearchParams();
   if (params?.page)     qs.set('page',     String(params.page));
@@ -106,6 +108,7 @@ export async function listPlugins(params?: {
   if (params?.category) qs.set('category', params.category);
   if (params?.search)   qs.set('search',   params.search);
   if (params?.author)   qs.set('author',   params.author);
+  if (params?.status)   qs.set('status',   params.status);
   return request<PluginListResponse>(`/plugins?${qs}`);
 }
 
@@ -237,4 +240,36 @@ export async function validatePlugin(repository: string): Promise<ValidationResu
     body: JSON.stringify({ repository }),
   });
   return resp.json() as Promise<ValidationResult>;
+}
+
+
+// ---- Community plugin submission ----
+
+export async function submitPlugin(plugin: Partial<Plugin>): Promise<Plugin> {
+  return request<{ data: Plugin }>('/plugins/submit', {
+    method: 'POST',
+    body: JSON.stringify(plugin),
+  }).then(r => r.data);
+}
+
+// ---- Admin: approve/reject submissions ----
+
+export async function approvePlugin(id: number | string): Promise<Plugin> {
+  return request<{ data: Plugin }>(`/admin/plugins/${id}/approve`, { method: 'PUT' }).then(r => r.data);
+}
+
+export async function rejectPlugin(id: number | string): Promise<Plugin> {
+  return request<{ data: Plugin }>(`/admin/plugins/${id}/reject`, { method: 'PUT' }).then(r => r.data);
+}
+
+// ---- Admin: sync GitHub org ----
+
+export interface OrgSyncResult {
+  org: string;
+  total: number;
+  results: { repo: string; action: string; versions?: number; error?: string }[];
+}
+
+export async function syncGitHubOrg(): Promise<OrgSyncResult> {
+  return request<OrgSyncResult>('/admin/sync-github-org', { method: 'POST' });
 }

@@ -46,6 +46,18 @@ func (stubPluginService) CreateVersion(_ context.Context, _ string, version mode
 	return version, nil
 }
 
+func (stubPluginService) SubmitPlugin(_ context.Context, plugin models.Plugin) (models.Plugin, error) {
+	return plugin, nil
+}
+
+func (stubPluginService) ApprovePlugin(_ context.Context, _ string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+
+func (stubPluginService) RejectPlugin(_ context.Context, _ string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 	os.Exit(m.Run())

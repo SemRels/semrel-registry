@@ -165,6 +165,121 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"plugin": plugin.Name, "version": rel.TagName, "status": status})
 }
 
+// POST /api/v1/admin/sync-github-org
+// Discovers all SemRels org repos matching the plugin naming convention and
+// upserts them into the registry with status=active. Also syncs versions.
+func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
+	org := os.Getenv("ALLOWED_GITHUB_ORGS")
+	if org == "" {
+		org = "SemRels"
+	}
+	// Use only the first org if multiple are set.
+	if idx := strings.Index(org, ","); idx != -1 {
+		org = strings.TrimSpace(org[:idx])
+	}
+
+	repos, err := fetchOrgRepos(org)
+	if err != nil {
+		InternalServerError(c, "failed to fetch org repos: "+err.Error(), nil)
+		return
+	}
+
+	// Valid plugin name pattern: <category>-<name>
+	// Categories: analyzer, condition, generator, hook, provider, updater
+	validCategory := regexp.MustCompile(`^(analyzer|condition|generator|hook|provider|updater)-(.+)$`)
+
+	ctx := c.Request.Context()
+
+	type syncResult struct {
+		Repo    string `json:"repo"`
+		Action  string `json:"action"` // "created", "updated", "skipped", "error"
+		Error   string `json:"error,omitempty"`
+		Versions int   `json:"versions,omitempty"`
+	}
+	var results []syncResult
+
+	for _, repo := range repos {
+		if repo.Private || repo.Archived || repo.Fork {
+			continue
+		}
+		m := validCategory.FindStringSubmatch(repo.Name)
+		if m == nil {
+			continue
+		}
+		category := m[1]
+		repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repo.Name)
+
+		existing, getErr := h.svc.GetPlugin(ctx, repo.Name)
+		if getErr != nil {
+			// Plugin does not exist yet — create it.
+			created, createErr := h.svc.CreatePlugin(ctx, models.Plugin{
+				Name:        repo.Name,
+				Description: repo.Description,
+				Author:      org,
+				Category:    category,
+				Repository:  repoURL,
+				License:     "Apache-2.0",
+				Status:      models.StatusActive,
+				Tags:        []string{category},
+			})
+			if createErr != nil {
+				results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: createErr.Error()})
+				continue
+			}
+			createdV, _, _ := h.syncPluginReleases(ctx, &created)
+			results = append(results, syncResult{Repo: repo.Name, Action: "created", Versions: createdV})
+		} else {
+			// Plugin exists — sync versions only.
+			createdV, _, syncErr := h.syncPluginReleases(ctx, &existing)
+			if syncErr != nil {
+				results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: syncErr.Error()})
+				continue
+			}
+			results = append(results, syncResult{Repo: repo.Name, Action: "updated", Versions: createdV})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"org": org, "results": results, "total": len(results)})
+}
+
+type ghRepo struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Private     bool   `json:"private"`
+	Archived    bool   `json:"archived"`
+	Fork        bool   `json:"fork"`
+}
+
+func fetchOrgRepos(org string) ([]ghRepo, error) {
+	token := os.Getenv("GITHUB_TOKEN")
+	var all []ghRepo
+	for page := 1; ; page++ {
+		url := fmt.Sprintf("https://api.github.com/orgs/%s/repos?type=public&per_page=100&page=%d", org, page)
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		if token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		req.Header.Set("Accept", "application/vnd.github+json")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+
+		var repos []ghRepo
+		if err := json.Unmarshal(body, &repos); err != nil {
+			return nil, fmt.Errorf("parse repos: %w", err)
+		}
+		all = append(all, repos...)
+		if len(repos) < 100 {
+			break
+		}
+	}
+	return all, nil
+}
+
 func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) (created, skipped int, err error) {
 	owner, repo := ownerRepoFromURL(p.Repository)
 	if repo == "" {

@@ -24,8 +24,9 @@ export default function PluginsPage() {
   useEffect(() => {
     if (!user) return; // wait for user to load
     setLoading(true);
-    // Non-admin users only see their own plugins.
+    // Non-admin users only see their own plugins (all statuses so they can track pending).
     const author = isAdmin ? undefined : (user.login || undefined);
+    // When fetching own plugins, pass author so API allows all statuses for own submissions.
     listPlugins({ page, limit: 25, search: search || undefined, category: category || undefined, author })
       .then((res) => { setPlugins(res.data ?? []); setPagination(res.pagination ?? null); setError(''); })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed'))
@@ -73,11 +74,11 @@ export default function PluginsPage() {
           <div className="table-wrap">
             <table>
               <thead><tr>
-                <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th></th>
+                <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Status</th><th></th>
               </tr></thead>
               <tbody>
                 {plugins.length === 0 && (
-                  <tr><td colSpan={6} style={{ textAlign:'center', padding:'2rem' }} className="muted">
+                  <tr><td colSpan={7} style={{ textAlign:'center', padding:'2rem' }} className="muted">
                     {isAdmin ? <><Link to="/plugins/new">Add the first plugin</Link></> : 'No plugins attributed to your account yet.'}
                   </td></tr>
                 )}
@@ -90,6 +91,16 @@ export default function PluginsPage() {
                     <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
                     <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
                     <td style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
+                    <td>
+                      {p.status !== 'active' && (
+                        <span style={{
+                          display:'inline-block', padding:'1px 7px', borderRadius:4,
+                          fontSize:'var(--fs-xs)', fontWeight:600, marginRight:'.4rem',
+                          background: p.status === 'pending' ? 'rgba(210,153,34,.2)' : 'rgba(248,81,73,.15)',
+                          color: p.status === 'pending' ? '#d29922' : '#f85149',
+                        }}>{p.status}</span>
+                      )}
+                    </td>
                     <td><div className="flex gap-sm">
                       {canEdit(p) ? (
                         <>

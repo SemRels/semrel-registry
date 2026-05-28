@@ -2,6 +2,13 @@ package models
 
 import "time"
 
+// StatusActive, StatusPending, StatusRejected are the valid plugin statuses.
+const (
+	StatusActive   = "active"
+	StatusPending  = "pending"
+	StatusRejected = "rejected"
+)
+
 type Plugin struct {
 	ID            int64           `json:"id"`
 	Name          string          `json:"name"`
@@ -10,6 +17,7 @@ type Plugin struct {
 	Category      string          `json:"category"`
 	Repository    string          `json:"repository"`
 	License       string          `json:"license"`
+	Status        string          `json:"status"`
 	Tags          []string        `json:"tags,omitempty"`
 	Versions      []PluginVersion `json:"versions,omitempty"`
 	LatestVersion string          `json:"latestVersion,omitempty"`

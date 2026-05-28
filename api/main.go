@@ -54,10 +54,11 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 
 	api := router.Group("/api/v1")
 
-	// Public read endpoints.
+	// Public read endpoints — with OptionalAuth so admins can filter by status.
+	optionalAuth := middleware.OptionalAuth(authHandler)
 	pluginHandler := handlers.NewPluginHandler(pluginService)
-	api.GET("/plugins", pluginHandler.ListPlugins)
-	api.GET("/plugins/:id", pluginHandler.GetPlugin)
+	api.GET("/plugins", optionalAuth, pluginHandler.ListPlugins)
+	api.GET("/plugins/:id", optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
 
 	adminHandler := handlers.NewAdminHandler(pluginService)
@@ -79,6 +80,8 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	authRoutes := api.Group("")
 	authRoutes.Use(requireAuth)
 	authRoutes.GET("/auth/me", authHandler.Me)
+	// Community plugin submission (creates with status=pending for review).
+	authRoutes.POST("/plugins/submit", pluginHandler.SubmitPlugin)
 	// Plugin writes: any authenticated user, but non-admins may only touch their own plugins.
 	authRoutes.POST("/plugins", pluginHandler.CreatePlugin)
 	authRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
@@ -92,6 +95,9 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	adminRoutes.POST("/admin/sync-file", adminHandler.SyncFromFile)
 	adminRoutes.GET("/admin/status", adminHandler.Status)
 	adminRoutes.POST("/admin/sync-versions", syncHandler.SyncVersions)
+	adminRoutes.POST("/admin/sync-github-org", syncHandler.SyncGitHubOrg)
+	adminRoutes.PUT("/admin/plugins/:id/approve", pluginHandler.ApprovePlugin)
+	adminRoutes.PUT("/admin/plugins/:id/reject", pluginHandler.RejectPlugin)
 
 	return router
 }

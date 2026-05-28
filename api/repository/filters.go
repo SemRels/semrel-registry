@@ -60,6 +60,29 @@ func (f AuthorFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	builder.WriteString(fmt.Sprintf(" AND LOWER(author) = LOWER($%d)", len(*args)))
 }
 
+// StatusFilter restricts results to plugins with a specific status.
+// When statuses is empty, no filter is applied (all statuses).
+type StatusFilter struct {
+	Statuses []string // e.g. ["active"] or ["pending", "rejected"]
+}
+
+func (f StatusFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
+	if builder == nil || args == nil || len(f.Statuses) == 0 {
+		return
+	}
+	if len(f.Statuses) == 1 {
+		*args = append(*args, f.Statuses[0])
+		builder.WriteString(fmt.Sprintf(" AND status = $%d", len(*args)))
+		return
+	}
+	placeholders := make([]string, len(f.Statuses))
+	for i, s := range f.Statuses {
+		*args = append(*args, s)
+		placeholders[i] = fmt.Sprintf("$%d", len(*args))
+	}
+	builder.WriteString(fmt.Sprintf(" AND status IN (%s)", strings.Join(placeholders, ",")))
+}
+
 type SortFilter struct {
 	Field     string
 	Direction string

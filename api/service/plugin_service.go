@@ -46,7 +46,8 @@ type ListPluginsParams struct {
 	Category string
 	Search   string
 	Sort     string
-	Author   string // when set, only return plugins by this author (exact, case-insensitive)
+	Author   string   // when set, only return plugins by this author (exact, case-insensitive)
+	Statuses []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
 }
 
 type Pagination struct {
@@ -66,9 +67,12 @@ type PluginManager interface {
 	GetPlugin(ctx context.Context, ref string) (models.Plugin, error)
 	ListVersions(ctx context.Context, ref string, limit, offset int) ([]models.PluginVersion, error)
 	CreatePlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
+	SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
 	UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error)
 	DeletePlugin(ctx context.Context, ref string) error
 	CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error)
+	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
+	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
 }
 
 type PluginService struct {
@@ -85,7 +89,7 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 		return PluginListResult{}, err
 	}
 
-	filters := make([]repository.Filter, 0, 4)
+	filters := make([]repository.Filter, 0, 5)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
@@ -94,6 +98,9 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 	}
 	if params.Author != "" {
 		filters = append(filters, repository.AuthorFilter{Author: params.Author})
+	}
+	if len(params.Statuses) > 0 {
+		filters = append(filters, repository.StatusFilter{Statuses: params.Statuses})
 	}
 	if params.Sort != "" {
 		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: "ASC"})
@@ -173,6 +180,9 @@ func (s *PluginService) ListVersions(ctx context.Context, ref string, limit, off
 
 func (s *PluginService) CreatePlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error) {
 	plugin = normalizePlugin(plugin)
+	if plugin.Status == "" {
+		plugin.Status = models.StatusActive
+	}
 	if err := validatePlugin(plugin, true); err != nil {
 		return models.Plugin{}, err
 	}
@@ -194,6 +204,58 @@ func (s *PluginService) CreatePlugin(ctx context.Context, plugin models.Plugin) 
 		return models.Plugin{}, err
 	}
 	return *created, nil
+}
+
+// SubmitPlugin creates a plugin with status=pending for community review.
+func (s *PluginService) SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error) {
+	plugin = normalizePlugin(plugin)
+	plugin.Status = models.StatusPending
+	if err := validatePlugin(plugin, true); err != nil {
+		return models.Plugin{}, err
+	}
+
+	id, err := s.repo.Create(ctx, &plugin)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+
+	created, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+	return *created, nil
+}
+
+// ApprovePlugin sets a plugin's status to active.
+func (s *PluginService) ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error) {
+	plugin, err := s.lookupPlugin(ctx, ref)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+	if err := s.repo.UpdateStatus(ctx, plugin.ID, models.StatusActive); err != nil {
+		return models.Plugin{}, err
+	}
+	updated, err := s.repo.GetByID(ctx, plugin.ID)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+	return *updated, nil
+}
+
+// RejectPlugin sets a plugin's status to rejected.
+func (s *PluginService) RejectPlugin(ctx context.Context, ref string) (models.Plugin, error) {
+	plugin, err := s.lookupPlugin(ctx, ref)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+	if err := s.repo.UpdateStatus(ctx, plugin.ID, models.StatusRejected); err != nil {
+		return models.Plugin{}, err
+	}
+	updated, err := s.repo.GetByID(ctx, plugin.ID)
+	if err != nil {
+		return models.Plugin{}, err
+	}
+	return *updated, nil
 }
 
 func (s *PluginService) UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error) {
@@ -278,7 +340,7 @@ func (s *PluginService) countPlugins(ctx context.Context, params ListPluginsPara
 }
 
 func countFilters(params ListPluginsParams) []repository.Filter {
-	filters := make([]repository.Filter, 0, 3)
+	filters := make([]repository.Filter, 0, 4)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
@@ -287,6 +349,9 @@ func countFilters(params ListPluginsParams) []repository.Filter {
 	}
 	if params.Author != "" {
 		filters = append(filters, repository.AuthorFilter{Author: params.Author})
+	}
+	if len(params.Statuses) > 0 {
+		filters = append(filters, repository.StatusFilter{Statuses: params.Statuses})
 	}
 	return filters
 }

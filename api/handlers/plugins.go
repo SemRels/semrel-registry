@@ -35,6 +35,26 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		return
 	}
 
+	// Admins can filter by status; non-admins always see active only
+	// (unless they're filtering their own submissions).
+	var statuses []string
+	isAdmin, _ := c.Get("isAdmin")
+	if isAdmin == true {
+		if s := strings.TrimSpace(c.Query("status")); s != "" {
+			statuses = []string{s}
+		}
+		// admin with no status filter sees all statuses
+	} else {
+		// community user: show active + own pending/rejected if author filter matches own login
+		login, _ := c.Get("login")
+		reqAuthor := strings.TrimSpace(c.Query("author"))
+		if loginStr, _ := login.(string); loginStr != "" && strings.EqualFold(reqAuthor, loginStr) {
+			// own plugins: all statuses
+		} else {
+			statuses = []string{models.StatusActive}
+		}
+	}
+
 	result, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
 		Page:     page,
 		Limit:    limit,
@@ -42,6 +62,7 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Search:   strings.TrimSpace(c.Query("search")),
 		Sort:     strings.TrimSpace(c.Query("sort")),
 		Author:   strings.TrimSpace(c.Query("author")),
+		Statuses: statuses,
 	})
 	if err != nil {
 		HandleError(c, err)
@@ -180,6 +201,53 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%s/versions/%d", c.Param("id"), created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
+}
+
+// SubmitPlugin handles community plugin submissions.
+// POST /api/v1/plugins/submit — requires auth; creates plugin with status=pending.
+func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
+	var plugin models.Plugin
+	if err := c.ShouldBindJSON(&plugin); err != nil {
+		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
+		return
+	}
+
+	// Force author to submitter's GitHub login.
+	login, _ := c.Get("login")
+	if loginStr, ok := login.(string); ok && loginStr != "" {
+		plugin.Author = loginStr
+	}
+
+	created, err := h.service.SubmitPlugin(c.Request.Context(), plugin)
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
+	c.JSON(http.StatusCreated, gin.H{"data": created})
+}
+
+// ApprovePlugin approves a pending plugin submission (admin only).
+// PUT /api/v1/admin/plugins/:id/approve
+func (h *PluginHandler) ApprovePlugin(c *gin.Context) {
+	updated, err := h.service.ApprovePlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": updated})
+}
+
+// RejectPlugin rejects a pending plugin submission (admin only).
+// PUT /api/v1/admin/plugins/:id/reject
+func (h *PluginHandler) RejectPlugin(c *gin.Context) {
+	updated, err := h.service.RejectPlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": updated})
 }
 
 func parseQueryInt(c *gin.Context, name string, defaultValue int) (int, bool) {

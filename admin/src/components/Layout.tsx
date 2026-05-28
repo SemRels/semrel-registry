@@ -23,6 +23,11 @@ export default function Layout() {
           <NavLink to="/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
             {isAdmin ? 'Plugins' : 'My Plugins'}
           </NavLink>
+          {!isAdmin && (
+            <NavLink to="/submit" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+              + Submit Plugin
+            </NavLink>
+          )}
           <a href="http://localhost:3000" className="sidebar__link" target="_blank" rel="noopener">
             Registry ↗
           </a>

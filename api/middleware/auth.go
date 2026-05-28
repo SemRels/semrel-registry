@@ -84,11 +84,18 @@ func RequireAuth(authHandler *handlers.AuthHandler) gin.HandlerFunc {
 	}
 }
 
-// OptionalAuth attaches claims if a valid JWT is present, but doesn't block.
+// OptionalAuth attaches claims if a valid JWT or ADMIN_TOKEN is present, but doesn't block.
 func OptionalAuth(authHandler *handlers.AuthHandler) gin.HandlerFunc {
+	adminToken := os.Getenv("ADMIN_TOKEN")
 	return func(c *gin.Context) {
 		bearer := extractBearer(c)
 		if bearer == "" {
+			c.Next()
+			return
+		}
+		// Static admin token fallback.
+		if adminToken != "" && bearer == adminToken {
+			c.Set("isAdmin", true)
 			c.Next()
 			return
 		}
