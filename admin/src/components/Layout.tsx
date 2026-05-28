@@ -20,6 +20,11 @@ export default function Layout() {
               Dashboard
             </NavLink>
           )}
+          {isAdmin && (
+            <NavLink to="/submissions" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+              Submissions
+            </NavLink>
+          )}
           <NavLink to="/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
             {isAdmin ? 'Plugins' : 'My Plugins'}
           </NavLink>

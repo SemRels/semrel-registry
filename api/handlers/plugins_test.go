@@ -167,6 +167,10 @@ func (a *mockRepositoryAdapter) UpdateStatus(_ context.Context, _ int64, _ strin
 	return nil
 }
 
+func (a *mockRepositoryAdapter) UpdateValidationChecks(_ context.Context, _ int64, _ []byte) error {
+	return nil
+}
+
 func (m *mockPluginRepository) ListVersions(ctx context.Context, ref string, limit, offset int) ([]models.PluginVersion, error) {
 	if m.listVersionsFunc != nil {
 		return m.listVersionsFunc(ctx, ref, limit, offset)
@@ -212,6 +216,10 @@ func (m *mockPluginRepository) ApprovePlugin(_ context.Context, _ string) (model
 
 func (m *mockPluginRepository) RejectPlugin(_ context.Context, _ string) (models.Plugin, error) {
 	return models.Plugin{}, nil
+}
+
+func (m *mockPluginRepository) UpdateValidationChecks(_ context.Context, _ int64, _ []byte) error {
+	return nil
 }
 
 type listResponse struct {

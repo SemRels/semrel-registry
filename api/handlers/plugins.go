@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -224,8 +226,50 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 		return
 	}
 
+	// Run validation checks asynchronously — results stored in DB when done.
+	go func(id int64, repoURL string) {
+		owner, repo := ownerRepoFromURL(repoURL)
+		if owner == "" || repo == "" {
+			return
+		}
+		result := validatePluginStandards(owner, repo)
+		raw, err := json.Marshal(result)
+		if err != nil {
+			return
+		}
+		_ = h.service.UpdateValidationChecks(context.Background(), id, raw)
+	}(created.ID, created.Repository)
+
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
+}
+
+// RevalidatePlugin re-runs validation checks on a plugin (admin only).
+// POST /api/v1/admin/plugins/:id/revalidate
+func (h *PluginHandler) RevalidatePlugin(c *gin.Context) {
+	plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	owner, repo := ownerRepoFromURL(plugin.Repository)
+	if owner == "" || repo == "" {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "plugin has no valid GitHub repository URL"})
+		return
+	}
+
+	result := validatePluginStandards(owner, repo)
+	raw, err := json.Marshal(result)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to marshal result"})
+		return
+	}
+	if err := h.service.UpdateValidationChecks(c.Request.Context(), plugin.ID, raw); err != nil {
+		HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 // ApprovePlugin approves a pending plugin submission (admin only).

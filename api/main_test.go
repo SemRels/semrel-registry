@@ -58,6 +58,10 @@ func (stubPluginService) RejectPlugin(_ context.Context, _ string) (models.Plugi
 	return models.Plugin{}, nil
 }
 
+func (stubPluginService) UpdateValidationChecks(_ context.Context, _ int64, _ []byte) error {
+	return nil
+}
+
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 	os.Exit(m.Run())

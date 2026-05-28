@@ -73,6 +73,7 @@ type PluginManager interface {
 	CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error)
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
+	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
 }
 
 type PluginService struct {
@@ -606,6 +607,10 @@ func enrichPlugin(plugin models.Plugin, includeVersions bool) models.Plugin {
 		plugin.Versions = nil
 	}
 	return plugin
+}
+
+func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error {
+	return s.repo.UpdateValidationChecks(ctx, id, checksJSON)
 }
 
 func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {

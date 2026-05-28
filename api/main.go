@@ -98,6 +98,7 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	adminRoutes.POST("/admin/sync-github-org", syncHandler.SyncGitHubOrg)
 	adminRoutes.PUT("/admin/plugins/:id/approve", pluginHandler.ApprovePlugin)
 	adminRoutes.PUT("/admin/plugins/:id/reject", pluginHandler.RejectPlugin)
+	adminRoutes.POST("/admin/plugins/:id/revalidate", pluginHandler.RevalidatePlugin)
 
 	return router
 }

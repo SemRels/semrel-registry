@@ -62,6 +62,8 @@ export interface Plugin {
   versions?: PluginVersion[];
   latestVersion?: string;
   downloads: number;
+  validationChecks?: ValidationResult; // pre-analysis results stored by server
+  validatedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -260,6 +262,10 @@ export async function approvePlugin(id: number | string): Promise<Plugin> {
 
 export async function rejectPlugin(id: number | string): Promise<Plugin> {
   return request<{ data: Plugin }>(`/admin/plugins/${id}/reject`, { method: 'PUT' }).then(r => r.data);
+}
+
+export async function revalidatePlugin(id: number | string): Promise<ValidationResult> {
+  return request<{ data: ValidationResult }>(`/admin/plugins/${id}/revalidate`, { method: 'POST' }).then(r => r.data);
 }
 
 // ---- Admin: sync GitHub org ----

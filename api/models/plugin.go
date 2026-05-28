@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // StatusActive, StatusPending, StatusRejected are the valid plugin statuses.
 const (
@@ -10,21 +13,23 @@ const (
 )
 
 type Plugin struct {
-	ID            int64           `json:"id"`
-	Name          string          `json:"name"`
-	Description   string          `json:"description"`
-	Author        string          `json:"author"`
-	Category      string          `json:"category"`
-	Repository    string          `json:"repository"`
-	License       string          `json:"license"`
-	Status        string          `json:"status"`
-	Tags          []string        `json:"tags,omitempty"`
-	Versions      []PluginVersion `json:"versions,omitempty"`
-	LatestVersion string          `json:"latestVersion,omitempty"`
-	Downloads     int64           `json:"downloads"`
-	CreatedAt     time.Time       `json:"createdAt"`
-	UpdatedAt     time.Time       `json:"updatedAt"`
-	DeletedAt     *time.Time      `json:"deletedAt,omitempty"`
+	ID               int64           `json:"id"`
+	Name             string          `json:"name"`
+	Description      string          `json:"description"`
+	Author           string          `json:"author"`
+	Category         string          `json:"category"`
+	Repository       string          `json:"repository"`
+	License          string          `json:"license"`
+	Status           string          `json:"status"`
+	Tags             []string        `json:"tags,omitempty"`
+	Versions         []PluginVersion `json:"versions,omitempty"`
+	LatestVersion    string          `json:"latestVersion,omitempty"`
+	Downloads        int64           `json:"downloads"`
+	ValidationChecks json.RawMessage `json:"validationChecks,omitempty"`
+	ValidatedAt      *time.Time      `json:"validatedAt,omitempty"`
+	CreatedAt        time.Time       `json:"createdAt"`
+	UpdatedAt        time.Time       `json:"updatedAt"`
+	DeletedAt        *time.Time      `json:"deletedAt,omitempty"`
 }
 
 type PluginVersion struct {

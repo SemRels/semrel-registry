@@ -1,0 +1,3 @@
+ALTER TABLE plugins
+  ADD COLUMN IF NOT EXISTS validation_checks JSONB,
+  ADD COLUMN IF NOT EXISTS validated_at      TIMESTAMPTZ;

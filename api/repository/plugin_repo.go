@@ -24,6 +24,7 @@ type PluginRepository interface {
 	Create(ctx context.Context, plugin *models.Plugin) (int64, error)
 	Update(ctx context.Context, plugin *models.Plugin) error
 	UpdateStatus(ctx context.Context, id int64, status string) error
+	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
 	Delete(ctx context.Context, id int64) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
 }
@@ -43,7 +44,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), created_at, updated_at, deleted_at
+SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE deleted_at IS NULL`)
 
@@ -105,7 +106,7 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), created_at, updated_at, deleted_at
+SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
 
@@ -128,7 +129,7 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), created_at, updated_at, deleted_at
+SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE name = $1 AND deleted_at IS NULL`, name)
 
@@ -278,6 +279,22 @@ WHERE id = $2 AND deleted_at IS NULL`, status, id)
 	return nil
 }
 
+func (r *pgRepository) UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.db.Pool().Exec(ctx, `
+UPDATE plugins SET validation_checks = $1, validated_at = NOW(), updated_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, checksJSON, id)
+	if err != nil {
+		return fmt.Errorf("update validation checks: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
 func (r *pgRepository) Delete(ctx context.Context, id int64) error {
 	if err := r.validate(); err != nil {
 		return err
@@ -398,6 +415,8 @@ func scanPlugin(scanner interface {
 		&plugin.License,
 		&plugin.Status,
 		&plugin.Tags,
+		&plugin.ValidationChecks,
+		&plugin.ValidatedAt,
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
