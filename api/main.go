@@ -70,6 +70,10 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 
 	syncHandler := handlers.NewSyncHandler(pluginService)
 
+	// plugins.json — semrel registry metadata endpoint consumed by `semrel` CLI.
+	// SEMREL_REGISTRY_URL=http://localhost:8080 and semrel fetches /plugins.json.
+	router.GET("/plugins.json", syncHandler.PluginsJSON)
+
 	// Webhook endpoint: receives repository_dispatch from plugin release workflows.
 	// Protected by WEBHOOK_SECRET env var (optional but recommended in prod).
 	api.POST("/webhooks/release", syncHandler.WebhookRelease)

@@ -31,6 +31,8 @@ type ghRelease struct {
 type ghAsset struct {
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
+	// Digest is provided by GitHub API as "sha256:hexhash" for each asset.
+	Digest string `json:"digest"`
 }
 
 // ── SyncHandler ───────────────────────────────────────────────────────────────
@@ -91,6 +93,86 @@ func (h *SyncHandler) SyncVersions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"results": results})
+}
+
+// GET /plugins.json
+// Returns all active plugins with their versions in the semrel registry metadata format.
+// semrel CLI fetches this via SEMREL_REGISTRY_URL, e.g.:
+//
+//	SEMREL_REGISTRY_URL=http://localhost:8080 semrel plugin install analyzer-conventional
+func (h *SyncHandler) PluginsJSON(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	params := service.ListPluginsParams{
+		Statuses: []string{"active"},
+		Limit:    100,
+	}
+	result, err := h.svc.ListPlugins(ctx, params)
+	if err != nil {
+		InternalServerError(c, "failed to list plugins", err)
+		return
+	}
+
+	type semrelPluginVersion struct {
+		Version     string            `json:"version"`
+		ReleaseDate string            `json:"releaseDate"`
+		Changelog   string            `json:"changelog,omitempty"`
+		DownloadURL string            `json:"downloadUrl"`
+		Checksums   map[string]string `json:"checksums"`
+		Prerelease  bool              `json:"prerelease,omitempty"`
+	}
+	type semrelPlugin struct {
+		Name        string               `json:"name"`
+		Description string               `json:"description"`
+		Author      string               `json:"author"`
+		License     string               `json:"license"`
+		Category    string               `json:"category"`
+		Repository  string               `json:"repository,omitempty"`
+		Tags        []string             `json:"tags,omitempty"`
+		Versions    []semrelPluginVersion `json:"versions"`
+	}
+	type semrelRegistry struct {
+		Plugins []semrelPlugin `json:"plugins"`
+	}
+
+	registry := semrelRegistry{Plugins: make([]semrelPlugin, 0, len(result.Data))}
+	for _, p := range result.Data {
+		versions, listErr := h.svc.ListVersions(ctx, p.Name, 100, 0)
+		if listErr != nil {
+			continue
+		}
+		svs := make([]semrelPluginVersion, 0, len(versions))
+		for _, v := range versions {
+			rd := ""
+			if v.ReleaseDate != nil {
+				rd = v.ReleaseDate.Format(time.RFC3339)
+			}
+			svs = append(svs, semrelPluginVersion{
+				Version:     v.Version,
+				ReleaseDate: rd,
+				Changelog:   v.Changelog,
+				DownloadURL: v.DownloadURL,
+				Checksums:   v.Checksums,
+				Prerelease:  v.Prerelease,
+			})
+		}
+		tags := p.Tags
+		if tags == nil {
+			tags = []string{}
+		}
+		registry.Plugins = append(registry.Plugins, semrelPlugin{
+			Name:        p.Name,
+			Description: p.Description,
+			Author:      p.Author,
+			License:     p.License,
+			Category:    p.Category,
+			Repository:  p.Repository,
+			Tags:        tags,
+			Versions:    svs,
+		})
+	}
+
+	c.JSON(http.StatusOK, registry)
 }
 
 // POST /api/v1/webhooks/release
@@ -621,32 +703,32 @@ func ownerRepoFromURL(repoURL string) (string, string) {
 	return parts[len(parts)-2], parts[len(parts)-1]
 }
 
-// pickChecksums builds a platform→hash map from the .sha256 asset files.
-// Asset names follow the pattern: plugin-{os}-{arch}[.exe].sha256
-// The URL is used as a proxy for the hash value (actual hash content
-// would require downloading; store the URL reference instead).
+// pickChecksums builds a platform→sha256hash map from release binary assets.
+// GitHub provides a "digest" field ("sha256:hexhash") for each asset, which
+// we use directly — no need to download the individual .sha256 files.
+// Keys use the semrel convention: "linux_amd64", "darwin_arm64", etc.
 func pickChecksums(assets []ghAsset) map[string]string {
 	checksums := make(map[string]string)
 	for _, a := range assets {
-		if !strings.HasSuffix(a.Name, ".sha256") {
+		// Skip checksum text files and non-binary assets.
+		if strings.HasSuffix(a.Name, ".sha256") || strings.HasSuffix(a.Name, ".txt") {
 			continue
 		}
-		// Derive platform key from filename, e.g. "plugin-linux-amd64.sha256" → "linux-amd64"
-		base := strings.TrimSuffix(a.Name, ".sha256")
-		base = strings.TrimPrefix(base, "plugin-")
+		if a.Digest == "" {
+			continue
+		}
+		// Parse platform from name: "plugin-linux-amd64" or "plugin-windows-arm64.exe"
+		base := strings.TrimPrefix(a.Name, "plugin-")
 		base = strings.TrimSuffix(base, ".exe")
-		if base != "" {
-			checksums[base] = a.BrowserDownloadURL
+		// Convert "linux-amd64" → "linux_amd64" (semrel convention)
+		parts := strings.SplitN(base, "-", 2)
+		if len(parts) != 2 {
+			continue
 		}
-	}
-	// Fallback: use checksums.txt URL if no individual .sha256 files found.
-	if len(checksums) == 0 {
-		for _, a := range assets {
-			if a.Name == "checksums.txt" {
-				checksums["all"] = a.BrowserDownloadURL
-				break
-			}
-		}
+		key := parts[0] + "_" + parts[1]
+		// Strip "sha256:" prefix from digest
+		hash := strings.TrimPrefix(a.Digest, "sha256:")
+		checksums[key] = hash
 	}
 	return checksums
 }
