@@ -111,7 +111,20 @@ func (h *PluginHandler) ListPluginVersions(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": versions})
+	// Enrich each version with per-platform download URLs derived from the stored base URL.
+	type versionResponse struct {
+		models.PluginVersion
+		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
+	}
+	out := make([]versionResponse, len(versions))
+	for i, v := range versions {
+		out[i] = versionResponse{
+			PluginVersion: v,
+			DownloadURLs:  deriveDownloadURLs(v.DownloadURL, v.Checksums),
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": out})
 }
 
 func (h *PluginHandler) CreatePlugin(c *gin.Context) {

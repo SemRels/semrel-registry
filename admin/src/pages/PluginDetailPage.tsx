@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { marked } from 'marked';
 import { hasToken } from '../lib/api';
 
 type Plugin = {
@@ -20,6 +21,8 @@ type Version = {
   releaseDate: string | null;
   changelog: string;
   downloadUrl: string;
+  downloadUrls?: Record<string, string>;
+  checksums?: Record<string, string>;
   prerelease: boolean;
 };
 
@@ -29,7 +32,6 @@ const CAT_CLASS: Record<string, string> = {
   updater: 'badge--updater', generator: 'badge--generator',
 };
 
-/** Default phase hint per category for the .semrel.yaml snippet. */
 const CAT_PHASE: Record<string, string> = {
   condition: 'condition',
   provider:  'provider',
@@ -38,6 +40,22 @@ const CAT_PHASE: Record<string, string> = {
   updater:   'pre-tag',
   hook:      'release',
 };
+
+const PLATFORM_LABELS: Record<string, string> = {
+  linux_amd64:   'Linux x64',
+  linux_arm64:   'Linux ARM64',
+  darwin_amd64:  'macOS Intel',
+  darwin_arm64:  'macOS Apple Silicon',
+  windows_amd64: 'Windows x64',
+  windows_arm64: 'Windows ARM64',
+};
+
+const PLATFORM_ORDER = ['linux_amd64', 'linux_arm64', 'darwin_amd64', 'darwin_arm64', 'windows_amd64', 'windows_arm64'];
+
+/** Returns true for development versions (semver major == 0). */
+function isDevVersion(version: string): boolean {
+  return version.startsWith('0.');
+}
 
 function configSnippet(name: string, category: string): string {
   const phase = CAT_PHASE[category] ?? 'release';
@@ -48,22 +66,11 @@ function configSnippet(name: string, category: string): string {
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    });
-  };
   return (
     <button
-      onClick={copy}
-      style={{
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: copied ? 'var(--success)' : 'var(--muted)',
-        fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4,
-        transition: 'color .15s',
-      }}
-      title="Copy to clipboard"
+      onClick={() => navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); })}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? 'var(--success)' : 'var(--muted)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, transition: 'color .15s' }}
+      title="Copy"
     >
       {copied ? '✓ Copied' : 'Copy'}
     </button>
@@ -73,20 +80,76 @@ function CopyButton({ text }: { text: string }) {
 function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
     <div style={{ position: 'relative', marginTop: label ? '.5rem' : 0 }}>
-      {label && (
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)', marginBottom: '.25rem', fontWeight: 600 }}>
-          {label}
-        </div>
-      )}
-      <div style={{
-        background: 'var(--surface2)', borderRadius: 8, padding: '.75rem 1rem',
-        fontFamily: 'monospace', fontSize: 'var(--fs-sm)', overflowX: 'auto',
-        border: '1px solid var(--border)', position: 'relative',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.5rem',
-      }}>
+      {label && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)', marginBottom: '.25rem', fontWeight: 600 }}>{label}</div>}
+      <div style={{ background: 'var(--surface2)', borderRadius: 8, padding: '.75rem 1rem', fontFamily: 'monospace', fontSize: 'var(--fs-sm)', overflowX: 'auto', border: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.5rem' }}>
         <pre style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{code}</pre>
         <CopyButton text={code} />
       </div>
+    </div>
+  );
+}
+
+/** Renders markdown using `marked`. Links open in new tab. */
+function MarkdownContent({ md }: { md: string }) {
+  const html = marked.parse(md, { async: false }) as string;
+  return (
+    <div
+      className="markdown-body"
+      dangerouslySetInnerHTML={{ __html: html }}
+      style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.7 }}
+      onClick={e => {
+        const a = (e.target as HTMLElement).closest('a');
+        if (a) { a.target = '_blank'; a.rel = 'noopener'; }
+      }}
+    />
+  );
+}
+
+/** Version badge reflecting semver semantics. */
+function VersionBadge({ version, isLatest }: { version: string; isLatest: boolean }) {
+  const dev = isDevVersion(version);
+  if (dev) {
+    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>dev</span>;
+  }
+  if (isLatest) {
+    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(35,134,54,.2)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>latest</span>;
+  }
+  return null;
+}
+
+/** Expandable multi-arch download links for a version. */
+function DownloadLinks({ downloadUrls }: { downloadUrls?: Record<string, string> }) {
+  const [open, setOpen] = useState(false);
+  if (!downloadUrls || Object.keys(downloadUrls).length === 0) return <span style={{ color: 'var(--muted)' }}>—</span>;
+
+  const platforms = PLATFORM_ORDER.filter(k => downloadUrls[k]);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 'var(--fs-xs)', padding: 0, textDecoration: 'underline dotted' }}
+      >
+        {open ? '▾ Hide' : `▸ Download (${platforms.length} platforms)`}
+      </button>
+      {open && (
+        <div style={{ marginTop: '.4rem', display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
+          {platforms.map(key => (
+            <a
+              key={key}
+              href={downloadUrls[key]}
+              target="_blank"
+              rel="noopener"
+              style={{ fontSize: '11px', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '.3rem' }}
+            >
+              <span style={{ fontFamily: 'monospace', background: 'var(--surface2)', borderRadius: 3, padding: '1px 5px', fontSize: '10px', color: 'var(--muted)' }}>{key}</span>
+              {PLATFORM_LABELS[key] ?? key}
+              {key.startsWith('windows') ? ' (.exe)' : ''}
+              <span style={{ opacity: .5 }}>↗</span>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -162,10 +225,13 @@ export default function PluginDetailPage() {
                   <span className={`badge ${CAT_CLASS[plugin.category] ?? ''}`}>{plugin.category}</span>
                   {latest && (
                     <span style={{
-                      fontSize: 'var(--fs-xs)', background: 'rgba(56,139,253,.12)',
-                      color: 'var(--accent)', borderRadius: 6, padding: '2px 8px', fontFamily: 'monospace', fontWeight: 600,
+                      fontSize: 'var(--fs-xs)',
+                      background: isDevVersion(latest.version) ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)',
+                      color: isDevVersion(latest.version) ? '#d7a22a' : 'var(--accent)',
+                      borderRadius: 6, padding: '2px 8px', fontFamily: 'monospace', fontWeight: 600,
                     }}>
                       v{latest.version}
+                      {isDevVersion(latest.version) && <span style={{ marginLeft: '.3rem', fontSize: '9px', opacity: .8 }}>dev</span>}
                     </span>
                   )}
                 </div>
@@ -205,7 +271,6 @@ export default function PluginDetailPage() {
               </p>
               <CodeBlock code={configSnippet(plugin.name, plugin.category)} />
 
-              {/* Category-specific hints */}
               {plugin.category === 'provider' && (
                 <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
                   💡 Providers run in the <strong>provider</strong> phase and are responsible for reading and creating VCS tags and releases.
@@ -254,7 +319,7 @@ export default function PluginDetailPage() {
                       <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
                       <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
                       <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
-                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Assets</th>
+                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -262,12 +327,10 @@ export default function PluginDetailPage() {
                       <tr key={v.id} style={{ borderBottom: '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
                         <td style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
                           v{v.version}
-                          {i === 0 && !v.prerelease && (
-                            <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(35,134,54,.2)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>latest</span>
-                          )}
-                          {v.prerelease && (
-                            <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
-                          )}
+                          {v.prerelease
+                            ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
+                            : <VersionBadge version={v.version} isLatest={i === 0} />
+                          }
                         </td>
                         <td style={{ padding: '.5rem', color: 'var(--muted)' }}>
                           {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
@@ -278,11 +341,7 @@ export default function PluginDetailPage() {
                           </code>
                         </td>
                         <td style={{ padding: '.5rem' }}>
-                          {v.downloadUrl ? (
-                            <a href={v.downloadUrl} target="_blank" rel="noopener" style={{ color: 'var(--accent)', fontSize: 'var(--fs-xs)' }}>
-                              Download ↗
-                            </a>
-                          ) : '—'}
+                          <DownloadLinks downloadUrls={v.downloadUrls} />
                         </td>
                       </tr>
                     ))}
@@ -297,9 +356,7 @@ export default function PluginDetailPage() {
                 <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
                   Release notes <span className="muted" style={{ fontWeight: 400, fontSize: 'var(--fs-sm)' }}>v{latest.version}</span>
                 </h2>
-                <pre style={{ margin: 0, fontSize: 'var(--fs-sm)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'var(--fg-muted)' }}>
-                  {latest.changelog}
-                </pre>
+                <MarkdownContent md={latest.changelog} />
               </section>
             )}
 

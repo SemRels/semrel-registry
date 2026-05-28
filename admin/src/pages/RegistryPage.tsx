@@ -181,11 +181,15 @@ export default function RegistryPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                      {versions[p.name] && (
-                        <span style={{ fontSize: '11px', fontFamily: 'monospace', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
-                          v{versions[p.name]}
-                        </span>
-                      )}
+                      {versions[p.name] && (() => {
+                        const ver = versions[p.name];
+                        const isDev = ver.startsWith('0.');
+                        return (
+                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
+                            v{ver}{isDev && <span style={{ marginLeft: '.2rem', fontSize: '9px', opacity: .75 }}>dev</span>}
+                          </span>
+                        );
+                      })()}
                       {p.repository && (
                         <a
                           href={p.repository}
