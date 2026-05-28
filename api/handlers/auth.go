@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
-	"encoding/base64"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -80,21 +82,19 @@ func NewAuthHandler() *AuthHandler {
 
 // GET /auth/github — redirect to GitHub OAuth consent page.
 func (h *AuthHandler) Redirect(c *gin.Context) {
-	state := randomState()
-	c.SetCookie("oauth_state", state, 300, "/", "", false, true)
+	state := h.signedState()
 	url := h.oauthConfig.AuthCodeURL(state, oauth2.AccessTypeOnline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // GET /auth/github/callback — exchange code for token, issue JWT, redirect to frontend.
+// Also registered as GET /oauth/callback to match common GitHub App callback URL patterns.
 func (h *AuthHandler) Callback(c *gin.Context) {
-	// Verify state to prevent CSRF.
-	cookieState, err := c.Cookie("oauth_state")
-	if err != nil || cookieState != c.Query("state") {
+	state := c.Query("state")
+	if !h.verifySignedState(state) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid OAuth state"})
 		return
 	}
-	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
 	code := c.Query("code")
 	if code == "" {
@@ -264,10 +264,29 @@ func (h *AuthHandler) ValidateJWT(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
-func randomState() string {
+// signedState generates an HMAC-signed OAuth state parameter.
+// Format: <16-byte-random-hex>.<hmac-sha256-hex>
+// This is stateless — no cookie or server-side session needed.
+func (h *AuthHandler) signedState() string {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b)
-	return base64.URLEncoding.EncodeToString(b)
+	nonce := hex.EncodeToString(b)
+	mac := hmac.New(sha256.New, h.jwtSecret)
+	mac.Write([]byte(nonce))
+	sig := hex.EncodeToString(mac.Sum(nil))
+	return nonce + "." + sig
+}
+
+// verifySignedState validates an HMAC-signed state parameter.
+func (h *AuthHandler) verifySignedState(state string) bool {
+	parts := strings.SplitN(state, ".", 2)
+	if len(parts) != 2 {
+		return false
+	}
+	mac := hmac.New(sha256.New, h.jwtSecret)
+	mac.Write([]byte(parts[0]))
+	expected := hex.EncodeToString(mac.Sum(nil))
+	return hmac.Equal([]byte(expected), []byte(parts[1]))
 }
 
 func splitEnv(key string) []string {
