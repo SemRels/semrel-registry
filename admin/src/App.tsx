@@ -25,6 +25,13 @@ function OAuthCallback() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
+  // Handle ?token= injected by OAuth callback even when landing on protected routes.
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
+  if (urlToken) {
+    saveToken(urlToken);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
   if (!hasToken()) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
