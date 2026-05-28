@@ -10,33 +10,33 @@ export default function Layout() {
   return (
     <div className="app">
       <aside className="sidebar">
-        <a href="http://localhost:3000" className="sidebar__brand" target="_blank" rel="noopener">
+        <NavLink to="/" className="sidebar__brand">
           <img src="/semrel.svg" alt="semrel" style={{ width:'1.5rem', height:'1.5rem', flexShrink:0 }} />
           <span>semrel Registry</span>
-        </a>
+        </NavLink>
         <nav className="sidebar__nav">
           {isAdmin && (
-            <NavLink to="/" end className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            <NavLink to="/admin" end className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
               Dashboard
             </NavLink>
           )}
           {isAdmin && (
-            <NavLink to="/submissions" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            <NavLink to="/admin/submissions" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
               Submissions
             </NavLink>
           )}
-          <NavLink to="/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+          <NavLink to="/admin/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
             {isAdmin ? 'Plugins' : 'My Plugins'}
           </NavLink>
           {!isAdmin && (
-            <NavLink to="/submit" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            <NavLink to="/admin/submit" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
               + Submit Plugin
             </NavLink>
           )}
-          <a href="http://localhost:3000" className="sidebar__link" target="_blank" rel="noopener">
-            Registry ↗
-          </a>
-          <a href="http://localhost:8080/api/v1/plugins" className="sidebar__link" target="_blank" rel="noopener">
+          <NavLink to="/" className="sidebar__link">
+            Public Registry ↗
+          </NavLink>
+          <a href="/api/v1/plugins" className="sidebar__link" target="_blank" rel="noopener">
             Raw API ↗
           </a>
         </nav>

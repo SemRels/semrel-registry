@@ -146,7 +146,7 @@ export default function DashboardPage() {
               <button
                 className="btn btn--primary"
                 style={{ padding: '4px 14px', fontSize: 'var(--fs-sm)' }}
-                onClick={() => navigate('/submissions')}
+                onClick={() => navigate('/admin/submissions')}
               >
                 Review submissions →
               </button>

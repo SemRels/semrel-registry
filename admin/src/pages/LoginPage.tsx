@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       if (await verifyToken(token.trim())) {
         saveToken(token.trim());
-        navigate('/');
+        navigate('/admin');
       } else {
         setError('Invalid token.');
       }

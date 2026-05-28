@@ -1,0 +1,179 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { hasToken } from '../lib/api';
+
+type Plugin = {
+  id: number;
+  name: string;
+  description: string;
+  author: string;
+  category: string;
+  repository: string;
+  license: string;
+  tags: string[];
+};
+
+type Pagination = { total: number; page: number; limit: number; pages: number };
+
+const CAT_CLASS: Record<string, string> = {
+  provider: 'badge--provider', analyzer: 'badge--analyzer',
+  condition: 'badge--condition', hook: 'badge--hook', updater: 'badge--updater',
+  generator: 'badge--generator',
+};
+
+const CATEGORIES = ['provider', 'analyzer', 'condition', 'hook', 'updater', 'generator'];
+
+export default function RegistryPage() {
+  const [plugins, setPlugins]       = useState<Plugin[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [search, setSearch]         = useState('');
+  const [category, setCategory]     = useState('');
+  const [page, setPage]             = useState(1);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({ limit: '24', page: String(page) });
+    if (search)   params.set('search', search);
+    if (category) params.set('category', category);
+
+    fetch(`/api/v1/plugins?${params}`)
+      .then(r => r.json())
+      .then((d: { data: Plugin[]; pagination: Pagination }) => {
+        setPlugins(d.data ?? []);
+        setPagination(d.pagination ?? null);
+        setError('');
+      })
+      .catch(() => setError('Failed to load plugins.'))
+      .finally(() => setLoading(false));
+  }, [page, search, category]);
+
+  // debounce search
+  const [searchInput, setSearchInput] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const isLoggedIn = hasToken();
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
+      {/* Top bar */}
+      <header style={{ borderBottom: '1px solid var(--border)', padding: '0 1.5rem', height: '3.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 10 }}>
+        <a style={{ display: 'flex', alignItems: 'center', gap: '.5rem', textDecoration: 'none', color: 'var(--fg)', fontWeight: 700 }} href="/">
+          <img src="/semrel.svg" alt="semrel" style={{ width: '1.4rem', height: '1.4rem' }} />
+          semrel Registry
+        </a>
+        <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+          <a href="http://localhost:8080/api/v1/plugins" target="_blank" rel="noopener" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
+            API ↗
+          </a>
+          {isLoggedIn
+            ? <Link to="/admin" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Admin Panel</Link>
+            : <Link to="/login" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Sign In</Link>
+          }
+        </div>
+      </header>
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        {/* Hero */}
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem,4vw,2.25rem)', fontWeight: 800, marginBottom: '.5rem' }}>
+            semrel Plugin Registry
+          </h1>
+          <p className="muted" style={{ fontSize: 'var(--fs-md)', marginBottom: '1.5rem' }}>
+            Discover and install plugins for <a href="https://semrel.io" target="_blank" rel="noopener" style={{ color: 'var(--accent)' }}>semrel</a> — semantic versioning made simple.
+          </p>
+          {pagination && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent)' }}>{pagination.total}</div>
+                <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Plugins</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Search + filter */}
+        <div style={{ display: 'flex', gap: '.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <input
+            className="input"
+            style={{ flex: 1, minWidth: '200px' }}
+            placeholder="Search plugins…"
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+          />
+          <select
+            className="input"
+            style={{ width: 'auto' }}
+            value={category}
+            onChange={e => { setCategory(e.target.value); setPage(1); }}
+          >
+            <option value="">All categories</option>
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        {/* Error */}
+        {error && <div className="alert alert--error">{error}</div>}
+
+        {/* Plugin grid */}
+        {loading ? (
+          <p className="muted" style={{ textAlign: 'center', padding: '3rem 0' }}>Loading…</p>
+        ) : plugins.length === 0 ? (
+          <p className="muted" style={{ textAlign: 'center', padding: '3rem 0' }}>No plugins found.</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {plugins.map(p => (
+              <div key={p.id} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
+                  <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                  <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
+                </div>
+                <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {p.description || 'No description.'}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.5rem' }}>
+                  <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
+                  {p.repository && (
+                    <a href={p.repository} target="_blank" rel="noopener" style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent)' }}>
+                      GitHub ↗
+                    </a>
+                  )}
+                </div>
+                {p.tags?.length > 0 && (
+                  <div style={{ display: 'flex', gap: '.25rem', flexWrap: 'wrap' }}>
+                    {p.tags.slice(0, 4).map(t => (
+                      <span key={t} style={{ fontSize: '10px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: '4px', padding: '1px 6px' }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination && pagination.pages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '.5rem' }}>
+            <button className="btn btn--secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span className="muted" style={{ lineHeight: '2rem', fontSize: 'var(--fs-sm)' }}>Page {page} / {pagination.pages}</span>
+            <button className="btn btn--secondary" disabled={page >= pagination.pages} onClick={() => setPage(p => p + 1)}>Next →</button>
+          </div>
+        )}
+
+        {/* Footer */}
+        <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
+          <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>© semrel · Plugin Registry</span>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <a href="http://localhost:8080/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
+            <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>GitHub</a>
+            {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}

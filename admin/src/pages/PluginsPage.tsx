@@ -48,13 +48,13 @@ export default function PluginsPage() {
     <>
       <div className="page__header">
         <h1 className="page__title">{isAdmin ? 'Plugins' : 'My Plugins'}</h1>
-        <button type="button" className="btn btn--primary" onClick={() => navigate('/plugins/new')}>+ Add</button>
+        <button type="button" className="btn btn--primary" onClick={() => navigate('/admin/plugins/new')}>+ Add</button>
       </div>
       <div className="page__body">
         {!isAdmin && (
           <div className="alert" style={{ background:'rgba(56,139,253,.1)', border:'1px solid rgba(56,139,253,.3)', color:'#79c0ff', padding:'.5rem .75rem', borderRadius:'6px', fontSize:'var(--fs-sm)', marginBottom:'.75rem' }}>
             Community view — you can only manage plugins attributed to <strong>{user?.login}</strong>.{' '}
-            <a href="http://localhost:3000/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
+            <a href="/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
               Submit a new plugin →
             </a>
           </div>
@@ -79,7 +79,7 @@ export default function PluginsPage() {
               <tbody>
                 {plugins.length === 0 && (
                   <tr><td colSpan={7} style={{ textAlign:'center', padding:'2rem' }} className="muted">
-                    {isAdmin ? <><Link to="/plugins/new">Add the first plugin</Link></> : 'No plugins attributed to your account yet.'}
+                    {isAdmin ? <><Link to="/admin/plugins/new">Add the first plugin</Link></> : 'No plugins attributed to your account yet.'}
                   </td></tr>
                 )}
                 {plugins.map((p) => (
@@ -104,8 +104,8 @@ export default function PluginsPage() {
                     <td><div className="flex gap-sm">
                       {canEdit(p) ? (
                         <>
-                          <Link to={`/plugins/${p.id}`} className="btn btn--sm">Edit</Link>
-                          <Link to={`/plugins/${p.id}/versions`} className="btn btn--sm">Versions</Link>
+                          <Link to={`/admin/plugins/${p.id}`} className="btn btn--sm">Edit</Link>
+                          <Link to={`/admin/plugins/${p.id}/versions`} className="btn btn--sm">Versions</Link>
                           <button type="button" className="btn btn--sm btn--danger" onClick={() => { void handleDelete(p); }}>Del</button>
                         </>
                       ) : (
