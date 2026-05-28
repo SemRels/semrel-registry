@@ -3,7 +3,7 @@
   "generatedAt": "2026-05-25T00:00:00Z",
   "plugins": [
     {
-      "name": "bitbucket",
+      "name": "provider-bitbucket",
       "description": "Bitbucket releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -17,7 +17,7 @@
       "versions": []
     },
     {
-      "name": "git",
+      "name": "provider-git",
       "description": "Git provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -31,7 +31,7 @@
       "versions": []
     },
     {
-      "name": "gitea",
+      "name": "provider-gitea",
       "description": "Gitea releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -45,7 +45,7 @@
       "versions": []
     },
     {
-      "name": "github",
+      "name": "provider-github",
       "description": "GitHub releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -59,7 +59,7 @@
       "versions": []
     },
     {
-      "name": "gitlab",
+      "name": "provider-gitlab",
       "description": "GitLab releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -73,7 +73,7 @@
       "versions": []
     },
     {
-      "name": "conventional",
+      "name": "analyzer-conventional",
       "description": "Conventional commits analyzer",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -87,7 +87,7 @@
       "versions": []
     },
     {
-      "name": "default",
+      "name": "analyzer-default",
       "description": "Default version analyzer",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -101,7 +101,7 @@
       "versions": []
     },
     {
-      "name": "generic",
+      "name": "condition-generic",
       "description": "Generic external condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -115,7 +115,7 @@
       "versions": []
     },
     {
-      "name": "gitea-actions",
+      "name": "condition-gitea-actions",
       "description": "Gitea Actions condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -129,7 +129,7 @@
       "versions": []
     },
     {
-      "name": "github-actions",
+      "name": "condition-github-actions",
       "description": "GitHub Actions condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -143,7 +143,7 @@
       "versions": []
     },
     {
-      "name": "gitlab-ci",
+      "name": "condition-gitlab-ci",
       "description": "GitLab CI condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -157,7 +157,7 @@
       "versions": []
     },
     {
-      "name": "email",
+      "name": "hook-email",
       "description": "Email notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -171,7 +171,7 @@
       "versions": []
     },
     {
-      "name": "gitplugin",
+      "name": "hook-gitplugin",
       "description": "Git plugin execution hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -185,7 +185,7 @@
       "versions": []
     },
     {
-      "name": "jira",
+      "name": "hook-jira",
       "description": "Jira integration hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -199,7 +199,7 @@
       "versions": []
     },
     {
-      "name": "matrix",
+      "name": "hook-matrix",
       "description": "Matrix notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -213,7 +213,7 @@
       "versions": []
     },
     {
-      "name": "slack",
+      "name": "hook-slack",
       "description": "Slack notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -227,7 +227,7 @@
       "versions": []
     },
     {
-      "name": "cargo",
+      "name": "updater-cargo",
       "description": "Cargo dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -241,7 +241,7 @@
       "versions": []
     },
     {
-      "name": "docker",
+      "name": "updater-docker",
       "description": "Docker image updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -255,7 +255,7 @@
       "versions": []
     },
     {
-      "name": "go",
+      "name": "updater-go",
       "description": "Go module updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -269,7 +269,7 @@
       "versions": []
     },
     {
-      "name": "gradle",
+      "name": "updater-gradle",
       "description": "Gradle dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -283,7 +283,7 @@
       "versions": []
     },
     {
-      "name": "helm",
+      "name": "updater-helm",
       "description": "Helm chart updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -297,7 +297,7 @@
       "versions": []
     },
     {
-      "name": "homebrew",
+      "name": "updater-homebrew",
       "description": "Homebrew formula updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -311,7 +311,7 @@
       "versions": []
     },
     {
-      "name": "maven",
+      "name": "updater-maven",
       "description": "Maven dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -325,7 +325,7 @@
       "versions": []
     },
     {
-      "name": "npm",
+      "name": "updater-npm",
       "description": "npm package updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -339,7 +339,7 @@
       "versions": []
     },
     {
-      "name": "nuget",
+      "name": "updater-nuget",
       "description": "NuGet package updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -353,7 +353,7 @@
       "versions": []
     },
     {
-      "name": "python",
+      "name": "updater-python",
       "description": "Python dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -367,7 +367,7 @@
       "versions": []
     },
     {
-      "name": "terraform",
+      "name": "updater-terraform",
       "description": "Terraform module updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",

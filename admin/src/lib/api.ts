@@ -192,3 +192,47 @@ export async function getAuthConfig(): Promise<AuthConfig> {
   const resp = await fetch('/auth/config');
   return resp.json() as Promise<AuthConfig>;
 }
+
+// ---- Version sync ----
+
+export interface SyncVersionsResult {
+  results: Array<{
+    plugin: string;
+    created: number;
+    skipped: number;
+    error?: string;
+  }>;
+}
+
+export async function syncVersions(plugin?: string): Promise<SyncVersionsResult> {
+  return request<SyncVersionsResult>('/admin/sync-versions', {
+    method: 'POST',
+    body: JSON.stringify(plugin ? { plugin } : {}),
+  });
+}
+
+// ---- Plugin standards validation ----
+
+export interface ValidationCheck {
+  id: string;
+  label: string;
+  passed: boolean;
+  message?: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  plugin: string;
+  owner: string;
+  checks: ValidationCheck[];
+  summary: string;
+}
+
+export async function validatePlugin(repository: string): Promise<ValidationResult> {
+  const resp = await fetch(`${API_BASE}/plugins/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repository }),
+  });
+  return resp.json() as Promise<ValidationResult>;
+}

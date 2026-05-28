@@ -63,6 +63,15 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	adminHandler := handlers.NewAdminHandler(pluginService)
 	api.GET("/stats", adminHandler.GetStats)
 
+	// Plugin standards validation (public — no auth needed to check).
+	api.POST("/plugins/validate", handlers.ValidatePlugin)
+
+	syncHandler := handlers.NewSyncHandler(pluginService)
+
+	// Webhook endpoint: receives repository_dispatch from plugin release workflows.
+	// Protected by WEBHOOK_SECRET env var (optional but recommended in prod).
+	api.POST("/webhooks/release", syncHandler.WebhookRelease)
+
 	// Protected endpoints — accept GitHub JWT or legacy ADMIN_TOKEN.
 	requireAdmin := middleware.RequireAdmin(authHandler)
 	protected := api.Group("")
@@ -75,6 +84,7 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	protected.POST("/admin/sync", adminHandler.SyncPlugins)
 	protected.POST("/admin/sync-file", adminHandler.SyncFromFile)
 	protected.GET("/admin/status", adminHandler.Status)
+	protected.POST("/admin/sync-versions", syncHandler.SyncVersions)
 
 	return router
 }

@@ -2,23 +2,31 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Submit a Plugin · semrel Registry" description="Propose a new plugin for the go-semrel registry.">
+<Layout title="Submit a Plugin · semrel Registry" description="Propose a new plugin for the semrel Registry.">
   <div class="container">
 
     <div class="hero">
       <h1>Submit a Plugin</h1>
-      <p>Fill in the form below — it will open a pre-filled GitHub Issue in the registry repository for review by the maintainers.</p>
+      <p>Fill in the form — it opens a pre-filled GitHub Issue for maintainer review. Your plugin must be based on the <a href="https://github.com/SemRels/plugin-template" target="_blank" rel="noopener" style="color:var(--accent)">plugin-template</a>.</p>
     </div>
 
-    <div class="card" style="max-width:640px;margin-top:1.5rem" id="submit-form">
+    <div class="card" style="max-width:680px;margin-top:1.5rem" id="submit-form">
       <div class="field">
+        <label for="f-repo">Repository URL *</label>
+        <div style="display:flex;gap:.5rem">
+          <input id="f-repo" class="search-input" placeholder="https://github.com/you/provider-gitlab" required style="flex:1" />
+          <button type="button" id="validate-btn" class="button button--secondary" style="white-space:nowrap">Validate →</button>
+        </div>
+        <small class="muted">Must be based on <code>SemRels/plugin-template</code></small>
+      </div>
+
+      <!-- Validation result -->
+      <div id="validation-result" hidden style="margin-top:.75rem"></div>
+
+      <div class="field" style="margin-top:.75rem">
         <label for="f-name">Plugin name *</label>
         <input id="f-name" class="search-input" placeholder="provider-gitlab" required style="width:100%" />
-        <small class="muted">Use the format <code>category-name</code>, e.g. <code>updater-pypi</code></small>
-      </div>
-      <div class="field" style="margin-top:.75rem">
-        <label for="f-repo">Repository URL *</label>
-        <input id="f-repo" class="search-input" placeholder="https://github.com/you/provider-gitlab" required style="width:100%" />
+        <small class="muted">Format: <code>category-name</code>, e.g. <code>updater-pypi</code></small>
       </div>
       <div class="field" style="margin-top:.75rem">
         <label for="f-cat">Category *</label>
@@ -28,6 +36,7 @@ import Layout from '../layouts/Layout.astro';
           <option value="condition">condition</option>
           <option value="hook">hook</option>
           <option value="updater">updater</option>
+          <option value="generator">generator</option>
         </select>
       </div>
       <div class="field" style="margin-top:.75rem">
@@ -50,16 +59,41 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </div>
 
-    <div class="section" style="margin-top:2rem;max-width:640px">
+    <!-- Standards checklist -->
+    <div class="section" style="margin-top:2rem;max-width:680px">
+      <p class="section-title">Plugin standards</p>
+      <div class="card" style="padding:0;overflow:hidden">
+        {[
+          ['naming',           'Naming convention: <code>category-name</code>'],
+          ['security_md',      'SECURITY.md present'],
+          ['contributing_md',  'CONTRIBUTING.md present'],
+          ['governance_md',    'GOVERNANCE.md present'],
+          ['license',          'LICENSE file present (Apache-2.0)'],
+          ['release_workflow', '.github/workflows/release.yml with multi-arch build'],
+          ['security_workflow','.github/workflows/security.yml with REUSE + govulncheck'],
+          ['go_mod',           'go.mod present (Go plugin)'],
+          ['cmd_plugin',       'cmd/plugin/ entry point'],
+          ['registry_sync',    'release.yml triggers registry sync on new tag'],
+        ].map(([id, label]) => (
+          <div style="display:grid;grid-template-columns:1.5rem 1fr;gap:.5rem;padding:.5rem .875rem;border-bottom:1px solid var(--border);align-items:center;font-size:var(--fs-sm)">
+            <span style="color:var(--muted)">○</span>
+            <span set:html={label}></span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Review process -->
+    <div class="section" style="margin-top:1.5rem;max-width:680px">
       <p class="section-title">Review process</p>
       <div class="card" style="padding:0;overflow:hidden">
         {[
-          ['1', 'Submit the form', 'A pre-filled GitHub Issue is opened in semrel-registry.'],
-          ['2', 'Maintainer review', 'A maintainer verifies the plugin implements the semrel plugin interface.'],
-          ['3', 'Merge to plugins.json', 'Approved plugins are added to the registry index via pull request.'],
-          ['4', 'Auto-sync', 'The registry API picks up the new entry on next sync.'],
+          ['1', 'Validate', 'Click "Validate →" to check your repo against SemRels standards.'],
+          ['2', 'Submit',   'A pre-filled GitHub Issue is opened for maintainer review.'],
+          ['3', 'Merge',    'Approved plugins are added to plugins.json via pull request.'],
+          ['4', 'Auto-sync','New releases are auto-fetched from GitHub Releases into the registry.'],
         ].map(([n, title, desc]) => (
-          <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;padding:.625rem .875rem;border-bottom:1px solid var(--border);align-items:start;font-size:var(--fs-sm);last-child:border:none">
+          <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;padding:.625rem .875rem;border-bottom:1px solid var(--border);align-items:start;font-size:var(--fs-sm)">
             <code style="color:var(--accent);font-weight:700">{n}</code>
             <div><strong>{title}</strong><div class="muted" style="font-size:var(--fs-xs)">{desc}</div></div>
           </div>
@@ -71,14 +105,81 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script is:inline>
-  document.getElementById('submit-btn')?.addEventListener('click', () => {
-    const name    = document.getElementById('f-name').value.trim();
-    const repo    = document.getElementById('f-repo').value.trim();
-    const cat     = document.getElementById('f-cat').value;
+  const repoInput    = document.getElementById('f-repo');
+  const nameInput    = document.getElementById('f-name');
+  const catSelect    = document.getElementById('f-cat');
+  const validateBtn  = document.getElementById('validate-btn');
+  const resultBox    = document.getElementById('validation-result');
+  const submitBtn    = document.getElementById('submit-btn');
+  const errEl        = document.getElementById('submit-error');
+
+  // Auto-fill name and category from repo URL
+  repoInput.addEventListener('input', () => {
+    const parts = repoInput.value.trim().replace(/\/$/, '').split('/');
+    const repo  = parts[parts.length - 1];
+    if (!repo) return;
+    nameInput.value = repo;
+    const cat = repo.split('-')[0];
+    const opt = Array.from(catSelect.options).find(o => o.value === cat);
+    if (opt) catSelect.value = cat;
+  });
+
+  validateBtn.addEventListener('click', async () => {
+    const repo = repoInput.value.trim();
+    if (!repo) return;
+    validateBtn.disabled    = true;
+    validateBtn.textContent = 'Checking…';
+    resultBox.hidden        = false;
+    resultBox.innerHTML     = '<p class="muted" style="font-size:.8rem;margin:0">Validating against SemRels standards…</p>';
+
+    try {
+      const resp = await fetch('/api/v1/plugins/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repository: repo }),
+      });
+      const data = await resp.json();
+
+      const passed  = data.checks.filter(c => c.passed).length;
+      const total   = data.checks.length;
+      const allGood = data.valid;
+
+      const rows = data.checks.map(c => {
+        const icon  = c.passed ? '✓' : '✗';
+        const color = c.passed ? '#3fb950' : '#f85149';
+        const msg   = c.message ? `<br><span style="color:var(--muted);font-size:.75rem">${c.message}</span>` : '';
+        return `<div style="display:grid;grid-template-columns:1.25rem 1fr;gap:.375rem;padding:.4rem .75rem;border-bottom:1px solid var(--border);font-size:.8125rem;align-items:start">
+          <span style="color:${color};font-weight:700">${icon}</span>
+          <span>${c.label}${msg}</span>
+        </div>`;
+      }).join('');
+
+      const headerColor = allGood ? 'rgba(63,185,80,.15)' : 'rgba(248,81,73,.1)';
+      const headerBorder = allGood ? 'rgba(63,185,80,.3)' : 'rgba(248,81,73,.3)';
+      const summaryColor = allGood ? '#3fb950' : '#f85149';
+
+      resultBox.innerHTML = `
+        <div style="border:1px solid ${headerBorder};border-radius:6px;overflow:hidden;margin-top:.5rem">
+          <div style="background:${headerColor};padding:.5rem .75rem;font-size:.8125rem;font-weight:600;color:${summaryColor}">
+            ${data.summary} (${passed}/${total} checks passed)
+          </div>
+          ${rows}
+        </div>`;
+    } catch (e) {
+      resultBox.innerHTML = '<div class="alert alert--error" style="font-size:.8rem">Validation failed — API may be offline</div>';
+    } finally {
+      validateBtn.disabled    = false;
+      validateBtn.textContent = 'Validate →';
+    }
+  });
+
+  submitBtn.addEventListener('click', () => {
+    const name    = nameInput.value.trim();
+    const repo    = repoInput.value.trim();
+    const cat     = catSelect.value;
     const desc    = document.getElementById('f-desc').value.trim();
     const author  = document.getElementById('f-author').value.trim();
     const license = document.getElementById('f-license').value.trim() || 'Apache-2.0';
-    const errEl   = document.getElementById('submit-error');
 
     if (!name || !repo || !desc) {
       errEl.textContent = 'Please fill in name, repository URL and description.';
@@ -97,15 +198,22 @@ import Layout from '../layouts/Layout.astro';
       `**Author:** ${author || '(not specified)'}`,
       `**License:** ${license}`,
       '',
-      '## Checklist',
+      '## Standards checklist',
       '',
-      '- [ ] Plugin implements the semrel stdio plugin interface',
-      '- [ ] Repository is public',
-      '- [ ] Has a README with usage instructions',
-      '- [ ] Licensed under an OSI-approved license',
+      '> Run the registry validator: `POST /api/v1/plugins/validate` with `{"repository":"' + repo + '"}`',
+      '',
+      '- [ ] Naming convention: `category-name`',
+      '- [ ] Based on `SemRels/plugin-template`',
+      '- [ ] SECURITY.md present',
+      '- [ ] CONTRIBUTING.md present',
+      '- [ ] GOVERNANCE.md present',
+      '- [ ] LICENSE file present',
+      '- [ ] .github/workflows/release.yml with registry sync step',
+      '- [ ] .github/workflows/security.yml with REUSE + govulncheck',
+      '- [ ] cmd/plugin/ entry point',
       '',
       '---',
-      '*Submitted via registry.semrel.io/submit*',
+      '*Submitted via semrel Registry /submit*',
     ].join('\n');
 
     const url = new URL('https://github.com/SemRels/semrel-registry/issues/new');
@@ -116,3 +224,4 @@ import Layout from '../layouts/Layout.astro';
     window.open(url.toString(), '_blank');
   });
 </script>
+
