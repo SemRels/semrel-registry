@@ -11,6 +11,7 @@ type Plugin = {
   repository: string;
   license: string;
   tags: string[];
+  latestVersion?: string;
 };
 
 type Pagination = { total: number; page: number; limit: number; pages: number };
@@ -40,8 +41,19 @@ export default function RegistryPage() {
 
     fetch(`/api/v1/plugins?${params}`)
       .then(r => r.json())
-      .then((d: { data: Plugin[]; pagination: Pagination }) => {
-        setPlugins(d.data ?? []);
+      .then(async (d: { data: Plugin[]; pagination: Pagination }) => {
+        const pluginList: Plugin[] = d.data ?? [];
+        // Fetch latest version for each plugin in parallel (best-effort)
+        const withVersions = await Promise.all(
+          pluginList.map(async p => {
+            try {
+              const vr = await fetch(`/api/v1/plugins/${p.name}/versions?limit=1`).then(r => r.json());
+              const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease) ?? vr.data?.[0];
+              return { ...p, latestVersion: latest?.version };
+            } catch { return p; }
+          })
+        );
+        setPlugins(withVersions);
         setPagination(d.pagination ?? null);
         setError('');
       })
@@ -127,30 +139,51 @@ export default function RegistryPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {plugins.map(p => (
-              <div key={p.id} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                  <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
-                </div>
-                <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {p.description || 'No description.'}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.5rem' }}>
-                  <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
-                  {p.repository && (
-                    <a href={p.repository} target="_blank" rel="noopener" style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent)' }}>
-                      GitHub ↗
-                    </a>
-                  )}
-                </div>
-                {p.tags?.length > 0 && (
-                  <div style={{ display: 'flex', gap: '.25rem', flexWrap: 'wrap' }}>
-                    {p.tags.slice(0, 4).map(t => (
-                      <span key={t} style={{ fontSize: '10px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: '4px', padding: '1px 6px' }}>{t}</span>
-                    ))}
+              <Link
+                key={p.id}
+                to={`/plugins/${p.name}`}
+                style={{ textDecoration: 'none', color: 'inherit', display: 'flex' }}
+              >
+                <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem', width: '100%', cursor: 'pointer', transition: 'border-color .15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = '')}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
+                    <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                    <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
                   </div>
-                )}
-              </div>
+                  <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {p.description || 'No description.'}
+                  </p>
+
+                  {/* Install hint */}
+                  <code style={{ fontSize: '11px', background: 'var(--surface2)', padding: '3px 7px', borderRadius: 5, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                    semrel plugin install {p.name}
+                  </code>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
+                    <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
+                    <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                      {p.latestVersion && (
+                        <span style={{ fontSize: '11px', fontFamily: 'monospace', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
+                          v{p.latestVersion}
+                        </span>
+                      )}
+                      {p.repository && (
+                        <a
+                          href={p.repository}
+                          target="_blank"
+                          rel="noopener"
+                          style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          GitHub ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

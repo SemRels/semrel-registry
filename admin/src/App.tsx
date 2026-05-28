@@ -4,6 +4,7 @@ import { hasToken, saveToken } from './lib/api';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import LoginPage from './pages/LoginPage';
 import RegistryPage from './pages/RegistryPage';
+import PluginDetailPage from './pages/PluginDetailPage';
 import Layout from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
 import PluginsPage from './pages/PluginsPage';
@@ -51,6 +52,7 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<RegistryPage />} />
+        <Route path="/plugins/:name" element={<PluginDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
 
