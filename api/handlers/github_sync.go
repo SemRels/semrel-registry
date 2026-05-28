@@ -114,21 +114,22 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 	}
 
 	type semrelPluginVersion struct {
-		Version     string            `json:"version"`
-		ReleaseDate string            `json:"releaseDate"`
-		Changelog   string            `json:"changelog,omitempty"`
-		DownloadURL string            `json:"downloadUrl"`
-		Checksums   map[string]string `json:"checksums"`
-		Prerelease  bool              `json:"prerelease,omitempty"`
+		Version      string            `json:"version"`
+		ReleaseDate  string            `json:"releaseDate"`
+		Changelog    string            `json:"changelog,omitempty"`
+		DownloadURL  string            `json:"downloadUrl"`
+		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
+		Checksums    map[string]string `json:"checksums"`
+		Prerelease   bool              `json:"prerelease,omitempty"`
 	}
 	type semrelPlugin struct {
-		Name        string               `json:"name"`
-		Description string               `json:"description"`
-		Author      string               `json:"author"`
-		License     string               `json:"license"`
-		Category    string               `json:"category"`
-		Repository  string               `json:"repository,omitempty"`
-		Tags        []string             `json:"tags,omitempty"`
+		Name        string                `json:"name"`
+		Description string                `json:"description"`
+		Author      string                `json:"author"`
+		License     string                `json:"license"`
+		Category    string                `json:"category"`
+		Repository  string                `json:"repository,omitempty"`
+		Tags        []string              `json:"tags,omitempty"`
 		Versions    []semrelPluginVersion `json:"versions"`
 	}
 	type semrelRegistry struct {
@@ -148,12 +149,13 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				rd = v.ReleaseDate.Format(time.RFC3339)
 			}
 			svs = append(svs, semrelPluginVersion{
-				Version:     v.Version,
-				ReleaseDate: rd,
-				Changelog:   v.Changelog,
-				DownloadURL: v.DownloadURL,
-				Checksums:   v.Checksums,
-				Prerelease:  v.Prerelease,
+				Version:      v.Version,
+				ReleaseDate:  rd,
+				Changelog:    v.Changelog,
+				DownloadURL:  v.DownloadURL,
+				DownloadURLs: deriveDownloadURLs(v.DownloadURL, v.Checksums),
+				Checksums:    v.Checksums,
+				Prerelease:   v.Prerelease,
 			})
 		}
 		tags := p.Tags
@@ -747,4 +749,57 @@ func pickDownloadURL(assets []ghAsset) string {
 		}
 	}
 	return ""
+}
+
+// deriveDownloadURLs constructs platform-specific download URLs from the stored linux-amd64 URL.
+// GitHub release asset URLs follow a predictable pattern:
+//
+//	https://github.com/{org}/{repo}/releases/download/{tag}/plugin-{os}-{arch}[.exe]
+//
+// We derive other-platform URLs by recognising and replacing the platform suffix.
+// Platforms are inferred from the keys already present in the checksums map.
+func deriveDownloadURLs(baseURL string, checksums map[string]string) map[string]string {
+	if baseURL == "" || len(checksums) == 0 {
+		return nil
+	}
+
+	// Detect the "plugin-{os}-{arch}" suffix in the stored URL.
+	// Strip trailing ".exe" so we work with the bare base.
+	cleanBase := strings.TrimSuffix(baseURL, ".exe")
+
+	// Find which known platform suffix is at the end of the URL.
+	type platform struct{ goos, goarch string }
+	known := []platform{
+		{"linux", "amd64"}, {"linux", "arm64"},
+		{"darwin", "amd64"}, {"darwin", "arm64"},
+		{"windows", "amd64"}, {"windows", "arm64"},
+	}
+
+	var urlPrefix string // everything before "plugin-{os}-{arch}"
+	for _, p := range known {
+		suffix := "plugin-" + p.goos + "-" + p.goarch
+		if idx := strings.LastIndex(cleanBase, suffix); idx >= 0 {
+			urlPrefix = cleanBase[:idx]
+			break
+		}
+	}
+	if urlPrefix == "" {
+		return nil
+	}
+
+	urls := make(map[string]string, len(checksums))
+	for key := range checksums {
+		// key format: "linux_amd64", "windows_arm64", etc.
+		parts := strings.SplitN(key, "_", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		goos, goarch := parts[0], parts[1]
+		assetName := "plugin-" + goos + "-" + goarch
+		if goos == "windows" {
+			assetName += ".exe"
+		}
+		urls[key] = urlPrefix + assetName
+	}
+	return urls
 }
