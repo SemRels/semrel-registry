@@ -24,7 +24,7 @@ const tags = plugin.tags ?? [];
   <summary class="plugin-card__summary">
     <div>
       <div class="plugin-card__title-row">
-        <h2>{plugin.name}</h2>
+        <h2><a class="plugin-name-link" href={`/plugins/${plugin.name}/`}>{plugin.name}</a></h2>
         <span class="category-badge">{getCategoryLabel(plugin.category)}</span>
       </div>
       <p class="plugin-card__description">{plugin.description}</p>

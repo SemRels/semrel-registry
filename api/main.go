@@ -51,15 +51,18 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	api.GET("/plugins/:id", pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
 
+	admin := handlers.NewAdminHandler(pluginService)
+	api.GET("/stats", admin.GetStats)
+
 	adminRoutes := api.Group("")
 	adminRoutes.Use(handlers.RequireAdminToken())
 	adminRoutes.POST("/plugins", pluginHandler.CreatePlugin)
 	adminRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
 	adminRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
 	adminRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
-
-	admin := handlers.NewAdminHandler()
-	api.GET("/admin/status", admin.Status)
+	adminRoutes.POST("/admin/sync", admin.SyncPlugins)
+	adminRoutes.POST("/admin/sync-file", admin.SyncFromFile)
+	adminRoutes.GET("/admin/status", admin.Status)
 
 	return router
 }

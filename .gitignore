@@ -15,3 +15,9 @@ web\node_modules\
 web\dist\
 web\.astro\
 web\public\plugins.json
+
+# Local dev
+api/.env
+admin/dist/
+admin/tsconfig.tsbuildinfo
+web/dist/

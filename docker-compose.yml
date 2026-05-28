@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: semrel-registry-postgres
+    environment:
+      POSTGRES_DB: semrel_registry
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d semrel_registry"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: semrel-registry-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://dev:dev@postgres:5432/semrel_registry?sslmode=disable
+      PORT: "8080"
+      ENVIRONMENT: dev
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-secret}
+      MIGRATE_DIR: /app/database/migrations
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api/database/migrations:/app/database/migrations:ro
+
+volumes:
+  postgres_data:
