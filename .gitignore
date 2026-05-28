@@ -21,3 +21,6 @@ api/.env
 admin/dist/
 admin/tsconfig.tsbuildinfo
 web/dist/
+
+# Build output
+bin/

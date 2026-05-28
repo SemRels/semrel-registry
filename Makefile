@@ -27,10 +27,10 @@ ps: ## Show running containers
 
 ##@ Data
 
-seed: ## Import plugins.json into PostgreSQL (requires API to be running)
+seed: ## Import plugins.json into PostgreSQL
 	@echo "Seeding plugins from plugins.json..."
-	cd $(API_DIR) && go run ../scripts/seed/main.go \
-		-db "$(or $(DATABASE_URL),postgres://dev:dev@localhost:5432/semrel_registry?sslmode=disable)" \
+	go -C api run cmd/seed/main.go \
+		-db "$(or $(DATABASE_URL),postgres://dev:dev@localhost:5433/semrel_registry?sslmode=disable)" \
 		-file ../plugins.json
 	@echo "Done."
 
@@ -51,13 +51,14 @@ dev-admin: ## Start React admin dev server (port 5173)
 	@if [ ! -d "$(ADMIN_DIR)" ]; then echo "Admin panel not yet created. Run: make scaffold-admin"; exit 1; fi
 	cd $(ADMIN_DIR) && npm install && npm run dev
 
-dev-api: ## Run Go API locally (requires PostgreSQL running)
-	cd $(API_DIR) && go run main.go
+dev-api: ## Run Go API from project root (loads root .env automatically)
+	go -C api run main.go
 
 ##@ Build
 
-build-api: ## Build Go API binary
-	cd $(API_DIR) && go build -o ../bin/api ./main.go
+build-api: ## Build Go API binary to bin/api
+	@mkdir -p bin
+	go -C api build -o ../bin/api main.go
 
 build-web: ## Build Astro web for production
 	cd $(WEB_DIR) && npm ci && npm run build
