@@ -7,7 +7,7 @@ interface Props {
 }
 
 const {
-  title = 'registry.semrel.io',
+  title = 'semrel Registry',
   description = 'Discover verified go-semrel plugins and registry documentation.',
 } = Astro.props;
 
@@ -35,10 +35,9 @@ const navItems = [
       <header class="site-header">
         <div class="container site-header__inner">
           <a class="brand" href="/">
-            <span class="brand__mark">SR</span>
+            <img src="/semrel.svg" alt="semrel" class="brand__logo" width="24" height="24" />
             <span>
-              <strong>registry.semrel.io</strong>
-              <small>go-semrel plugin registry</small>
+              <strong>semrel Registry</strong>
             </span>
           </a>
           <nav aria-label="Primary">
@@ -66,8 +65,8 @@ const navItems = [
       <footer class="site-footer">
         <div class="container site-footer__grid">
           <div>
-            <p class="footer-heading">registry.semrel.io</p>
-            <p class="muted">A static registry front-end for discovering, validating, and documenting go-semrel plugins.</p>
+            <p class="footer-heading">semrel Registry</p>
+            <p class="muted">The plugin registry for <a href="https://semrel.io">semrel</a> — a semantic versioning toolkit for Go.</p>
           </div>
           <div>
             <p class="footer-heading">Resources</p>

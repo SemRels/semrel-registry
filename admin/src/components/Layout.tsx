@@ -7,8 +7,8 @@ export default function Layout() {
     <div className="app">
       <aside className="sidebar">
         <a href="http://localhost:3000" className="sidebar__brand" target="_blank" rel="noopener">
-          <span className="sidebar__brand-mark">SR</span>
-          <span>Admin Panel</span>
+          <img src="/semrel.svg" alt="semrel" style={{ width:'1.5rem', height:'1.5rem', flexShrink:0 }} />
+          <span>semrel Registry</span>
         </a>
         <nav className="sidebar__nav">
           <NavLink to="/" end className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
