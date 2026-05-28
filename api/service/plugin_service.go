@@ -504,7 +504,7 @@ func validateVersion(version models.PluginVersion) error {
 
 func normalizeTags(tags []string) []string {
 	if len(tags) == 0 {
-		return nil
+		return []string{}
 	}
 	seen := make(map[string]struct{}, len(tags))
 	normalized := make([]string, 0, len(tags))

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	appErrors "github.com/SemRels/semrel-registry/api/internal"
@@ -55,6 +56,7 @@ func HandleError(c *gin.Context, err error) {
 	case errors.Is(err, appErrors.ErrDatabaseUnavailable):
 		InternalServerError(c, "Database unavailable", nil)
 	default:
+		log.Printf("unhandled error: %v", err)
 		InternalServerError(c, "Internal server error", nil)
 	}
 }
