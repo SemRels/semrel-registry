@@ -37,24 +37,35 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		return
 	}
 
-	// Admins can filter by status; non-admins always see active only
-	// (unless they're filtering their own submissions).
+	// Visibility rules:
+	//   admin       → all statuses; any author filter accepted
+	//   auth user   → own plugins only (all statuses); author forced to own login
+	//   public      → active only; any author filter accepted
 	var statuses []string
+	var forcedAuthor string
+
 	isAdmin, _ := c.Get("isAdmin")
+	login, _    := c.Get("login")
+	loginStr, _ := login.(string)
+
 	if isAdmin == true {
+		// Admin: honour requested status filter (empty = all statuses).
 		if s := strings.TrimSpace(c.Query("status")); s != "" {
 			statuses = []string{s}
 		}
-		// admin with no status filter sees all statuses
+	} else if loginStr != "" {
+		// Authenticated non-admin: always scope to own plugins only.
+		forcedAuthor = loginStr
+		// No status restriction — they can see pending/rejected of their own.
 	} else {
-		// community user: show active + own pending/rejected if author filter matches own login
-		login, _ := c.Get("login")
-		reqAuthor := strings.TrimSpace(c.Query("author"))
-		if loginStr, _ := login.(string); loginStr != "" && strings.EqualFold(reqAuthor, loginStr) {
-			// own plugins: all statuses
-		} else {
-			statuses = []string{models.StatusActive}
-		}
+		// Unauthenticated (public registry): active only.
+		statuses = []string{models.StatusActive}
+	}
+
+	// Resolve author: forced author (for non-admin auth) takes priority over query param.
+	author := strings.TrimSpace(c.Query("author"))
+	if forcedAuthor != "" {
+		author = forcedAuthor
 	}
 
 	result, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
@@ -63,7 +74,7 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Category: strings.TrimSpace(c.Query("category")),
 		Search:   strings.TrimSpace(c.Query("search")),
 		Sort:     strings.TrimSpace(c.Query("sort")),
-		Author:   strings.TrimSpace(c.Query("author")),
+		Author:   author,
 		Statuses: statuses,
 	})
 	if err != nil {
