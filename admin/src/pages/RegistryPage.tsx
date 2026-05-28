@@ -11,7 +11,6 @@ type Plugin = {
   repository: string;
   license: string;
   tags: string[];
-  latestVersion?: string;
 };
 
 type Pagination = { total: number; page: number; limit: number; pages: number };
@@ -25,40 +24,58 @@ const CAT_CLASS: Record<string, string> = {
 const CATEGORIES = ['provider', 'analyzer', 'condition', 'hook', 'updater', 'generator'];
 
 export default function RegistryPage() {
-  const [plugins, setPlugins]       = useState<Plugin[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [search, setSearch]         = useState('');
-  const [category, setCategory]     = useState('');
-  const [page, setPage]             = useState(1);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState('');
+  const [plugins, setPlugins]         = useState<Plugin[]>([]);
+  const [versions, setVersions]       = useState<Record<string, string>>({});
+  const [pagination, setPagination]   = useState<Pagination | null>(null);
+  const [search, setSearch]           = useState('');
+  const [category, setCategory]       = useState('');
+  const [page, setPage]               = useState(1);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+    setVersions({});
+
     const params = new URLSearchParams({ limit: '24', page: String(page) });
     if (search)   params.set('search', search);
     if (category) params.set('category', category);
 
-    fetch(`/api/v1/plugins?${params}`)
-      .then(r => r.json())
-      .then(async (d: { data: Plugin[]; pagination: Pagination }) => {
-        const pluginList: Plugin[] = d.data ?? [];
-        // Fetch latest version for each plugin in parallel (best-effort)
-        const withVersions = await Promise.all(
-          pluginList.map(async p => {
-            try {
-              const vr = await fetch(`/api/v1/plugins/${p.name}/versions?limit=1`).then(r => r.json());
-              const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease) ?? vr.data?.[0];
-              return { ...p, latestVersion: latest?.version };
-            } catch { return p; }
-          })
-        );
-        setPlugins(withVersions);
+    async function load() {
+      try {
+        const d = await fetch(`/api/v1/plugins?${params}`).then(r => r.json());
+        if (cancelled) return;
+        setPlugins(d.data ?? []);
         setPagination(d.pagination ?? null);
         setError('');
-      })
-      .catch(() => setError('Failed to load plugins.'))
-      .finally(() => setLoading(false));
+        setLoading(false);
+
+        // Progressively load latest version for each plugin
+        for (const p of (d.data ?? []) as Plugin[]) {
+          if (cancelled) break;
+          fetch(`/api/v1/plugins/${p.name}/versions?limit=1`)
+            .then(r => r.json())
+            .then(vr => {
+              if (cancelled) return;
+              const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease)
+                ?? vr.data?.[0];
+              if (latest?.version) {
+                setVersions(prev => ({ ...prev, [p.name]: latest.version }));
+              }
+            })
+            .catch(() => { /* best-effort */ });
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Failed to load plugins.');
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
   }, [page, search, category]);
 
   // debounce search
@@ -164,9 +181,9 @@ export default function RegistryPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                      {p.latestVersion && (
+                      {versions[p.name] && (
                         <span style={{ fontSize: '11px', fontFamily: 'monospace', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
-                          v{p.latestVersion}
+                          v{versions[p.name]}
                         </span>
                       )}
                       {p.repository && (
