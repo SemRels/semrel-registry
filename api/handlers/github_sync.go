@@ -312,7 +312,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 	tag := strings.TrimPrefix(rel.TagName, "v")
 
 	// Check if already exists.
-	existing, err := h.svc.ListVersions(ctx, p.Name, 200, 0)
+	existing, err := h.svc.ListVersions(ctx, p.Name, 100, 0)
 	if err != nil {
 		return false, err
 	}
@@ -336,6 +336,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		ReleaseDate: releaseDate,
 		Changelog:   rel.Body,
 		DownloadURL: pickDownloadURL(rel.Assets),
+		Checksums:   pickChecksums(rel.Assets),
 		Prerelease:  rel.Prerelease,
 	}
 	_, createErr := h.svc.CreateVersion(ctx, p.Name, ver)
@@ -620,6 +621,35 @@ func ownerRepoFromURL(repoURL string) (string, string) {
 	return parts[len(parts)-2], parts[len(parts)-1]
 }
 
+// pickChecksums builds a platform→hash map from the .sha256 asset files.
+// Asset names follow the pattern: plugin-{os}-{arch}[.exe].sha256
+// The URL is used as a proxy for the hash value (actual hash content
+// would require downloading; store the URL reference instead).
+func pickChecksums(assets []ghAsset) map[string]string {
+	checksums := make(map[string]string)
+	for _, a := range assets {
+		if !strings.HasSuffix(a.Name, ".sha256") {
+			continue
+		}
+		// Derive platform key from filename, e.g. "plugin-linux-amd64.sha256" → "linux-amd64"
+		base := strings.TrimSuffix(a.Name, ".sha256")
+		base = strings.TrimPrefix(base, "plugin-")
+		base = strings.TrimSuffix(base, ".exe")
+		if base != "" {
+			checksums[base] = a.BrowserDownloadURL
+		}
+	}
+	// Fallback: use checksums.txt URL if no individual .sha256 files found.
+	if len(checksums) == 0 {
+		for _, a := range assets {
+			if a.Name == "checksums.txt" {
+				checksums["all"] = a.BrowserDownloadURL
+				break
+			}
+		}
+	}
+	return checksums
+}
 func pickDownloadURL(assets []ghAsset) string {
 	for _, a := range assets {
 		if strings.HasSuffix(a.Name, ".sha256") || strings.HasSuffix(a.Name, ".txt") {
