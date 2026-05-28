@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins, approvePlugin, rejectPlugin } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from '../lib/api';
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 
 export default function DashboardPage() {
+  const user    = useCurrentUser();
+  const navigate = useNavigate();
+  const isAdmin = user?.isAdmin === true;
   const [stats, setStats]                     = useState<Stats | null>(null);
   const [error, setError]                     = useState('');
   const [syncing, setSyncing]                 = useState(false);
@@ -16,8 +21,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     getStats().then(setStats).catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed'));
-    loadPending();
-  }, []);
+    if (isAdmin) loadPending();
+  }, [isAdmin]);
 
   async function loadPending() {
     setPendingLoading(true);
@@ -58,25 +63,6 @@ export default function DashboardPage() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Org sync failed');
     } finally { setSyncingOrg(false); }
-  }
-
-  async function handleApprove(id: number) {
-    try {
-      await approvePlugin(id);
-      await loadPending();
-      setStats(await getStats());
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Approve failed');
-    }
-  }
-
-  async function handleReject(id: number) {
-    try {
-      await rejectPlugin(id);
-      await loadPending();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Reject failed');
-    }
   }
 
   const versionStats = versionResult
@@ -145,27 +131,39 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Pending submissions */}
-        <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: 'var(--fs-md)', marginBottom: '1rem' }}>
-            Pending submissions {pending.length > 0 && <span style={{ background: '#f85149', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>{pending.length}</span>}
-          </h2>
-          {pendingLoading && <p className="muted">Loading…</p>}
-          {!pendingLoading && pending.length === 0 && <p className="muted">No pending submissions. 🎉</p>}
-          {pending.map(p => (
-            <div key={p.id} className="table__row" style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
-              <div style={{ flex: 1 }}>
-                <a href={p.repository} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.name}</a>
-                <span className="muted" style={{ fontSize: 'var(--fs-xs)', marginLeft: '.5rem' }}>by {p.author}</span>
-                <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>{p.description}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '.4rem' }}>
-                <button className="btn btn--primary" style={{ padding: '4px 12px', fontSize: 'var(--fs-sm)' }} onClick={() => { void handleApprove(p.id); }}>Approve</button>
-                <button className="btn btn--danger" style={{ padding: '4px 12px', fontSize: 'var(--fs-sm)' }} onClick={() => { void handleReject(p.id); }}>Reject</button>
-              </div>
+        {/* Pending submissions — admin only */}
+        {isAdmin && (
+          <div style={{ marginTop: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: 'var(--fs-md)', margin: 0 }}>
+                Pending submissions
+                {pending.length > 0 && (
+                  <span style={{ background: '#f85149', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>
+                    {pending.length}
+                  </span>
+                )}
+              </h2>
+              <button
+                className="btn btn--primary"
+                style={{ padding: '4px 14px', fontSize: 'var(--fs-sm)' }}
+                onClick={() => navigate('/submissions')}
+              >
+                Review submissions →
+              </button>
             </div>
-          ))}
-        </div>
+            {pendingLoading && <p className="muted">Loading…</p>}
+            {!pendingLoading && pending.length === 0 && <p className="muted">No pending submissions. 🎉</p>}
+            {!pendingLoading && pending.length > 0 && pending.map(p => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ flex: 1 }}>
+                  <a href={p.repository} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.name}</a>
+                  <span className="muted" style={{ fontSize: 'var(--fs-xs)', marginLeft: '.5rem' }}>by {p.author}</span>
+                  <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>{p.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
