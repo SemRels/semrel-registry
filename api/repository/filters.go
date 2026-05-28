@@ -43,6 +43,23 @@ func (f SearchFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	builder.WriteString(fmt.Sprintf(" AND (name ILIKE $%[1]d OR description ILIKE $%[1]d OR author ILIKE $%[1]d OR repository ILIKE $%[1]d)", len(*args)))
 }
 
+// AuthorFilter restricts results to plugins owned by a specific author (exact, case-insensitive).
+type AuthorFilter struct {
+	Author string
+}
+
+func (f AuthorFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
+	if builder == nil || args == nil {
+		return
+	}
+	author := strings.TrimSpace(f.Author)
+	if author == "" {
+		return
+	}
+	*args = append(*args, author)
+	builder.WriteString(fmt.Sprintf(" AND LOWER(author) = LOWER($%d)", len(*args)))
+}
+
 type SortFilter struct {
 	Field     string
 	Direction string

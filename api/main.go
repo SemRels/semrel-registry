@@ -72,19 +72,26 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	// Protected by WEBHOOK_SECRET env var (optional but recommended in prod).
 	api.POST("/webhooks/release", syncHandler.WebhookRelease)
 
-	// Protected endpoints — accept GitHub JWT or legacy ADMIN_TOKEN.
+	// Protected endpoints — any authenticated user.
+	requireAuth  := middleware.RequireAuth(authHandler)
 	requireAdmin := middleware.RequireAdmin(authHandler)
-	protected := api.Group("")
-	protected.Use(requireAdmin)
-	protected.GET("/auth/me", authHandler.Me)
-	protected.POST("/plugins", pluginHandler.CreatePlugin)
-	protected.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
-	protected.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
-	protected.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
-	protected.POST("/admin/sync", adminHandler.SyncPlugins)
-	protected.POST("/admin/sync-file", adminHandler.SyncFromFile)
-	protected.GET("/admin/status", adminHandler.Status)
-	protected.POST("/admin/sync-versions", syncHandler.SyncVersions)
+
+	authRoutes := api.Group("")
+	authRoutes.Use(requireAuth)
+	authRoutes.GET("/auth/me", authHandler.Me)
+	// Plugin writes: any authenticated user, but non-admins may only touch their own plugins.
+	authRoutes.POST("/plugins", pluginHandler.CreatePlugin)
+	authRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
+	authRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
+	authRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
+
+	// Admin-only endpoints.
+	adminRoutes := api.Group("")
+	adminRoutes.Use(requireAdmin)
+	adminRoutes.POST("/admin/sync", adminHandler.SyncPlugins)
+	adminRoutes.POST("/admin/sync-file", adminHandler.SyncFromFile)
+	adminRoutes.GET("/admin/status", adminHandler.Status)
+	adminRoutes.POST("/admin/sync-versions", syncHandler.SyncVersions)
 
 	return router
 }

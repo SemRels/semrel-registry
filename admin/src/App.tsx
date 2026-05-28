@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { hasToken, saveToken } from './lib/api';
+import { useCurrentUser } from './hooks/useCurrentUser';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
@@ -16,7 +17,6 @@ function OAuthCallback() {
     const token = params.get('token');
     if (token) {
       saveToken(token);
-      // Strip token from URL to avoid leaking it in browser history.
       window.history.replaceState({}, '', window.location.pathname);
     }
     navigate('/', { replace: true });
@@ -26,6 +26,14 @@ function OAuthCallback() {
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!hasToken()) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+/** Redirects non-admin users away from admin-only routes. */
+function AdminOnly({ children }: { children: React.ReactNode }) {
+  const user = useCurrentUser();
+  if (user === null) return null; // still loading
+  if (!user.isAdmin) return <Navigate to="/plugins" replace />;
   return <>{children}</>;
 }
 
@@ -39,7 +47,8 @@ export default function App() {
           path="/"
           element={<RequireAuth><Layout /></RequireAuth>}
         >
-          <Route index element={<DashboardPage />} />
+          {/* Dashboard: admin-only, redirect community users to /plugins */}
+          <Route index element={<AdminOnly><DashboardPage /></AdminOnly>} />
           <Route path="plugins" element={<PluginsPage />} />
           <Route path="plugins/new" element={<PluginEditPage />} />
           <Route path="plugins/:id" element={<PluginEditPage />} />

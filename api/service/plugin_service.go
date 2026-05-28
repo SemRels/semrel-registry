@@ -46,6 +46,7 @@ type ListPluginsParams struct {
 	Category string
 	Search   string
 	Sort     string
+	Author   string // when set, only return plugins by this author (exact, case-insensitive)
 }
 
 type Pagination struct {
@@ -84,12 +85,15 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 		return PluginListResult{}, err
 	}
 
-	filters := make([]repository.Filter, 0, 3)
+	filters := make([]repository.Filter, 0, 4)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
 	if params.Search != "" {
 		filters = append(filters, repository.SearchFilter{Query: params.Search})
+	}
+	if params.Author != "" {
+		filters = append(filters, repository.AuthorFilter{Author: params.Author})
 	}
 	if params.Sort != "" {
 		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: "ASC"})
@@ -274,12 +278,15 @@ func (s *PluginService) countPlugins(ctx context.Context, params ListPluginsPara
 }
 
 func countFilters(params ListPluginsParams) []repository.Filter {
-	filters := make([]repository.Filter, 0, 2)
+	filters := make([]repository.Filter, 0, 3)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
 	if params.Search != "" {
 		filters = append(filters, repository.SearchFilter{Query: params.Search})
+	}
+	if params.Author != "" {
+		filters = append(filters, repository.AuthorFilter{Author: params.Author})
 	}
 	return filters
 }
@@ -302,6 +309,7 @@ func normalizeListParams(params ListPluginsParams) ListPluginsParams {
 	params.Category = strings.TrimSpace(params.Category)
 	params.Search = strings.TrimSpace(params.Search)
 	params.Sort = strings.TrimSpace(params.Sort)
+	params.Author = strings.TrimSpace(params.Author)
 	return params
 }
 

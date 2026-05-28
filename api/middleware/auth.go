@@ -9,9 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RequireAdmin checks for a valid admin credential:
-//   1. JWT issued via GitHub OAuth (IsAdmin == true)
-//   2. Legacy static ADMIN_TOKEN in Authorization header (dev fallback)
+// RequireAdmin gates routes that only org owners/maintainers (role=admin) may access.
+// Accepts: GitHub JWT (IsAdmin==true) | legacy ADMIN_TOKEN (dev fallback).
 func RequireAdmin(authHandler *handlers.AuthHandler) gin.HandlerFunc {
 	adminToken := os.Getenv("ADMIN_TOKEN")
 
@@ -22,18 +21,19 @@ func RequireAdmin(authHandler *handlers.AuthHandler) gin.HandlerFunc {
 			return
 		}
 
-		// Try JWT first.
 		claims, err := authHandler.ValidateJWT(bearer)
 		if err == nil {
 			if !claims.IsAdmin {
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-					"error": "GitHub account is not an admin (not an org member)",
+					"error": "admin access required — only SemRels org owners/maintainers are admins",
+					"role":  claims.Role,
 					"login": claims.Login,
 				})
 				return
 			}
 			c.Set("claims", claims)
 			c.Set("login", claims.Login)
+			c.Set("isAdmin", true)
 			c.Next()
 			return
 		}
@@ -41,6 +41,41 @@ func RequireAdmin(authHandler *handlers.AuthHandler) gin.HandlerFunc {
 		// Fallback: static ADMIN_TOKEN for local dev.
 		if adminToken != "" && bearer == adminToken {
 			c.Set("login", "admin-token")
+			c.Set("isAdmin", true)
+			c.Next()
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
+	}
+}
+
+// RequireAuth gates routes that require any authenticated user (admin or regular).
+// Accepts: any valid GitHub JWT | legacy ADMIN_TOKEN.
+// Sets "claims", "login", "isAdmin" in context.
+func RequireAuth(authHandler *handlers.AuthHandler) gin.HandlerFunc {
+	adminToken := os.Getenv("ADMIN_TOKEN")
+
+	return func(c *gin.Context) {
+		bearer := extractBearer(c)
+		if bearer == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "authentication required — sign in with GitHub"})
+			return
+		}
+
+		claims, err := authHandler.ValidateJWT(bearer)
+		if err == nil {
+			c.Set("claims", claims)
+			c.Set("login", claims.Login)
+			c.Set("isAdmin", claims.IsAdmin)
+			c.Next()
+			return
+		}
+
+		// Fallback: static ADMIN_TOKEN for local dev.
+		if adminToken != "" && bearer == adminToken {
+			c.Set("login", "admin-token")
+			c.Set("isAdmin", true)
 			c.Next()
 			return
 		}
@@ -61,6 +96,7 @@ func OptionalAuth(authHandler *handlers.AuthHandler) gin.HandlerFunc {
 		if err == nil {
 			c.Set("claims", claims)
 			c.Set("login", claims.Login)
+			c.Set("isAdmin", claims.IsAdmin)
 		}
 		c.Next()
 	}
@@ -71,6 +107,5 @@ func extractBearer(c *gin.Context) string {
 	if after, ok := strings.CutPrefix(h, "Bearer "); ok {
 		return strings.TrimSpace(after)
 	}
-	// Also accept ?token= query param (for OAuth redirect).
 	return c.Query("token")
 }

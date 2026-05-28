@@ -2,7 +2,7 @@
 
 const API_BASE = '/api/v1';
 
-function getToken(): string {
+export function getToken(): string {
   return localStorage.getItem('admin_token') ?? '';
 }
 
@@ -98,12 +98,14 @@ export async function listPlugins(params?: {
   limit?: number;
   category?: string;
   search?: string;
+  author?: string;
 }): Promise<PluginListResponse> {
   const qs = new URLSearchParams();
-  if (params?.page) qs.set('page', String(params.page));
-  if (params?.limit) qs.set('limit', String(params.limit));
+  if (params?.page)     qs.set('page',     String(params.page));
+  if (params?.limit)    qs.set('limit',    String(params.limit));
   if (params?.category) qs.set('category', params.category);
-  if (params?.search) qs.set('search', params.search);
+  if (params?.search)   qs.set('search',   params.search);
+  if (params?.author)   qs.set('author',   params.author);
   return request<PluginListResponse>(`/plugins?${qs}`);
 }
 

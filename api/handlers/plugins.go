@@ -41,6 +41,7 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Category: strings.TrimSpace(c.Query("category")),
 		Search:   strings.TrimSpace(c.Query("search")),
 		Sort:     strings.TrimSpace(c.Query("sort")),
+		Author:   strings.TrimSpace(c.Query("author")),
 	})
 	if err != nil {
 		HandleError(c, err)
@@ -86,6 +87,14 @@ func (h *PluginHandler) CreatePlugin(c *gin.Context) {
 		return
 	}
 
+	// Non-admin users can only create plugins attributed to themselves.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		if loginStr, ok := login.(string); ok && loginStr != "" {
+			plugin.Author = loginStr
+		}
+	}
+
 	created, err := h.service.CreatePlugin(c.Request.Context(), plugin)
 	if err != nil {
 		HandleError(c, err)
@@ -103,6 +112,26 @@ func (h *PluginHandler) UpdatePlugin(c *gin.Context) {
 		return
 	}
 
+	// Non-admin users can only update their own plugins.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		existing, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !strings.EqualFold(existing.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only edit your own plugins", "author": existing.Author})
+			return
+		}
+		// Non-admin cannot change the author field to someone else.
+		if patch.Author != nil && !strings.EqualFold(*patch.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you cannot change the author to another user"})
+			return
+		}
+	}
+
 	updated, err := h.service.UpdatePlugin(c.Request.Context(), c.Param("id"), patch)
 	if err != nil {
 		HandleError(c, err)
@@ -113,6 +142,21 @@ func (h *PluginHandler) UpdatePlugin(c *gin.Context) {
 }
 
 func (h *PluginHandler) DeletePlugin(c *gin.Context) {
+	// Non-admin users can only delete their own plugins.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		existing, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !strings.EqualFold(existing.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own plugins", "author": existing.Author})
+			return
+		}
+	}
+
 	if err := h.service.DeletePlugin(c.Request.Context(), c.Param("id")); err != nil {
 		HandleError(c, err)
 		return

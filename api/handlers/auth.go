@@ -28,11 +28,13 @@ type GitHubUser struct {
 }
 
 // Claims extends standard JWT claims with GitHub identity.
+// Role is "admin" (org owner/maintainer) or "user" (authenticated community member).
 type Claims struct {
 	Login     string `json:"login"`
 	Name      string `json:"name"`
 	AvatarURL string `json:"avatar_url"`
-	IsAdmin   bool   `json:"is_admin"`
+	Role      string `json:"role"`    // "admin" | "user"
+	IsAdmin   bool   `json:"is_admin"` // true when Role == "admin" (kept for backwards compat)
 	jwt.RegisteredClaims
 }
 
@@ -112,9 +114,9 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	isAdmin := h.isAdmin(user.Login, token.AccessToken)
+	role := h.resolveRole(user.Login, token.AccessToken)
 
-	jwtToken, err := h.issueJWT(user, isAdmin)
+	jwtToken, err := h.issueJWT(user, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to issue JWT"})
 		return
@@ -171,39 +173,69 @@ func (h *AuthHandler) fetchGitHubUser(accessToken string) (*GitHubUser, error) {
 	return &user, nil
 }
 
-func (h *AuthHandler) isAdmin(login, accessToken string) bool {
-	// Explicit admin user list.
+// resolveRole determines the user's role:
+//   "admin" — org owner/maintainer or in ADMIN_GITHUB_USERS list
+//   "user"  — any other authenticated GitHub user
+func (h *AuthHandler) resolveRole(login, accessToken string) string {
+	// Explicit admin list always wins.
 	for _, u := range h.adminUsers {
 		if strings.EqualFold(u, login) {
-			return true
+			return "admin"
 		}
 	}
 
-	// Check org membership.
+	// Check if the user is an owner/maintainer in any allowed org.
 	for _, org := range h.allowedOrgs {
-		url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, login)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+accessToken)
-		req.Header.Set("Accept", "application/vnd.github+json")
-
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			continue
-		}
-		resp.Body.Close()
-		if resp.StatusCode == http.StatusNoContent {
-			return true
+		if h.isOrgOwnerOrMaintainer(org, login, accessToken) {
+			return "admin"
 		}
 	}
-	return false
+	return "user"
 }
 
-func (h *AuthHandler) issueJWT(user *GitHubUser, isAdmin bool) (string, error) {
+// isOrgOwnerOrMaintainer checks whether the user has role "admin" (org owner)
+// in the given GitHub org, using the user's own OAuth token.
+func (h *AuthHandler) isOrgOwnerOrMaintainer(org, login, accessToken string) bool {
+	// GET /orgs/{org}/memberships/{username} — the user can read their own membership.
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/memberships/%s", org, login)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// 404 = not a member, 403 = private org (insufficient scope) — not admin.
+		return false
+	}
+
+	var membership struct {
+		Role  string `json:"role"`  // "admin" (owner) | "member"
+		State string `json:"state"` // "active" | "pending"
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if err := json.Unmarshal(body, &membership); err != nil {
+		return false
+	}
+	// Only "admin" role in an org maps to our admin role.
+	// Regular org members are not admins in the registry.
+	return membership.Role == "admin" && membership.State == "active"
+}
+
+func (h *AuthHandler) issueJWT(user *GitHubUser, role string) (string, error) {
 	claims := Claims{
 		Login:     user.Login,
 		Name:      user.Name,
 		AvatarURL: user.AvatarURL,
-		IsAdmin:   isAdmin,
+		Role:      role,
+		IsAdmin:   role == "admin",
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   user.Login,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
