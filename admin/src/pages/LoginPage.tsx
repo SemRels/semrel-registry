@@ -37,7 +37,7 @@ export default function LoginPage() {
         {cfg?.githubOAuthEnabled && (
           <>
             <a
-              href="http://localhost:8080/auth/github"
+              href={cfg.loginURL}
               className="btn btn--primary"
               style={{ width: '100%', justifyContent: 'center', marginBottom: '.75rem' }}
             >
