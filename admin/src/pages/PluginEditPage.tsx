@@ -30,7 +30,7 @@ export default function PluginEditPage() {
     const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
     try {
       isNew ? await createPlugin({ ...form, tags }) : await updatePlugin(id!, { ...form, tags });
-      navigate('/plugins');
+      navigate('/admin/plugins');
     } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Save failed'); setSaving(false); }
   }
 
@@ -40,7 +40,7 @@ export default function PluginEditPage() {
     <>
       <div className="page__header">
         <h1 className="page__title">{isNew ? 'Add Plugin' : `Edit · ${form.name}`}</h1>
-        <button type="button" className="btn btn--sm" onClick={() => navigate('/plugins')}>← Back</button>
+        <button type="button" className="btn btn--sm" onClick={() => navigate('/admin/plugins')}>← Back</button>
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
@@ -88,7 +88,7 @@ export default function PluginEditPage() {
             </div>
             <div className="flex gap-sm mt-1">
               <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : isNew ? 'Create' : 'Save'}</button>
-              <button type="button" className="btn" onClick={() => navigate('/plugins')}>Cancel</button>
+              <button type="button" className="btn" onClick={() => navigate('/admin/plugins')}>Cancel</button>
             </div>
           </form>
         </div>
