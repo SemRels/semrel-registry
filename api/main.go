@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
 
 	"github.com/SemRels/semrel-registry/api/config"
 	"github.com/SemRels/semrel-registry/api/database"
@@ -32,6 +34,12 @@ func main() {
 
 	pluginRepo := repository.NewPluginRepository(db)
 	pluginService := service.NewPluginService(pluginRepo)
+
+	// Auto-seed from plugins.json on first startup (when DB is empty).
+	if err := seedPluginsIfEmpty(context.Background(), pluginService, os.Getenv("PLUGINS_JSON_PATH")); err != nil {
+		log.Printf("seed warning: %v", err)
+	}
+
 	router := newRouter(pluginService)
 
 	log.Printf("server listening on %s", cfg.Port)
