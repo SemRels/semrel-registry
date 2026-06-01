@@ -74,6 +74,7 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Category:  strings.TrimSpace(c.Query("category")),
 		Search:    strings.TrimSpace(c.Query("search")),
 		Sort:      strings.TrimSpace(c.Query("sort")),
+		SortDir:   strings.TrimSpace(c.Query("order")),
 		Namespace: strings.TrimSpace(c.Query("namespace")),
 		Author:    author,
 		Statuses:  statuses,

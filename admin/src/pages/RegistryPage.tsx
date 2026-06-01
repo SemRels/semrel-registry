@@ -4,6 +4,7 @@ import { hasToken } from '../lib/api';
 
 type Plugin = {
   id: number;
+  namespace?: string;
   name: string;
   description: string;
   author: string;
@@ -22,6 +23,13 @@ const CAT_CLASS: Record<string, string> = {
 };
 
 const CATEGORIES = ['provider', 'analyzer', 'condition', 'hook', 'updater', 'generator'];
+const SORTS = [
+  { value: '', label: 'Default' },
+  { value: 'name:asc', label: 'Name (A → Z)' },
+  { value: 'name:desc', label: 'Name (Z → A)' },
+  { value: 'updated_at:desc', label: 'Recently updated' },
+  { value: 'created_at:desc', label: 'Newest' },
+];
 
 export default function RegistryPage() {
   const [plugins, setPlugins]         = useState<Plugin[]>([]);
@@ -29,6 +37,7 @@ export default function RegistryPage() {
   const [pagination, setPagination]   = useState<Pagination | null>(null);
   const [search, setSearch]           = useState('');
   const [category, setCategory]       = useState('');
+  const [sort, setSort]               = useState('');
   const [page, setPage]               = useState(1);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState('');
@@ -41,6 +50,11 @@ export default function RegistryPage() {
     const params = new URLSearchParams({ limit: '24', page: String(page) });
     if (search)   params.set('search', search);
     if (category) params.set('category', category);
+    if (sort) {
+      const [field, dir] = sort.split(':');
+      params.set('sort', field);
+      params.set('order', dir ?? 'asc');
+    }
 
     async function load() {
       try {
@@ -54,14 +68,15 @@ export default function RegistryPage() {
         // Progressively load latest version for each plugin
         for (const p of (d.data ?? []) as Plugin[]) {
           if (cancelled) break;
-          fetch(`/api/v1/plugins/${p.name}/versions?limit=1`)
+          const key = p.namespace ? `${p.namespace}/${p.name}` : p.name;
+          fetch(`/api/v1/plugins/${encodeURIComponent(key)}/versions?limit=1`)
             .then(r => r.json())
             .then(vr => {
               if (cancelled) return;
               const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease)
                 ?? vr.data?.[0];
               if (latest?.version) {
-                setVersions(prev => ({ ...prev, [p.name]: latest.version }));
+                setVersions(prev => ({ ...prev, [key]: latest.version }));
               }
             })
             .catch(() => { /* best-effort */ });
@@ -76,7 +91,7 @@ export default function RegistryPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [page, search, category]);
+  }, [page, search, category, sort]);
 
   // debounce search
   const [searchInput, setSearchInput] = useState('');
@@ -96,7 +111,7 @@ export default function RegistryPage() {
           semrel Registry
         </a>
         <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-          <a href="http://localhost:8080/api/v1/plugins" target="_blank" rel="noopener" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
+          <a href="/api/v1/plugins" target="_blank" rel="noopener" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
             API ↗
           </a>
           {isLoggedIn
@@ -125,7 +140,7 @@ export default function RegistryPage() {
           )}
         </div>
 
-        {/* Search + filter */}
+        {/* Search + filter + sort */}
         <div style={{ display: 'flex', gap: '.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           <input
             className="input"
@@ -143,6 +158,14 @@ export default function RegistryPage() {
             <option value="">All categories</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+          <select
+            className="input"
+            style={{ width: 'auto' }}
+            value={sort}
+            onChange={e => { setSort(e.target.value); setPage(1); }}
+          >
+            {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
         </div>
 
         {/* Error */}
@@ -155,10 +178,12 @@ export default function RegistryPage() {
           <p className="muted" style={{ textAlign: 'center', padding: '3rem 0' }}>No plugins found.</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
-            {plugins.map(p => (
+            {plugins.map(p => {
+              const pluginKey = p.namespace ? `${p.namespace}/${p.name}` : p.name;
+              return (
               <Link
                 key={p.id}
-                to={`/plugins/${p.name}`}
+                to={`/plugins/${encodeURIComponent(pluginKey)}`}
                 style={{ textDecoration: 'none', color: 'inherit', display: 'flex' }}
               >
                 <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem', width: '100%', cursor: 'pointer', transition: 'border-color .15s' }}
@@ -166,7 +191,10 @@ export default function RegistryPage() {
                   onMouseLeave={e => (e.currentTarget.style.borderColor = '')}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                    <div style={{ overflow: 'hidden' }}>
+                      {p.namespace && <span className="muted" style={{ fontSize: 'var(--fs-xs)', display: 'block' }}>{p.namespace}</span>}
+                      <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{p.name}</span>
+                    </div>
                     <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
                   </div>
                   <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -175,14 +203,14 @@ export default function RegistryPage() {
 
                   {/* Install hint */}
                   <code style={{ fontSize: '11px', background: 'var(--surface2)', padding: '3px 7px', borderRadius: 5, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-                    semrel plugin install {p.name}
+                    semrel plugin install {pluginKey}
                   </code>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                      {versions[p.name] && (() => {
-                        const ver = versions[p.name];
+                      {versions[pluginKey] && (() => {
+                        const ver = versions[pluginKey];
                         const isDev = ver.startsWith('0.');
                         return (
                           <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
@@ -205,7 +233,8 @@ export default function RegistryPage() {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -222,7 +251,7 @@ export default function RegistryPage() {
         <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
           <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>© semrel · Plugin Registry</span>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <a href="http://localhost:8080/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
+            <a href="/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
             <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>GitHub</a>
             {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
           </div>

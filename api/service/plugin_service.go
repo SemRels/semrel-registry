@@ -42,6 +42,7 @@ var allowedSorts = map[string]struct{}{
 	"category":   {},
 	"created_at": {},
 	"updated_at": {},
+	"downloads":  {},
 }
 
 type ListPluginsParams struct {
@@ -50,6 +51,7 @@ type ListPluginsParams struct {
 	Category  string
 	Search    string
 	Sort      string
+	SortDir   string // "asc" or "desc"; defaults to "asc"
 	Namespace string   // when set, filter by namespace (e.g. "@semrel")
 	Author    string   // when set, only return plugins by this author (exact, case-insensitive)
 	Statuses  []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
@@ -112,7 +114,11 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 		filters = append(filters, repository.StatusFilter{Statuses: params.Statuses})
 	}
 	if params.Sort != "" {
-		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: "ASC"})
+		dir := "ASC"
+		if strings.EqualFold(params.SortDir, "desc") {
+			dir = "DESC"
+		}
+		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: dir})
 	}
 
 	offset := (params.Page - 1) * params.Limit

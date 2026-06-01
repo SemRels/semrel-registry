@@ -5,6 +5,7 @@ import { hasToken } from '../lib/api';
 
 type Plugin = {
   id: number;
+  namespace?: string;
   name: string;
   description: string;
   author: string;
@@ -57,10 +58,11 @@ function isDevVersion(version: string): boolean {
   return version.startsWith('0.');
 }
 
-function configSnippet(name: string, category: string): string {
+function configSnippet(namespace: string | undefined, name: string, category: string): string {
   const phase = CAT_PHASE[category] ?? 'release';
+  const ref = namespace ? `${namespace}/${name}` : name;
   return `plugins:
-  - uses: ${name}
+  - uses: ${ref}
     phase: ${phase}`;
 }
 
@@ -221,7 +223,10 @@ export default function PluginDetailPage() {
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.4rem' }}>
-                  <h1 style={{ margin: 0, fontSize: 'clamp(1.25rem,3vw,1.75rem)', fontWeight: 800 }}>{plugin.name}</h1>
+                  <h1 style={{ margin: 0, fontSize: 'clamp(1.25rem,3vw,1.75rem)', fontWeight: 800 }}>
+                    {plugin.namespace && <span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: '0.75em' }}>{plugin.namespace}/</span>}
+                    {plugin.name}
+                  </h1>
                   <span className={`badge ${CAT_CLASS[plugin.category] ?? ''}`}>{plugin.category}</span>
                   {latest && (
                     <span style={{
@@ -255,7 +260,7 @@ export default function PluginDetailPage() {
               <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>Installation</h2>
               <CodeBlock
                 label="Install via semrel CLI"
-                code={`semrel plugin install ${plugin.name}`}
+                code={`semrel plugin install ${plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}`}
               />
               <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.5rem', marginBottom: 0 }}>
                 Set <code style={{ background: 'var(--surface2)', padding: '1px 4px', borderRadius: 3 }}>SEMREL_REGISTRY_URL</code> to
@@ -269,7 +274,7 @@ export default function PluginDetailPage() {
               <p className="muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '.75rem' }}>
                 Add this to your <code style={{ background: 'var(--surface2)', padding: '1px 4px', borderRadius: 3 }}>.semrel.yaml</code>:
               </p>
-              <CodeBlock code={configSnippet(plugin.name, plugin.category)} />
+              <CodeBlock code={configSnippet(plugin.namespace, plugin.name, plugin.category)} />
 
               {plugin.category === 'provider' && (
                 <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
@@ -337,7 +342,7 @@ export default function PluginDetailPage() {
                         </td>
                         <td style={{ padding: '.5rem' }}>
                           <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
-                            semrel plugin install {plugin.name}@{v.version}
+                            semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
                           </code>
                         </td>
                         <td style={{ padding: '.5rem' }}>

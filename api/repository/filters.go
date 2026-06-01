@@ -134,6 +134,8 @@ func normalizeSortField(field string) string {
 		return "created_at"
 	case "updated_at", "updatedat":
 		return "updated_at"
+	case "downloads":
+		return "COALESCE(downloads, 0)"
 	default:
 		return ""
 	}
