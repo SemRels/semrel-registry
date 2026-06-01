@@ -56,6 +56,7 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	authHandler := handlers.NewAuthHandler()
 	router.GET("/auth/github", authHandler.Redirect)
 	router.GET("/auth/github/callback", authHandler.Callback)
+	router.GET("/auth/callback", authHandler.Callback)  // alias: GitHub App configured without /github
 	router.GET("/oauth/callback", authHandler.Callback) // alias for GitHub App callback URL
 	router.GET("/auth/config", authHandler.Config)
 
