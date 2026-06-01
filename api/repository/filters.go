@@ -83,6 +83,24 @@ func (f StatusFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	builder.WriteString(fmt.Sprintf(" AND status IN (%s)", strings.Join(placeholders, ",")))
 }
 
+// NamespaceFilter restricts results to plugins belonging to a specific namespace (exact, case-insensitive).
+type NamespaceFilter struct {
+	Namespace string // e.g. "@semrel"
+}
+
+func (f NamespaceFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
+	if builder == nil || args == nil {
+		return
+	}
+	ns := strings.TrimSpace(f.Namespace)
+	if ns == "" {
+		return
+	}
+	*args = append(*args, ns)
+	builder.WriteString(fmt.Sprintf(" AND LOWER(namespace) = LOWER($%d)", len(*args)))
+}
+
+
 type SortFilter struct {
 	Field     string
 	Direction string

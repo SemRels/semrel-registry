@@ -20,6 +20,7 @@ type PluginRepository interface {
 	GetAll(ctx context.Context, limit, offset int, filters ...Filter) ([]models.Plugin, error)
 	GetByID(ctx context.Context, id int64) (*models.Plugin, error)
 	GetByName(ctx context.Context, name string) (*models.Plugin, error)
+	GetByNamespacedName(ctx context.Context, namespace, name string) (*models.Plugin, error)
 	GetVersions(ctx context.Context, pluginID int64) ([]models.PluginVersion, error)
 	Create(ctx context.Context, plugin *models.Plugin) (int64, error)
 	Update(ctx context.Context, plugin *models.Plugin) error
@@ -44,7 +45,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE deleted_at IS NULL`)
 
@@ -106,7 +107,7 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
 
@@ -129,9 +130,32 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE name = $1 AND deleted_at IS NULL`, name)
+
+	plugin, err := scanPlugin(row)
+	if err != nil {
+		return nil, err
+	}
+
+	plugin.Versions, err = r.GetVersions(ctx, plugin.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return plugin, nil
+}
+
+func (r *pgRepository) GetByNamespacedName(ctx context.Context, namespace, name string) (*models.Plugin, error) {
+	if err := r.validate(); err != nil {
+		return nil, err
+	}
+
+	row := r.db.Pool().QueryRow(ctx, `
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+FROM plugins
+WHERE LOWER(namespace) = LOWER($1) AND name = $2 AND deleted_at IS NULL`, namespace, name)
 
 	plugin, err := scanPlugin(row)
 	if err != nil {
@@ -200,9 +224,10 @@ func (r *pgRepository) Create(ctx context.Context, plugin *models.Plugin) (int64
 	}()
 
 	err = tx.QueryRow(ctx, `
-INSERT INTO plugins (name, description, author, category, repository, license, status, tags)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO plugins (namespace, name, description, author, category, repository, license, status, tags)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING id, created_at, updated_at`,
+		nullableString(plugin.Namespace),
 		plugin.Name,
 		plugin.Description,
 		plugin.Author,
@@ -233,16 +258,18 @@ func (r *pgRepository) Update(ctx context.Context, plugin *models.Plugin) error 
 
 	row := r.db.Pool().QueryRow(ctx, `
 UPDATE plugins
-SET name = $1,
-    description = $2,
-    author = $3,
-    category = $4,
-    repository = $5,
-    license = $6,
-    tags = $7,
+SET namespace = $1,
+    name = $2,
+    description = $3,
+    author = $4,
+    category = $5,
+    repository = $6,
+    license = $7,
+    tags = $8,
     updated_at = NOW()
-WHERE id = $8 AND deleted_at IS NULL
+WHERE id = $9 AND deleted_at IS NULL
 RETURNING updated_at`,
+		nullableString(plugin.Namespace),
 		plugin.Name,
 		plugin.Description,
 		plugin.Author,
@@ -407,6 +434,7 @@ func scanPlugin(scanner interface {
 	var plugin models.Plugin
 	if err := scanner.Scan(
 		&plugin.ID,
+		&plugin.Namespace,
 		&plugin.Name,
 		&plugin.Description,
 		&plugin.Author,
@@ -466,4 +494,13 @@ func wrapWriteError(operation string, err error) error {
 		return appErrors.ErrPluginNotFound
 	}
 	return fmt.Errorf("%s: %w", operation, err)
+}
+
+// nullableString converts an empty string to nil so that an empty namespace is
+// stored as NULL in the database rather than as an empty string.
+func nullableString(s string) interface{} {
+	if strings.TrimSpace(s) == "" {
+		return nil
+	}
+	return s
 }

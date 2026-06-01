@@ -69,13 +69,14 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 	}
 
 	result, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
-		Page:     page,
-		Limit:    limit,
-		Category: strings.TrimSpace(c.Query("category")),
-		Search:   strings.TrimSpace(c.Query("search")),
-		Sort:     strings.TrimSpace(c.Query("sort")),
-		Author:   author,
-		Statuses: statuses,
+		Page:      page,
+		Limit:     limit,
+		Category:  strings.TrimSpace(c.Query("category")),
+		Search:    strings.TrimSpace(c.Query("search")),
+		Sort:      strings.TrimSpace(c.Query("sort")),
+		Namespace: strings.TrimSpace(c.Query("namespace")),
+		Author:    author,
+		Statuses:  statuses,
 	})
 	if err != nil {
 		HandleError(c, err)
@@ -93,6 +94,49 @@ func (h *PluginHandler) GetPlugin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": plugin})
+}
+
+// GetPluginByNamespace handles GET /api/v1/plugins/@:namespace/:name
+func (h *PluginHandler) GetPluginByNamespace(c *gin.Context) {
+	ref := "@" + c.Param("namespace") + "/" + c.Param("name")
+	plugin, err := h.service.GetPlugin(c.Request.Context(), ref)
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": plugin})
+}
+
+// ListPluginVersionsByNamespace handles GET /api/v1/plugins/@:namespace/:name/versions
+func (h *PluginHandler) ListPluginVersionsByNamespace(c *gin.Context) {
+	ref := "@" + c.Param("namespace") + "/" + c.Param("name")
+	limit, ok := parseQueryInt(c, "limit", 20)
+	if !ok {
+		return
+	}
+	offset, ok := parseQueryInt(c, "offset", 0)
+	if !ok {
+		return
+	}
+
+	versions, err := h.service.ListVersions(c.Request.Context(), ref, limit, offset)
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	type versionResponse struct {
+		models.PluginVersion
+		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
+	}
+	out := make([]versionResponse, len(versions))
+	for i, v := range versions {
+		out[i] = versionResponse{
+			PluginVersion: v,
+			DownloadURLs:  deriveDownloadURLs(v.DownloadURL, v.Checksums),
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"data": out})
 }
 
 func (h *PluginHandler) ListPluginVersions(c *gin.Context) {

@@ -18,6 +18,7 @@ const (
 	defaultVersionLimit  = 20
 	maxListLimit         = 100
 	maxNameLength        = 255
+	maxNamespaceLength   = 100
 	maxDescriptionLength = 4000
 	maxAuthorLength      = 255
 	maxCategoryLength    = 50
@@ -32,6 +33,9 @@ const (
 
 var pluginNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
 
+// namespacePattern matches scoped namespace identifiers such as @semrel or @google.
+var namespacePattern = regexp.MustCompile(`^@[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$`)
+
 var allowedSorts = map[string]struct{}{
 	"":           {},
 	"name":       {},
@@ -41,13 +45,14 @@ var allowedSorts = map[string]struct{}{
 }
 
 type ListPluginsParams struct {
-	Page     int
-	Limit    int
-	Category string
-	Search   string
-	Sort     string
-	Author   string   // when set, only return plugins by this author (exact, case-insensitive)
-	Statuses []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
+	Page      int
+	Limit     int
+	Category  string
+	Search    string
+	Sort      string
+	Namespace string   // when set, filter by namespace (e.g. "@semrel")
+	Author    string   // when set, only return plugins by this author (exact, case-insensitive)
+	Statuses  []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
 }
 
 type Pagination struct {
@@ -90,12 +95,15 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 		return PluginListResult{}, err
 	}
 
-	filters := make([]repository.Filter, 0, 5)
+	filters := make([]repository.Filter, 0, 6)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
 	if params.Search != "" {
 		filters = append(filters, repository.SearchFilter{Query: params.Search})
+	}
+	if params.Namespace != "" {
+		filters = append(filters, repository.NamespaceFilter{Namespace: params.Namespace})
 	}
 	if params.Author != "" {
 		filters = append(filters, repository.AuthorFilter{Author: params.Author})
@@ -341,12 +349,15 @@ func (s *PluginService) countPlugins(ctx context.Context, params ListPluginsPara
 }
 
 func countFilters(params ListPluginsParams) []repository.Filter {
-	filters := make([]repository.Filter, 0, 4)
+	filters := make([]repository.Filter, 0, 5)
 	if params.Category != "" {
 		filters = append(filters, repository.CategoryFilter{Category: params.Category})
 	}
 	if params.Search != "" {
 		filters = append(filters, repository.SearchFilter{Query: params.Search})
+	}
+	if params.Namespace != "" {
+		filters = append(filters, repository.NamespaceFilter{Namespace: params.Namespace})
 	}
 	if params.Author != "" {
 		filters = append(filters, repository.AuthorFilter{Author: params.Author})
@@ -362,6 +373,16 @@ func (s *PluginService) lookupPlugin(ctx context.Context, ref string) (*models.P
 	if id, err := strconv.ParseInt(ref, 10, 64); err == nil {
 		return s.repo.GetByID(ctx, id)
 	}
+	// Support @namespace/name refs such as @semrel/provider-github.
+	if strings.HasPrefix(ref, "@") {
+		if slash := strings.Index(ref, "/"); slash > 0 {
+			ns := ref[:slash]
+			name := ref[slash+1:]
+			if name != "" {
+				return s.repo.GetByNamespacedName(ctx, ns, name)
+			}
+		}
+	}
 	return s.repo.GetByName(ctx, ref)
 }
 
@@ -375,6 +396,7 @@ func normalizeListParams(params ListPluginsParams) ListPluginsParams {
 	params.Category = strings.TrimSpace(params.Category)
 	params.Search = strings.TrimSpace(params.Search)
 	params.Sort = strings.TrimSpace(params.Sort)
+	params.Namespace = strings.TrimSpace(params.Namespace)
 	params.Author = strings.TrimSpace(params.Author)
 	return params
 }
@@ -391,6 +413,9 @@ func validateListParams(params ListPluginsParams) error {
 	}
 	if params.Category != "" && !pluginNamePattern.MatchString(params.Category) {
 		return &appErrors.ValidationError{Field: "category", Issue: "must contain only letters, numbers, dots, dashes, or underscores"}
+	}
+	if params.Namespace != "" && !namespacePattern.MatchString(params.Namespace) {
+		return &appErrors.ValidationError{Field: "namespace", Issue: "must start with @ followed by lowercase letters, numbers, or hyphens (e.g. @semrel)"}
 	}
 	if len(params.Search) > maxSearchLength {
 		return &appErrors.ValidationError{Field: "search", Issue: fmt.Sprintf("must be at most %d characters", maxSearchLength)}
@@ -409,6 +434,7 @@ func validatePluginRef(ref string) error {
 }
 
 func normalizePlugin(plugin models.Plugin) models.Plugin {
+	plugin.Namespace = strings.TrimSpace(plugin.Namespace)
 	plugin.Name = strings.TrimSpace(plugin.Name)
 	plugin.Description = strings.TrimSpace(plugin.Description)
 	plugin.Author = strings.TrimSpace(plugin.Author)
@@ -423,6 +449,7 @@ func normalizePlugin(plugin models.Plugin) models.Plugin {
 }
 
 func normalizePatch(patch models.PluginPatch) models.PluginPatch {
+	patch.Namespace = trimPointer(patch.Namespace)
 	patch.Name = trimPointer(patch.Name)
 	patch.Description = trimPointer(patch.Description)
 	patch.Author = trimPointer(patch.Author)
@@ -451,6 +478,14 @@ func normalizeVersion(version models.PluginVersion) models.PluginVersion {
 }
 
 func validatePlugin(plugin models.Plugin, requireName bool) error {
+	if plugin.Namespace != "" {
+		if len(plugin.Namespace) > maxNamespaceLength {
+			return &appErrors.ValidationError{Field: "namespace", Issue: fmt.Sprintf("must be at most %d characters", maxNamespaceLength)}
+		}
+		if !namespacePattern.MatchString(plugin.Namespace) {
+			return &appErrors.ValidationError{Field: "namespace", Issue: "must start with @ followed by lowercase letters, numbers, or hyphens (e.g. @semrel)"}
+		}
+	}
 	if requireName && plugin.Name == "" {
 		return &appErrors.ValidationError{Field: "name", Issue: "is required"}
 	}
@@ -497,6 +532,14 @@ func validatePlugin(plugin models.Plugin, requireName bool) error {
 }
 
 func validatePatch(patch models.PluginPatch) error {
+	if patch.Namespace != nil && *patch.Namespace != "" {
+		if len(*patch.Namespace) > maxNamespaceLength {
+			return &appErrors.ValidationError{Field: "namespace", Issue: fmt.Sprintf("must be at most %d characters", maxNamespaceLength)}
+		}
+		if !namespacePattern.MatchString(*patch.Namespace) {
+			return &appErrors.ValidationError{Field: "namespace", Issue: "must start with @ followed by lowercase letters, numbers, or hyphens (e.g. @semrel)"}
+		}
+	}
 	if patch.Name != nil {
 		if err := validatePlugin(models.Plugin{Name: *patch.Name, Category: "patched"}, true); err != nil {
 			if validationErr, ok := err.(*appErrors.ValidationError); ok && validationErr.Field == "category" {
@@ -614,6 +657,9 @@ func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, ch
 }
 
 func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {
+	if patch.Namespace != nil {
+		plugin.Namespace = *patch.Namespace
+	}
 	if patch.Name != nil {
 		plugin.Name = *patch.Name
 	}

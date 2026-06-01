@@ -9,10 +9,12 @@ import (
 )
 
 type Config struct {
-	Port        string
-	DatabaseURL string
-	MigrateDir  string
-	Environment string
+	Port           string
+	DatabaseURL    string
+	MigrateDir     string
+	Environment    string
+	StorageBackend string // "postgres" (default) or "file"
+	StorageDir     string // path used when StorageBackend == "file"
 }
 
 // Load reads configuration from environment variables.
@@ -23,10 +25,12 @@ func Load() *Config {
 	loadDotEnv()
 
 	cfg := &Config{
-		Port:        getEnv("PORT", ":8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://dev:dev@localhost:5432/semrel_registry?sslmode=disable"),
-		MigrateDir:  getEnv("MIGRATE_DIR", resolveMigrateDir()),
-		Environment: getEnv("ENVIRONMENT", "dev"),
+		Port:           getEnv("PORT", ":8080"),
+		DatabaseURL:    getEnv("DATABASE_URL", "postgres://dev:dev@localhost:5432/semrel_registry?sslmode=disable"),
+		MigrateDir:     getEnv("MIGRATE_DIR", resolveMigrateDir()),
+		Environment:    getEnv("ENVIRONMENT", "dev"),
+		StorageBackend: getEnv("STORAGE_BACKEND", "postgres"),
+		StorageDir:     getEnv("STORAGE_DIR", "./data"),
 	}
 
 	cfg.Port = normalizePort(cfg.Port)

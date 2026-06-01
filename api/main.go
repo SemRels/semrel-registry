@@ -20,19 +20,33 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	db, err := database.Connect(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatalf("database connection failed: %v", err)
-	}
-	defer func() {
-		_ = db.Close()
-	}()
+	var pluginRepo repository.PluginRepository
 
-	if err := db.RunMigrations(cfg.MigrateDir); err != nil {
-		log.Fatalf("migration failed: %v", err)
+	switch cfg.StorageBackend {
+	case "file":
+		log.Printf("using file storage backend at %s", cfg.StorageDir)
+		repo, err := repository.NewFileRepository(cfg.StorageDir)
+		if err != nil {
+			log.Fatalf("file repository init failed: %v", err)
+		}
+		pluginRepo = repo
+
+	default: // "postgres"
+		db, err := database.Connect(cfg.DatabaseURL)
+		if err != nil {
+			log.Fatalf("database connection failed: %v", err)
+		}
+		defer func() {
+			_ = db.Close()
+		}()
+
+		if err := db.RunMigrations(cfg.MigrateDir); err != nil {
+			log.Fatalf("migration failed: %v", err)
+		}
+
+		pluginRepo = repository.NewPluginRepository(db)
 	}
 
-	pluginRepo := repository.NewPluginRepository(db)
 	pluginService := service.NewPluginService(pluginRepo)
 
 	// Auto-seed from plugins.json on first startup (when DB is empty).
@@ -78,6 +92,9 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	api.GET("/plugins", optionalAuth, pluginHandler.ListPlugins)
 	api.GET("/plugins/:id", optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
+	// Namespaced plugin lookup: GET /api/v1/plugins/@semrel/provider-github
+	api.GET("/plugins/@:namespace/:name", optionalAuth, pluginHandler.GetPluginByNamespace)
+	api.GET("/plugins/@:namespace/:name/versions", pluginHandler.ListPluginVersionsByNamespace)
 
 	adminHandler := handlers.NewAdminHandler(pluginService)
 	api.GET("/stats", adminHandler.GetStats)

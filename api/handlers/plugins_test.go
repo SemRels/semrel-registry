@@ -103,6 +103,10 @@ func (a *mockRepositoryAdapter) GetByName(ctx context.Context, name string) (*mo
 	return &plugin, nil
 }
 
+func (a *mockRepositoryAdapter) GetByNamespacedName(ctx context.Context, namespace, name string) (*models.Plugin, error) {
+	return a.GetByName(ctx, name)
+}
+
 func (a *mockRepositoryAdapter) GetVersions(ctx context.Context, pluginID int64) ([]models.PluginVersion, error) {
 	if a.mock.listVersionsFunc != nil {
 		return a.mock.listVersionsFunc(ctx, strconv.FormatInt(pluginID, 10), 20, 0)

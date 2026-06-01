@@ -14,6 +14,7 @@ const (
 
 type Plugin struct {
 	ID               int64           `json:"id"`
+	Namespace        string          `json:"namespace,omitempty"`
 	Name             string          `json:"name"`
 	Description      string          `json:"description"`
 	Author           string          `json:"author"`
@@ -45,6 +46,7 @@ type PluginVersion struct {
 }
 
 type PluginPatch struct {
+	Namespace   *string   `json:"namespace"`
 	Name        *string   `json:"name"`
 	Description *string   `json:"description"`
 	Author      *string   `json:"author"`
@@ -55,7 +57,8 @@ type PluginPatch struct {
 }
 
 func (p PluginPatch) Empty() bool {
-	return p.Name == nil &&
+	return p.Namespace == nil &&
+		p.Name == nil &&
 		p.Description == nil &&
 		p.Author == nil &&
 		p.Category == nil &&
