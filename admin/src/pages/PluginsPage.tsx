@@ -13,7 +13,6 @@ export default function PluginsPage() {
   const user                          = useCurrentUser();
   const isAdmin                       = user?.isAdmin ?? false;
   const [plugins, setPlugins]         = useState<Plugin[]>([]);
-  const [versions, setVersions]       = useState<Record<string, string>>({});
   const [pagination, setPagination]   = useState<Pagination | null>(null);
   const [search, setSearch]           = useState('');
   const [category, setCategory]       = useState('');
@@ -26,28 +25,14 @@ export default function PluginsPage() {
     if (!user) return;
     let cancelled = false;
     setLoading(true);
-    setVersions({});
     const author = isAdmin ? undefined : (user.login || undefined);
     listPlugins({ page, limit: 25, search: search || undefined, category: category || undefined, author })
       .then((res) => {
         if (cancelled) return;
-        const list = res.data ?? [];
-        setPlugins(list);
+        setPlugins(res.data ?? []);
         setPagination(res.pagination ?? null);
         setError('');
         setLoading(false);
-        // Progressively load latest version for each plugin
-        for (const p of list) {
-          if (cancelled) break;
-          fetch(`/api/v1/plugins/${p.name}/versions?limit=1`)
-            .then(r => r.json())
-            .then(vr => {
-              if (cancelled) return;
-              const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease) ?? vr.data?.[0];
-              if (latest?.version) setVersions(prev => ({ ...prev, [p.name]: latest.version }));
-            })
-            .catch(() => {/* best-effort */});
-        }
       })
       .catch((e: unknown) => { if (!cancelled) { setError(e instanceof Error ? e.message : 'Failed'); setLoading(false); } });
     return () => { cancelled = true; };
@@ -110,7 +95,7 @@ export default function PluginsPage() {
                     <td><span className={`badge ${CAT_CLASS[p.category] ?? ''}`}>{p.category}</span></td>
                     <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
                     <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
-                    <td style={{ fontSize:'var(--fs-sm)' }}>{versions[p.name] ? <code>v{versions[p.name]}</code> : <span className="muted">—</span>}</td>
+                    <td style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
                     <td>
                       {p.status !== 'active' && (
                         <span style={{
