@@ -4,7 +4,7 @@ COPY api/go.* ./
 RUN go mod download
 COPY api/ .
 COPY plugins.json ./plugins.json
-RUN CGO_ENABLED=0 go build -o api main.go
+RUN CGO_ENABLED=0 go build -o api .
 
 FROM alpine:latest
 COPY --from=builder /app/api /usr/local/bin/
