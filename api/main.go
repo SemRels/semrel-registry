@@ -51,6 +51,15 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	router.GET("/oauth/callback", authHandler.Callback) // alias for GitHub App callback URL
 	router.GET("/auth/config", authHandler.Config)
 
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"name":    "semrel-registry",
+			"version": "1",
+			"docs":    "https://semrel.io",
+			"health":  "/health",
+			"plugins": "/api/v1/plugins",
+		})
+	})
 	router.GET("/health", handlers.Health())
 
 	api := router.Group("/api/v1")
