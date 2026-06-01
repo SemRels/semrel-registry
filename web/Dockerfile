@@ -1,10 +1,11 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
-# Copy plugins.json for the sync-public-assets script
 COPY plugins.json ./
 COPY web/package*.json ./web/
-RUN cd web && npm ci
+# --ignore-scripts skips postinstall (needs scripts/ dir not yet copied)
+RUN cd web && npm ci --ignore-scripts
 COPY web/ ./web/
+# prebuild hook (sync-public-assets.mjs) runs here with all files present
 RUN cd web && npm run build
 
 FROM nginx:alpine
