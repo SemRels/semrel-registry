@@ -51,6 +51,7 @@ export interface PluginVersion {
 
 export interface Plugin {
   id: number;
+  namespace?: string; // e.g. "@semrel"
   name: string;
   description: string;
   author: string;

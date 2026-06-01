@@ -104,7 +104,7 @@ export default function PluginsPage() {
                 )}
                 {plugins.map((p) => (
                   <tr key={p.id}>
-                    <td><strong style={{ fontSize:'var(--fs-sm)' }}>{p.name}</strong>
+                    <td><strong style={{ fontSize:'var(--fs-sm)' }}>{p.namespace ? <span className="muted" style={{ fontWeight:400 }}>{p.namespace}/</span> : null}{p.name}</strong>
                       {p.description && <div className="muted truncate" style={{ fontSize:'var(--fs-xs)', maxWidth:240 }}>{p.description}</div>}
                     </td>
                     <td><span className={`badge ${CAT_CLASS[p.category] ?? ''}`}>{p.category}</span></td>

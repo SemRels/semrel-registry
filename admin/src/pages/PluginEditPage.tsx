@@ -10,7 +10,7 @@ export default function PluginEditPage() {
   const { id } = useParams<{ id: string }>();
   const isNew  = !id;
   const navigate = useNavigate();
-  const [form, setForm] = useState<Partial<Plugin>>({ name:'', description:'', author:'', category:'provider', repository:'', license:'Apache-2.0', tags:[] });
+  const [form, setForm] = useState<Partial<Plugin>>({ namespace:'@semrel', name:'', description:'', author:'', category:'provider', repository:'', license:'Apache-2.0', tags:[] });
   const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving]   = useState(false);
@@ -46,7 +46,11 @@ export default function PluginEditPage() {
         {error && <div className="alert alert--error">{error}</div>}
         <div className="card" style={{ maxWidth: 640, margin: '0 auto' }}>
           <form onSubmit={(e) => { void handleSubmit(e); }}>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'.75rem' }}>
+              <div className="field">
+                <label htmlFor="namespace">Namespace</label>
+                <input id="namespace" className="input" value={form.namespace ?? ''} onChange={e => set('namespace', e.target.value)} placeholder="@semrel" />
+              </div>
               <div className="field">
                 <label htmlFor="name">Name *</label>
                 <input id="name" className="input" value={form.name ?? ''} onChange={e => set('name', e.target.value)} placeholder="provider-github" required disabled={!isNew} />
