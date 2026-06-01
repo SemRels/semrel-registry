@@ -13,6 +13,7 @@ import (
 )
 
 type seedPlugin struct {
+	Namespace   string   `json:"namespace"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Author      string   `json:"author"`
@@ -65,6 +66,7 @@ func seedPluginsIfEmpty(ctx context.Context, svc service.PluginManager, filePath
 			continue
 		}
 		_, err = svc.CreatePlugin(ctx, models.Plugin{
+			Namespace:   sp.Namespace,
 			Name:        sp.Name,
 			Description: sp.Description,
 			Author:      sp.Author,
