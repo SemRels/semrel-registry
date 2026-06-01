@@ -45,7 +45,8 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at,
+       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
 FROM plugins
 WHERE deleted_at IS NULL`)
 
@@ -81,16 +82,10 @@ WHERE deleted_at IS NULL`)
 
 	plugins := make([]models.Plugin, 0)
 	for rows.Next() {
-		plugin, err := scanPlugin(rows)
+		plugin, err := scanPluginWithLatest(rows)
 		if err != nil {
 			return nil, err
 		}
-
-		plugin.Versions, err = r.GetVersions(ctx, plugin.ID)
-		if err != nil {
-			return nil, err
-		}
-
 		plugins = append(plugins, *plugin)
 	}
 
@@ -460,6 +455,41 @@ func scanPlugin(scanner interface {
 	if plugin.Versions == nil {
 		plugin.Versions = []models.PluginVersion{}
 	}
+	return &plugin, nil
+}
+
+// scanPluginWithLatest scans the extended list SELECT that includes a latest_version subquery column.
+func scanPluginWithLatest(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*models.Plugin, error) {
+	var plugin models.Plugin
+	if err := scanner.Scan(
+		&plugin.ID,
+		&plugin.Namespace,
+		&plugin.Name,
+		&plugin.Description,
+		&plugin.Author,
+		&plugin.Category,
+		&plugin.Repository,
+		&plugin.License,
+		&plugin.Status,
+		&plugin.Tags,
+		&plugin.ValidationChecks,
+		&plugin.ValidatedAt,
+		&plugin.CreatedAt,
+		&plugin.UpdatedAt,
+		&plugin.DeletedAt,
+		&plugin.LatestVersion,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, appErrors.ErrPluginNotFound
+		}
+		return nil, fmt.Errorf("scan plugin: %w", err)
+	}
+	if plugin.Tags == nil {
+		plugin.Tags = []string{}
+	}
+	plugin.Versions = []models.PluginVersion{}
 	return &plugin, nil
 }
 

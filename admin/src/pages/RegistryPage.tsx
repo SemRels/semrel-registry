@@ -12,6 +12,7 @@ type Plugin = {
   repository: string;
   license: string;
   tags: string[];
+  latestVersion?: string;
 };
 
 type Pagination = { total: number; page: number; limit: number; pages: number };
@@ -33,7 +34,6 @@ const SORTS = [
 
 export default function RegistryPage() {
   const [plugins, setPlugins]         = useState<Plugin[]>([]);
-  const [versions, setVersions]       = useState<Record<string, string>>({});
   const [pagination, setPagination]   = useState<Pagination | null>(null);
   const [search, setSearch]           = useState('');
   const [category, setCategory]       = useState('');
@@ -45,7 +45,6 @@ export default function RegistryPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    setVersions({});
 
     const params = new URLSearchParams({ limit: '24', page: String(page) });
     if (search)   params.set('search', search);
@@ -64,23 +63,6 @@ export default function RegistryPage() {
         setPagination(d.pagination ?? null);
         setError('');
         setLoading(false);
-
-        // Progressively load latest version for each plugin
-        for (const p of (d.data ?? []) as Plugin[]) {
-          if (cancelled) break;
-          const key = p.namespace ? `${p.namespace}/${p.name}` : p.name;
-          fetch(`/api/v1/plugins/${encodeURIComponent(key)}/versions?limit=1`)
-            .then(r => r.json())
-            .then(vr => {
-              if (cancelled) return;
-              const latest = (vr.data ?? []).find((v: { prerelease: boolean }) => !v.prerelease)
-                ?? vr.data?.[0];
-              if (latest?.version) {
-                setVersions(prev => ({ ...prev, [key]: latest.version }));
-              }
-            })
-            .catch(() => { /* best-effort */ });
-        }
       } catch {
         if (!cancelled) {
           setError('Failed to load plugins.');
@@ -209,8 +191,8 @@ export default function RegistryPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                      {versions[pluginKey] && (() => {
-                        const ver = versions[pluginKey];
+                      {p.latestVersion && (() => {
+                        const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');
                         return (
                           <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
