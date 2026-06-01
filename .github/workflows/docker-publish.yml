@@ -44,3 +44,11 @@ jobs:
             ghcr.io/semrels/semrel-registry:${{ github.sha }}
           cache-from: type=registry,ref=ghcr.io/semrels/semrel-registry:buildcache
           cache-to: type=registry,ref=ghcr.io/semrels/semrel-registry:buildcache,mode=max
+
+      - name: Make package public
+        run: |
+          curl -s -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/orgs/SemRels/packages/container/semrel-registry \
+            -d '{"visibility":"public"}'
