@@ -52,7 +52,7 @@ type AuthHandler struct {
 func NewAuthHandler() *AuthHandler {
 	clientID     := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
-	jwtSecret    := os.Getenv("JWT_SECRET")
+	jwtSecret    := strings.TrimSpace(os.Getenv("JWT_SECRET"))
 	frontendURL  := os.Getenv("FRONTEND_URL")
 	allowedOrgs  := splitEnv("ALLOWED_GITHUB_ORGS")
 	adminUsers   := splitEnv("ADMIN_GITHUB_USERS")
