@@ -10,7 +10,7 @@ export default function PluginEditPage() {
   const { id } = useParams<{ id: string }>();
   const isNew  = !id;
   const navigate = useNavigate();
-  const [form, setForm] = useState<Partial<Plugin>>({ namespace:'@semrel', name:'', description:'', author:'', category:'provider', repository:'', license:'Apache-2.0', tags:[] });
+  const [form, setForm] = useState<Partial<Plugin>>({ namespace:'', name:'', description:'', author:'', category:'provider', repository:'', license:'Apache-2.0', tags:[] });
   const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving]   = useState(false);
