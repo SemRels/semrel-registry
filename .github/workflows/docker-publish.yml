@@ -6,8 +6,7 @@ on:
       - main
     paths:
       - 'api/**'
-      - 'web/**'
-      - 'plugins.json'
+      - 'admin/**'
       - '.github/workflows/docker-publish.yml'
   workflow_dispatch:
 
@@ -47,7 +46,7 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/semrels/semrel-registry:buildcache
           cache-to: type=registry,ref=ghcr.io/semrels/semrel-registry:buildcache,mode=max
 
-  build-web:
+  build-admin:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -63,14 +62,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Web
+      - name: Build and push Admin
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./web/Dockerfile
+          file: ./admin/Dockerfile
           push: true
           tags: |
-            ghcr.io/semrels/semrel-registry-web:latest
-            ghcr.io/semrels/semrel-registry-web:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/semrels/semrel-registry-web:buildcache
-          cache-to: type=registry,ref=ghcr.io/semrels/semrel-registry-web:buildcache,mode=max
+            ghcr.io/semrels/semrel-registry-admin:latest
+            ghcr.io/semrels/semrel-registry-admin:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/semrels/semrel-registry-admin:buildcache
+          cache-to: type=registry,ref=ghcr.io/semrels/semrel-registry-admin:buildcache,mode=max
