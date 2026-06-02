@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-30T19:19:23.684Z",
+  "generatedAt": "2026-06-02T07:17:52.659Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -30,8 +30,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/7\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/6\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/5\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/3\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-bitbucket/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-bitbucket/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-bitbucket/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "git",
@@ -61,8 +60,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/6\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/2\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-git/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-git/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gitea",
@@ -92,8 +90,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/10\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/5\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/6\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/3\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/2\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-gitea/pull/10\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-gitea/pull/5\n\n**Full Changelog**: https://github.com/SemRels/provider-gitea/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "github",
@@ -123,8 +120,7 @@
           "prerelease": false,
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gitlab",
@@ -154,8 +150,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/10\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/6\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/5\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/3\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-gitlab/pull/10\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-gitlab/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-gitlab/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "conventional",
@@ -185,8 +180,7 @@
           "prerelease": false,
           "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "default",
@@ -216,8 +210,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/6\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/3\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/2\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/analyzer-default/pull/6\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "generic",
@@ -247,8 +240,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/7\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/3\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/15\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/14\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-generic/pull/6\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gitea-actions",
@@ -278,8 +270,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/6\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/4\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-gitea-actions/pull/6\n\n**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "github-actions",
@@ -309,8 +300,7 @@
           "prerelease": false,
           "changelog": "**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gitlab-ci",
@@ -340,8 +330,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/7\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/6\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/3\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/2\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/15\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/14\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-gitlab-ci/pull/7\n\n**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "email",
@@ -371,8 +360,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/6\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/3\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/15\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/14\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/13\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-email/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-email/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gitplugin",
@@ -402,8 +390,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/8\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/6\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/5\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/2\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/1\n* chore(deps): bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/10\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/9\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-gitplugin/pull/8\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-gitplugin/pull/7\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "jira",
@@ -433,8 +420,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-jira/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/5\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/4\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/2\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-jira/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-jira/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "matrix",
@@ -464,8 +450,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/5\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/4\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/3\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/1\n* chore(deps): bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/10\n* chore(deps): bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/9\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-matrix/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-matrix/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "slack",
@@ -495,8 +480,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-slack/pull/13\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/5\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/4\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/3\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/2\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/16\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/14\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-slack/pull/13\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-slack/pull/5\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "cargo",
@@ -526,8 +510,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/7\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/6\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/5\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/2\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-cargo/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-cargo/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "docker",
@@ -557,8 +540,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-docker/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/6\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/4\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/3\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/1\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/10\n* chore(deps): bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/9\n* chore(deps): bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-docker/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-docker/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "go",
@@ -588,8 +570,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-go/pull/14\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/6\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-go/pull/14\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-go/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-go/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "gradle",
@@ -619,8 +600,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/7\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/6\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/2\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-gradle/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-gradle/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "helm",
@@ -650,8 +630,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-helm/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/4\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/2\n* chore(deps): bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/10\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/9\n* chore(deps): bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-helm/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-helm/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "homebrew",
@@ -681,8 +660,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/6\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/3\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/2\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-homebrew/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-homebrew/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "maven",
@@ -712,8 +690,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-maven/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/5\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/3\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-maven/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-maven/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "npm",
@@ -743,8 +720,7 @@
           "prerelease": false,
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "nuget",
@@ -774,8 +750,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/4\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/2\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-nuget/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-nuget/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "python",
@@ -805,8 +780,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-python/pull/12\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/3\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/5\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/16\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/14\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/13\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-python/pull/12\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-python/pull/3\n\n**Full Changelog**: https://github.com/SemRels/updater-python/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     },
     {
       "name": "terraform",
@@ -836,8 +810,7 @@
           "prerelease": false,
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/7\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-terraform/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-terraform/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/commits/v0.1.0"
         }
-      ],
-      "namespace": "@semrel"
+      ]
     }
   ]
 }
