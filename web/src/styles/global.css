@@ -429,7 +429,93 @@ p  { margin: 0 0 0.75rem; }
 .footer-links a { font-size: var(--fs-sm); color: var(--text-muted); }
 .footer-links a:hover { color: var(--text); }
 
+/* ── Endpoint grid (index page) ─────────────────────── */
+
+.endpoint-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+.endpoint-row {
+  display: grid;
+  grid-template-columns: 3rem 14rem 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: var(--fs-sm);
+}
+
+/* ── Scrollable table wrapper ────────────────────────── */
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* ── Utilities ───────────────────────────────────────── */
 
 .muted { color: var(--text-muted); }
 .mono  { font-family: monospace; }
+
+/* ── Mobile overrides (≤ 640 px) ────────────────────── */
+
+@media (max-width: 640px) {
+  /* Compress nav links on small screens */
+  .site-nav {
+    gap: 0;
+  }
+  .site-nav a {
+    padding: 0.25rem 0.4rem;
+    font-size: var(--fs-xs);
+  }
+
+  /* Stack plugin rows: name + badge on first line, description below */
+  .plugin-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.25rem 0.5rem;
+    padding: 0.625rem 0.75rem;
+  }
+  .plugin-row__name {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .plugin-row__right {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-start;
+  }
+  .plugin-row__desc {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Collapse the endpoint table on the home page */
+  .endpoint-row {
+    grid-template-columns: 3rem 1fr;
+    grid-template-rows: auto auto;
+  }
+  .endpoint-row .endpoint-desc {
+    grid-column: 1 / -1;
+    padding-left: 3.5rem;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  /* Plugin detail: stack actions below metadata */
+  .plugin-detail__header {
+    flex-direction: column;
+  }
+  .plugin-detail__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* Control bar: search takes full width */
+  .search-input {
+    width: 100%;
+    min-width: 0;
+  }
+}

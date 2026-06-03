@@ -31,6 +31,7 @@ type PluginVersion struct {
 }
 
 type Plugin struct {
+	Namespace   string          `json:"namespace"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Author      string          `json:"author"`
@@ -80,21 +81,42 @@ func main() {
 			tags = []string{}
 		}
 
+		// Use namespace-aware upsert key. Plugins with a namespace use
+		// (namespace, name) as the unique key; bare-name plugins use (name)
+		// with namespace IS NULL.
 		var pluginID int64
-		err := pool.QueryRow(ctx, `
-			INSERT INTO plugins (name, description, author, category, repository, license, tags, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-			ON CONFLICT (name) DO UPDATE SET
-				description = EXCLUDED.description,
-				author      = EXCLUDED.author,
-				category    = EXCLUDED.category,
-				repository  = EXCLUDED.repository,
-				license     = EXCLUDED.license,
-				tags        = EXCLUDED.tags,
-				updated_at  = NOW()
-			RETURNING id`,
-			p.Name, p.Description, p.Author, p.Category, p.Repository, p.License, tags,
-		).Scan(&pluginID)
+		var err error
+		if p.Namespace != "" {
+			err = pool.QueryRow(ctx, `
+				INSERT INTO plugins (namespace, name, description, author, category, repository, license, tags, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+				ON CONFLICT (namespace, name) WHERE namespace IS NOT NULL DO UPDATE SET
+					description = EXCLUDED.description,
+					author      = EXCLUDED.author,
+					category    = EXCLUDED.category,
+					repository  = EXCLUDED.repository,
+					license     = EXCLUDED.license,
+					tags        = EXCLUDED.tags,
+					updated_at  = NOW()
+				RETURNING id`,
+				p.Namespace, p.Name, p.Description, p.Author, p.Category, p.Repository, p.License, tags,
+			).Scan(&pluginID)
+		} else {
+			err = pool.QueryRow(ctx, `
+				INSERT INTO plugins (name, description, author, category, repository, license, tags, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+				ON CONFLICT (name) WHERE namespace IS NULL DO UPDATE SET
+					description = EXCLUDED.description,
+					author      = EXCLUDED.author,
+					category    = EXCLUDED.category,
+					repository  = EXCLUDED.repository,
+					license     = EXCLUDED.license,
+					tags        = EXCLUDED.tags,
+					updated_at  = NOW()
+				RETURNING id`,
+				p.Name, p.Description, p.Author, p.Category, p.Repository, p.License, tags,
+			).Scan(&pluginID)
+		}
 		if err != nil {
 			log.Printf("  ✗ %s: upsert failed: %v", p.Name, err)
 			skipped++

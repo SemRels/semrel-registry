@@ -1,4 +1,4 @@
-.PHONY: up down restart logs seed dev-web dev-admin build-api test-api clean help
+.PHONY: up down restart logs seed dedup dev-web dev-admin build-api test-api clean help
 
 ADMIN_TOKEN ?= dev-secret
 API_DIR     := ./api
@@ -33,6 +33,19 @@ seed: ## Import plugins.json into PostgreSQL
 		-db "$(or $(DATABASE_URL),postgres://dev:dev@localhost:5433/semrel_registry?sslmode=disable)" \
 		-file ../plugins.json
 	@echo "Done."
+
+seed-direct: ## Seed directly via curl (requires API running on :8080)
+
+dedup: ## Remove bare-name duplicate plugins superseded by @semrel-namespaced entries
+	@echo "Removing bare-name plugin duplicates..."
+	go -C api run cmd/dedup/main.go \
+		-db "$(or $(DATABASE_URL),postgres://dev:dev@localhost:5433/semrel_registry?sslmode=disable)"
+	@echo "Done."
+
+dedup-dry-run: ## Preview which bare-name plugins would be removed (no changes)
+	go -C api run cmd/dedup/main.go \
+		-db "$(or $(DATABASE_URL),postgres://dev:dev@localhost:5433/semrel_registry?sslmode=disable)" \
+		-dry-run
 
 seed-direct: ## Seed directly via curl (requires API running on :8080)
 	@for plugin in $$(cat plugins.json | python3 -c "import json,sys; [print(json.dumps(p)) for p in json.load(sys.stdin)['plugins']]"); do \

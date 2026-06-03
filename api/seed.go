@@ -56,7 +56,14 @@ func seedPluginsIfEmpty(ctx context.Context, svc service.PluginManager, filePath
 
 	created, skipped := 0, 0
 	for _, sp := range payload.Plugins {
-		existing, err := svc.GetPlugin(ctx, sp.Name)
+		// Build the canonical ref (@namespace/name or bare name) so we don't
+		// accidentally skip a namespaced plugin because GetPlugin("bare-name")
+		// returns a different entry.
+		ref := sp.Name
+		if sp.Namespace != "" {
+			ref = sp.Namespace + "/" + sp.Name
+		}
+		existing, err := svc.GetPlugin(ctx, ref)
 		if err != nil && !errors.Is(err, appErrors.ErrPluginNotFound) {
 			skipped++
 			continue

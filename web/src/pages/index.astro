@@ -36,18 +36,18 @@ const cats = Object.entries(
 
     <div class="section">
       <p class="section-title">Registry endpoints</p>
-      <div class="card" style="display:grid;gap:0.5rem">
+      <div class="card endpoint-grid">
         {[
-          ['GET', '/plugins.json',          'Full plugin index (static JSON)'],
-          ['GET', '/api/v1/plugins',         'Plugin list (paginated, filterable)'],
-          ['GET', '/api/v1/plugins/:id',     'Single plugin by ID or name'],
+          ['GET', '/plugins.json',               'Full plugin index (static JSON)'],
+          ['GET', '/api/v1/plugins',              'Plugin list (paginated, filterable)'],
+          ['GET', '/api/v1/plugins/:id',          'Single plugin by ID or name'],
           ['GET', '/api/v1/plugins/:id/versions', 'Version list for a plugin'],
-          ['GET', '/api/v1/stats',           'Aggregate stats by category'],
+          ['GET', '/api/v1/stats',                'Aggregate stats by category'],
         ].map(([method, path, desc]) => (
-          <div style="display:grid;grid-template-columns:3rem 14rem 1fr;gap:0.5rem;align-items:center;font-size:0.8125rem">
-            <code style="color:var(--success);font-size:0.75rem">{method}</code>
+          <div class="endpoint-row">
+            <code style="color:var(--success);font-size:var(--fs-xs)">{method}</code>
             <code style="color:var(--accent)">{path}</code>
-            <span style="color:var(--text-muted)">{desc}</span>
+            <span class="endpoint-desc muted">{desc}</span>
           </div>
         ))}
       </div>

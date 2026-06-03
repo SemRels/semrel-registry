@@ -320,6 +320,23 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 		}
 
 		existing, getErr := h.svc.GetPlugin(ctx, pluginRef)
+		if getErr != nil && orgNS != "" {
+			// Namespaced lookup failed. Check whether an old bare-name entry exists
+			// that was created before GITHUB_ORG_NAMESPACE was configured. If the
+			// repository URL confirms ownership, migrate it to the correct namespace
+			// instead of creating a duplicate entry.
+			bare, bareErr := h.svc.GetPlugin(ctx, repo.Name)
+			if bareErr == nil && bare.Namespace == "" && strings.Contains(bare.Repository, "/"+org+"/") {
+				migrated, patchErr := h.svc.UpdatePlugin(ctx, repo.Name, models.PluginPatch{Namespace: &orgNS})
+				if patchErr != nil {
+					results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: "namespace migration: " + patchErr.Error()})
+					continue
+				}
+				createdV, _, _ := h.syncPluginReleases(ctx, &migrated)
+				results = append(results, syncResult{Repo: repo.Name, Action: "migrated", Versions: createdV})
+				continue
+			}
+		}
 		if getErr != nil {
 			// Plugin does not exist yet — create it with the correct namespace.
 			created, createErr := h.svc.CreatePlugin(ctx, models.Plugin{
