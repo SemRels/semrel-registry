@@ -123,6 +123,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Prerelease   bool              `json:"prerelease,omitempty"`
 	}
 	type semrelPlugin struct {
+		Namespace   string                `json:"namespace,omitempty"`
 		Name        string                `json:"name"`
 		Description string                `json:"description"`
 		Author      string                `json:"author"`
@@ -138,7 +139,8 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 
 	registry := semrelRegistry{Plugins: make([]semrelPlugin, 0, len(result.Data))}
 	for _, p := range result.Data {
-		versions, listErr := h.svc.ListVersions(ctx, p.Name, 100, 0)
+		// Use the canonical ref so namespaced plugins resolve correctly.
+		versions, listErr := h.svc.ListVersions(ctx, p.Ref(), 100, 0)
 		if listErr != nil {
 			continue
 		}
@@ -163,6 +165,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 			tags = []string{}
 		}
 		registry.Plugins = append(registry.Plugins, semrelPlugin{
+			Namespace:   p.Namespace,
 			Name:        p.Name,
 			Description: p.Description,
 			Author:      p.Author,
@@ -215,7 +218,19 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	plugin, err := h.svc.GetPlugin(ctx, payload.Repository)
+	// Build the canonical plugin ref. If GITHUB_ORG_NAMESPACE is configured,
+	// try the namespaced ref first and fall back to the bare repo name so that
+	// webhooks work for both namespaced and community (un-namespaced) plugins.
+	orgNS := strings.TrimSpace(os.Getenv("GITHUB_ORG_NAMESPACE"))
+	pluginRef := payload.Repository
+	if orgNS != "" {
+		pluginRef = orgNS + "/" + payload.Repository
+	}
+	plugin, err := h.svc.GetPlugin(ctx, pluginRef)
+	if err != nil && orgNS != "" {
+		// Fallback: try bare name for community plugins without a namespace.
+		plugin, err = h.svc.GetPlugin(ctx, payload.Repository)
+	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("plugin %q not registered", payload.Repository)})
 		return
@@ -274,11 +289,16 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
+	// The GITHUB_ORG_NAMESPACE env var maps a GitHub org to a plugin namespace,
+	// e.g. org="SemRels" → namespace="@semrel". Plugins from this org are stored
+	// and looked up as "@semrel/analyzer-default", etc.
+	orgNS := strings.TrimSpace(os.Getenv("GITHUB_ORG_NAMESPACE"))
+
 	type syncResult struct {
-		Repo    string `json:"repo"`
-		Action  string `json:"action"` // "created", "updated", "skipped", "error"
-		Error   string `json:"error,omitempty"`
-		Versions int   `json:"versions,omitempty"`
+		Repo     string `json:"repo"`
+		Action   string `json:"action"` // "created", "updated", "skipped", "error"
+		Error    string `json:"error,omitempty"`
+		Versions int    `json:"versions,omitempty"`
 	}
 	var results []syncResult
 
@@ -293,10 +313,17 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 		category := m[1]
 		repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repo.Name)
 
-		existing, getErr := h.svc.GetPlugin(ctx, repo.Name)
+		// Build the canonical lookup ref: "@semrel/analyzer-default" or bare "name".
+		pluginRef := repo.Name
+		if orgNS != "" {
+			pluginRef = orgNS + "/" + repo.Name
+		}
+
+		existing, getErr := h.svc.GetPlugin(ctx, pluginRef)
 		if getErr != nil {
-			// Plugin does not exist yet — create it.
+			// Plugin does not exist yet — create it with the correct namespace.
 			created, createErr := h.svc.CreatePlugin(ctx, models.Plugin{
+				Namespace:   orgNS,
 				Name:        repo.Name,
 				Description: repo.Description,
 				Author:      org,
@@ -394,9 +421,10 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 
 func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *ghRelease) (bool, error) {
 	tag := strings.TrimPrefix(rel.TagName, "v")
+	ref := p.Ref()
 
 	// Check if already exists.
-	existing, err := h.svc.ListVersions(ctx, p.Name, 100, 0)
+	existing, err := h.svc.ListVersions(ctx, ref, 100, 0)
 	if err != nil {
 		return false, err
 	}
@@ -423,7 +451,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		Checksums:   pickChecksums(rel.Assets),
 		Prerelease:  rel.Prerelease,
 	}
-	_, createErr := h.svc.CreateVersion(ctx, p.Name, ver)
+	_, createErr := h.svc.CreateVersion(ctx, ref, ver)
 	return createErr == nil, createErr
 }
 

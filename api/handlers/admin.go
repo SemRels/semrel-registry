@@ -44,7 +44,7 @@ func (h *AdminHandler) SyncPlugins(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	for _, sp := range payload.Plugins {
-		existing, err := h.service.GetPlugin(ctx, sp.Name)
+		existing, err := h.service.GetPlugin(ctx, sp.ref())
 		if err != nil && !errors.Is(err, appErrors.ErrPluginNotFound) {
 			failed++
 			continue
@@ -52,6 +52,7 @@ func (h *AdminHandler) SyncPlugins(c *gin.Context) {
 
 		if existing.ID == 0 {
 			_, err = h.service.CreatePlugin(ctx, models.Plugin{
+				Namespace:   sp.Namespace,
 				Name:        sp.Name,
 				Description: sp.Description,
 				Author:      sp.Author,
@@ -67,7 +68,7 @@ func (h *AdminHandler) SyncPlugins(c *gin.Context) {
 			created++
 		} else {
 			desc, auth, cat, repo, lic := sp.Description, sp.Author, sp.Category, sp.Repository, sp.License
-			_, err = h.service.UpdatePlugin(ctx, sp.Name, models.PluginPatch{
+			_, err = h.service.UpdatePlugin(ctx, sp.ref(), models.PluginPatch{
 				Description: &desc,
 				Author:      &auth,
 				Category:    &cat,
@@ -118,7 +119,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 
 	created, updated, failed := 0, 0, 0
 	for _, sp := range payload.Plugins {
-		existing, err := h.service.GetPlugin(c.Request.Context(), sp.Name)
+		existing, err := h.service.GetPlugin(c.Request.Context(), sp.ref())
 		if err != nil && !errors.Is(err, appErrors.ErrPluginNotFound) {
 			failed++
 			continue
@@ -126,6 +127,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 
 		if existing.ID == 0 {
 			_, err = h.service.CreatePlugin(c.Request.Context(), models.Plugin{
+				Namespace:   sp.Namespace,
 				Name:        sp.Name,
 				Description: sp.Description,
 				Author:      sp.Author,
@@ -141,7 +143,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 			created++
 		} else {
 			desc, auth, cat, repo, lic := sp.Description, sp.Author, sp.Category, sp.Repository, sp.License
-			_, err = h.service.UpdatePlugin(c.Request.Context(), sp.Name, models.PluginPatch{
+			_, err = h.service.UpdatePlugin(c.Request.Context(), sp.ref(), models.PluginPatch{
 				Description: &desc,
 				Author:      &auth,
 				Category:    &cat,
@@ -196,6 +198,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 }
 
 type syncPlugin struct {
+	Namespace   string   `json:"namespace,omitempty"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Author      string   `json:"author"`
@@ -203,5 +206,13 @@ type syncPlugin struct {
 	Repository  string   `json:"repository"`
 	License     string   `json:"license"`
 	Tags        []string `json:"tags"`
+}
+
+// ref returns the canonical lookup key: "@namespace/name" or bare "name".
+func (sp syncPlugin) ref() string {
+	if sp.Namespace != "" {
+		return sp.Namespace + "/" + sp.Name
+	}
+	return sp.Name
 }
 

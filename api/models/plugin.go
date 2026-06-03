@@ -56,6 +56,16 @@ type PluginPatch struct {
 	Tags        *[]string `json:"tags"`
 }
 
+// Ref returns the canonical reference for the plugin: "@namespace/name" if a
+// namespace is set, otherwise just "name". Use Ref() whenever converting a Plugin
+// back into a lookup key for service calls.
+func (p Plugin) Ref() string {
+	if p.Namespace != "" {
+		return p.Namespace + "/" + p.Name
+	}
+	return p.Name
+}
+
 func (p PluginPatch) Empty() bool {
 	return p.Namespace == nil &&
 		p.Name == nil &&

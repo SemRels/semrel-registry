@@ -129,7 +129,7 @@ func (s *fileStore) GetByName(_ context.Context, name string) (*models.Plugin, e
 	}
 	for i := range all {
 		p := &all[i]
-		if p.DeletedAt == nil && strings.EqualFold(p.Name, name) && p.Namespace == "" {
+		if p.DeletedAt == nil && strings.EqualFold(p.Name, name) {
 			return p, nil
 		}
 	}

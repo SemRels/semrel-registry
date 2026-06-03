@@ -3,6 +3,7 @@
   "generatedAt": "2026-06-02T07:17:52.659Z",
   "plugins": [
     {
+      "namespace": "@semrel",
       "name": "bitbucket",
       "description": "Bitbucket releases provider",
       "author": "semrel Authors",
@@ -33,6 +34,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "git",
       "description": "Git provider",
       "author": "semrel Authors",
@@ -63,6 +65,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gitea",
       "description": "Gitea releases provider",
       "author": "semrel Authors",
@@ -93,6 +96,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "github",
       "description": "GitHub releases provider",
       "author": "semrel Authors",
@@ -123,6 +127,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gitlab",
       "description": "GitLab releases provider",
       "author": "semrel Authors",
@@ -153,6 +158,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "conventional",
       "description": "Conventional commits analyzer",
       "author": "semrel Authors",
@@ -183,6 +189,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "default",
       "description": "Default version analyzer",
       "author": "semrel Authors",
@@ -213,6 +220,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "generic",
       "description": "Generic external condition",
       "author": "semrel Authors",
@@ -243,6 +251,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gitea-actions",
       "description": "Gitea Actions condition",
       "author": "semrel Authors",
@@ -273,6 +282,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "github-actions",
       "description": "GitHub Actions condition",
       "author": "semrel Authors",
@@ -303,6 +313,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gitlab-ci",
       "description": "GitLab CI condition",
       "author": "semrel Authors",
@@ -333,6 +344,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "email",
       "description": "Email notification hook",
       "author": "semrel Authors",
@@ -363,6 +375,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gitplugin",
       "description": "Git plugin execution hook",
       "author": "semrel Authors",
@@ -393,6 +406,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "jira",
       "description": "Jira integration hook",
       "author": "semrel Authors",
@@ -423,6 +437,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "matrix",
       "description": "Matrix notification hook",
       "author": "semrel Authors",
@@ -453,6 +468,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "slack",
       "description": "Slack notification hook",
       "author": "semrel Authors",
@@ -483,6 +499,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "cargo",
       "description": "Cargo dependency updater",
       "author": "semrel Authors",
@@ -513,6 +530,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "docker",
       "description": "Docker image updater",
       "author": "semrel Authors",
@@ -543,6 +561,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "go",
       "description": "Go module updater",
       "author": "semrel Authors",
@@ -573,6 +592,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "gradle",
       "description": "Gradle dependency updater",
       "author": "semrel Authors",
@@ -603,6 +623,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "helm",
       "description": "Helm chart updater",
       "author": "semrel Authors",
@@ -633,6 +654,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "homebrew",
       "description": "Homebrew formula updater",
       "author": "semrel Authors",
@@ -663,6 +685,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "maven",
       "description": "Maven dependency updater",
       "author": "semrel Authors",
@@ -693,6 +716,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "npm",
       "description": "npm package updater",
       "author": "semrel Authors",
@@ -723,6 +747,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "nuget",
       "description": "NuGet package updater",
       "author": "semrel Authors",
@@ -753,6 +778,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "python",
       "description": "Python dependency updater",
       "author": "semrel Authors",
@@ -783,6 +809,7 @@
       ]
     },
     {
+      "namespace": "@semrel",
       "name": "terraform",
       "description": "Terraform module updater",
       "author": "semrel Authors",
