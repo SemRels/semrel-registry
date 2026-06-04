@@ -1,9 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-02T07:17:52.659Z",
+  "generatedAt": "2026-06-04T07:15:53.276Z",
   "plugins": [
     {
-      "namespace": "@semrel",
       "name": "bitbucket",
       "description": "Bitbucket releases provider",
       "author": "semrel Authors",
@@ -34,7 +33,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "git",
       "description": "Git provider",
       "author": "semrel Authors",
@@ -65,7 +63,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gitea",
       "description": "Gitea releases provider",
       "author": "semrel Authors",
@@ -96,7 +93,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "github",
       "description": "GitHub releases provider",
       "author": "semrel Authors",
@@ -109,6 +105,21 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:45:09Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "08086d2457d2524cb8d487cef27a8806bea8807c2b2ad9aaa0de59a58fa78914",
+            "linux_arm64": "409f89db0e8968074f9939d63dfe1c04c1902f41c39106dc518ab67ab95635ef",
+            "darwin_amd64": "2825fab00a366cb24b41563927f485de042096be0e666254827e62d7ea82802d",
+            "darwin_arm64": "c0bd73d14b9ba9354252b9dfcc481cccd5ede9d177cbe15bcd3ffa210372348e",
+            "windows_amd64": "848c141b855fccd399bcb23899a954ba4fdbef55e33c627432e08a3407bbd696",
+            "windows_arm64": "0fd9d7ecdebfd223b5c8d95f8091e1cef75d9cdef40f30717a2527cfd71e814e"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* feat(provider): implement GitHub REST API provider plugin by @mwaldheim in https://github.com/SemRels/provider-github/pull/11\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-github/pull/12\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/provider-github/pull/15\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/19\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/18\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-github/pull/11\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-github/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.2.0\n\n## What's Changed\n* feat(provider): implement GitHub REST API provider plugin by @mwaldheim in https://github.com/SemRels/provider-github/pull/11\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-github/pull/12\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/provider-github/pull/15\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/19\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/18\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-github/pull/11\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-github/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:32Z",
@@ -127,7 +138,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gitlab",
       "description": "GitLab releases provider",
       "author": "semrel Authors",
@@ -158,7 +168,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "conventional",
       "description": "Conventional commits analyzer",
       "author": "semrel Authors",
@@ -189,7 +198,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "default",
       "description": "Default version analyzer",
       "author": "semrel Authors",
@@ -202,6 +210,21 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:42:27Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "12efba223b1a3d1578609162fb82f866d7ed6e8d7d928f198e2609411f5e10a4",
+            "linux_arm64": "e87c0b0f0b0d548976f42267fb69e48dd81f7dbdad871603587a58d52ee345b9",
+            "darwin_amd64": "923025ba014aacca6408ba06771821e1f2170fd4869f93cf035c56ebbae35d37",
+            "darwin_arm64": "c1aad963476d5531c0055bead5ce6162de5dc4a3e118f1bc2b3dea210a5a5729",
+            "windows_amd64": "6e346f76ac171fff9467959565733fe1be2ddd03002a4e57bfacabc5cd3483de",
+            "windows_arm64": "ae31e25eeafdf044a48fd7496068b3e408aa7e6462d42974cf18888e208047d9"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/15\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/20\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/18\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/17\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/analyzer-default/pull/15\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:35:34Z",
@@ -220,7 +243,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "generic",
       "description": "Generic external condition",
       "author": "semrel Authors",
@@ -233,6 +255,21 @@
         "workflow"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:42:02Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b7f1045fdbee4d5aede1b5a3dc264cd2512241628fc22e4cf53efdca31fc53c3",
+            "linux_arm64": "cc9dad745a0c59bda5d0437521efe2a18f1980c2a5a8d39c2e94a661b0cf9c42",
+            "darwin_amd64": "27f96b3dc1bbd5c9fe6c233b8f301ef984b8df08ee8b68fe0cf53642b64cdc8c",
+            "darwin_arm64": "ed279d3847241a108925167e5d02e0e395d0ebc88cdb88b0e9514f24a968e5ee",
+            "windows_amd64": "b50b5503eb4a04f9d6dc234d052d7c100efca882e7edad7b3aff67a7336ed39d",
+            "windows_arm64": "faea4650bee132d4dfeb7a5968483821009ebac1e756f71cdb9f93a562f638f4"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:34:39Z",
@@ -251,7 +288,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gitea-actions",
       "description": "Gitea Actions condition",
       "author": "semrel Authors",
@@ -282,7 +318,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "github-actions",
       "description": "GitHub Actions condition",
       "author": "semrel Authors",
@@ -313,7 +348,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gitlab-ci",
       "description": "GitLab CI condition",
       "author": "semrel Authors",
@@ -344,7 +378,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "email",
       "description": "Email notification hook",
       "author": "semrel Authors",
@@ -375,7 +408,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gitplugin",
       "description": "Git plugin execution hook",
       "author": "semrel Authors",
@@ -406,7 +438,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "jira",
       "description": "Jira integration hook",
       "author": "semrel Authors",
@@ -437,7 +468,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "matrix",
       "description": "Matrix notification hook",
       "author": "semrel Authors",
@@ -450,6 +480,21 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:42:26Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b1e94a35054b2c20904ea7ee9abfd49b235bdf4c886fe51517a6fd2a88994426",
+            "linux_arm64": "a332db9d01269db4753b08477ca065172dbfea76db815f8cb0d3bd7186f1b1ad",
+            "darwin_amd64": "10ccc239933d77722e21b5bc5a11b774e32964fa07399a543ec50a21234364d7",
+            "darwin_arm64": "21e3893607b598b9d7388803f0e6b02436e3b3e6e314a79ecc20e993bf4b2d19",
+            "windows_amd64": "01a8e520ba152122998509207c22a52c8bbcac42baca1aa99c7566939b5bd02a",
+            "windows_arm64": "30edcada2c5b8455514702b6984b3c7cabf0cd3cfd50f08db031a70bd86deb60"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* chore(deps): bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/14\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:24Z",
@@ -468,7 +513,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "slack",
       "description": "Slack notification hook",
       "author": "semrel Authors",
@@ -481,6 +525,21 @@
         "slack"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:42:11Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "eaa83ff4ab4649fb7efc79102876c771c42e89caa2fdc3127f7b3fcc200d21ba",
+            "linux_arm64": "28b9269e113883b5a24ea8b04026325064a5c1d8e4596d2a0b877b276d21752a",
+            "darwin_amd64": "18f136b6a954472b47e3fee91af624a00bfd4483426aa5790e9183d5488f79e0",
+            "darwin_arm64": "2e873dd11f1834c5762d41cbf11f3c1b7d8a540508a201a005704a814f538f12",
+            "windows_amd64": "198154fa5be41d1d7052a7bd84390472bc053c7732a6de9bbfc1ac9a73779ff5",
+            "windows_arm64": "ebe385a5225915dfb6cc738fa1dfce0e1b2824bccd0b0b9d4b8317d4f4a5ae90"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/20\n\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:26Z",
@@ -499,7 +558,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "cargo",
       "description": "Cargo dependency updater",
       "author": "semrel Authors",
@@ -530,7 +588,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "docker",
       "description": "Docker image updater",
       "author": "semrel Authors",
@@ -561,7 +618,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "go",
       "description": "Go module updater",
       "author": "semrel Authors",
@@ -592,7 +648,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "gradle",
       "description": "Gradle dependency updater",
       "author": "semrel Authors",
@@ -623,7 +678,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "helm",
       "description": "Helm chart updater",
       "author": "semrel Authors",
@@ -636,6 +690,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:42:01Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "775d7bbe29fa1f0fdef5bd79e6c6190a5f0c3bd394018b488767738a7f376e23",
+            "linux_arm64": "70d1f12364e45d8c86738ded41d3692e43ebbc1b6763c982f02cc06422bdbb1a",
+            "darwin_amd64": "4b23fd2d9d2617c5a9c0a505c62197de61e22f98667f433c0b2e9fe5726e6a6c",
+            "darwin_arm64": "444e2cd610cdaf8cda003c1f2b3ec7f558956ad1872d9056b69a932d21af65cf",
+            "windows_amd64": "dee9f0b3c161b5332f00b70bd07c484af295910427d022ea36241cdd54a6e6cb",
+            "windows_arm64": "064617bc6dfd9b394e0160d5d6d03634add350a1540ac9c9f4f051e2a215b3f6"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:28Z",
@@ -654,7 +723,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "homebrew",
       "description": "Homebrew formula updater",
       "author": "semrel Authors",
@@ -685,7 +753,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "maven",
       "description": "Maven dependency updater",
       "author": "semrel Authors",
@@ -716,7 +783,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "npm",
       "description": "npm package updater",
       "author": "semrel Authors",
@@ -729,6 +795,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:45:02Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "08db5110851da61943ae245e2f729957830bd52a9b3140af2edfbe23d4030c4b",
+            "linux_arm64": "76f1c1db870f97eeb23cb038f0c2a9a25519d54ef063ba7adb16490641b0b26c",
+            "darwin_amd64": "9fc4a40e174bc6adb104ea788a8fcb0c01f774c5cb55effac6920000175ca63d",
+            "darwin_arm64": "71eb4b747b00504fd279304a8aea016d3a6bafe89c9865daafe5ff09adf74b22",
+            "windows_amd64": "c2a15781c36b3a020a6fbe2c8fca7bcf2120dc85222afbd63876eea6b8272ea4",
+            "windows_arm64": "15c0bdf543feea4c2f9bb1b5613ef137796d19f168a0243722ca2a88c2f53b67"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-npm/pull/15\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/5\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/1\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/17\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/16\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-npm/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-npm/pull/5\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.2.0\n\n## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-npm/pull/15\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/5\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/1\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/17\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/16\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-npm/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-npm/pull/5\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:36Z",
@@ -747,7 +828,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "nuget",
       "description": "NuGet package updater",
       "author": "semrel Authors",
@@ -778,7 +858,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "python",
       "description": "Python dependency updater",
       "author": "semrel Authors",
@@ -809,7 +888,6 @@
       ]
     },
     {
-      "namespace": "@semrel",
       "name": "terraform",
       "description": "Terraform module updater",
       "author": "semrel Authors",
