@@ -121,6 +121,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	router.GET("/health", handlers.Health())
 
 	api := router.Group("/api/v1")
+	requireAdmin := middleware.RequireAdmin(authHandler)
 
 	// Public read endpoints — with OptionalAuth so admins can filter by status.
 	optionalAuth := middleware.OptionalAuth(authHandler)
@@ -135,7 +136,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	api.GET("/plugins/@:namespace/:name/versions/:version/download", pluginHandler.DownloadPluginVersionByNamespace)
 
 	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
-	api.GET("/stats", adminHandler.GetStats)
+	api.GET("/stats", requireAdmin, adminHandler.GetStats)
 
 	// Plugin standards validation (public — no auth needed to check).
 	api.POST("/plugins/validate", handlers.ValidatePlugin)
@@ -152,7 +153,6 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 
 	// Protected endpoints — any authenticated user.
 	requireAuth := middleware.RequireAuth(authHandler)
-	requireAdmin := middleware.RequireAdmin(authHandler)
 
 	authRoutes := api.Group("")
 	authRoutes.Use(requireAuth)
