@@ -45,7 +45,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at,
+	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
 FROM plugins
 WHERE deleted_at IS NULL`)
@@ -102,7 +102,7 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
 
@@ -125,7 +125,7 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE name = $1 AND deleted_at IS NULL`, name)
 
@@ -148,7 +148,7 @@ func (r *pgRepository) GetByNamespacedName(ctx context.Context, namespace, name 
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
 FROM plugins
 WHERE LOWER(namespace) = LOWER($1) AND name = $2 AND deleted_at IS NULL`, namespace, name)
 
@@ -171,7 +171,7 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, created_at
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(views, 0), COALESCE(downloads, 0), created_at
 FROM plugin_versions
 WHERE plugin_id = $1
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
@@ -438,6 +438,8 @@ func scanPlugin(scanner interface {
 		&plugin.License,
 		&plugin.Status,
 		&plugin.Tags,
+		&plugin.Views,
+		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
 		&plugin.CreatedAt,
@@ -474,6 +476,8 @@ func scanPluginWithLatest(scanner interface {
 		&plugin.License,
 		&plugin.Status,
 		&plugin.Tags,
+		&plugin.Views,
+		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
 		&plugin.CreatedAt,
@@ -505,6 +509,8 @@ func scanVersion(scanner interface {
 		&version.Changelog,
 		&version.DownloadURL,
 		&version.Prerelease,
+		&version.Views,
+		&version.Downloads,
 		&version.CreatedAt,
 	); err != nil {
 		return nil, fmt.Errorf("scan version: %w", err)

@@ -25,6 +25,7 @@ type Plugin struct {
 	Tags             []string        `json:"tags,omitempty"`
 	Versions         []PluginVersion `json:"versions,omitempty"`
 	LatestVersion    string          `json:"latestVersion,omitempty"`
+	Views            int64           `json:"views"`
 	Downloads        int64           `json:"downloads"`
 	ValidationChecks json.RawMessage `json:"validationChecks,omitempty"`
 	ValidatedAt      *time.Time      `json:"validatedAt,omitempty"`
@@ -42,6 +43,8 @@ type PluginVersion struct {
 	DownloadURL string            `json:"downloadUrl"`
 	Checksums   map[string]string `json:"checksums,omitempty"`
 	Prerelease  bool              `json:"prerelease"`
+	Views       int64             `json:"views"`
+	Downloads   int64             `json:"downloads"`
 	CreatedAt   time.Time         `json:"createdAt"`
 }
 

@@ -192,9 +192,11 @@ func readPluginsJSON(filePath string) (string, []byte, error) {
 
 // GetStats returns aggregate statistics about the registry.
 func (h *AdminHandler) GetStats(c *gin.Context) {
+	const pageSize = 100
+
 	result, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
 		Page:  1,
-		Limit: 1,
+		Limit: pageSize,
 	})
 	if err != nil {
 		HandleError(c, err)
@@ -202,20 +204,37 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	}
 
 	categories := map[string]int64{}
-	allResult, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
-		Page:  1,
-		Limit: 100,
-	})
-	if err == nil {
-		for _, p := range allResult.Data {
+	var totalViews int64
+	var totalDownloads int64
+
+	accumulate := func(plugins []models.Plugin) {
+		for _, p := range plugins {
 			categories[p.Category]++
+			totalViews += p.Views
+			totalDownloads += p.Downloads
 		}
 	}
 
+	accumulate(result.Data)
+
+	for page := 2; page <= result.Pagination.Pages; page++ {
+		pageResult, listErr := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
+			Page:  page,
+			Limit: pageSize,
+		})
+		if listErr != nil {
+			HandleError(c, listErr)
+			return
+		}
+		accumulate(pageResult.Data)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"totalPlugins": result.Pagination.Total,
-		"categories":   categories,
-		"timestamp":    time.Now().UTC(),
+		"totalPlugins":   result.Pagination.Total,
+		"categories":     categories,
+		"totalViews":     totalViews,
+		"totalDownloads": totalDownloads,
+		"timestamp":      time.Now().UTC(),
 	})
 }
 

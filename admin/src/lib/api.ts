@@ -50,6 +50,8 @@ export interface PluginVersion {
   downloadUrl: string;
   checksums?: Record<string, string>;
   prerelease: boolean;
+  views: number;
+  downloads: number;
   createdAt: string;
 }
 
@@ -66,6 +68,7 @@ export interface Plugin {
   tags: string[];
   versions?: PluginVersion[];
   latestVersion?: string;
+  views: number;
   downloads: number;
   validationChecks?: ValidationResult; // pre-analysis results stored by server
   validatedAt?: string;
@@ -88,6 +91,8 @@ export interface PluginListResponse {
 export interface Stats {
   totalPlugins: number;
   categories: Record<string, number>;
+  totalViews: number;
+  totalDownloads: number;
   timestamp: string;
 }
 
