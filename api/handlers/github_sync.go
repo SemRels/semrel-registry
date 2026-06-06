@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,7 +88,13 @@ func (h *SyncHandler) SyncVersions(c *gin.Context) {
 		created, skipped, syncErr := h.syncPluginReleases(ctx, p)
 		r := result{Plugin: p.Name, Created: created, Skipped: skipped}
 		if syncErr != nil {
+			if isGitHubRateLimitError(syncErr) {
+				writeError(c, http.StatusTooManyRequests, "GITHUB_RATE_LIMIT", "GitHub API rate limit exceeded. Configure GITHUB_TOKEN for higher limits.", syncErr)
+				return
+			}
 			r.Error = syncErr.Error()
+			results = append(results, r)
+			continue
 		}
 		results = append(results, r)
 	}
@@ -219,17 +226,21 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 
 	ctx := c.Request.Context()
 	// Build the canonical plugin ref. If GITHUB_ORG_NAMESPACE is configured,
-	// try the namespaced ref first and fall back to the bare repo name so that
-	// webhooks work for both namespaced and community (un-namespaced) plugins.
-	orgNS := strings.TrimSpace(os.Getenv("GITHUB_ORG_NAMESPACE"))
-	pluginRef := payload.Repository
+	// map repo names like "provider-bitbucket" to namespaced plugin refs like
+	// "@semrel/bitbucket" to match the seeded naming convention.
+	orgNS := namespaceForOrg(payload.Owner)
+	pluginName := pluginNameFromRepo(payload.Repository)
+	pluginRef := pluginName
 	if orgNS != "" {
-		pluginRef = orgNS + "/" + payload.Repository
+		pluginRef = orgNS + "/" + pluginName
 	}
 	plugin, err := h.svc.GetPlugin(ctx, pluginRef)
 	if err != nil && orgNS != "" {
-		// Fallback: try bare name for community plugins without a namespace.
-		plugin, err = h.svc.GetPlugin(ctx, payload.Repository)
+		// Fallback: try both bare forms for community plugins without a namespace.
+		plugin, err = h.svc.GetPlugin(ctx, pluginName)
+		if err != nil {
+			plugin, err = h.svc.GetPlugin(ctx, payload.Repository)
+		}
 	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("plugin %q not registered", payload.Repository)})
@@ -279,6 +290,10 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 
 	repos, err := fetchOrgRepos(org)
 	if err != nil {
+		if isGitHubRateLimitError(err) {
+			writeError(c, http.StatusTooManyRequests, "GITHUB_RATE_LIMIT", "GitHub API rate limit exceeded. Configure GITHUB_TOKEN for higher limits.", err)
+			return
+		}
 		InternalServerError(c, "failed to fetch org repos: "+err.Error(), nil)
 		return
 	}
@@ -292,7 +307,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 	// The GITHUB_ORG_NAMESPACE env var maps a GitHub org to a plugin namespace,
 	// e.g. org="SemRels" → namespace="@semrel". Plugins from this org are stored
 	// and looked up as "@semrel/analyzer-default", etc.
-	orgNS := strings.TrimSpace(os.Getenv("GITHUB_ORG_NAMESPACE"))
+	orgNS := namespaceForOrg(org)
 
 	type syncResult struct {
 		Repo     string `json:"repo"`
@@ -311,23 +326,26 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 			continue
 		}
 		category := m[1]
+		pluginName := m[2]
 		repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repo.Name)
 
-		// Build the canonical lookup ref: "@semrel/analyzer-default" or bare "name".
-		pluginRef := repo.Name
+		// Build the canonical lookup ref: "@semrel/default" or bare "default".
+		// The seed normalizes SemRels repo names by stripping category prefixes.
+		pluginRef := pluginName
 		if orgNS != "" {
-			pluginRef = orgNS + "/" + repo.Name
+			pluginRef = orgNS + "/" + pluginName
 		}
 
 		existing, getErr := h.svc.GetPlugin(ctx, pluginRef)
 		if getErr != nil && orgNS != "" {
-			// Namespaced lookup failed. Check whether an old bare-name entry exists
-			// that was created before GITHUB_ORG_NAMESPACE was configured. If the
-			// repository URL confirms ownership, migrate it to the correct namespace
-			// instead of creating a duplicate entry.
-			bare, bareErr := h.svc.GetPlugin(ctx, repo.Name)
+			// Namespaced lookup failed. Check whether old bare-name entries exist
+			// and migrate one to the configured namespace instead of duplicating.
+			bare, bareErr := h.svc.GetPlugin(ctx, pluginName)
+			if bareErr != nil {
+				bare, bareErr = h.svc.GetPlugin(ctx, repo.Name)
+			}
 			if bareErr == nil && bare.Namespace == "" && strings.Contains(bare.Repository, "/"+org+"/") {
-				migrated, patchErr := h.svc.UpdatePlugin(ctx, repo.Name, models.PluginPatch{Namespace: &orgNS})
+				migrated, patchErr := h.svc.UpdatePlugin(ctx, bare.Ref(), models.PluginPatch{Namespace: &orgNS})
 				if patchErr != nil {
 					results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: "namespace migration: " + patchErr.Error()})
 					continue
@@ -341,7 +359,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 			// Plugin does not exist yet — create it with the correct namespace.
 			created, createErr := h.svc.CreatePlugin(ctx, models.Plugin{
 				Namespace:   orgNS,
-				Name:        repo.Name,
+				Name:        pluginName,
 				Description: repo.Description,
 				Author:      org,
 				Category:    category,
@@ -361,6 +379,9 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 			createdV, _, syncErr := h.syncPluginReleases(ctx, &existing)
 			if syncErr != nil {
 				results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: syncErr.Error()})
+				if isGitHubRateLimitError(syncErr) {
+					break
+				}
 				continue
 			}
 			results = append(results, syncResult{Repo: repo.Name, Action: "updated", Versions: createdV})
@@ -368,6 +389,33 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"org": org, "results": results, "total": len(results)})
+}
+
+// pluginNameFromRepo maps plugin repository names to canonical plugin names.
+// Example: "provider-bitbucket" -> "bitbucket".
+func pluginNameFromRepo(repoName string) string {
+	parts := strings.SplitN(strings.TrimSpace(repoName), "-", 2)
+	if len(parts) != 2 {
+		return strings.TrimSpace(repoName)
+	}
+	category := parts[0]
+	if category == "analyzer" || category == "condition" || category == "generator" || category == "hook" || category == "provider" || category == "updater" {
+		return parts[1]
+	}
+	return strings.TrimSpace(repoName)
+}
+
+// namespaceForOrg resolves the namespace used for plugins synced from a GitHub org.
+// If GITHUB_ORG_NAMESPACE is not configured, SemRels defaults to @semrel.
+func namespaceForOrg(org string) string {
+	ns := strings.TrimSpace(os.Getenv("GITHUB_ORG_NAMESPACE"))
+	if ns != "" {
+		return ns
+	}
+	if strings.EqualFold(strings.TrimSpace(org), "SemRels") {
+		return "@semrel"
+	}
+	return ""
 }
 
 type ghRepo struct {
@@ -395,6 +443,9 @@ func fetchOrgRepos(org string) ([]ghRepo, error) {
 		}
 		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, githubAPIError("org repos", org, resp.StatusCode, body)
+		}
 
 		var repos []ghRepo
 		if err := json.Unmarshal(body, &repos); err != nil {
@@ -670,7 +721,7 @@ func fetchGHReleases(owner, repo string) ([]ghRelease, error) {
 		return nil, nil
 	}
 	if status != http.StatusOK {
-		return nil, fmt.Errorf("GitHub API %d for %s/%s", status, owner, repo)
+		return nil, githubAPIError(owner, repo, status, body)
 	}
 	var releases []ghRelease
 	return releases, json.Unmarshal(body, &releases)
@@ -683,7 +734,7 @@ func fetchGHRelease(owner, repo, tag string) (*ghRelease, error) {
 		return nil, err
 	}
 	if status != http.StatusOK {
-		return nil, fmt.Errorf("GitHub API %d for %s/%s@%s", status, owner, repo, tag)
+		return nil, githubAPIError(owner, repo+"@"+tag, status, body)
 	}
 	var rel ghRelease
 	return &rel, json.Unmarshal(body, &rel)
@@ -696,10 +747,28 @@ func fetchGHLatestRelease(owner, repo string) (*ghRelease, error) {
 		return nil, err
 	}
 	if status != http.StatusOK {
-		return nil, fmt.Errorf("GitHub API %d for %s/%s/latest", status, owner, repo)
+		return nil, githubAPIError(owner, repo+"/latest", status, body)
 	}
 	var rel ghRelease
 	return &rel, json.Unmarshal(body, &rel)
+}
+
+func githubAPIError(owner, repo string, status int, body []byte) error {
+	var payload struct {
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(body, &payload); err == nil && strings.TrimSpace(payload.Message) != "" {
+		return fmt.Errorf("GitHub API %d for %s/%s: %s", status, owner, repo, payload.Message)
+	}
+	return fmt.Errorf("GitHub API %d for %s/%s", status, owner, repo)
+}
+
+func isGitHubRateLimitError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "rate limit") || (strings.Contains(msg, "github api 403") && !errors.Is(err, context.Canceled))
 }
 
 func checkGHFile(owner, repo, path string) (bool, string) {

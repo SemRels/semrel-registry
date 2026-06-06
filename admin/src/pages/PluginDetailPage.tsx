@@ -318,40 +318,42 @@ export default function PluginDetailPage() {
               {versions.length === 0 ? (
                 <p className="muted" style={{ fontSize: 'var(--fs-sm)' }}>No versions published yet.</p>
               ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
-                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
-                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
-                      <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {versions.map((v, i) => (
-                      <tr key={v.id} style={{ borderBottom: '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
-                        <td style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
-                          v{v.version}
-                          {v.prerelease
-                            ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
-                            : <VersionBadge version={v.version} isLatest={i === 0} />
-                          }
-                        </td>
-                        <td style={{ padding: '.5rem', color: 'var(--muted)' }}>
-                          {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
-                        </td>
-                        <td style={{ padding: '.5rem' }}>
-                          <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
-                            semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
-                          </code>
-                        </td>
-                        <td style={{ padding: '.5rem' }}>
-                          <DownloadLinks downloadUrls={v.downloadUrls} />
-                        </td>
+                <div className="table-wrap">
+                  <table className="table--stack" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {versions.map((v, i) => (
+                        <tr key={v.id} style={{ borderBottom: '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
+                          <td data-label="Version" style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
+                            v{v.version}
+                            {v.prerelease
+                              ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
+                              : <VersionBadge version={v.version} isLatest={i === 0} />
+                            }
+                          </td>
+                          <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
+                            {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
+                          </td>
+                          <td data-label="Install" style={{ padding: '.5rem' }}>
+                            <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
+                              semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
+                            </code>
+                          </td>
+                          <td data-label="Downloads" style={{ padding: '.5rem' }}>
+                            <DownloadLinks downloadUrls={v.downloadUrls} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </section>
 

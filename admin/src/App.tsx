@@ -17,29 +17,29 @@ import SubmissionsPage from './pages/SubmissionsPage';
 function OAuthCallback() {
   const navigate = useNavigate();
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     const token = params.get('token');
     if (token) {
       saveToken(token);
-      window.history.replaceState({}, '', window.location.pathname);
+      globalThis.history.replaceState({}, '', globalThis.location.pathname);
     }
     navigate('/admin', { replace: true });
   }, [navigate]);
   return null;
 }
 
-function RequireAuth({ children }: { children: React.ReactNode }) {
-  const params = new URLSearchParams(window.location.search);
+function RequireAuth({ children }: Readonly<{ children: React.ReactNode }>) {
+  const params = new URLSearchParams(globalThis.location.search);
   const urlToken = params.get('token');
   if (urlToken) {
     saveToken(urlToken);
-    window.history.replaceState({}, '', window.location.pathname);
+    globalThis.history.replaceState({}, '', globalThis.location.pathname);
   }
   if (!hasToken()) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
-function AdminOnly({ children }: { children: React.ReactNode }) {
+function AdminOnly({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = useCurrentUser();
   if (user === null) return null;
   if (!user.isAdmin) return <Navigate to="/admin/plugins" replace />;
@@ -48,7 +48,7 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Public */}
         <Route path="/" element={<RegistryPage />} />

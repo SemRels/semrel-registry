@@ -71,7 +71,7 @@ export default function VersionsPage() {
                 <textarea id="cs" className="textarea" style={{ fontFamily:'monospace', fontSize:'var(--fs-xs)' }} value={form.checksums} onChange={e => setForm(f=>({...f,checksums:e.target.value}))} placeholder={'{"linux_amd64":"<sha256>"}'} /></div>
               <label style={{ display:'flex', alignItems:'center', gap:'.375rem', fontSize:'var(--fs-sm)', marginBottom:'.75rem', cursor:'pointer' }}>
                 <input type="checkbox" checked={form.prerelease} onChange={e => setForm(f=>({...f,prerelease:e.target.checked}))} />
-                Pre-release
+                {' '}Pre-release
               </label>
               <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : 'Publish'}</button>
             </form>
@@ -82,21 +82,21 @@ export default function VersionsPage() {
           <div className="muted" style={{ padding:'2rem 0', textAlign:'center' }}>No versions yet.</div>
         ) : (
           <div className="table-wrap">
-            <table>
+            <table className="table--stack">
               <thead><tr><th>Version</th><th>Released</th><th>Channel</th><th>Download URL</th><th>Platforms</th></tr></thead>
               <tbody>
                 {versions.map(v => (
                   <tr key={v.id}>
-                    <td><code>v{v.version}</code></td>
-                    <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.releaseDate ? new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(new Date(v.releaseDate)) : '—'}</td>
-                    <td>{v.prerelease
+                    <td data-label="Version"><code>v{v.version}</code></td>
+                    <td data-label="Released" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.releaseDate ? new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(new Date(v.releaseDate)) : '—'}</td>
+                    <td data-label="Channel">{v.prerelease
                       ? <span className="badge" style={{ background:'rgba(210,153,34,.15)',color:'var(--warning)',borderColor:'rgba(210,153,34,.3)' }}>pre</span>
                       : <span className="badge" style={{ background:'rgba(63,185,80,.12)',color:'var(--success)',borderColor:'rgba(63,185,80,.25)' }}>stable</span>
                     }</td>
-                    <td style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
+                    <td data-label="Download" style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
                       <a href={v.downloadUrl} target="_blank" rel="noopener">{v.downloadUrl}</a>
                     </td>
-                    <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.checksums ? Object.keys(v.checksums).length : 0}</td>
+                    <td data-label="Platforms" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.checksums ? Object.keys(v.checksums).length : 0}</td>
                   </tr>
                 ))}
               </tbody>

@@ -39,14 +39,14 @@ export default function PluginsPage() {
   }, [page, search, category, user, isAdmin]);
 
   async function handleDelete(p: Plugin) {
-    if (!window.confirm(`Delete "${p.name}"?`)) return;
+    if (!globalThis.confirm(`Delete "${p.name}"?`)) return;
     try { await deletePlugin(p.id); setPlugins((prev) => prev.filter((x) => x.id !== p.id)); }
     catch (e: unknown) { alert(e instanceof Error ? e.message : 'Delete failed'); }
   }
 
   // Non-admins can only edit/delete their own plugins.
   function canEdit(p: Plugin) {
-    return isAdmin || (user?.login && p.author?.toLowerCase() === user.login.toLowerCase());
+    return isAdmin || (p.author?.toLowerCase() === user?.login?.toLowerCase());
   }
 
   return (
@@ -77,26 +77,26 @@ export default function PluginsPage() {
 
         {loading ? <p className="muted">Loading…</p> : (
           <div className="table-wrap">
-            <table>
+            <table className="table--stack">
               <thead><tr>
                 <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Status</th><th></th>
               </tr></thead>
               <tbody>
                 {plugins.length === 0 && (
                   <tr><td colSpan={7} style={{ textAlign:'center', padding:'2rem' }} className="muted">
-                    {isAdmin ? <><Link to="/admin/plugins/new">Add the first plugin</Link></> : 'No plugins attributed to your account yet.'}
+                    {isAdmin ? <Link to="/admin/plugins/new">Add the first plugin</Link> : 'No plugins attributed to your account yet.'}
                   </td></tr>
                 )}
                 {plugins.map((p) => (
                   <tr key={p.id}>
-                    <td><strong style={{ fontSize:'var(--fs-sm)' }}>{p.namespace ? <span className="muted" style={{ fontWeight:400 }}>{p.namespace}/</span> : null}{p.name}</strong>
+                    <td data-label="Name"><strong style={{ fontSize:'var(--fs-sm)' }}>{p.namespace ? <span className="muted" style={{ fontWeight:400 }}>{p.namespace}/</span> : null}{p.name}</strong>
                       {p.description && <div className="muted truncate" style={{ fontSize:'var(--fs-xs)', maxWidth:240 }}>{p.description}</div>}
                     </td>
-                    <td><span className={`badge ${CAT_CLASS[p.category] ?? ''}`}>{p.category}</span></td>
-                    <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
-                    <td className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
-                    <td style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
-                    <td>
+                    <td data-label="Category"><span className={`badge ${CAT_CLASS[p.category] ?? ''}`}>{p.category}</span></td>
+                    <td data-label="Author" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
+                    <td data-label="License" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
+                    <td data-label="Latest" style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
+                    <td data-label="Status">
                       {p.status !== 'active' && (
                         <span style={{
                           display:'inline-block', padding:'1px 7px', borderRadius:4,
@@ -106,7 +106,7 @@ export default function PluginsPage() {
                         }}>{p.status}</span>
                       )}
                     </td>
-                    <td><div className="flex gap-sm">
+                    <td data-label="Actions"><div className="flex gap-sm">
                       {canEdit(p) ? (
                         <>
                           <Link to={`/admin/plugins/${p.id}`} className="btn btn--sm">Edit</Link>

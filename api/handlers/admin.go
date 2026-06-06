@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	appErrors "github.com/SemRels/semrel-registry/api/internal"
@@ -100,7 +101,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 		filePath = "plugins.json"
 	}
 
-	data, err := os.ReadFile(filePath)
+	resolvedPath, data, err := readPluginsJSON(filePath)
 	if err != nil {
 		writeError(c, http.StatusInternalServerError, "FILE_ERROR", fmt.Sprintf("cannot read %s", filePath), err)
 		return
@@ -164,8 +165,29 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 		"updated": updated,
 		"failed":  failed,
 		"total":   len(payload.Plugins),
-		"source":  filePath,
+		"source":  resolvedPath,
 	})
+}
+
+func readPluginsJSON(filePath string) (string, []byte, error) {
+	candidates := []string{filePath}
+	if !filepath.IsAbs(filePath) {
+		candidates = append(candidates, filepath.Join("..", filePath), filepath.Join("/app", filePath))
+	}
+
+	var lastErr error
+	for _, p := range candidates {
+		data, err := os.ReadFile(p)
+		if err == nil {
+			return p, data, nil
+		}
+		lastErr = err
+	}
+
+	if lastErr == nil {
+		lastErr = os.ErrNotExist
+	}
+	return "", nil, lastErr
 }
 
 // GetStats returns aggregate statistics about the registry.

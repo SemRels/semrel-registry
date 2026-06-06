@@ -24,13 +24,17 @@ async function request<T>(
 
   if (resp.status === 401) {
     localStorage.removeItem('admin_token');
-    window.location.href = '/login';
+    globalThis.location.href = '/login';
     throw new Error('Unauthorized');
   }
 
   if (!resp.ok) {
-    const body = await resp.json().catch(() => ({})) as { message?: string };
-    throw new Error(body.message ?? `HTTP ${resp.status}`);
+    const body = await resp.json().catch(() => ({})) as {
+      message?: string;
+      error?: { message?: string };
+    };
+    const message = body.message ?? body.error?.message;
+    throw new Error(message ?? `HTTP ${resp.status}`);
   }
 
   if (resp.status === 204) return undefined as T;

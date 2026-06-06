@@ -464,6 +464,66 @@ tbody tr:hover td { background: var(--bg-3); }
   /* Scrollable tables on mobile */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+  /* Stack table rows into card-like blocks for touch-friendly reading */
+  table.table--stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  table.table--stack tbody tr {
+    display: block;
+    padding: .6rem .75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.table--stack tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    border: 0;
+    padding: .2rem 0;
+    white-space: normal;
+  }
+  table.table--stack tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 6.2rem;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+  }
+  table.table--stack tbody td[data-label="Name"] {
+    display: block;
+    padding-bottom: .35rem;
+    margin-bottom: .35rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  table.table--stack tbody td[data-label="Name"]::before {
+    display: block;
+    margin-bottom: .2rem;
+  }
+  table.table--stack tbody td[data-label="Actions"] {
+    display: block;
+    padding-top: .45rem;
+    margin-top: .2rem;
+    border-top: 1px dashed var(--border);
+  }
+  table.table--stack tbody td[data-label="Actions"] > .flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+  }
+  table.table--stack tbody tr:last-child {
+    border-bottom: 0;
+  }
+
   /* Stat grid single column on very small screens */
   .stat-grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
 
