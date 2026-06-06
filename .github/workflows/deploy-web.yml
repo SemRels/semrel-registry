@@ -1,11 +1,11 @@
-name: Deploy registry web
+name: Deploy registry admin web
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'web/**'
+      - 'admin/**'
       - 'plugins.json'
       - 'docs/**'
       - 'schemas/**'
@@ -31,20 +31,20 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: admin/package-lock.json
 
-      - name: Install web dependencies
-        working-directory: ./web
+      - name: Install admin dependencies
+        working-directory: ./admin
         run: npm ci
 
-      - name: Build Astro site
-        working-directory: ./web
+      - name: Build admin site
+        working-directory: ./admin
         run: npm run build
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web/dist
+          publish_dir: ./admin/dist
           publish_branch: gh-pages
           force_orphan: true
