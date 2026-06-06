@@ -3,18 +3,23 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port           string
-	DatabaseURL    string
-	MigrateDir     string
-	Environment    string
-	StorageBackend string // "postgres" (default) or "file"
-	StorageDir     string // path used when StorageBackend == "file"
+	Port                 string
+	DatabaseURL          string
+	MigrateDir           string
+	Environment          string
+	StorageBackend       string // "postgres" (default) or "file"
+	StorageDir           string // path used when StorageBackend == "file"
+	MetricsQueueSize     int
+	MetricsBatchSize     int
+	MetricsFlushInterval time.Duration
 }
 
 // Load reads configuration from environment variables.
@@ -25,12 +30,15 @@ func Load() *Config {
 	loadDotEnv()
 
 	cfg := &Config{
-		Port:           getEnv("PORT", ":8080"),
-		DatabaseURL:    getEnv("DATABASE_URL", "postgres://dev:dev@localhost:5432/semrel_registry?sslmode=disable"),
-		MigrateDir:     getEnv("MIGRATE_DIR", resolveMigrateDir()),
-		Environment:    getEnv("ENVIRONMENT", "dev"),
-		StorageBackend: getEnv("STORAGE_BACKEND", "postgres"),
-		StorageDir:     getEnv("STORAGE_DIR", "./data"),
+		Port:                 getEnv("PORT", ":8080"),
+		DatabaseURL:          getEnv("DATABASE_URL", "postgres://dev:dev@localhost:5432/semrel_registry?sslmode=disable"),
+		MigrateDir:           getEnv("MIGRATE_DIR", resolveMigrateDir()),
+		Environment:          getEnv("ENVIRONMENT", "dev"),
+		StorageBackend:       getEnv("STORAGE_BACKEND", "postgres"),
+		StorageDir:           getEnv("STORAGE_DIR", "./data"),
+		MetricsQueueSize:     getEnvInt("METRICS_QUEUE_SIZE", 2048),
+		MetricsBatchSize:     getEnvInt("METRICS_BATCH_SIZE", 200),
+		MetricsFlushInterval: getEnvDuration("METRICS_FLUSH_INTERVAL", 2*time.Second),
 	}
 
 	cfg.Port = normalizePort(cfg.Port)
@@ -93,6 +101,30 @@ func getEnv(key, fallback string) string {
 	}
 
 	return value
+}
+
+func getEnvInt(key string, fallback int) int {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
+}
+
+func getEnvDuration(key string, fallback time.Duration) time.Duration {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := time.ParseDuration(value)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
 }
 
 func normalizePort(port string) string {

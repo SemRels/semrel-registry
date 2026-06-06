@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -15,10 +16,15 @@ import (
 
 type PluginHandler struct {
 	service service.PluginManager
+	metrics service.MetricsRecorder
 }
 
-func NewPluginHandler(pluginService service.PluginManager) *PluginHandler {
-	return &PluginHandler{service: pluginService}
+func NewPluginHandler(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *PluginHandler {
+	recorder := service.NewNoopMetricsRecorder()
+	if len(metrics) > 0 && metrics[0] != nil {
+		recorder = metrics[0]
+	}
+	return &PluginHandler{service: pluginService, metrics: recorder}
 }
 
 func Health() gin.HandlerFunc {
@@ -45,7 +51,7 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 	var forcedAuthor string
 
 	isAdmin, _ := c.Get("isAdmin")
-	login, _    := c.Get("login")
+	login, _ := c.Get("login")
 	loginStr, _ := login.(string)
 
 	if isAdmin == true {
@@ -93,6 +99,7 @@ func (h *PluginHandler) GetPlugin(c *gin.Context) {
 		HandleError(c, err)
 		return
 	}
+	h.metrics.Record(service.MetricEvent{PluginID: plugin.ID, Type: service.MetricTypeView, Source: "plugin-detail"})
 
 	c.JSON(http.StatusOK, gin.H{"data": plugin})
 }
@@ -105,6 +112,7 @@ func (h *PluginHandler) GetPluginByNamespace(c *gin.Context) {
 		HandleError(c, err)
 		return
 	}
+	h.metrics.Record(service.MetricEvent{PluginID: plugin.ID, Type: service.MetricTypeView, Source: "plugin-detail"})
 	c.JSON(http.StatusOK, gin.H{"data": plugin})
 }
 
@@ -132,9 +140,10 @@ func (h *PluginHandler) ListPluginVersionsByNamespace(c *gin.Context) {
 	}
 	out := make([]versionResponse, len(versions))
 	for i, v := range versions {
+		h.metrics.Record(service.MetricEvent{PluginID: v.PluginID, VersionID: v.ID, Type: service.MetricTypeView, Source: "version-list"})
 		out[i] = versionResponse{
 			PluginVersion: v,
-			DownloadURLs:  deriveDownloadURLs(v.DownloadURL, v.Checksums),
+			DownloadURLs:  buildNamespacedDownloadURLs(c, c.Param("namespace"), c.Param("name"), v),
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{"data": out})
@@ -163,13 +172,88 @@ func (h *PluginHandler) ListPluginVersions(c *gin.Context) {
 	}
 	out := make([]versionResponse, len(versions))
 	for i, v := range versions {
+		h.metrics.Record(service.MetricEvent{PluginID: v.PluginID, VersionID: v.ID, Type: service.MetricTypeView, Source: "version-list"})
 		out[i] = versionResponse{
 			PluginVersion: v,
-			DownloadURLs:  deriveDownloadURLs(v.DownloadURL, v.Checksums),
+			DownloadURLs:  buildPluginDownloadURLs(c, c.Param("id"), v),
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": out})
+}
+
+func (h *PluginHandler) DownloadPluginVersion(c *gin.Context) {
+	h.downloadVersionByRef(c, c.Param("id"))
+}
+
+func (h *PluginHandler) DownloadPluginVersionByNamespace(c *gin.Context) {
+	ref := "@" + c.Param("namespace") + "/" + c.Param("name")
+	h.downloadVersionByRef(c, ref)
+}
+
+func (h *PluginHandler) downloadVersionByRef(c *gin.Context, ref string) {
+	version, found, err := h.findVersion(c.Request.Context(), ref, c.Param("version"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+	if !found {
+		c.JSON(http.StatusNotFound, gin.H{"error": "version not found"})
+		return
+	}
+
+	target := version.DownloadURL
+	if platform := strings.TrimSpace(c.Query("platform")); platform != "" {
+		if derived := deriveDownloadURLs(version.DownloadURL, version.Checksums); len(derived) > 0 {
+			if perPlatform, ok := derived[platform]; ok {
+				target = perPlatform
+			}
+		}
+	}
+
+	h.metrics.Record(service.MetricEvent{PluginID: version.PluginID, VersionID: version.ID, Type: service.MetricTypeDownload, Source: "download-redirect"})
+	c.Redirect(http.StatusTemporaryRedirect, target)
+}
+
+func (h *PluginHandler) findVersion(ctx context.Context, ref, versionTag string) (models.PluginVersion, bool, error) {
+	offset := 0
+	for {
+		batch, err := h.service.ListVersions(ctx, ref, 100, offset)
+		if err != nil {
+			return models.PluginVersion{}, false, err
+		}
+		for _, v := range batch {
+			if v.Version == versionTag {
+				return v, true, nil
+			}
+		}
+		if len(batch) < 100 {
+			break
+		}
+		offset += 100
+	}
+	return models.PluginVersion{}, false, nil
+}
+
+func buildPluginDownloadURLs(c *gin.Context, pluginID string, version models.PluginVersion) map[string]string {
+	return buildTrackedDownloadURLs(c, deriveDownloadURLs(version.DownloadURL, version.Checksums),
+		fmt.Sprintf("/api/v1/plugins/%s/versions/%s/download", url.PathEscape(pluginID), url.PathEscape(version.Version)))
+}
+
+func buildNamespacedDownloadURLs(c *gin.Context, namespace, name string, version models.PluginVersion) map[string]string {
+	return buildTrackedDownloadURLs(c, deriveDownloadURLs(version.DownloadURL, version.Checksums),
+		fmt.Sprintf("/api/v1/plugins/@%s/%s/versions/%s/download", url.PathEscape(namespace), url.PathEscape(name), url.PathEscape(version.Version)))
+}
+
+func buildTrackedDownloadURLs(_ *gin.Context, source map[string]string, endpoint string) map[string]string {
+	if len(source) == 0 {
+		return nil
+	}
+	tracked := make(map[string]string, len(source))
+	for platform := range source {
+		tracked[platform] = endpoint + "?platform=" + url.QueryEscape(platform)
+	}
+	return tracked
 }
 
 func (h *PluginHandler) CreatePlugin(c *gin.Context) {

@@ -21,6 +21,7 @@ func main() {
 	}
 
 	var pluginRepo repository.PluginRepository
+	metricsRecorder := service.NewNoopMetricsRecorder()
 
 	switch cfg.StorageBackend {
 	case "file":
@@ -52,7 +53,17 @@ func main() {
 		}
 
 		pluginRepo = repository.NewPluginRepository(db)
+		metricsRecorder = service.NewAsyncMetricsRecorder(db, service.MetricsConfig{
+			BufferSize:    cfg.MetricsQueueSize,
+			BatchSize:     cfg.MetricsBatchSize,
+			FlushInterval: cfg.MetricsFlushInterval,
+		})
 	}
+	defer func() {
+		if err := metricsRecorder.Close(context.Background()); err != nil {
+			log.Printf("metrics shutdown warning: %v", err)
+		}
+	}()
 
 	pluginService := service.NewPluginService(pluginRepo)
 
@@ -61,7 +72,7 @@ func main() {
 		log.Printf("seed warning: %v", err)
 	}
 
-	router := newRouter(pluginService)
+	router := newRouter(pluginService, metricsRecorder)
 
 	log.Printf("server listening on %s", cfg.Port)
 	if err := router.Run(cfg.Port); err != nil {
@@ -69,9 +80,14 @@ func main() {
 	}
 }
 
-func newRouter(pluginService service.PluginManager) *gin.Engine {
+func newRouter(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *gin.Engine {
 	router := gin.New()
 	router.Use(handlers.ErrorHandler(), handlers.RequestLogger(), handlers.CORSMiddleware())
+
+	metricsRecorder := service.NewNoopMetricsRecorder()
+	if len(metrics) > 0 && metrics[0] != nil {
+		metricsRecorder = metrics[0]
+	}
 
 	// GitHub OAuth routes (public).
 	authHandler := handlers.NewAuthHandler()
@@ -95,13 +111,15 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 
 	// Public read endpoints — with OptionalAuth so admins can filter by status.
 	optionalAuth := middleware.OptionalAuth(authHandler)
-	pluginHandler := handlers.NewPluginHandler(pluginService)
+	pluginHandler := handlers.NewPluginHandler(pluginService, metricsRecorder)
 	api.GET("/plugins", optionalAuth, pluginHandler.ListPlugins)
 	api.GET("/plugins/:id", optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
+	api.GET("/plugins/:id/versions/:version/download", pluginHandler.DownloadPluginVersion)
 	// Namespaced plugin lookup: GET /api/v1/plugins/@semrel/provider-github
 	api.GET("/plugins/@:namespace/:name", optionalAuth, pluginHandler.GetPluginByNamespace)
 	api.GET("/plugins/@:namespace/:name/versions", pluginHandler.ListPluginVersionsByNamespace)
+	api.GET("/plugins/@:namespace/:name/versions/:version/download", pluginHandler.DownloadPluginVersionByNamespace)
 
 	adminHandler := handlers.NewAdminHandler(pluginService)
 	api.GET("/stats", adminHandler.GetStats)

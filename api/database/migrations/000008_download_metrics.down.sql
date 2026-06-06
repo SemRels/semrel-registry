@@ -5,7 +5,8 @@ DROP INDEX IF EXISTS idx_metric_events_metric_type;
 DROP INDEX IF EXISTS idx_metric_events_version_id;
 DROP INDEX IF EXISTS idx_metric_events_plugin_id;
 
-DROP TABLE IF EXISTS metric_daily;
+DROP TABLE IF EXISTS metric_daily_version;
+DROP TABLE IF EXISTS metric_daily_plugin;
 DROP TABLE IF EXISTS metric_events;
 
 ALTER TABLE plugin_versions
