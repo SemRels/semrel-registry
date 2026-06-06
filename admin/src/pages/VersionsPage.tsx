@@ -93,10 +93,16 @@ export default function VersionsPage() {
                       ? <span className="badge" style={{ background:'rgba(210,153,34,.15)',color:'var(--warning)',borderColor:'rgba(210,153,34,.3)' }}>pre</span>
                       : <span className="badge" style={{ background:'rgba(63,185,80,.12)',color:'var(--success)',borderColor:'rgba(63,185,80,.25)' }}>stable</span>
                     }</td>
-                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{v.views.toLocaleString()}</td>
-                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{v.downloads.toLocaleString()}</td>
+                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.views ?? 0).toLocaleString()}</td>
+                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.downloads ?? 0).toLocaleString()}</td>
                     <td data-label="Download" style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
-                      <a href={v.downloadUrl} target="_blank" rel="noopener">{v.downloadUrl}</a>
+                      <a
+                        href={`/api/v1/plugins/${encodeURIComponent(id ?? '')}/versions/${encodeURIComponent(v.version)}/download`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Download via registry
+                      </a>
                     </td>
                     <td data-label="Platforms" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.checksums ? Object.keys(v.checksums).length : 0}</td>
                   </tr>

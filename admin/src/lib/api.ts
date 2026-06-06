@@ -135,6 +135,8 @@ export async function listPlugins(params?: {
   search?: string;
   author?: string;
   status?: string;
+  sort?: 'name' | 'category' | 'created_at' | 'updated_at' | 'downloads' | 'views';
+  order?: 'asc' | 'desc';
 }): Promise<PluginListResponse> {
   const qs = new URLSearchParams();
   if (params?.page)     qs.set('page',     String(params.page));
@@ -143,6 +145,8 @@ export async function listPlugins(params?: {
   if (params?.search)   qs.set('search',   params.search);
   if (params?.author)   qs.set('author',   params.author);
   if (params?.status)   qs.set('status',   params.status);
+  if (params?.sort)     qs.set('sort',     params.sort);
+  if (params?.order)    qs.set('order',    params.order);
   return request<PluginListResponse>(`/plugins?${qs}`);
 }
 

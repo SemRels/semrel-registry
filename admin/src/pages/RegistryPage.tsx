@@ -13,6 +13,8 @@ type Plugin = {
   license: string;
   tags: string[];
   latestVersion?: string;
+  views?: number;
+  downloads?: number;
 };
 
 type Pagination = { total: number; page: number; limit: number; pages: number };
@@ -191,6 +193,34 @@ export default function RegistryPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontFamily: 'monospace',
+                          background: 'rgba(63,185,80,.12)',
+                          color: 'var(--success)',
+                          borderRadius: 5,
+                          padding: '1px 7px',
+                          fontWeight: 600,
+                        }}
+                        title="Total downloads"
+                      >
+                        D {Number(p.downloads ?? 0).toLocaleString()}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontFamily: 'monospace',
+                          background: 'rgba(56,139,253,.12)',
+                          color: 'var(--accent)',
+                          borderRadius: 5,
+                          padding: '1px 7px',
+                          fontWeight: 600,
+                        }}
+                        title="Total views"
+                      >
+                        V {Number(p.views ?? 0).toLocaleString()}
+                      </span>
                       {p.latestVersion && (() => {
                         const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');

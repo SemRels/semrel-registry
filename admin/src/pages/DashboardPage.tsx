@@ -4,6 +4,145 @@ import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 
+type TrendPoint = { period: string; views: number; downloads: number };
+
+function buildZeroSeries(range: 'day' | 'week' | 'month'): TrendPoint[] {
+  const now = new Date();
+  const out: TrendPoint[] = [];
+  const count = range === 'day' ? 14 : 12;
+
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now);
+    if (range === 'day') {
+      d.setDate(d.getDate() - i);
+      out.push({ period: d.toISOString().slice(0, 10), views: 0, downloads: 0 });
+      continue;
+    }
+    if (range === 'week') {
+      d.setDate(d.getDate() - i * 7);
+      const weekStart = new Date(d);
+      const day = (weekStart.getDay() + 6) % 7;
+      weekStart.setDate(weekStart.getDate() - day);
+      const year = weekStart.getUTCFullYear();
+      const firstThursday = new Date(Date.UTC(year, 0, 4));
+      const firstWeekStart = new Date(firstThursday);
+      firstWeekStart.setUTCDate(firstThursday.getUTCDate() - ((firstThursday.getUTCDay() + 6) % 7));
+      const diff = Math.round((weekStart.getTime() - firstWeekStart.getTime()) / (7 * 24 * 3600 * 1000));
+      const week = Math.max(1, diff + 1);
+      out.push({ period: `${year}-W${String(week).padStart(2, '0')}`, views: 0, downloads: 0 });
+      continue;
+    }
+    d.setMonth(d.getMonth() - i);
+    out.push({ period: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, views: 0, downloads: 0 });
+  }
+
+  return out;
+}
+
+function linePath(values: number[], width: number, height: number, pad: number): string {
+  if (values.length === 0) return '';
+  const max = Math.max(1, ...values);
+  const innerW = width - pad * 2;
+  const innerH = height - pad * 2;
+  return values.map((v, i) => {
+    const x = pad + (values.length === 1 ? innerW / 2 : (i / (values.length - 1)) * innerW);
+    const y = pad + innerH - (v / max) * innerH;
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+}
+
+function SeriesLineChart({
+  data,
+  hoveredIndex,
+  onHoverIndexChange,
+}: Readonly<{
+  data: TrendPoint[];
+  hoveredIndex: number | null;
+  onHoverIndexChange: (index: number | null) => void;
+}>) {
+  const width = 760;
+  const height = 220;
+  const pad = 18;
+  const ordered = [...data].reverse();
+  const views = ordered.map((p) => p.views ?? 0);
+  const downloads = ordered.map((p) => p.downloads ?? 0);
+  const max = Math.max(1, ...views, ...downloads);
+  const innerW = width - pad * 2;
+  const innerH = height - pad * 2;
+  const step = ordered.length <= 1 ? 0 : innerW / (ordered.length - 1);
+  const pointX = (idx: number) => pad + (ordered.length === 1 ? innerW / 2 : idx * step);
+  const pointY = (value: number) => pad + innerH - (value / max) * innerH;
+  const viewPath = linePath(views, width, height, pad);
+  const downloadPath = linePath(downloads, width, height, pad);
+  const hoverX = hoveredIndex === null ? null : pointX(hoveredIndex);
+  const hoverViewsY = hoveredIndex === null ? null : pointY(views[hoveredIndex] ?? 0);
+  const hoverDownloadsY = hoveredIndex === null ? null : pointY(downloads[hoveredIndex] ?? 0);
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width="100%"
+      height="220"
+      role="img"
+      aria-label="Trend chart for views and downloads"
+      onMouseLeave={() => onHoverIndexChange(null)}
+    >
+      <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(13,17,23,.25)" />
+      <path d={viewPath} fill="none" stroke="rgba(56,139,253,.95)" strokeWidth="2.5" />
+      <path d={downloadPath} fill="none" stroke="rgba(63,185,80,.95)" strokeWidth="2.5" />
+      {hoverX !== null && (
+        <>
+          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.4)" strokeDasharray="3 3" />
+          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="4" fill="rgba(56,139,253,.95)" />
+          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="4" fill="rgba(63,185,80,.95)" />
+        </>
+      )}
+      {ordered.map((point, idx) => {
+        const x = pointX(idx);
+        const hit = Math.max(12, step || 24);
+        return (
+          <rect
+            key={point.period}
+            x={x - hit / 2}
+            y={pad}
+            width={hit}
+            height={innerH}
+            fill="transparent"
+            onMouseEnter={() => onHoverIndexChange(idx)}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlugins']> }>) {
+  if (!data || data.length === 0) return null;
+  const max = Math.max(1, ...data.map((d) => Math.max(d.views, d.downloads)));
+  return (
+    <div style={{ display: 'grid', gap: '.6rem' }}>
+      {data.slice(0, 6).map((item) => {
+        const views = Number(item.views ?? 0);
+        const downloads = Number(item.downloads ?? 0);
+        const v = Math.max(2, Math.round((views / max) * 100));
+        const d = Math.max(2, Math.round((downloads / max) * 100));
+        return (
+          <div key={item.pluginId} style={{ display: 'grid', gap: '.2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)' }}>
+              <span>{item.namespace ? `${item.namespace}/` : ''}{item.name}</span>
+              <span className="muted">V {views.toLocaleString()} · D {downloads.toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'grid', gap: '.2rem' }}>
+              <div style={{ width: `${v}%`, height: 6, borderRadius: 999, background: 'rgba(56,139,253,.7)' }} />
+              <div style={{ width: `${d}%`, height: 6, borderRadius: 999, background: 'rgba(63,185,80,.75)' }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const user    = useCurrentUser();
   const navigate = useNavigate();
@@ -19,6 +158,11 @@ export default function DashboardPage() {
   const [pending, setPending]                 = useState<Plugin[]>([]);
   const [pendingLoading, setPendingLoading]   = useState(true);
   const [seriesRange, setSeriesRange]         = useState<'day' | 'week' | 'month'>('day');
+  const [hoveredSeriesIndex, setHoveredSeriesIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    setHoveredSeriesIndex(null);
+  }, [seriesRange, stats?.timestamp]);
 
   useEffect(() => {
     getStats().then(setStats).catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed'));
@@ -80,11 +224,20 @@ export default function DashboardPage() {
       )
     : null;
 
-  const activeSeries = stats?.series?.[seriesRange] ?? [];
-  const maxSeriesValue = activeSeries.reduce((max, point) => {
-    const localMax = Math.max(point.views ?? 0, point.downloads ?? 0);
-    return Math.max(localMax, max);
-  }, 1);
+  const rawSeries = stats?.series?.[seriesRange] ?? [];
+  const activeSeries = rawSeries.length > 0 ? rawSeries : buildZeroSeries(seriesRange);
+  const categories = stats?.categories ?? {};
+  const totalPlugins = Number(stats?.totalPlugins ?? 0);
+  const totalViews = Number(stats?.totalViews ?? 0);
+  const totalDownloads = Number(stats?.totalDownloads ?? 0);
+  const topPlugins = stats?.topPlugins ?? [];
+  const topVersions = stats?.topVersions ?? [];
+  const orderedSeries = [...activeSeries].reverse();
+  const activePoint = (() => {
+    if (orderedSeries.length === 0) return null;
+    if (hoveredSeriesIndex !== null && orderedSeries[hoveredSeriesIndex]) return orderedSeries[hoveredSeriesIndex];
+    return orderedSeries[orderedSeries.length - 1] ?? null;
+  })();
 
   return (
     <>
@@ -128,20 +281,20 @@ export default function DashboardPage() {
           <div className="stat-grid">
             <div className="stat-card">
               <div className="stat-card__label">Total</div>
-              <div className="stat-card__value">{stats.totalPlugins}</div>
+              <div className="stat-card__value">{totalPlugins}</div>
             </div>
             <div className="stat-card">
               <div className="stat-card__label">Views</div>
-              <div className="stat-card__value">{stats.totalViews.toLocaleString()}</div>
+              <div className="stat-card__value">{totalViews.toLocaleString()}</div>
             </div>
             <div className="stat-card">
               <div className="stat-card__label">Downloads</div>
-              <div className="stat-card__value">{stats.totalDownloads.toLocaleString()}</div>
+              <div className="stat-card__value">{totalDownloads.toLocaleString()}</div>
             </div>
-            {Object.entries(stats.categories).map(([cat, count]) => (
+            {Object.entries(categories).map(([cat, count]) => (
               <div key={cat} className="stat-card">
                 <div className="stat-card__label">{cat}</div>
-                <div className="stat-card__value">{count}</div>
+                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
               </div>
             ))}
           </div>
@@ -162,69 +315,71 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-            {activeSeries.length === 0 ? (
-              <p className="muted" style={{ marginTop: '.75rem' }}>No trend data yet.</p>
-            ) : (
-              <div style={{ marginTop: '.75rem', display: 'grid', gap: '.5rem' }}>
-                {activeSeries.map((point) => {
-                  const downloadWidth = Math.max(2, Math.round(((point.downloads ?? 0) / maxSeriesValue) * 100));
-                  const viewWidth = Math.max(2, Math.round(((point.views ?? 0) / maxSeriesValue) * 100));
-                  return (
-                    <div key={point.period} style={{ display: 'grid', gap: '.25rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)' }}>
-                        <span>{point.period}</span>
-                        <span className="muted">V {point.views.toLocaleString()} · D {point.downloads.toLocaleString()}</span>
-                      </div>
-                      <div style={{ display: 'grid', gap: '.25rem' }}>
-                        <div style={{ width: `${viewWidth}%`, height: 6, borderRadius: 999, background: 'rgba(56,139,253,.6)' }} />
-                        <div style={{ width: `${downloadWidth}%`, height: 6, borderRadius: 999, background: 'rgba(63,185,80,.75)' }} />
-                      </div>
-                    </div>
-                  );
-                })}
+            <div style={{ marginTop: '.75rem' }}>
+              <SeriesLineChart
+                data={activeSeries}
+                hoveredIndex={hoveredSeriesIndex}
+                onHoverIndexChange={setHoveredSeriesIndex}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '.4rem', fontSize: 'var(--fs-xs)' }}>
+                <span style={{ color: 'rgba(56,139,253,.95)' }}>Views</span>
+                <span style={{ color: 'rgba(63,185,80,.95)' }}>Downloads</span>
               </div>
-            )}
+              {rawSeries.length === 0 && (
+                <div style={{ marginTop: '.4rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                  Noch keine Events vorhanden. Die Grafik zeigt aktuell eine 0-Basislinie.
+                </div>
+              )}
+              {activePoint && (
+                <div style={{ marginTop: '.5rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                  <strong>{activePoint.period}</strong> · Views {Number(activePoint.views ?? 0).toLocaleString()} · Downloads {Number(activePoint.downloads ?? 0).toLocaleString()}
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
             <div className="card">
               <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top plugins</h2>
-              {!stats.topPlugins || stats.topPlugins.length === 0 ? (
+              {topPlugins.length === 0 ? (
                 <p className="muted">No plugin metrics yet.</p>
               ) : (
-                <div className="table-wrap">
+                <>
+                <TopPluginsBarChart data={topPlugins} />
+                <div className="table-wrap" style={{ marginTop: '.8rem' }}>
                   <table className="table--stack">
                     <thead><tr><th>Plugin</th><th>Category</th><th>Views</th><th>Downloads</th></tr></thead>
                     <tbody>
-                      {stats.topPlugins.map((item) => (
+                      {topPlugins.map((item) => (
                         <tr key={item.pluginId}>
                           <td data-label="Plugin">{item.namespace ? `${item.namespace}/` : ''}{item.name}</td>
                           <td data-label="Category" className="muted">{item.category}</td>
-                          <td data-label="Views">{item.views.toLocaleString()}</td>
-                          <td data-label="Downloads">{item.downloads.toLocaleString()}</td>
+                          <td data-label="Views">{Number(item.views ?? 0).toLocaleString()}</td>
+                          <td data-label="Downloads">{Number(item.downloads ?? 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
 
             <div className="card">
               <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top versions</h2>
-              {!stats.topVersions || stats.topVersions.length === 0 ? (
+              {topVersions.length === 0 ? (
                 <p className="muted">No version metrics yet.</p>
               ) : (
                 <div className="table-wrap">
                   <table className="table--stack">
                     <thead><tr><th>Version</th><th>Plugin</th><th>Views</th><th>Downloads</th></tr></thead>
                     <tbody>
-                      {stats.topVersions.map((item) => (
+                      {topVersions.map((item) => (
                         <tr key={item.versionId}>
                           <td data-label="Version"><code>v{item.version}</code></td>
                           <td data-label="Plugin">{item.namespace ? `${item.namespace}/` : ''}{item.pluginName}</td>
-                          <td data-label="Views">{item.views.toLocaleString()}</td>
-                          <td data-label="Downloads">{item.downloads.toLocaleString()}</td>
+                          <td data-label="Views">{Number(item.views ?? 0).toLocaleString()}</td>
+                          <td data-label="Downloads">{Number(item.downloads ?? 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>

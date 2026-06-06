@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { listPlugins, deletePlugin } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
@@ -12,21 +12,45 @@ const CAT_CLASS: Record<string, string> = {
 export default function PluginsPage() {
   const user                          = useCurrentUser();
   const isAdmin                       = user?.isAdmin ?? false;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialPage = Number.parseInt(searchParams.get('page') ?? '1', 10);
+  const initialSort = (searchParams.get('sort') as 'name' | 'downloads' | 'views' | null) ?? 'name';
+  const initialOrder = (searchParams.get('order') as 'asc' | 'desc' | null) ?? 'asc';
   const [plugins, setPlugins]         = useState<Plugin[]>([]);
   const [pagination, setPagination]   = useState<Pagination | null>(null);
-  const [search, setSearch]           = useState('');
-  const [category, setCategory]       = useState('');
-  const [page, setPage]               = useState(1);
+  const [search, setSearch]           = useState(searchParams.get('search') ?? '');
+  const [category, setCategory]       = useState(searchParams.get('category') ?? '');
+  const [sort, setSort]               = useState<'name' | 'downloads' | 'views'>(initialSort);
+  const [order, setOrder]             = useState<'asc' | 'desc'>(initialOrder);
+  const [page, setPage]               = useState(Number.isFinite(initialPage) && initialPage > 0 ? initialPage : 1);
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
   const navigate                      = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    if (sort !== 'name') params.set('sort', sort);
+    if (order !== 'asc') params.set('order', order);
+    if (page > 1) params.set('page', String(page));
+    setSearchParams(params, { replace: true });
+  }, [search, category, sort, order, page, setSearchParams]);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     setLoading(true);
     const author = isAdmin ? undefined : (user.login || undefined);
-    listPlugins({ page, limit: 25, search: search || undefined, category: category || undefined, author })
+    listPlugins({
+      page,
+      limit: 25,
+      search: search || undefined,
+      category: category || undefined,
+      author,
+      sort,
+      order,
+    })
       .then((res) => {
         if (cancelled) return;
         setPlugins(res.data ?? []);
@@ -36,7 +60,7 @@ export default function PluginsPage() {
       })
       .catch((e: unknown) => { if (!cancelled) { setError(e instanceof Error ? e.message : 'Failed'); setLoading(false); } });
     return () => { cancelled = true; };
-  }, [page, search, category, user, isAdmin]);
+  }, [page, search, category, sort, order, user, isAdmin]);
 
   async function handleDelete(p: Plugin) {
     if (!globalThis.confirm(`Delete "${p.name}"?`)) return;
@@ -73,6 +97,20 @@ export default function PluginsPage() {
             <option value="">All categories</option>
             {['provider','analyzer','condition','hook','updater'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+          <select className="select" style={{ width: 180 }} value={`${sort}:${order}`}
+            onChange={(e) => {
+              const [nextSort, nextOrder] = e.target.value.split(':') as ['name' | 'downloads' | 'views', 'asc' | 'desc'];
+              setSort(nextSort);
+              setOrder(nextOrder);
+              setPage(1);
+            }}>
+            <option value="name:asc">Name A-Z</option>
+            <option value="name:desc">Name Z-A</option>
+            <option value="downloads:desc">Downloads high-low</option>
+            <option value="downloads:asc">Downloads low-high</option>
+            <option value="views:desc">Views high-low</option>
+            <option value="views:asc">Views low-high</option>
+          </select>
         </div>
 
         {loading ? <p className="muted">Loading…</p> : (
@@ -96,8 +134,8 @@ export default function PluginsPage() {
                     <td data-label="Author" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
                     <td data-label="License" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
                     <td data-label="Latest" style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
-                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{p.views.toLocaleString()}</td>
-                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{p.downloads.toLocaleString()}</td>
+                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.views ?? 0).toLocaleString()}</td>
+                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.downloads ?? 0).toLocaleString()}</td>
                     <td data-label="Status">
                       {p.status !== 'active' && (
                         <span style={{

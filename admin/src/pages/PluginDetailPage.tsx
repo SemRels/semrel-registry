@@ -14,6 +14,8 @@ type Plugin = {
   license: string;
   tags: string[];
   status: string;
+  views?: number;
+  downloads?: number;
 };
 
 type Version = {
@@ -25,6 +27,8 @@ type Version = {
   downloadUrls?: Record<string, string>;
   checksums?: Record<string, string>;
   prerelease: boolean;
+  views?: number;
+  downloads?: number;
 };
 
 const CAT_CLASS: Record<string, string> = {
@@ -239,6 +243,34 @@ export default function PluginDetailPage() {
                       {isDevVersion(latest.version) && <span style={{ marginLeft: '.3rem', fontSize: '9px', opacity: .8 }}>dev</span>}
                     </span>
                   )}
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontFamily: 'monospace',
+                      background: 'rgba(63,185,80,.12)',
+                      color: 'var(--success)',
+                      borderRadius: 5,
+                      padding: '1px 7px',
+                      fontWeight: 600,
+                    }}
+                    title="Total downloads"
+                  >
+                    D {Number(plugin.downloads ?? 0).toLocaleString()}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontFamily: 'monospace',
+                      background: 'rgba(56,139,253,.12)',
+                      color: 'var(--accent)',
+                      borderRadius: 5,
+                      padding: '1px 7px',
+                      fontWeight: 600,
+                    }}
+                    title="Total views"
+                  >
+                    V {Number(plugin.views ?? 0).toLocaleString()}
+                  </span>
                 </div>
                 <p className="muted" style={{ margin: '0 0 .5rem', fontSize: 'var(--fs-md)' }}>
                   {plugin.description || 'No description.'}
@@ -325,6 +357,7 @@ export default function PluginDetailPage() {
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Stats</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
                       </tr>
                     </thead>
@@ -345,6 +378,16 @@ export default function PluginDetailPage() {
                             <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
                               semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
                             </code>
+                          </td>
+                          <td data-label="Stats" style={{ padding: '.5rem' }}>
+                            <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '10px', fontFamily: 'monospace', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>
+                                D {Number(v.downloads ?? 0).toLocaleString()}
+                              </span>
+                              <span style={{ fontSize: '10px', fontFamily: 'monospace', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 4, padding: '1px 6px' }}>
+                                V {Number(v.views ?? 0).toLocaleString()}
+                              </span>
+                            </div>
                           </td>
                           <td data-label="Downloads" style={{ padding: '.5rem' }}>
                             <DownloadLinks downloadUrls={v.downloadUrls} />
