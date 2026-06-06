@@ -237,4 +237,3 @@ func (sp syncPlugin) ref() string {
 	}
 	return sp.Name
 }
-

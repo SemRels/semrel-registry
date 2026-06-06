@@ -582,8 +582,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	}
 
 	// Detect language by presence of go.mod or Cargo.toml.
-	hasGoMod, _    := checkGHFile(owner, repo, "go.mod")
-	hasCargo, _    := checkGHFile(owner, repo, "Cargo.toml")
+	hasGoMod, _ := checkGHFile(owner, repo, "go.mod")
+	hasCargo, _ := checkGHFile(owner, repo, "Cargo.toml")
 
 	var lang string
 	switch {
