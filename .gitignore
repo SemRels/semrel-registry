@@ -11,10 +11,10 @@ node_modules/
 dist/
 
 # Astro web app
-web\node_modules\
-web\dist\
-web\.astro\
-web\public\plugins.json
+web/node_modules/
+web/dist/
+web/.astro/
+web/public/plugins.json
 
 # Local dev
 api/.env

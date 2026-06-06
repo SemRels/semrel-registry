@@ -1,15 +1,39 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { clearToken } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user     = useCurrentUser();
   const isAdmin  = user?.isAdmin ?? false;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    globalThis.addEventListener('keydown', onKeyDown);
+    return () => globalThis.removeEventListener('keydown', onKeyDown);
+  }, [sidebarOpen]);
 
   return (
     <div className="app">
-      <aside className="sidebar">
+      <button
+        type="button"
+        className={`sidebar-backdrop${sidebarOpen ? ' open' : ''}`}
+        aria-label="Close navigation"
+        aria-hidden={!sidebarOpen}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      <aside id="admin-navigation" className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <NavLink to="/" className="sidebar__brand">
           <img src="/semrel.svg" alt="semrel" style={{ width:'1.5rem', height:'1.5rem', flexShrink:0 }} />
           <span>semrel Registry</span>
@@ -62,6 +86,22 @@ export default function Layout() {
         </div>
       </aside>
       <main className="page">
+        <div className="topbar">
+          <button
+            type="button"
+            className="sidebar__toggle"
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-label="Toggle navigation"
+            aria-controls="admin-navigation"
+            aria-expanded={sidebarOpen}
+          >
+            ☰
+          </button>
+          <NavLink to="/admin" className="topbar__brand">
+            <img src="/semrel.svg" alt="semrel" style={{ width:'1.25rem', height:'1.25rem', flexShrink:0 }} />
+            <span>semrel Registry</span>
+          </NavLink>
+        </div>
         <Outlet />
       </main>
     </div>
