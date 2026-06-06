@@ -30,6 +30,9 @@ services:
       ENVIRONMENT: dev
       ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-secret}
       MIGRATE_DIR: /app/database/migrations
+      PLUGINS_JSON_PATH: /app/plugins.json
+      GITHUB_ORG_NAMESPACE: ${GITHUB_ORG_NAMESPACE:-@semrel}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     ports:
       - "8080:8080"
     volumes:

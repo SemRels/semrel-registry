@@ -44,6 +44,13 @@ func main() {
 			log.Fatalf("migration failed: %v", err)
 		}
 
+		deleted, normalized, err := db.CleanupSemrelDuplicates(context.Background())
+		if err != nil {
+			log.Printf("startup cleanup warning: %v", err)
+		} else if deleted > 0 || normalized > 0 {
+			log.Printf("startup cleanup: deleted %d duplicate rows, normalized %d rows", deleted, normalized)
+		}
+
 		pluginRepo = repository.NewPluginRepository(db)
 	}
 
@@ -70,7 +77,7 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	authHandler := handlers.NewAuthHandler()
 	router.GET("/auth/github", authHandler.Redirect)
 	router.GET("/auth/github/callback", authHandler.Callback)
-	router.GET("/auth/callback", authHandler.Callback)  // alias: GitHub App configured without /github
+	router.GET("/auth/callback", authHandler.Callback) // alias: GitHub App configured without /github
 	router.GET("/auth/config", authHandler.Config)
 
 	router.GET("/", func(c *gin.Context) {
@@ -113,7 +120,7 @@ func newRouter(pluginService service.PluginManager) *gin.Engine {
 	api.POST("/webhooks/release", syncHandler.WebhookRelease)
 
 	// Protected endpoints — any authenticated user.
-	requireAuth  := middleware.RequireAuth(authHandler)
+	requireAuth := middleware.RequireAuth(authHandler)
 	requireAdmin := middleware.RequireAdmin(authHandler)
 
 	authRoutes := api.Group("")
