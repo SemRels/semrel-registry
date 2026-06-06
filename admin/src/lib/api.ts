@@ -93,6 +93,28 @@ export interface Stats {
   categories: Record<string, number>;
   totalViews: number;
   totalDownloads: number;
+  topPlugins?: Array<{
+    pluginId: number;
+    namespace?: string;
+    name: string;
+    category: string;
+    views: number;
+    downloads: number;
+  }>;
+  topVersions?: Array<{
+    versionId: number;
+    pluginId: number;
+    namespace?: string;
+    pluginName: string;
+    version: string;
+    views: number;
+    downloads: number;
+  }>;
+  series?: Record<string, Array<{
+    period: string;
+    views: number;
+    downloads: number;
+  }>>;
   timestamp: string;
 }
 

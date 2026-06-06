@@ -83,7 +83,7 @@ export default function VersionsPage() {
         ) : (
           <div className="table-wrap">
             <table className="table--stack">
-              <thead><tr><th>Version</th><th>Released</th><th>Channel</th><th>Download URL</th><th>Platforms</th></tr></thead>
+              <thead><tr><th>Version</th><th>Released</th><th>Channel</th><th>Views</th><th>Downloads</th><th>Download URL</th><th>Platforms</th></tr></thead>
               <tbody>
                 {versions.map(v => (
                   <tr key={v.id}>
@@ -93,6 +93,8 @@ export default function VersionsPage() {
                       ? <span className="badge" style={{ background:'rgba(210,153,34,.15)',color:'var(--warning)',borderColor:'rgba(210,153,34,.3)' }}>pre</span>
                       : <span className="badge" style={{ background:'rgba(63,185,80,.12)',color:'var(--success)',borderColor:'rgba(63,185,80,.25)' }}>stable</span>
                     }</td>
+                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{v.views.toLocaleString()}</td>
+                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{v.downloads.toLocaleString()}</td>
                     <td data-label="Download" style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
                       <a href={v.downloadUrl} target="_blank" rel="noopener">{v.downloadUrl}</a>
                     </td>

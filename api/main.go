@@ -22,6 +22,7 @@ func main() {
 
 	var pluginRepo repository.PluginRepository
 	metricsRecorder := service.NewNoopMetricsRecorder()
+	statsProvider := service.NewNoopRegistryStatsProvider()
 
 	switch cfg.StorageBackend {
 	case "file":
@@ -58,6 +59,7 @@ func main() {
 			BatchSize:     cfg.MetricsBatchSize,
 			FlushInterval: cfg.MetricsFlushInterval,
 		})
+		statsProvider = service.NewPostgresRegistryStatsProvider(db)
 	}
 	defer func() {
 		if err := metricsRecorder.Close(context.Background()); err != nil {
@@ -72,7 +74,7 @@ func main() {
 		log.Printf("seed warning: %v", err)
 	}
 
-	router := newRouter(pluginService, metricsRecorder)
+	router := newRouter(pluginService, routerDependencies{metrics: metricsRecorder, stats: statsProvider})
 
 	log.Printf("server listening on %s", cfg.Port)
 	if err := router.Run(cfg.Port); err != nil {
@@ -80,13 +82,24 @@ func main() {
 	}
 }
 
-func newRouter(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *gin.Engine {
+type routerDependencies struct {
+	metrics service.MetricsRecorder
+	stats   service.RegistryStatsProvider
+}
+
+func newRouter(pluginService service.PluginManager, deps ...routerDependencies) *gin.Engine {
 	router := gin.New()
 	router.Use(handlers.ErrorHandler(), handlers.RequestLogger(), handlers.CORSMiddleware())
 
 	metricsRecorder := service.NewNoopMetricsRecorder()
-	if len(metrics) > 0 && metrics[0] != nil {
-		metricsRecorder = metrics[0]
+	statsProvider := service.NewNoopRegistryStatsProvider()
+	if len(deps) > 0 {
+		if deps[0].metrics != nil {
+			metricsRecorder = deps[0].metrics
+		}
+		if deps[0].stats != nil {
+			statsProvider = deps[0].stats
+		}
 	}
 
 	// GitHub OAuth routes (public).
@@ -121,7 +134,7 @@ func newRouter(pluginService service.PluginManager, metrics ...service.MetricsRe
 	api.GET("/plugins/@:namespace/:name/versions", pluginHandler.ListPluginVersionsByNamespace)
 	api.GET("/plugins/@:namespace/:name/versions/:version/download", pluginHandler.DownloadPluginVersionByNamespace)
 
-	adminHandler := handlers.NewAdminHandler(pluginService)
+	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
 	api.GET("/stats", adminHandler.GetStats)
 
 	// Plugin standards validation (public — no auth needed to check).

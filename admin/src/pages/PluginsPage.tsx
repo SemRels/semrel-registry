@@ -79,11 +79,11 @@ export default function PluginsPage() {
           <div className="table-wrap">
             <table className="table--stack">
               <thead><tr>
-                <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Status</th><th></th>
+                <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Views</th><th>Downloads</th><th>Status</th><th></th>
               </tr></thead>
               <tbody>
                 {plugins.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign:'center', padding:'2rem' }} className="muted">
+                  <tr><td colSpan={9} style={{ textAlign:'center', padding:'2rem' }} className="muted">
                     {isAdmin ? <Link to="/admin/plugins/new">Add the first plugin</Link> : 'No plugins attributed to your account yet.'}
                   </td></tr>
                 )}
@@ -96,6 +96,8 @@ export default function PluginsPage() {
                     <td data-label="Author" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
                     <td data-label="License" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
                     <td data-label="Latest" style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
+                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{p.views.toLocaleString()}</td>
+                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{p.downloads.toLocaleString()}</td>
                     <td data-label="Status">
                       {p.status !== 'active' && (
                         <span style={{

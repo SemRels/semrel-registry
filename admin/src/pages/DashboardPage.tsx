@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [orgResult, setOrgResult]             = useState<OrgSyncResult | null>(null);
   const [pending, setPending]                 = useState<Plugin[]>([]);
   const [pendingLoading, setPendingLoading]   = useState(true);
+  const [seriesRange, setSeriesRange]         = useState<'day' | 'week' | 'month'>('day');
 
   useEffect(() => {
     getStats().then(setStats).catch((e: unknown) => setError(e instanceof Error ? e.message : 'Failed'));
@@ -79,6 +80,12 @@ export default function DashboardPage() {
       )
     : null;
 
+  const activeSeries = stats?.series?.[seriesRange] ?? [];
+  const maxSeriesValue = activeSeries.reduce((max, point) => {
+    const localMax = Math.max(point.views ?? 0, point.downloads ?? 0);
+    return Math.max(localMax, max);
+  }, 1);
+
   return (
     <>
       <div className="page__header">
@@ -117,10 +124,19 @@ export default function DashboardPage() {
 
         {!stats && !error && <p className="muted">Loading…</p>}
         {stats && (
+          <>
           <div className="stat-grid">
             <div className="stat-card">
               <div className="stat-card__label">Total</div>
               <div className="stat-card__value">{stats.totalPlugins}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card__label">Views</div>
+              <div className="stat-card__value">{stats.totalViews.toLocaleString()}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card__label">Downloads</div>
+              <div className="stat-card__value">{stats.totalDownloads.toLocaleString()}</div>
             </div>
             {Object.entries(stats.categories).map(([cat, count]) => (
               <div key={cat} className="stat-card">
@@ -129,6 +145,95 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+
+          <div className="card" style={{ marginTop: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)' }}>Traffic trend</h2>
+              <div style={{ display: 'flex', gap: '.5rem' }}>
+                {(['day', 'week', 'month'] as const).map((range) => (
+                  <button
+                    key={range}
+                    type="button"
+                    className={`btn btn--sm ${seriesRange === range ? 'btn--primary' : ''}`}
+                    onClick={() => setSeriesRange(range)}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {activeSeries.length === 0 ? (
+              <p className="muted" style={{ marginTop: '.75rem' }}>No trend data yet.</p>
+            ) : (
+              <div style={{ marginTop: '.75rem', display: 'grid', gap: '.5rem' }}>
+                {activeSeries.map((point) => {
+                  const downloadWidth = Math.max(2, Math.round(((point.downloads ?? 0) / maxSeriesValue) * 100));
+                  const viewWidth = Math.max(2, Math.round(((point.views ?? 0) / maxSeriesValue) * 100));
+                  return (
+                    <div key={point.period} style={{ display: 'grid', gap: '.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)' }}>
+                        <span>{point.period}</span>
+                        <span className="muted">V {point.views.toLocaleString()} · D {point.downloads.toLocaleString()}</span>
+                      </div>
+                      <div style={{ display: 'grid', gap: '.25rem' }}>
+                        <div style={{ width: `${viewWidth}%`, height: 6, borderRadius: 999, background: 'rgba(56,139,253,.6)' }} />
+                        <div style={{ width: `${downloadWidth}%`, height: 6, borderRadius: 999, background: 'rgba(63,185,80,.75)' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
+            <div className="card">
+              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top plugins</h2>
+              {!stats.topPlugins || stats.topPlugins.length === 0 ? (
+                <p className="muted">No plugin metrics yet.</p>
+              ) : (
+                <div className="table-wrap">
+                  <table className="table--stack">
+                    <thead><tr><th>Plugin</th><th>Category</th><th>Views</th><th>Downloads</th></tr></thead>
+                    <tbody>
+                      {stats.topPlugins.map((item) => (
+                        <tr key={item.pluginId}>
+                          <td data-label="Plugin">{item.namespace ? `${item.namespace}/` : ''}{item.name}</td>
+                          <td data-label="Category" className="muted">{item.category}</td>
+                          <td data-label="Views">{item.views.toLocaleString()}</td>
+                          <td data-label="Downloads">{item.downloads.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top versions</h2>
+              {!stats.topVersions || stats.topVersions.length === 0 ? (
+                <p className="muted">No version metrics yet.</p>
+              ) : (
+                <div className="table-wrap">
+                  <table className="table--stack">
+                    <thead><tr><th>Version</th><th>Plugin</th><th>Views</th><th>Downloads</th></tr></thead>
+                    <tbody>
+                      {stats.topVersions.map((item) => (
+                        <tr key={item.versionId}>
+                          <td data-label="Version"><code>v{item.version}</code></td>
+                          <td data-label="Plugin">{item.namespace ? `${item.namespace}/` : ''}{item.pluginName}</td>
+                          <td data-label="Views">{item.views.toLocaleString()}</td>
+                          <td data-label="Downloads">{item.downloads.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          </>
         )}
 
         {/* Pending submissions — admin only */}

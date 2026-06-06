@@ -17,10 +17,15 @@ import (
 
 type AdminHandler struct {
 	service service.PluginManager
+	stats   service.RegistryStatsProvider
 }
 
-func NewAdminHandler(pluginService service.PluginManager) *AdminHandler {
-	return &AdminHandler{service: pluginService}
+func NewAdminHandler(pluginService service.PluginManager, stats ...service.RegistryStatsProvider) *AdminHandler {
+	var provider service.RegistryStatsProvider
+	if len(stats) > 0 {
+		provider = stats[0]
+	}
+	return &AdminHandler{service: pluginService, stats: provider}
 }
 
 func (h *AdminHandler) Status(c *gin.Context) {
@@ -192,6 +197,26 @@ func readPluginsJSON(filePath string) (string, []byte, error) {
 
 // GetStats returns aggregate statistics about the registry.
 func (h *AdminHandler) GetStats(c *gin.Context) {
+	if h.stats != nil {
+		stats, err := h.stats.GetRegistryStats(c.Request.Context())
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"totalPlugins":   stats.TotalPlugins,
+			"categories":     stats.Categories,
+			"totalViews":     stats.TotalViews,
+			"totalDownloads": stats.TotalDownloads,
+			"topPlugins":     stats.TopPlugins,
+			"topVersions":    stats.TopVersions,
+			"series":         stats.Series,
+			"timestamp":      stats.Timestamp,
+		})
+		return
+	}
+
 	const pageSize = 100
 
 	result, err := h.service.ListPlugins(c.Request.Context(), service.ListPluginsParams{
