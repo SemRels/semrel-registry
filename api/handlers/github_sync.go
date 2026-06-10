@@ -516,6 +516,15 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		}
 	}
 
+	downloadURL := pickDownloadURL(rel.Assets)
+	if downloadURL == "" {
+		// Release exists on GitHub but has no binary assets (e.g. source-only or
+		// draft release without uploads). Skip silently — the release may gain
+		// assets later and will be picked up on the next sync run.
+		log.Printf("version sync: skipping %s@%s — release has no binary assets", ref, rel.TagName)
+		return false, nil
+	}
+
 	var releaseDate *time.Time
 	if rel.PublishedAt != "" {
 		t, parseErr := time.Parse(time.RFC3339, rel.PublishedAt)
@@ -529,7 +538,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		Version:     tag,
 		ReleaseDate: releaseDate,
 		Changelog:   rel.Body,
-		DownloadURL: pickDownloadURL(rel.Assets),
+		DownloadURL: downloadURL,
 		Checksums:   pickChecksums(rel.Assets),
 		Prerelease:  rel.Prerelease,
 	}
