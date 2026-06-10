@@ -1,28 +1,26 @@
 # semrel-registry
 
-Central registry for go-semrel plugins.
+Central registry for [semrel](https://github.com/SemRels/semrel) plugins — a Go-based REST API that stores, validates, and serves plugin metadata.
 
 ## Related repositories
 
-- [go-semrel](https://github.com/SemRels/semrel) - the core release tool
-- [go-semrel-plugins](https://github.com/SemRels/semrel-plugins) - plugin SDK and official plugins
-- [go-semrel-docs](https://github.com/SemRels/semrel-docs) - documentation site
+- [semrel](https://github.com/SemRels/semrel) — the core release tool
+- [semrel-plugins](https://github.com/SemRels/semrel-plugins) — official plugin catalog
+- [semrel-docs](https://github.com/SemRels/semrel-docs) — documentation site
 
 ## How the registry works
 
-The registry is the canonical source for published go-semrel plugins.
+The registry is the canonical source for published semrel plugins.
 
-1. Plugin authors publish versioned GitHub Releases in [`SemRels/go-semrel-plugins`](https://github.com/SemRels/go-semrel-plugins).
-2. Release tags, binary asset names, and checksum files follow the registry naming conventions.
-3. GitHub Actions validates release metadata against the registry schema.
-4. GitHub Actions rebuilds `plugins.json` and publishes it from the repository root.
-5. Consumers can fetch the index via GitHub Pages today and `registry.semrel.io` later.
-
-`plugins.json` is intentionally kept in the repository root so it can be served directly by GitHub Pages.
+1. Plugin authors publish versioned GitHub Releases in their own repositories.
+2. A `repository_dispatch` webhook notifies the registry (`POST /api/v1/webhooks/release`).
+3. The registry validates metadata, stores plugin and version records, and updates `plugins.json`.
+4. Consumers fetch the index via `GET /plugins.json` or browse individual plugins via the REST API.
+5. The `semrel` CLI respects `SEMREL_REGISTRY_URL` to discover plugins from a custom registry.
 
 ## For plugin authors
 
-See the [release guide](docs/release-guide.md) for the expected publish flow.
+See the [registry API docs](https://semrel.io/api/registry) for the full endpoint reference.
 
 ## For contributors
 
