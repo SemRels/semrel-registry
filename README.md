@@ -37,6 +37,20 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
 
+## Quick start (no database)
+
+The simplest way to run the registry locally is with the **file storage backend** — no Postgres required.
+
+```bash
+cp .env.example .env          # set JWT_SECRET and ADMIN_TOKEN
+docker compose -f docker-compose.file.yml up -d
+```
+
+The registry stores all plugin data as JSON files in a named Docker volume (`registry_data`).  
+This is ideal for self-hosting with small to medium plugin catalogues.
+
+> **Choose PostgreSQL** when you need full-text search, concurrent writes, or plan to host more than ~10 000 plugins.
+
 ## Web app development
 
 ```bash
