@@ -140,7 +140,6 @@ func (h *PluginHandler) ListPluginVersionsByNamespace(c *gin.Context) {
 	}
 	out := make([]versionResponse, len(versions))
 	for i, v := range versions {
-		h.metrics.Record(service.MetricEvent{PluginID: v.PluginID, VersionID: v.ID, Type: service.MetricTypeView, Source: "version-list"})
 		out[i] = versionResponse{
 			PluginVersion: v,
 			DownloadURLs:  buildNamespacedDownloadURLs(c, c.Param("namespace"), c.Param("name"), v),
@@ -172,7 +171,6 @@ func (h *PluginHandler) ListPluginVersions(c *gin.Context) {
 	}
 	out := make([]versionResponse, len(versions))
 	for i, v := range versions {
-		h.metrics.Record(service.MetricEvent{PluginID: v.PluginID, VersionID: v.ID, Type: service.MetricTypeView, Source: "version-list"})
 		out[i] = versionResponse{
 			PluginVersion: v,
 			DownloadURLs:  buildPluginDownloadURLs(c, c.Param("id"), v),
