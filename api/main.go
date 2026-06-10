@@ -195,5 +195,11 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	adminRoutes.PUT("/admin/plugins/:id/reject", pluginHandler.RejectPlugin)
 	adminRoutes.POST("/admin/plugins/:id/revalidate", pluginHandler.RevalidatePlugin)
 
+	// JSON Schema serving — stable, versioned, publicly cached.
+	schemaHandler := handlers.NewSchemaHandler()
+	router.GET("/schemas/core/:version", schemaHandler.GetCoreSchema)
+	router.GET("/schemas/plugins/:name/:version", schemaHandler.GetPluginSchema)
+	router.GET("/schemas/plugins/@:namespace/:name/:version", schemaHandler.GetNamespacedPluginSchema)
+
 	return router
 }

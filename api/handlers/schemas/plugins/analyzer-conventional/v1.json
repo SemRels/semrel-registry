@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/analyzer-conventional/v1.json",
+  "title": "analyzer-conventional plugin schema",
+  "description": "Schema for the analyzer-conventional semrel plugin environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_MINOR_TYPES": {
+      "type": "string",
+      "default": "feat",
+      "description": "Comma-separated commit types that trigger a minor version bump."
+    },
+    "SEMREL_PLUGIN_PATCH_TYPES": {
+      "type": "string",
+      "default": "fix,perf,refactor",
+      "description": "Comma-separated commit types that trigger a patch version bump."
+    }
+  }
+}
