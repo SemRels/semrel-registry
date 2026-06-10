@@ -10,16 +10,23 @@ function CheckIcon({ passed }: { passed: boolean }) {
   );
 }
 
-function ValidationPanel({ checks, summary, valid }: ValidationResult) {
+function ValidationPanel({ checks, summary, valid, validatedAt }: ValidationResult & { validatedAt?: string }) {
   return (
     <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-        fontSize: 'var(--fs-xs)', fontWeight: 700, marginBottom: '0.6rem',
-        color: valid ? 'var(--success)' : 'var(--danger)',
-      }}>
-        {valid ? '✓ All checks passed' : '✗ Some checks failed'}
-        {summary && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> — {summary}</span>}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.25rem' }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+          fontSize: 'var(--fs-xs)', fontWeight: 700,
+          color: valid ? 'var(--success)' : 'var(--danger)',
+        }}>
+          {valid ? '✓ All checks passed' : '✗ Some checks failed'}
+          {summary && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> — {summary}</span>}
+        </div>
+        {validatedAt && (
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
+            checked {new Date(validatedAt).toLocaleString()}
+          </span>
+        )}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.3rem' }}>
         {checks.map(ch => (
@@ -89,7 +96,7 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
               </span>
             )}
             {!checks && (
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>⏳ validating…</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>not yet validated</span>
             )}
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
@@ -114,7 +121,7 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
             disabled={revalidating}
             style={{ fontSize: 'var(--fs-xs)' }}
           >
-            {revalidating ? '⏳' : '↻ Re-check'}
+            {revalidating ? '⏳' : checks ? '↻ Re-check' : '▶ Run check'}
           </button>
           <button
             className="btn btn--primary btn--sm"
@@ -135,26 +142,34 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
 
       {revalError && <div className="alert alert--error" style={{ marginTop: '0.5rem', padding: '0.3rem 0.5rem' }}>{revalError}</div>}
 
-      {/* Validation panel */}
-      {checks && <ValidationPanel {...checks} />}
+      {/* Validation panel — shows stored results from DB automatically */}
+      {checks && <ValidationPanel {...checks} validatedAt={plugin.validatedAt} />}
     </div>
   );
 }
 
-export default function SubmissionsPage() {
-  const [plugins, setPlugins] = useState<Plugin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState('');
-  const [filter, setFilter]   = useState<'pending' | 'rejected' | 'all'>('pending');
+const PAGE_SIZE = 20;
 
-  useEffect(() => { void load(); }, [filter]);
+export default function SubmissionsPage() {
+  const [plugins, setPlugins]   = useState<Plugin[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState('');
+  const [filter, setFilter]     = useState<'pending' | 'rejected' | 'all'>('pending');
+  const [page, setPage]         = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal]       = useState(0);
+
+  useEffect(() => { setPage(1); }, [filter]);
+  useEffect(() => { void load(); }, [filter, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function load() {
     setLoading(true); setError('');
     try {
       const status = filter === 'all' ? undefined : filter;
-      const r = await listPlugins({ status, limit: 100 });
+      const r = await listPlugins({ status, limit: PAGE_SIZE, page });
       setPlugins(r.data);
+      setTotalPages(r.pagination?.pages ?? 1);
+      setTotal(r.pagination?.total ?? r.data.length);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
     } finally { setLoading(false); }
@@ -164,6 +179,7 @@ export default function SubmissionsPage() {
     try {
       await approvePlugin(id);
       setPlugins(prev => prev.filter(p => p.id !== id));
+      setTotal(t => Math.max(0, t - 1));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Approve failed');
     }
@@ -182,18 +198,14 @@ export default function SubmissionsPage() {
     setPlugins(prev => prev.map(p => p.id === id ? { ...p, validationChecks: result } : p));
   }
 
-  const pending  = plugins.filter(p => p.status === 'pending');
-  const rejected = plugins.filter(p => p.status === 'rejected');
-  const shown    = filter === 'all' ? plugins : filter === 'pending' ? pending : rejected;
-
   return (
     <>
       <div className="page__header">
         <h1 className="page__title">
           Submissions
-          {pending.length > 0 && (
+          {total > 0 && filter !== 'all' && (
             <span style={{ background: 'var(--danger)', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '0.5rem', verticalAlign: 'middle' }}>
-              {pending.length}
+              {total}
             </span>
           )}
         </h1>
@@ -209,12 +221,12 @@ export default function SubmissionsPage() {
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
         {loading && <p className="muted">Loading…</p>}
-        {!loading && shown.length === 0 && (
+        {!loading && plugins.length === 0 && (
           <p className="muted">
             {filter === 'pending' ? '🎉 No pending submissions.' : `No ${filter} submissions.`}
           </p>
         )}
-        {!loading && shown.map(p => (
+        {!loading && plugins.map(p => (
           <SubmissionCard
             key={p.id}
             plugin={p}
@@ -223,6 +235,15 @@ export default function SubmissionsPage() {
             onRevalidate={(result) => handleRevalidated(p.id, result)}
           />
         ))}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+            <button className="btn btn--secondary btn--sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span className="muted" style={{ fontSize: 'var(--fs-sm)' }}>Page {page} / {totalPages}</span>
+            <button className="btn btn--secondary btn--sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
+          </div>
+        )}
       </div>
     </>
   );
