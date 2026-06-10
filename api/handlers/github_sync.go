@@ -656,10 +656,16 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 		{"governance_md", "GOVERNANCE.md present", func() (bool, string) { return checkGHFile(owner, repo, "GOVERNANCE.md") }},
 		{"license", "LICENSE file present", func() (bool, string) { return checkGHFile(owner, repo, "LICENSE") }},
 		{"release_workflow", ".github/workflows/release.yml present", func() (bool, string) {
-			return checkGHFile(owner, repo, ".github/workflows/release.yml")
+			if ok, _ := checkGHFile(owner, repo, ".github/workflows/release.yml"); ok {
+				return true, ""
+			}
+			return checkGHFile(owner, repo, ".github/workflows/release.yaml")
 		}},
 		{"security_workflow", ".github/workflows/security.yml present", func() (bool, string) {
-			return checkGHFile(owner, repo, ".github/workflows/security.yml")
+			if ok, _ := checkGHFile(owner, repo, ".github/workflows/security.yml"); ok {
+				return true, ""
+			}
+			return checkGHFile(owner, repo, ".github/workflows/security.yaml")
 		}},
 		manifestCheck,
 		entrypointCheck,
@@ -667,14 +673,18 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 			"registry_sync",
 			"release.yml triggers registry sync",
 			func() (bool, string) {
+				// Accept both .yml and .yaml extensions.
 				content, err := fetchGHFileContent(owner, repo, ".github/workflows/release.yml")
 				if err != nil {
-					return false, "could not fetch release.yml"
+					content, err = fetchGHFileContent(owner, repo, ".github/workflows/release.yaml")
+				}
+				if err != nil {
+					return false, "could not fetch release workflow"
 				}
 				if strings.Contains(content, "REGISTRY_SYNC") || strings.Contains(content, "semrel-registry") {
 					return true, ""
 				}
-				return false, "release.yml has no registry sync step — add 'Trigger registry sync' from plugin-template"
+				return false, "release workflow has no registry sync step — add 'Trigger registry sync' from plugin-template"
 			},
 		},
 	}
