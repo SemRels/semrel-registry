@@ -1,0 +1,35 @@
+# docker-compose.file.yml
+# Quick-start: file-storage backend (no database required).
+# Usage:
+#   cp .env.example .env          # edit JWT_SECRET and ADMIN_TOKEN
+#   docker compose -f docker-compose.file.yml up -d
+services:
+  registry:
+    image: ghcr.io/semrels/semrel-registry:latest
+    container_name: semrel-registry
+    ports:
+      - "8080:8080"
+    environment:
+      STORAGE_BACKEND: file
+      STORAGE_DIR: /data
+      ENVIRONMENT: prod
+      PORT: ":8080"
+      JWT_SECRET: ${JWT_SECRET:-change-me-before-production}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-change-me-before-production}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_PUBLIC_RPM: ${RATE_LIMIT_PUBLIC_RPM:-60}
+      RATE_LIMIT_PLUGINS_JSON_RPM: ${RATE_LIMIT_PLUGINS_JSON_RPM:-10}
+      RATE_LIMIT_AUTH_RPM: ${RATE_LIMIT_AUTH_RPM:-20}
+      PLUGINS_JSON_PATH: ""
+    volumes:
+      - registry_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  registry_data:
+    driver: local
