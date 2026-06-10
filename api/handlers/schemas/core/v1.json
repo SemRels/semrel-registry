@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/core/v1.json",
+  "title": "semrel core configuration",
+  "description": "Schema for the .semrel.yaml configuration file used by the semrel release tool.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version. Set to 1 for semrel v1.x compatibility."
+    },
+    "tagPrefix": {
+      "type": "string",
+      "default": "v",
+      "description": "Prefix applied to generated version tags (e.g. 'v' \u2192 'v1.2.3')."
+    },
+    "branch": {
+      "type": "string",
+      "description": "Release branch. Defaults to the repository default branch."
+    },
+    "plugins": {
+      "type": "array",
+      "description": "Ordered list of plugins to run during release.",
+      "items": {
+        "type": "object",
+        "required": ["uses"],
+        "properties": {
+          "uses": {
+            "type": "string",
+            "description": "Plugin name or path (e.g. 'analyzer-conventional', '@semrel/provider-github')."
+          },
+          "args": {
+            "type": "object",
+            "description": "Plugin-specific configuration arguments."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "changelog": {
+      "type": "string",
+      "default": "CHANGELOG.md",
+      "description": "Path to the changelog file."
+    },
+    "dryRun": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, run the full release pipeline without creating tags or publishing."
+    }
+  },
+  "additionalProperties": false
+}

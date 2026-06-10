@@ -89,6 +89,9 @@ func TestNewRouterRegistersCoreRoutes(t *testing.T) {
 	assert.Contains(t, routePaths, "/api/v1/plugins")
 	assert.Contains(t, routePaths, "/api/v1/plugins/:id")
 	assert.Contains(t, routePaths, "/api/v1/plugins/:id/versions")
+	assert.Contains(t, routePaths, "/schemas/core/:version")
+	assert.Contains(t, routePaths, "/schemas/plugins/:name/:version")
+	assert.Contains(t, routePaths, "/schemas/plugins/@:namespace/:name/:version")
 }
 
 func TestHealthEndpoint(t *testing.T) {
