@@ -225,7 +225,13 @@ export default function DashboardPage() {
     : null;
 
   const rawSeries = stats?.series?.[seriesRange] ?? [];
-  const activeSeries = rawSeries.length > 0 ? rawSeries : buildZeroSeries(seriesRange);
+  const zeroSeries = buildZeroSeries(seriesRange);
+  // Merge sparse API data into zero-filled baseline so the chart always has N points.
+  const activeSeries = (() => {
+    if (rawSeries.length === 0) return zeroSeries;
+    const map = new Map(rawSeries.map((p) => [p.period, p]));
+    return zeroSeries.map((z) => map.get(z.period) ?? z);
+  })();
   const categories = stats?.categories ?? {};
   const totalPlugins = Number(stats?.totalPlugins ?? 0);
   const totalViews = Number(stats?.totalViews ?? 0);
