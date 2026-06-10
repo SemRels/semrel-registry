@@ -475,6 +475,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 	if err != nil {
 		return 0, 0, err
 	}
+	var firstErr error
 	for i := range releases {
 		rel := &releases[i]
 		if rel.Draft {
@@ -483,7 +484,13 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 		}
 		ok, upsertErr := h.upsertVersion(ctx, p, rel)
 		if upsertErr != nil {
-			return created, skipped, upsertErr
+			// Log the individual version failure but continue with remaining releases.
+			log.Printf("version sync: skipping release %s for plugin %q: %v", rel.TagName, p.Name, upsertErr)
+			skipped++
+			if firstErr == nil {
+				firstErr = fmt.Errorf("release %s: %w", rel.TagName, upsertErr)
+			}
+			continue
 		}
 		if ok {
 			created++
@@ -491,7 +498,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 			skipped++
 		}
 	}
-	return created, skipped, nil
+	return created, skipped, firstErr
 }
 
 func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *ghRelease) (bool, error) {
