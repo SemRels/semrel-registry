@@ -189,6 +189,19 @@ func (h *PluginHandler) DownloadPluginVersionByNamespace(c *gin.Context) {
 	h.downloadVersionByRef(c, ref)
 }
 
+// TrackDownload handles POST /api/v1/plugins/:id/versions/:version/downloads
+// and POST /api/v1/plugins/@:namespace/:name/versions/:version/downloads.
+// It records a download metric without redirecting so direct GitHub downloads
+// can still be tracked by the CLI.
+func (h *PluginHandler) TrackDownload(c *gin.Context) {
+	h.trackDownloadByRef(c, c.Param("id"))
+}
+
+func (h *PluginHandler) TrackDownloadByNamespace(c *gin.Context) {
+	ref := "@" + c.Param("namespace") + "/" + c.Param("name")
+	h.trackDownloadByRef(c, ref)
+}
+
 func (h *PluginHandler) downloadVersionByRef(c *gin.Context, ref string) {
 	version, found, err := h.findVersion(c.Request.Context(), ref, c.Param("version"))
 	if err != nil {
@@ -211,6 +224,26 @@ func (h *PluginHandler) downloadVersionByRef(c *gin.Context, ref string) {
 
 	h.metrics.Record(service.MetricEvent{PluginID: version.PluginID, VersionID: version.ID, Type: service.MetricTypeDownload, Source: "download-redirect"})
 	c.Redirect(http.StatusTemporaryRedirect, target)
+}
+
+func (h *PluginHandler) trackDownloadByRef(c *gin.Context, ref string) {
+	version, found, err := h.findVersion(c.Request.Context(), ref, c.Param("version"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+	if !found {
+		c.JSON(http.StatusNotFound, gin.H{"error": "version not found"})
+		return
+	}
+
+	h.metrics.Record(service.MetricEvent{
+		PluginID:  version.PluginID,
+		VersionID: version.ID,
+		Type:      service.MetricTypeDownload,
+		Source:    "cli-install",
+	})
+	c.Status(http.StatusNoContent)
 }
 
 func (h *PluginHandler) findVersion(ctx context.Context, ref, versionTag string) (models.PluginVersion, bool, error) {

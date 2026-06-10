@@ -138,6 +138,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Category    string                `json:"category"`
 		Repository  string                `json:"repository,omitempty"`
 		Tags        []string              `json:"tags,omitempty"`
+		Downloads   int64                 `json:"downloads"`
 		Versions    []semrelPluginVersion `json:"versions"`
 	}
 	type semrelRegistry struct {
@@ -180,6 +181,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 			Category:    p.Category,
 			Repository:  p.Repository,
 			Tags:        tags,
+			Downloads:   p.Downloads,
 			Versions:    svs,
 		})
 	}

@@ -148,10 +148,12 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	api.GET("/plugins/:id", rlPublic, optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", rlPublic, pluginHandler.ListPluginVersions)
 	api.GET("/plugins/:id/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersion)
+	api.POST("/plugins/:id/versions/:version/downloads", rlPublic, pluginHandler.TrackDownload)
 	// Namespaced plugin lookup: GET /api/v1/plugins/@semrel/provider-github
 	api.GET("/plugins/@:namespace/:name", rlPublic, optionalAuth, pluginHandler.GetPluginByNamespace)
 	api.GET("/plugins/@:namespace/:name/versions", rlPublic, pluginHandler.ListPluginVersionsByNamespace)
 	api.GET("/plugins/@:namespace/:name/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersionByNamespace)
+	api.POST("/plugins/@:namespace/:name/versions/:version/downloads", rlPublic, pluginHandler.TrackDownloadByNamespace)
 
 	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
 	api.GET("/stats", requireAdmin, adminHandler.GetStats)
