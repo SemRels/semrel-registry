@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -93,6 +94,7 @@ func (h *SyncHandler) SyncVersions(c *gin.Context) {
 				return
 			}
 			r.Error = syncErr.Error()
+			log.Printf("version sync error for plugin %q: %v", p.Name, syncErr)
 			results = append(results, r)
 			continue
 		}
@@ -350,6 +352,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 				migrated, patchErr := h.svc.UpdatePlugin(ctx, bare.Ref(), models.PluginPatch{Namespace: &orgNS})
 				if patchErr != nil {
 					results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: "namespace migration: " + patchErr.Error()})
+				log.Printf("version sync: namespace migration error for %s: %v", repo.Name, patchErr)
 					continue
 				}
 				createdV, _, _ := h.syncPluginReleases(ctx, &migrated)
@@ -372,6 +375,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 			})
 			if createErr != nil {
 				results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: createErr.Error()})
+				log.Printf("version sync: create plugin error for %s: %v", repo.Name, createErr)
 				continue
 			}
 			createdV, _, _ := h.syncPluginReleases(ctx, &created)
@@ -381,6 +385,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 			createdV, _, syncErr := h.syncPluginReleases(ctx, &existing)
 			if syncErr != nil {
 				results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: syncErr.Error()})
+				log.Printf("version sync: release sync error for %s: %v", repo.Name, syncErr)
 				if isGitHubRateLimitError(syncErr) {
 					break
 				}

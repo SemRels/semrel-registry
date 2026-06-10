@@ -272,12 +272,26 @@ export default function DashboardPage() {
           <div className={versionStats.errors > 0 ? 'alert alert--error' : 'alert alert--success'}>
             Version sync — new: {versionStats.created}, up-to-date: {versionStats.skipped}
             {versionStats.errors > 0 && `, errors: ${versionStats.errors}`}
+            {versionStats.errors > 0 && (
+              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+                {versionResult!.results.filter(r => r.error).map(r => (
+                  <li key={r.plugin}><code>{r.plugin}</code>: {r.error}</li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
         {orgStats && (
           <div className={orgStats.errors > 0 ? 'alert alert--error' : 'alert alert--success'}>
             GitHub org sync — discovered: {orgResult!.total}, new: {orgStats.created}, updated: {orgStats.updated}
             {orgStats.errors > 0 && `, errors: ${orgStats.errors}`}
+            {orgStats.errors > 0 && (
+              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+                {orgResult!.results.filter(r => r.error).map(r => (
+                  <li key={r.repo}><code>{r.repo}</code>: {r.error}</li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
