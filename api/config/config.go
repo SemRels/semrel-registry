@@ -20,6 +20,12 @@ type Config struct {
 	MetricsQueueSize     int
 	MetricsBatchSize     int
 	MetricsFlushInterval time.Duration
+	// Rate limiting
+	RateLimitEnabled    bool
+	RateLimitPublicRPM  float64
+	RateLimitPluginsRPM float64
+	RateLimitAuthRPM    float64
+	RateLimitTrustProxy bool
 }
 
 // Load reads configuration from environment variables.
@@ -39,6 +45,12 @@ func Load() *Config {
 		MetricsQueueSize:     getEnvInt("METRICS_QUEUE_SIZE", 2048),
 		MetricsBatchSize:     getEnvInt("METRICS_BATCH_SIZE", 200),
 		MetricsFlushInterval: getEnvDuration("METRICS_FLUSH_INTERVAL", 2*time.Second),
+		// Rate limiting — disabled by default; enabled in prod via RATE_LIMIT_ENABLED=true.
+		RateLimitEnabled:    getEnvBool("RATE_LIMIT_ENABLED", false),
+		RateLimitPublicRPM:  getEnvFloat("RATE_LIMIT_PUBLIC_RPM", 60),
+		RateLimitPluginsRPM: getEnvFloat("RATE_LIMIT_PLUGINS_JSON_RPM", 10),
+		RateLimitAuthRPM:    getEnvFloat("RATE_LIMIT_AUTH_RPM", 20),
+		RateLimitTrustProxy: getEnvBool("RATE_LIMIT_TRUST_PROXY", true),
 	}
 
 	cfg.Port = normalizePort(cfg.Port)
@@ -110,6 +122,30 @@ func getEnvInt(key string, fallback int) int {
 	}
 	parsed, err := strconv.Atoi(value)
 	if err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
+}
+
+func getEnvFloat(key string, fallback float64) float64 {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
+}
+
+func getEnvBool(key string, fallback bool) bool {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
 		return fallback
 	}
 	return parsed

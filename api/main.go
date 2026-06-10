@@ -74,7 +74,17 @@ func main() {
 		log.Printf("seed warning: %v", err)
 	}
 
-	router := newRouter(pluginService, routerDependencies{metrics: metricsRecorder, stats: statsProvider})
+	router := newRouter(pluginService, routerDependencies{
+		metrics: metricsRecorder,
+		stats:   statsProvider,
+		rateLimCfg: middleware.RateLimitConfig{
+			Enabled:    cfg.RateLimitEnabled,
+			PublicRPM:  cfg.RateLimitPublicRPM,
+			PluginsRPM: cfg.RateLimitPluginsRPM,
+			AuthRPM:    cfg.RateLimitAuthRPM,
+			TrustProxy: cfg.RateLimitTrustProxy,
+		},
+	})
 
 	log.Printf("server listening on %s", cfg.Port)
 	if err := router.Run(cfg.Port); err != nil {
@@ -83,8 +93,9 @@ func main() {
 }
 
 type routerDependencies struct {
-	metrics service.MetricsRecorder
-	stats   service.RegistryStatsProvider
+	metrics    service.MetricsRecorder
+	stats      service.RegistryStatsProvider
+	rateLimCfg middleware.RateLimitConfig
 }
 
 func newRouter(pluginService service.PluginManager, deps ...routerDependencies) *gin.Engine {
@@ -93,6 +104,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 
 	metricsRecorder := service.NewNoopMetricsRecorder()
 	statsProvider := service.NewNoopRegistryStatsProvider()
+	var rlCfg middleware.RateLimitConfig
 	if len(deps) > 0 {
 		if deps[0].metrics != nil {
 			metricsRecorder = deps[0].metrics
@@ -100,13 +112,19 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 		if deps[0].stats != nil {
 			statsProvider = deps[0].stats
 		}
+		rlCfg = deps[0].rateLimCfg
 	}
 
-	// GitHub OAuth routes (public).
+	// Rate limiting middleware instances (no-ops when Enabled=false).
+	rlPublic := middleware.RateLimit(rlCfg, rlCfg.PublicRPM)
+	rlPluginsJSON := middleware.RateLimit(rlCfg, rlCfg.PluginsRPM)
+	rlAuth := middleware.RateLimit(rlCfg, rlCfg.AuthRPM)
+
+	// GitHub OAuth routes (public) — rate limited.
 	authHandler := handlers.NewAuthHandler()
-	router.GET("/auth/github", authHandler.Redirect)
-	router.GET("/auth/github/callback", authHandler.Callback)
-	router.GET("/auth/callback", authHandler.Callback) // alias: GitHub App configured without /github
+	router.GET("/auth/github", rlAuth, authHandler.Redirect)
+	router.GET("/auth/github/callback", rlAuth, authHandler.Callback)
+	router.GET("/auth/callback", rlAuth, authHandler.Callback) // alias: GitHub App configured without /github
 	router.GET("/auth/config", authHandler.Config)
 
 	router.GET("/", func(c *gin.Context) {
@@ -126,14 +144,14 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// Public read endpoints — with OptionalAuth so admins can filter by status.
 	optionalAuth := middleware.OptionalAuth(authHandler)
 	pluginHandler := handlers.NewPluginHandler(pluginService, metricsRecorder)
-	api.GET("/plugins", optionalAuth, pluginHandler.ListPlugins)
-	api.GET("/plugins/:id", optionalAuth, pluginHandler.GetPlugin)
-	api.GET("/plugins/:id/versions", pluginHandler.ListPluginVersions)
-	api.GET("/plugins/:id/versions/:version/download", pluginHandler.DownloadPluginVersion)
+	api.GET("/plugins", rlPublic, optionalAuth, pluginHandler.ListPlugins)
+	api.GET("/plugins/:id", rlPublic, optionalAuth, pluginHandler.GetPlugin)
+	api.GET("/plugins/:id/versions", rlPublic, pluginHandler.ListPluginVersions)
+	api.GET("/plugins/:id/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersion)
 	// Namespaced plugin lookup: GET /api/v1/plugins/@semrel/provider-github
-	api.GET("/plugins/@:namespace/:name", optionalAuth, pluginHandler.GetPluginByNamespace)
-	api.GET("/plugins/@:namespace/:name/versions", pluginHandler.ListPluginVersionsByNamespace)
-	api.GET("/plugins/@:namespace/:name/versions/:version/download", pluginHandler.DownloadPluginVersionByNamespace)
+	api.GET("/plugins/@:namespace/:name", rlPublic, optionalAuth, pluginHandler.GetPluginByNamespace)
+	api.GET("/plugins/@:namespace/:name/versions", rlPublic, pluginHandler.ListPluginVersionsByNamespace)
+	api.GET("/plugins/@:namespace/:name/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersionByNamespace)
 
 	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
 	api.GET("/stats", requireAdmin, adminHandler.GetStats)
@@ -145,7 +163,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 
 	// plugins.json — semrel registry metadata endpoint consumed by `semrel` CLI.
 	// SEMREL_REGISTRY_URL=http://localhost:8080 and semrel fetches /plugins.json.
-	router.GET("/plugins.json", syncHandler.PluginsJSON)
+	router.GET("/plugins.json", rlPluginsJSON, syncHandler.PluginsJSON)
 
 	// Webhook endpoint: receives repository_dispatch from plugin release workflows.
 	// Protected by WEBHOOK_SECRET env var (optional but recommended in prod).
