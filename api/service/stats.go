@@ -228,35 +228,55 @@ func (p *PostgresRegistryStatsProvider) querySeries(ctx context.Context, grain s
 	switch grain {
 	case "day":
 		query = `
-SELECT TO_CHAR(day, 'YYYY-MM-DD') AS period,
-       COALESCE(SUM(CASE WHEN metric_type = 'view' THEN count END), 0)::BIGINT AS views,
-       COALESCE(SUM(CASE WHEN metric_type = 'download' THEN count END), 0)::BIGINT AS downloads
-FROM metric_daily_plugin
-WHERE day >= CURRENT_DATE - ($1::INT - 1)
-GROUP BY day
-ORDER BY day DESC
+WITH gs AS (
+  SELECT generate_series::date AS day
+  FROM generate_series(CURRENT_DATE - ($1::INT - 1), CURRENT_DATE, '1 day'::interval)
+)
+SELECT TO_CHAR(gs.day, 'YYYY-MM-DD') AS period,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'view' THEN m.count END), 0)::BIGINT AS views,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'download' THEN m.count END), 0)::BIGINT AS downloads
+FROM gs
+LEFT JOIN metric_daily_plugin m ON m.day = gs.day
+GROUP BY gs.day
+ORDER BY gs.day DESC
 LIMIT $1
 `
 	case "week":
 		query = `
-SELECT TO_CHAR(DATE_TRUNC('week', day), 'IYYY-"W"IW') AS period,
-       COALESCE(SUM(CASE WHEN metric_type = 'view' THEN count END), 0)::BIGINT AS views,
-       COALESCE(SUM(CASE WHEN metric_type = 'download' THEN count END), 0)::BIGINT AS downloads
-FROM metric_daily_plugin
-WHERE day >= DATE_TRUNC('week', CURRENT_DATE) - (($1::INT - 1) * INTERVAL '1 week')
-GROUP BY DATE_TRUNC('week', day)
-ORDER BY DATE_TRUNC('week', day) DESC
+WITH gs AS (
+  SELECT DATE_TRUNC('week', gs::date) AS week_start
+  FROM generate_series(
+    DATE_TRUNC('week', CURRENT_DATE) - (($1::INT - 1) * INTERVAL '1 week'),
+    DATE_TRUNC('week', CURRENT_DATE),
+    '1 week'::interval
+  ) AS gs
+)
+SELECT TO_CHAR(gs.week_start, 'IYYY-"W"IW') AS period,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'view' THEN m.count END), 0)::BIGINT AS views,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'download' THEN m.count END), 0)::BIGINT AS downloads
+FROM gs
+LEFT JOIN metric_daily_plugin m ON DATE_TRUNC('week', m.day) = gs.week_start
+GROUP BY gs.week_start
+ORDER BY gs.week_start DESC
 LIMIT $1
 `
 	case "month":
 		query = `
-SELECT TO_CHAR(DATE_TRUNC('month', day), 'YYYY-MM') AS period,
-       COALESCE(SUM(CASE WHEN metric_type = 'view' THEN count END), 0)::BIGINT AS views,
-       COALESCE(SUM(CASE WHEN metric_type = 'download' THEN count END), 0)::BIGINT AS downloads
-FROM metric_daily_plugin
-WHERE day >= DATE_TRUNC('month', CURRENT_DATE) - (($1::INT - 1) * INTERVAL '1 month')
-GROUP BY DATE_TRUNC('month', day)
-ORDER BY DATE_TRUNC('month', day) DESC
+WITH gs AS (
+  SELECT DATE_TRUNC('month', gs::date) AS month_start
+  FROM generate_series(
+    DATE_TRUNC('month', CURRENT_DATE) - (($1::INT - 1) * INTERVAL '1 month'),
+    DATE_TRUNC('month', CURRENT_DATE),
+    '1 month'::interval
+  ) AS gs
+)
+SELECT TO_CHAR(gs.month_start, 'YYYY-MM') AS period,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'view' THEN m.count END), 0)::BIGINT AS views,
+       COALESCE(SUM(CASE WHEN m.metric_type = 'download' THEN m.count END), 0)::BIGINT AS downloads
+FROM gs
+LEFT JOIN metric_daily_plugin m ON DATE_TRUNC('month', m.day) = gs.month_start
+GROUP BY gs.month_start
+ORDER BY gs.month_start DESC
 LIMIT $1
 `
 	default:
