@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-04T07:15:53.276Z",
+  "generatedAt": "2026-06-11T07:23:19.678Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -15,6 +15,21 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:50:22Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "250204e9f0d078266ea2ad7d52564972a722c91c3f7d16d8965d8410e1ab58e6",
+            "linux_arm64": "7840e03c7bc7346e60f37e86a9bdc9bb3b5897ee52b569695aa39d69623e0998",
+            "darwin_amd64": "77c126b9b9d36222d5bae1b97c86f4ede4bba5f5b79f500779f800222264ef7d",
+            "darwin_arm64": "0830ddc4b58171d72d82cb790e4ec51f8924fddedfda222b4828ea90f3eba21f",
+            "windows_amd64": "b26dbeacb4455e106b4d5f063de869735189c937881a6e41527b1fe3cc07dfd2",
+            "windows_arm64": "0c5dd37f5ec4748203039582358d053833ac3313f9a2af988742827e1b2dd9d4"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.2.3...v0.2.4"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:30Z",
@@ -46,6 +61,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:52:00Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cc9b88248087b6522fdb08655e31fbe915dd2d1b48dce6e8d94bb0362f963301",
+            "linux_arm64": "e48bd346076b0e70cec9cc27456986530889e87e2ca57d2eeb53d1dbf3145b73",
+            "darwin_amd64": "bfb843c8d256edd568718a7a64d1a1a625b0d0010131ac69f4c0e3fca7c927c0",
+            "darwin_arm64": "8c25e9f652dd0c9f5415b8e23b342d17bcc32875668f55880feee2b1a6c2e8e9",
+            "windows_amd64": "078f4ffd678cdef293b04f09f49368979fe0b1ba7eb3991176dd4dc6234e5547",
+            "windows_arm64": "30a99e0aae59ca3506a7206bf9b40874c611e67c8a59dfd28827ec36c174a104"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:17Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.1.0/plugin-linux-amd64",
@@ -76,6 +106,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.3",
+          "releaseDate": "2026-06-10T10:51:17Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.2.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "507744f04ffb423218056f4a55f5d0857946dcf77e5202d660c7815575e48441",
+            "linux_arm64": "385d87b2656cce499a82bcb2a23469d4bef1ea30c841ba919434e3c04f00a927",
+            "darwin_amd64": "a2341c6a36953ce8eca69274c3ad1111d172955ac9316d8a4fd5f3930d775104",
+            "darwin_arm64": "5a2c3b784b417db1ca2a2983d48ca91088b4ca784a2f725794a71ce4ae47964d",
+            "windows_amd64": "b7941b4d9455553787bb9f7c4a07caf8eafd0d4e02f1b59990b86771fe4e6f4e",
+            "windows_arm64": "985090f0746fc58f22a12c52d3546e0120596369106e38eaa1ad10532f108f46"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.2.2...v0.2.3"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:07Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.1.0/plugin-linux-amd64",
@@ -105,6 +150,21 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.3.3",
+          "releaseDate": "2026-06-10T10:52:01Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.3.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3604e9b5593cb8ecd0c23a853b8019f56b6a77d9f4f7e0c0f6a953062e932189",
+            "linux_arm64": "01554d86394549079c09fe4d9d63b5c816328996b9b1bb67ea382bf3a999a5ab",
+            "darwin_amd64": "cafbe662a30bc8d099930bdd0745b8a0668c578412e43058aa723984f77e8685",
+            "darwin_arm64": "0e6070f481171f7e869f145354761765c2d144e908e88c3f88bccdb201139c55",
+            "windows_amd64": "b2e8f66e4f208b660631cc3455042076c8c8b38a369db94eab97d169fb9a0c0f",
+            "windows_arm64": "ed2fe66ab46aaba868743e0d9e092281439cc1017625bc3e7168dd265f2eb609"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.3.2...v0.3.3"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:45:09Z",
@@ -151,6 +211,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:35Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "78784b6f3d63c475997912dedb8998cb3a40ad5e2753abeb2b0ad6f47f9f9550",
+            "linux_arm64": "06bd99f75132f3efaf93e38e31e7a73e06bc6f9ef1e287c6278e991926539ce0",
+            "darwin_amd64": "307e14e63f3f3df0a7462a9e9a6a2de53f782f21a2fed397e8850951deee3a5d",
+            "darwin_arm64": "4fb133f5c85659b82f45a97e476d83da6f19cbd3a1e402cf2fc0899031c72bac",
+            "windows_amd64": "b33c17194a8b455506ac2b04a4849b168abf9cbf3503ccf52f5369df4273b5df",
+            "windows_arm64": "8c730607bf1c592312b991d5b923be457a3ad9d77d70ada58d181898c7fbcf07"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:36Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.1.0/plugin-linux-amd64",
@@ -193,7 +268,7 @@
             "windows_arm64": "7d01a553af80ff51b45e3e490cb7c47f1182527390b1b790b8b17998e5e04544"
           },
           "prerelease": false,
-          "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0"
+          "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0"
         }
       ]
     },
@@ -210,6 +285,21 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.3.3",
+          "releaseDate": "2026-06-10T10:49:43Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.3.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "514e611e9c5c6d6dc8c849339bcda67a67344e61c9303e3ef481c657f86a37a7",
+            "linux_arm64": "c132990874ecd8566b1a2d7a66f8dab1a37cb3384426d227dc0045d75d837679",
+            "darwin_amd64": "a53f29c84a3e2053871e27bee11f7c515286b06d304a82baaac01af57c9e4429",
+            "darwin_arm64": "3f36a9147f7653389435ff8d0b0035c05c9d52ef6c1d292d73e4505c9d2a4d65",
+            "windows_amd64": "374e71c5cc7cc620f4e1f6f0716fbc2a588867b279a2662257103721afd4c473",
+            "windows_arm64": "bf0cabc6059b3396eac9e753b98fd5afd07d72681bc5d68b33eb84605f2a4057"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: dependency-review v5 + skip on unsupported repos by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/24\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.3.2...v0.3.3"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:42:27Z",
@@ -256,6 +346,21 @@
       ],
       "versions": [
         {
+          "version": "0.3.3",
+          "releaseDate": "2026-06-10T10:52:02Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.3.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1c89f91a6a7a61ed756c09a423643146256bbcdd9bd74f3a47fbd0dfdfd010b0",
+            "linux_arm64": "062ff6f3ec7a7988d4236421b8b71422ef83a64e14b1d468ee4b9e33b2b444c3",
+            "darwin_amd64": "65a95d1476cc0c904bc342a79e7c44dae811252a5dffbacea1e2719856ad08ea",
+            "darwin_arm64": "05cf332e1e66848631e2dfeb65431a261fe3b440304f6fbbf20d44ac36ebd3d4",
+            "windows_amd64": "f0de3ff6816236f0e1a58b9de039c6ca69f28b1ea99faf4a909d8b8d81c6d7d3",
+            "windows_arm64": "d0cad5031e5e7da13a435cecd2d7a928e97a295ad9f3e4d9f50b4523aa70958a"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.3.2...v0.3.3"
+        },
+        {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:42:02Z",
           "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.2.0/plugin-linux-amd64",
@@ -300,6 +405,21 @@
         "ci"
       ],
       "versions": [
+        {
+          "version": "0.2.3",
+          "releaseDate": "2026-06-10T10:51:28Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.2.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e20aebb44fd8877631718aae7f08ce1fa777b4a86bc4290334e3b246907e81a8",
+            "linux_arm64": "a845ca20b73181e3b46f32d64ad1d4c00203956b8f8185985489671cdfe19ce9",
+            "darwin_amd64": "cf99f251de5b560d91f35e42bd8d0e74531e3933d3231f60e7d65b13345038b9",
+            "darwin_arm64": "8b4d871eed07618ebad37cc6a4ee679b3b07d951d9681d9d853e0be81943b145",
+            "windows_amd64": "5a85e70c84eb1baf4150a02f5a1ecf7f31253f31083faffc8f2174468727fce0",
+            "windows_arm64": "c3d7e245583b2b995147c7ba61fb539681a145f70226ca51976b5380621f5aa6"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.2.2...v0.2.3"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:35:24Z",
@@ -361,6 +481,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.3",
+          "releaseDate": "2026-06-10T10:50:24Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.2.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "612ccdd219f83918064a9efc0f262e29452e1d05484e44f595133a1b3d39eb49",
+            "linux_arm64": "d5d7a9cae5ed028661d3045229b4f53229bf83b74910bd7068ba44cd9d119492",
+            "darwin_amd64": "85137457a497277ec496b17edd6bb8dd3d3bed5a8e5726581fc19bf57af3d607",
+            "darwin_arm64": "4e560de67090098c8a49ae812448bb75b3c0d408e1703d243bb08f0a0ef3906d",
+            "windows_amd64": "6d231125aaa76d12fd25d196e9bbe784d0c7aab2d3906087ad6389647d5bce84",
+            "windows_arm64": "8c4ea07d8d47072480925a39ca219221211074c29d5872e6072909f8aaffd566"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.2.2...v0.2.3"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:35:24Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.1.0/plugin-linux-amd64",
@@ -390,6 +525,21 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.2.3",
+          "releaseDate": "2026-06-10T10:49:31Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.2.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5a09a596ad8d198c0b9b6d9f05dda105ceadf8f7820f9b5657186550bbc9ecf9",
+            "linux_arm64": "99da01d0b5477c951b56181de6aa5a77f40af8f6fddfe8ba9654c5d74e21962b",
+            "darwin_amd64": "221efaf45d01ebfddfeaaeeda5987f72d1e59f50b934bff9d958aa1d217964bd",
+            "darwin_arm64": "8c8e3993bc98454e82e22da38eb47dc9ebace17d3e798e9bd4d41501d0146bb0",
+            "windows_amd64": "9851730661222a2b9fd7b46be5fe87d9c6790f725ede7405979862e93b3a7233",
+            "windows_arm64": "12e24a87205e36792ad50c0047666b98ebf6d3492c6d3490429343736824cfa2"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.2.2...v0.2.3"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:35Z",
@@ -421,6 +571,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:07Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1e1a32cb99a6ac9e5c465a0a555c8c14cb1ff21c2915b697e64d18ea3d9ed38f",
+            "linux_arm64": "1e3ca4b1e67852e20ef3ca5e54d86ebec480838f04e2e6306f5851ef2b2e5e9e",
+            "darwin_amd64": "ce241b63ebc54d63480c83792c8206eda253c0b38ef53d61a08460910e9410f0",
+            "darwin_arm64": "31256abc5fa87d7ce8116282b702f0f1b7300e616060895ffdc34512e1e33d25",
+            "windows_amd64": "7b14e84fbd773befa1899134742cf788dd08959cb8da5fcfdff9b8e53c2ee0f7",
+            "windows_arm64": "16ad4e077fc2a81759a42be53e0e23db26587074736f9e2c75f98b607b66a3ea"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:34:53Z",
           "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.1.0/plugin-linux-amd64",
@@ -451,6 +616,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:10Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2249c45d3f8b730fe873e303f0e46f29b9071e7fd15f0526ca44b0a27e9116c9",
+            "linux_arm64": "7321e43d260e5253473458c350cd35f11210bdd93cb00dc678e0a4c0dbd4e9d1",
+            "darwin_amd64": "2d16e1dc75b7349f13a64ca92dc96978d6b6027bff4071ec0373e890d31f1414",
+            "darwin_arm64": "4cfbca8b23cb853134fc67c85c8d7aa3e303801f0da6817bbc074d7fb160fae3",
+            "windows_amd64": "f7aa8f3c2f65860e040c582597f9f9f833f3671c4651e16212f71a6f930eb964",
+            "windows_arm64": "090823ac4713eaa37a56d264ce9c00671c585dee349746112343df0e568f7198"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-jira/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:22Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.1.0/plugin-linux-amd64",
@@ -480,6 +660,21 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.3.4",
+          "releaseDate": "2026-06-10T10:51:52Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.3.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "100f341c3bf859dcd033faa24ff96351062eb7b7a05134295b7dea9d0c572a82",
+            "linux_arm64": "46d5da1aab3be4f7e5c4b4f876321dfab889d2874b07219b91658f989f01c060",
+            "darwin_amd64": "b434c4512e1419ac9c15b8b35ea40df3ae21ddf7d0c37781189ab8f350882891",
+            "darwin_arm64": "65ec7702ee8e2d613eed29f352f4905fc7c8313c6ce15c90ddf859f7418c8641",
+            "windows_amd64": "e3930180c2cfdfc7f161111173866b67a27c4f9fcf3a9a47ff809d757acbcca1",
+            "windows_arm64": "53d005fcf5fe6a66ecb33130ddfb7a13d493e8838b7650904b0ac5c119da9c84"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.3.3...v0.3.4"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:42:26Z",
@@ -526,6 +721,21 @@
       ],
       "versions": [
         {
+          "version": "0.3.4",
+          "releaseDate": "2026-06-10T10:51:22Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.3.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d09a301c215543eb1d6510d7392c9515b399eedf64318aaea9c675e2260cd2cc",
+            "linux_arm64": "076839e1416c300b263ad56407143e10c0953ba1bc02b53fdafe9f2a14b43043",
+            "darwin_amd64": "4e67fbb97ee25473965175a92ea378fc8c4a16fc206329dfabe7653e7760cef7",
+            "darwin_arm64": "9203f0395dca912ca61c708ea94199551c6b1e61cc8252e3a13f23b312e38d28",
+            "windows_amd64": "3a9c0b6dd6dca9aa126ee8c9f89d21e14a0457d943476ce1909d6117a920781a",
+            "windows_arm64": "019098f3649b6d3b486ceb6879166ebef525c8b5bd07ba2d5c9b2d64dafe5357"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.3.3...v0.3.4"
+        },
+        {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:42:11Z",
           "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.2.0/plugin-linux-amd64",
@@ -571,6 +781,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:52:00Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5b3369bb3f048fc1c19fa47f810edd346ea1f26f766e128d9beec9c8b7c9e40a",
+            "linux_arm64": "bd8717abfec421aec91cd963222cf6c65e04b941131cbb2b1c6b98175d23c53e",
+            "darwin_amd64": "493ca749298f1718977d7f9ecba6cb449476a97643d036537719417c3ab1fb84",
+            "darwin_arm64": "24c2b57b6b0889602a344bff90f225fb4c975e42eabbf3bcea856c7c8fd7e23a",
+            "windows_amd64": "e1076803bab46820bdbc1896610760ad2817673bc112d4e86ba7199eac712f8b",
+            "windows_arm64": "a2c18c55d51ab821c518e1e275cf156ee794bafd52ea00f41963e1f68dfed794"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:08Z",
           "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.1.0/plugin-linux-amd64",
@@ -600,6 +825,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:41Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fc08e7fb0a65e8abff7bbde562220ccd9ff4bf7296837dc22ecbb9518d20ded9",
+            "linux_arm64": "cfb37e5b6298c161527f19ada5132d6e9187c36466c09e59b877ff15e1cbbd54",
+            "darwin_amd64": "1b776758dd44ee88b565a81dd42f8c650f026ee4003ab56e8bdba190e59ddcbf",
+            "darwin_arm64": "ca022d80b4eabe053aef854a5ee8f29ef60d9bb6f8d95e69bcd31e584087d75c",
+            "windows_amd64": "f27f53d09c27e80e4db16aaca04a774f26da963e312ae20e85ca8b35fa0fadd5",
+            "windows_arm64": "d37921af2468deb1f1e6b80b8a9f530e107305fb01ff4040420678ff107921ec"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-docker/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.2.3...v0.2.4"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:24Z",
@@ -631,6 +871,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:45Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e92f5e8a3e5177c4aee29958824888011a9abc8a2218174997bd81413bd5cef8",
+            "linux_arm64": "fb043cca42bd3307e2c99bdbd4d941a5e85bd25f4ce3db7a15c6cacff67a045f",
+            "darwin_amd64": "a4a11b30a74755b746e657f041cd4a3095631711c4490d7cbae0a38a683320f0",
+            "darwin_arm64": "4bd2b5f08f75a5a43139364345a86aff108aceee5e5256c423a0ad920e0917d3",
+            "windows_amd64": "2276e34d049db748022a3522a4d8a288ed7a43806e1b8cf3add4512c1036d50d",
+            "windows_arm64": "ce9975d15e86de7a173c5952650d7cab94eeaeffbb690a056d1c15cbbaa51724"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:36Z",
           "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.1.0/plugin-linux-amd64",
@@ -661,6 +916,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:49:05Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bb715fc599f35aa49d60109da0c12a03d74ed8b3ede71d0937a9615ee3f3fbce",
+            "linux_arm64": "a21601b18f2906e37b8e402c91b26a7dceec63a5b76197f5bf3019a400a3d717",
+            "darwin_amd64": "b81a1c5b36cf468889561e80e406fcf74b14c47b49ef3f1d79a10f1c5b265e2a",
+            "darwin_arm64": "47e8a77f0cd126ac834339f0c5b05883297d5a54156eb47c8d221d75bc9122b6",
+            "windows_amd64": "0d17c4672a852a6bf215f3f91049f24a2c5e14e7540ed8a94c73ce98a0ea7ed4",
+            "windows_arm64": "7b33b114f5038f45d4ce3181cefc918e7f615d4f369929c6d2f3d5c381bd2b10"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/17\n\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:35Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.1.0/plugin-linux-amd64",
@@ -690,6 +960,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.4",
+          "releaseDate": "2026-06-10T10:49:32Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.3.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a124367d3a60fdeb0388df51030e6959bfc560443c7e7a8a10d760cc4bd19840",
+            "linux_arm64": "264a6f81961d9431c9c64faa8cc8bb50a2e642e958aadfdeeec3c6141391ad68",
+            "darwin_amd64": "39d79c1cbb027e7618bff85de39c8eccb7de206a395d50812b01ab219c20957e",
+            "darwin_arm64": "49ae3d619b8c0f852b1c855a304d97e6a72a59141559a3601896214fbbfa1d4d",
+            "windows_amd64": "0026036fe3e7f8ee133261c8265e913f18e532fd0e012ebe5e3d74e46cb78d21",
+            "windows_arm64": "b707276a7bcf40e53e61be3fb771ba5323b55f5a1c60c8aaf06cb6cde6fbaef3"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-helm/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.3.3...v0.3.4"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:42:01Z",
@@ -736,6 +1021,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:42Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e7a356adf5131d2754a426c4a70031ae6011c75904287e3f86673ef097e93591",
+            "linux_arm64": "35a87add2e95177eaa91015f3daab5492fa95c9fba50f8247fd54b06b8731cb3",
+            "darwin_amd64": "3016d02571d63ebaaff04dbafca39a3d4037ac65f91285ddeacdbc3deec2acfe",
+            "darwin_arm64": "9e7b9e150c64d36cb584959ab489cc758eff1ea50116801970be86760f421a2e",
+            "windows_amd64": "7180df4ecf3cbe86bc74667ae72f7d6012415d84bc3a11726c46a64cc82c6aed",
+            "windows_arm64": "8a0bc5e2f2155254d694962f8ad6bc77391785837bd70328485a385976244501"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:33Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.1.0/plugin-linux-amd64",
@@ -766,6 +1066,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:50:20Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0460d7777f2b59ad1a9966ad4825801d6acad4a26f82d3399f4b51dd509ab1d6",
+            "linux_arm64": "23b0c839881e4402cba35ae49be4709fb4dece8ac2b8383a487599f471b4fd43",
+            "darwin_amd64": "7d0461a80668ddd7ca3c90e13091a238679b66e8ef5a027cbcdf7455a38cb308",
+            "darwin_arm64": "08ee2ff1af0fcb9f31cd89a6d7294bfb3049ea4f6fe05d6da0a263f7c36aff22",
+            "windows_amd64": "da51033e568fca2fcffa611bb49c2a3c0ed11b90ce023be3f80ba40883a3bc6f",
+            "windows_arm64": "8b7978d956be501c3b6d53b3053aafe275e46b9c3e8c0a10c3b51a4018f4ae67"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-maven/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:55Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.1.0/plugin-linux-amd64",
@@ -795,6 +1110,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.4",
+          "releaseDate": "2026-06-10T10:49:40Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.3.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0e6ce4760cf17b723f3d8dc118f89d4a8d0b8cfa2bcbd7aa5836d33990ddf8e8",
+            "linux_arm64": "c4e69f83510596e12473bcc6849bf6b29160599be13835faf695fe67cc131705",
+            "darwin_amd64": "8d7bed9e16837dbc88a9d1de8e1cf0bea974e3f654521cfb0a41a659d878c907",
+            "darwin_arm64": "62febbc7c7b1f6c7bffd2e5b2b6aa1757bc7235800d73cacf811b93de0e77a62",
+            "windows_amd64": "e0f16b5cc6f37d845a6412d559450e1aec4367613aa8eb3fe05f4f6bf1de100a",
+            "windows_arm64": "085e90574b6d58beda09bab3535a9250209c6e02e9cedd97779cf7e7dfb4c077"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.3.3...v0.3.4"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-06-03T10:45:02Z",
@@ -841,6 +1171,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:00Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "4ee9b0e0330cb25407782da2a50876773e51733aaebb6f6b83dd914683f66763",
+            "linux_arm64": "14dfb84ff599a5593e98fd7781c4608b7f54d401b961d5eafa1f64d1fa179d4e",
+            "darwin_amd64": "58f4d5b13d54bd8c983be4d8b8ffe5d71e3473ac99122e2b907c1117af8ea095",
+            "darwin_arm64": "42a26998b46c2cb41d9ea3542cd4030ff165f3f5c3006534b2403241b7ef250a",
+            "windows_amd64": "7aa153276c8abd3bd4f19b710d45f003116bdf1fefcab47d874e7a7068aa5d1a",
+            "windows_arm64": "58c672d2813747b654087b8784f60efa4cb2f0b4aeaa3d22ff313a151fb5b422"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/17\n\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:39Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.1.0/plugin-linux-amd64",
@@ -871,6 +1216,21 @@
       ],
       "versions": [
         {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:48:59Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "55c7aba199a80f0ad8c2c7a40b780805933bd6ce1a97e2f2e56290c8e341ff4b",
+            "linux_arm64": "42b4d3bec895a801e4aa91048bd8c8f41edf4ccd99d57d0711bb6cef3fe13b6e",
+            "darwin_amd64": "5faa934db6b721e48d0a78aae010a17267ce5f20cf1f1150762a5e3e252977f6",
+            "darwin_arm64": "2799a6fb32ff1e497da21fa84d2d5295626f2644309798bd9a760b2de8fa91fc",
+            "windows_amd64": "736dd239743d5ce7eed4f3e0e826ba67629574e99f5b534250214346dfe130ee",
+            "windows_arm64": "4b87f543db3113aafc036cfebd8eb8e37842dccdd268e1dd65786972172168bb"
+          },
+          "prerelease": false,
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.2.3...v0.2.4"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:47Z",
           "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.1.0/plugin-linux-amd64",
@@ -900,6 +1260,21 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:42Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "206c77726f76b3862b1d4e03588d533238525cd1a7f840bcd96b87812a52ef61",
+            "linux_arm64": "32b1d527fe082ac67f006ef0dbc44ea3ba89803e9aeea3cd59f74fec44476f45",
+            "darwin_amd64": "1fc853e3e54b2a1368fa033e0ae4019ff4ef37dbaa6f82ab7cde325be20bfa6e",
+            "darwin_arm64": "e39df511aa9045dd78a4a245cecb1e180120141644d776626e3d21956a29d284",
+            "windows_amd64": "fd636b3150cfe5413e93f999e0c1464a40f0025cfb6238688d77867c20a86f56",
+            "windows_arm64": "f0f758cb53adbc47ebb5e45aa81a24e2621a008f8a937f0f615c499d4b52b2a2"
+          },
+          "prerelease": false,
+          "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.2.3...v0.2.4"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:48Z",
