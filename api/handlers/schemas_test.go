@@ -65,3 +65,27 @@ func performSchemaRequest(t *testing.T, method, target string) *httptest.Respons
 	schemaTestRouter().ServeHTTP(resp, req)
 	return resp
 }
+
+func TestSchemaHandlerAllOfficialPlugins(t *testing.T) {
+	// Verify that every official plugin has an embedded schema served correctly.
+	plugins := []string{
+		"github", "gitlab", "gitea", "git", "bitbucket",
+		"github-actions", "gitlab-ci", "gitea-actions", "generic",
+		"conventional", "default",
+		"slack", "teams", "email", "jira", "matrix", "gitplugin",
+		"go", "npm", "cargo", "docker", "helm", "gradle", "maven",
+		"python", "terraform", "homebrew", "nuget",
+	}
+	for _, name := range plugins {
+		t.Run(name, func(t *testing.T) {
+			resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/"+name+"/v1.json")
+			require.Equal(t, http.StatusOK, resp.Code, "plugin %s: expected 200", name)
+			assert.Equal(t, "application/schema+json", resp.Header().Get("Content-Type"))
+
+			var payload map[string]any
+			require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &payload), "plugin %s: invalid JSON", name)
+			expectedID := "https://registry.semrel.io/schemas/plugins/" + name + "/v1.json"
+			assert.Equal(t, expectedID, payload["$id"], "plugin %s: wrong $id", name)
+		})
+	}
+}

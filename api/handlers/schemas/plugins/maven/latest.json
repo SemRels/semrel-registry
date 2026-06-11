@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/maven/latest.json",
+  "title": "semrel plugin args: maven",
+  "description": "Updates the `<version>` element in a Maven POM file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path to pom.xml.",
+      "default": "pom.xml"
+    }
+  }
+}

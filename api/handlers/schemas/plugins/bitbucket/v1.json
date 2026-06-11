@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/bitbucket/v1.json",
+  "title": "semrel plugin args: bitbucket",
+  "description": "Creates a Bitbucket tag and release entry.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "workspace": {
+      "type": "string",
+      "description": "Bitbucket workspace name."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository slug. Derived from the git remote when absent."
+    },
+    "app_password": {
+      "type": "string",
+      "description": "Bitbucket App Password."
+    },
+    "username": {
+      "type": "string",
+      "description": "Bitbucket username associated with the app password."
+    }
+  },
+  "required": [
+    "workspace",
+    "app_password"
+  ]
+}

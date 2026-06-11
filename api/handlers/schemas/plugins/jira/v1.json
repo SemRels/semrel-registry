@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/jira/v1.json",
+  "title": "semrel plugin args: jira",
+  "description": "Creates a Jira release version and marks issues as fixed.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "base_url": {
+      "type": "string",
+      "description": "Base URL of the Jira instance."
+    },
+    "token": {
+      "type": "string",
+      "description": "Jira API token."
+    },
+    "project": {
+      "type": "string",
+      "description": "Jira project key (e.g. `REL`)."
+    },
+    "fix_version_template": {
+      "type": "string",
+      "description": "Template for the fix version name.",
+      "default": "{{ .Version }}"
+    }
+  },
+  "required": [
+    "base_url",
+    "token",
+    "project"
+  ]
+}

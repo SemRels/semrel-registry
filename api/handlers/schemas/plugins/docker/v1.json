@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/docker/v1.json",
+  "title": "semrel plugin args: docker",
+  "description": "Updates a `ARG VERSION=` line in a Dockerfile.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path to the Dockerfile.",
+      "default": "Dockerfile"
+    },
+    "arg_name": {
+      "type": "string",
+      "description": "Docker build argument name that stores the version.",
+      "default": "VERSION"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/python/latest.json",
+  "title": "semrel plugin args: python",
+  "description": "Updates the version in a Python packaging file (pyproject.toml, setup.cfg, setup.py).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path to the packaging file.",
+      "default": "pyproject.toml"
+    },
+    "backend": {
+      "type": "string",
+      "description": "Backend format: `pyproject`, `setup_cfg`, or `setup_py`.",
+      "default": "pyproject",
+      "enum": [
+        "pyproject",
+        "setup_cfg",
+        "setup_py"
+      ]
+    }
+  }
+}

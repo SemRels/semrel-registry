@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/git/v1.json",
+  "title": "semrel plugin args: git",
+  "description": "Creates an annotated git tag and pushes it to the remote.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "remote": {
+      "type": "string",
+      "description": "Git remote name to push to.",
+      "default": "origin"
+    },
+    "signing_key": {
+      "type": "string",
+      "description": "Path to a GPG key for signing the tag."
+    },
+    "push_branch": {
+      "type": "string",
+      "description": "Push the current branch in addition to the tag.",
+      "default": "false",
+      "enum": [
+        "true",
+        "false"
+      ]
+    }
+  }
+}
