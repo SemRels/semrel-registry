@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/github-actions/latest.json",
+  "title": "semrel plugin args: github-actions",
+  "description": "Passes only when running inside GitHub Actions (GITHUB_ACTIONS=true). No args required.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}

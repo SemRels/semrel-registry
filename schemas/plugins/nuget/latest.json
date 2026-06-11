@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/nuget/latest.json",
+  "title": "semrel plugin args: nuget",
+  "description": "Updates the version property in a .csproj file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path or glob to the .csproj file.",
+      "default": "*.csproj"
+    },
+    "property": {
+      "type": "string",
+      "description": "XML property element name that stores the version.",
+      "default": "Version"
+    }
+  }
+}

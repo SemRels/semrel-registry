@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/helm/v1.json",
+  "title": "semrel plugin args: helm",
+  "description": "Updates `version` (and optionally `appVersion`) in a Helm Chart.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path to Chart.yaml.",
+      "default": "Chart.yaml"
+    },
+    "update_app_version": {
+      "type": "string",
+      "description": "Also update the `appVersion` field.",
+      "default": "false",
+      "enum": [
+        "true",
+        "false"
+      ]
+    },
+    "app_version_prefix": {
+      "type": "string",
+      "description": "Prefix applied to `appVersion` (e.g. `v`).",
+      "default": ""
+    }
+  }
+}

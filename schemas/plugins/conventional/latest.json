@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/conventional/latest.json",
+  "title": "semrel plugin args: conventional",
+  "description": "Parses Conventional Commits and determines the SemVer bump level.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "breaking_change_label": {
+      "type": "string",
+      "description": "Footer token that signals a breaking change.",
+      "default": "BREAKING CHANGE"
+    },
+    "minor_types": {
+      "type": "string",
+      "description": "Comma-separated commit types that trigger a minor bump.",
+      "default": "feat"
+    },
+    "patch_types": {
+      "type": "string",
+      "description": "Comma-separated commit types that trigger a patch bump.",
+      "default": "fix,perf,refactor"
+    }
+  }
+}

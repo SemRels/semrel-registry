@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/gitea-actions/latest.json",
+  "title": "semrel plugin args: gitea-actions",
+  "description": "Passes only when running inside Gitea Actions (GITEA_ACTIONS=true). No args required.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}

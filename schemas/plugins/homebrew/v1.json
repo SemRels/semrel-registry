@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/homebrew/v1.json",
+  "title": "semrel plugin args: homebrew",
+  "description": "Updates a Homebrew formula's `url` and `sha256` fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "formula_file": {
+      "type": "string",
+      "description": "Path to the Homebrew formula file."
+    },
+    "url_template": {
+      "type": "string",
+      "description": "Go template for the download URL (e.g. `https://\u2026/v{{ .Version }}.tar.gz`)."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "SHA-256 checksum of the release tarball."
+    }
+  },
+  "required": [
+    "formula_file"
+  ]
+}

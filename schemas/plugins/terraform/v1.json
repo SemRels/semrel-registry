@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/terraform/v1.json",
+  "title": "semrel plugin args: terraform",
+  "description": "Updates a version variable in a Terraform file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "type": "string",
+      "description": "Path to the Terraform file.",
+      "default": "variables.tf"
+    },
+    "variable": {
+      "type": "string",
+      "description": "Terraform variable name to update.",
+      "default": "app_version"
+    }
+  }
+}

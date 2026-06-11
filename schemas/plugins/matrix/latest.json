@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/matrix/latest.json",
+  "title": "semrel plugin args: matrix",
+  "description": "Sends a release notification to a Matrix room.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "homeserver_url": {
+      "type": "string",
+      "description": "Matrix homeserver base URL."
+    },
+    "token": {
+      "type": "string",
+      "description": "Matrix access token."
+    },
+    "room_id": {
+      "type": "string",
+      "description": "Matrix room ID (e.g. `!abcdef:matrix.org`)."
+    },
+    "max_retries": {
+      "type": "string",
+      "description": "Retry count on transient failures.",
+      "default": "3"
+    },
+    "retry_delay": {
+      "type": "string",
+      "description": "Delay between retries (Go duration string).",
+      "default": "2s"
+    }
+  },
+  "required": [
+    "homeserver_url",
+    "token",
+    "room_id"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/gitlab/v1.json",
+  "title": "semrel plugin args: gitlab",
+  "description": "Publishes a GitLab Release on the configured instance.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "GitLab API token (Personal Access Token with `api` scope)."
+    },
+    "base_url": {
+      "type": "string",
+      "description": "Base URL of the GitLab instance.",
+      "default": "https://gitlab.com"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "GitLab project ID. Derived from the git remote when absent."
+    },
+    "milestone": {
+      "type": "string",
+      "description": "Milestone template to associate with the release (e.g. `v{{ .Version }}`)."
+    }
+  },
+  "required": [
+    "token"
+  ]
+}

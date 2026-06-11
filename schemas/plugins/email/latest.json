@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/email/latest.json",
+  "title": "semrel plugin args: email",
+  "description": "Sends a release notification via SMTP.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "smtp_host": {
+      "type": "string",
+      "description": "SMTP server hostname."
+    },
+    "smtp_port": {
+      "type": "string",
+      "description": "SMTP server port.",
+      "default": "587"
+    },
+    "smtp_user": {
+      "type": "string",
+      "description": "SMTP username."
+    },
+    "smtp_pass": {
+      "type": "string",
+      "description": "SMTP password."
+    },
+    "from": {
+      "type": "string",
+      "description": "Sender address."
+    },
+    "to": {
+      "type": "string",
+      "description": "Comma-separated recipient addresses."
+    },
+    "subject_template": {
+      "type": "string",
+      "description": "Go template for the subject line (e.g. `Release {{ .TagName }} is live`)."
+    }
+  },
+  "required": [
+    "smtp_host",
+    "from",
+    "to"
+  ]
+}
