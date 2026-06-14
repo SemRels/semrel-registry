@@ -57,9 +57,11 @@ func (d *Database) RunMigrations(dir string) error {
 
 func migrationSourceURL(dir string) string {
 	cleanDir := filepath.ToSlash(dir)
-	if runtime.GOOS == "windows" && !strings.HasPrefix(cleanDir, "/") {
+	if runtime.GOOS == "windows" {
+		return "file://" + cleanDir
+	}
+	if !strings.HasPrefix(cleanDir, "/") {
 		cleanDir = "/" + cleanDir
 	}
-
 	return "file://" + cleanDir
 }

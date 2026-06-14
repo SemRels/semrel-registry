@@ -186,9 +186,9 @@ export default function RegistryPage() {
                   </p>
 
                   {/* Install hint */}
-                  <code style={{ fontSize: '11px', background: 'var(--surface2)', padding: '3px 7px', borderRadius: 5, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                  <div className="registry-cli-cmd">
                     semrel plugin install {pluginKey}
-                  </code>
+                  </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>

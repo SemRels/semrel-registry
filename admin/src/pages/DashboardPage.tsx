@@ -87,14 +87,24 @@ function SeriesLineChart({
       aria-label="Trend chart for views and downloads"
       onMouseLeave={() => onHoverIndexChange(null)}
     >
-      <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(13,17,23,.25)" />
-      <path d={viewPath} fill="none" stroke="rgba(56,139,253,.95)" strokeWidth="2.5" />
-      <path d={downloadPath} fill="none" stroke="rgba(63,185,80,.95)" strokeWidth="2.5" />
+      <defs>
+        <linearGradient id="viewGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+        <linearGradient id="downloadGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#059669" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(3,7,18,.3)" stroke="var(--border)" strokeWidth="1" />
+      <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="3" strokeLinecap="round" />
+      <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="3" strokeLinecap="round" />
       {hoverX !== null && (
         <>
-          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.4)" strokeDasharray="3 3" />
-          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="4" fill="rgba(56,139,253,.95)" />
-          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="4" fill="rgba(63,185,80,.95)" />
+          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.3)" strokeDasharray="3 3" />
+          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="1.5" />
+          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
         </>
       )}
       {ordered.map((point, idx) => {
@@ -249,17 +259,19 @@ export default function DashboardPage() {
     <>
       <div className="page__header">
         <h1 className="page__title">Dashboard</h1>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncVersions(); }} disabled={syncingVersions}>
-            {syncingVersions ? 'Syncing…' : '↓ Sync versions'}
-          </button>
-          <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncOrg(); }} disabled={syncingOrg}>
-            {syncingOrg ? 'Scanning…' : '⟳ Sync GitHub org'}
-          </button>
-          <button type="button" className="btn btn--primary" onClick={() => { void handleSync(); }} disabled={syncing}>
-            {syncing ? 'Syncing…' : '⟳ Sync plugins.json'}
-          </button>
-        </div>
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncVersions(); }} disabled={syncingVersions}>
+              {syncingVersions ? 'Syncing…' : '↓ Sync versions'}
+            </button>
+            <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncOrg(); }} disabled={syncingOrg}>
+              {syncingOrg ? 'Scanning…' : '⟳ Sync GitHub org'}
+            </button>
+            <button type="button" className="btn btn--primary" onClick={() => { void handleSync(); }} disabled={syncing}>
+              {syncing ? 'Syncing…' : '⟳ Sync plugins.json'}
+            </button>
+          </div>
+        )}
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
