@@ -198,6 +198,7 @@
           "enum": [
             "provider",
             "analyzer",
+            "generator",
             "condition",
             "hook",
             "updater"

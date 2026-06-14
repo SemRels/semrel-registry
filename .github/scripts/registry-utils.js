@@ -10,6 +10,7 @@ const REQUIRED_CHECKSUM_KEYS = [
 const VALID_CATEGORIES = new Set([
   'provider',
   'analyzer',
+  'generator',
   'condition',
   'hook',
   'updater'
@@ -31,6 +32,7 @@ function deriveCategory(pluginName) {
   const legacyPrefixes = new Map([
     ['provider-', 'provider'],
     ['analyzer-', 'analyzer'],
+    ['generator-', 'generator'],
     ['condition-', 'condition'],
     ['hook-', 'hook'],
     ['updater-', 'updater']

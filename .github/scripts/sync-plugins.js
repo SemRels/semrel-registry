@@ -9,7 +9,7 @@ const {
   validatePlugin
 } = require('./registry-utils');
 
-const CATEGORY_ORDER = ['provider', 'analyzer', 'condition', 'hook', 'updater'];
+const CATEGORY_ORDER = ['provider', 'analyzer', 'generator', 'condition', 'hook', 'updater'];
 const OFFICIAL_PLUGINS = [
   { repo: 'provider-github', name: 'github', category: 'provider', description: 'GitHub releases provider', tags: ['github', 'provider', 'releases'] },
   { repo: 'provider-gitlab', name: 'gitlab', category: 'provider', description: 'GitLab releases provider', tags: ['gitlab', 'provider', 'releases'] },
@@ -18,6 +18,9 @@ const OFFICIAL_PLUGINS = [
   { repo: 'provider-bitbucket', name: 'bitbucket', category: 'provider', description: 'Bitbucket releases provider', tags: ['bitbucket', 'provider', 'releases'] },
   { repo: 'analyzer-conventional', name: 'conventional', category: 'analyzer', description: 'Conventional commits analyzer', tags: ['analyzer', 'commits', 'conventional'] },
   { repo: 'analyzer-default', name: 'default', category: 'analyzer', description: 'Default version analyzer', tags: ['analyzer', 'default', 'semver'] },
+  { repo: 'generator-changelog-md', name: 'changelog-md', category: 'generator', description: 'Markdown changelog generator', tags: ['changelog', 'markdown', 'generator'] },
+  { repo: 'generator-changelog-html', name: 'changelog-html', category: 'generator', description: 'HTML changelog generator', tags: ['changelog', 'html', 'generator'] },
+  { repo: 'generator-release-notes', name: 'release-notes', category: 'generator', description: 'Release notes generator', tags: ['release-notes', 'markdown', 'generator'] },
   { repo: 'condition-github-actions', name: 'github-actions', category: 'condition', description: 'GitHub Actions condition', tags: ['condition', 'github-actions', 'ci'] },
   { repo: 'condition-generic', name: 'generic', category: 'condition', description: 'Generic external condition', tags: ['condition', 'generic', 'workflow'] },
   { repo: 'condition-gitea-actions', name: 'gitea-actions', category: 'condition', description: 'Gitea Actions condition', tags: ['condition', 'gitea-actions', 'ci'] },
@@ -26,6 +29,7 @@ const OFFICIAL_PLUGINS = [
   { repo: 'hook-email', name: 'email', category: 'hook', description: 'Email notification hook', tags: ['email', 'hook', 'notifications'] },
   { repo: 'hook-matrix', name: 'matrix', category: 'hook', description: 'Matrix notification hook', tags: ['hook', 'matrix', 'notifications'] },
   { repo: 'hook-jira', name: 'jira', category: 'hook', description: 'Jira integration hook', tags: ['hook', 'integration', 'jira'] },
+  { repo: 'hook-teams', name: 'teams', category: 'hook', description: 'Microsoft Teams notification hook', tags: ['hook', 'notifications', 'teams'] },
   { repo: 'hook-gitplugin', name: 'gitplugin', category: 'hook', description: 'Git plugin execution hook', tags: ['git', 'hook', 'plugin'] },
   { repo: 'updater-go', name: 'go', category: 'updater', description: 'Go module updater', tags: ['go', 'modules', 'updater'] },
   { repo: 'updater-npm', name: 'npm', category: 'updater', description: 'npm package updater', tags: ['npm', 'packages', 'updater'] },

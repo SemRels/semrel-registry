@@ -194,6 +194,13 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 // POST /api/v1/webhooks/release
 // Payload: {"owner":"SemRels","repository":"analyzer-conventional","tag":"v1.2.3"}
 // Also handles GitHub repository_dispatch client_payload wrapper.
+type syncResult struct {
+	Repo     string `json:"repo"`
+	Action   string `json:"action"` // "created", "updated", "skipped", "error"
+	Error    string `json:"error,omitempty"`
+	Versions int    `json:"versions,omitempty"`
+}
+
 func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 	secret := os.Getenv("WEBHOOK_SECRET")
 	if secret != "" && c.GetHeader("X-Webhook-Secret") != secret {
@@ -210,10 +217,21 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 			SourceRepo  string `json:"source_repo"`
 			Tag         string `json:"tag"`
 		} `json:"client_payload"`
+		Action string `json:"action"`
+		Plugin *struct {
+			Name       string `json:"name"`
+			Namespace  string `json:"namespace"`
+			Version    string `json:"version"`
+			Repository string `json:"repository"`
+		} `json:"plugin"`
 	}
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
 		return
+	}
+	if payload.Plugin != nil {
+		payload.Owner, payload.Repository = ownerRepoFromURL(payload.Plugin.Repository)
+		payload.Tag = "v" + strings.TrimPrefix(payload.Plugin.Version, "v")
 	}
 	if payload.ClientPayload != nil {
 		payload.Owner = payload.ClientPayload.SourceOwner
@@ -229,6 +247,21 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
+
+	if payload.Repository == "semrel-plugins" {
+		results, err := h.performOrgSync(ctx, payload.Owner)
+		if err != nil {
+			InternalServerError(c, "failed to sync org", err)
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "success",
+			"message": "triggered full organization sync via meta-repo release",
+			"results": results,
+		})
+		return
+	}
+
 	// Build the canonical plugin ref. If GITHUB_ORG_NAMESPACE is configured,
 	// map repo names like "provider-bitbucket" to namespaced plugin refs like
 	// "@semrel/bitbucket" to match the seeded naming convention.
@@ -292,7 +325,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 		org = strings.TrimSpace(org[:idx])
 	}
 
-	repos, err := fetchOrgRepos(org)
+	results, err := h.performOrgSync(c.Request.Context(), org)
 	if err != nil {
 		if isGitHubRateLimitError(err) {
 			writeError(c, http.StatusTooManyRequests, "GITHUB_RATE_LIMIT", "GitHub API rate limit exceeded. Configure GITHUB_TOKEN for higher limits.", err)
@@ -302,23 +335,32 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"org": org, "results": results, "total": len(results)})
+}
+
+func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncResult, error) {
+	if org == "" {
+		org = "SemRels"
+	}
+	// Use only the first org if multiple are set.
+	if idx := strings.Index(org, ","); idx != -1 {
+		org = strings.TrimSpace(org[:idx])
+	}
+
+	repos, err := fetchOrgRepos(org)
+	if err != nil {
+		return nil, err
+	}
+
 	// Valid plugin name pattern: <category>-<name>
 	// Categories: analyzer, condition, generator, hook, provider, updater
 	validCategory := regexp.MustCompile(`^(analyzer|condition|generator|hook|provider|updater)-(.+)$`)
-
-	ctx := c.Request.Context()
 
 	// The GITHUB_ORG_NAMESPACE env var maps a GitHub org to a plugin namespace,
 	// e.g. org="SemRels" → namespace="@semrel". Plugins from this org are stored
 	// and looked up as "@semrel/analyzer-default", etc.
 	orgNS := namespaceForOrg(org)
 
-	type syncResult struct {
-		Repo     string `json:"repo"`
-		Action   string `json:"action"` // "created", "updated", "skipped", "error"
-		Error    string `json:"error,omitempty"`
-		Versions int    `json:"versions,omitempty"`
-	}
 	var results []syncResult
 
 	for _, repo := range repos {
@@ -352,7 +394,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 				migrated, patchErr := h.svc.UpdatePlugin(ctx, bare.Ref(), models.PluginPatch{Namespace: &orgNS})
 				if patchErr != nil {
 					results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: "namespace migration: " + patchErr.Error()})
-				log.Printf("version sync: namespace migration error for %s: %v", repo.Name, patchErr)
+					log.Printf("version sync: namespace migration error for %s: %v", repo.Name, patchErr)
 					continue
 				}
 				createdV, _, _ := h.syncPluginReleases(ctx, &migrated)
@@ -395,7 +437,7 @@ func (h *SyncHandler) SyncGitHubOrg(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"org": org, "results": results, "total": len(results)})
+	return results, nil
 }
 
 // pluginNameFromRepo maps plugin repository names to canonical plugin names.
