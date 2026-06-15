@@ -18,6 +18,8 @@ The registry is the canonical source for published semrel plugins.
 4. Consumers fetch the index via `GET /plugins.json` or browse individual plugins via the REST API.
 5. The `semrel` CLI respects `SEMREL_REGISTRY_URL` to discover plugins from a custom registry.
 
+For update-aware clients, each plugin's `versions` array is the source for version checks; clients are expected to select the highest stable release (`prerelease: false`) as the default update target.
+
 ## For plugin authors
 
 See the [registry API docs](https://semrel.io/api/registry) for the full endpoint reference.
