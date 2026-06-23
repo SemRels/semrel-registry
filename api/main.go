@@ -163,6 +163,10 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 
 	syncHandler := handlers.NewSyncHandler(pluginService)
 
+	// Sitemap for SEO — lists all active plugin pages.
+	sitemapHandler := handlers.NewSitemapHandler(pluginService)
+	router.GET("/sitemap.xml", sitemapHandler.Sitemap)
+
 	// plugins.json — semrel registry metadata endpoint consumed by `semrel` CLI.
 	// SEMREL_REGISTRY_URL=http://localhost:8080 and semrel fetches /plugins.json.
 	router.GET("/plugins.json", rlPluginsJSON, syncHandler.PluginsJSON)
