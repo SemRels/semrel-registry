@@ -54,7 +54,9 @@ jobs:
 
       - name: Commit and push updated plugins.json
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use REGISTRY_SYNC_TOKEN (user PAT) so the bot can create and auto-merge
+          # the PR — the org policy blocks the default GITHUB_TOKEN from creating PRs.
+          GH_TOKEN: ${{ secrets.REGISTRY_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           if git diff --quiet plugins.json; then
             echo "plugins.json unchanged — nothing to commit."
