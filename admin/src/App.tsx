@@ -12,6 +12,7 @@ import PluginEditPage from './pages/PluginEditPage';
 import VersionsPage from './pages/VersionsPage';
 import SubmitPage from './pages/SubmitPage';
 import SubmissionsPage from './pages/SubmissionsPage';
+import CookieConsent from './components/CookieConsent';
 
 /** Handles ?token= injected by the GitHub OAuth callback redirect. */
 function OAuthCallback() {
@@ -49,6 +50,7 @@ function AdminOnly({ children }: Readonly<{ children: React.ReactNode }>) {
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <CookieConsent />
       <Routes>
         {/* Public */}
         <Route path="/" element={<RegistryPage />} />

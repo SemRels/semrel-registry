@@ -77,6 +77,24 @@
       ]
     }
     </script>
+
+    <!-- GA Consent Mode v2: deny by default until user consents -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        wait_for_update: 500,
+      });
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0RD0CMG2RV"></script>
+    <script>
+      gtag('js', new Date());
+      gtag('config', 'G-0RD0CMG2RV');
+    </script>
   </head>
   <body>
     <div id="root"></div>
