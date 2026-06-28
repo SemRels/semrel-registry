@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { validatePlugin, submitPlugin } from '../lib/api';
 import type { ValidationResult } from '../lib/api';
 
-const CATEGORIES = ['analyzer', 'condition', 'generator', 'hook', 'provider', 'updater'];
+const CATEGORIES = ['analyzer', 'condition', 'generator', 'hook', 'provider', 'updater', 'packager', 'publisher'];
 
 export default function SubmitPage() {
   const [repoUrl, setRepoUrl] = useState('');
@@ -29,7 +29,7 @@ export default function SubmitPage() {
       setValidation(result);
       const parsed = parseRepo(repoUrl);
       if (parsed?.name && !category) {
-        const m = parsed.name.match(/^(analyzer|condition|generator|hook|provider|updater)-/);
+        const m = parsed.name.match(/^(analyzer|condition|generator|hook|provider|updater|packager|publisher)-/);
         if (m) setCategory(m[1]);
       }
     } catch (e) {

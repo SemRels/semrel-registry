@@ -46,6 +46,7 @@ const CAT_CLASS: Record<string, string> = {
   provider: 'badge--provider', analyzer: 'badge--analyzer',
   condition: 'badge--condition', hook: 'badge--hook',
   updater: 'badge--updater', generator: 'badge--generator',
+  packager: 'badge--packager', publisher: 'badge--publisher',
 };
 
 const CAT_PHASE: Record<string, string> = {
@@ -54,6 +55,8 @@ const CAT_PHASE: Record<string, string> = {
   analyzer:  'analyze',
   generator: 'generate',
   updater:   'pre-tag',
+  packager:  'package',
+  publisher: 'publish',
   hook:      'release',
 };
 

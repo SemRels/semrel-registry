@@ -22,10 +22,11 @@ type Pagination = { total: number; page: number; limit: number; pages: number };
 const CAT_CLASS: Record<string, string> = {
   provider: 'badge--provider', analyzer: 'badge--analyzer',
   condition: 'badge--condition', hook: 'badge--hook', updater: 'badge--updater',
-  generator: 'badge--generator',
+  generator: 'badge--generator', packager: 'badge--packager',
+  publisher: 'badge--publisher',
 };
 
-const CATEGORIES = ['provider', 'analyzer', 'condition', 'hook', 'updater', 'generator'];
+const CATEGORIES = ['provider', 'analyzer', 'condition', 'hook', 'updater', 'generator', 'packager', 'publisher'];
 const SORTS = [
   { value: '', label: 'Default' },
   { value: 'name:asc', label: 'Name (A → Z)' },

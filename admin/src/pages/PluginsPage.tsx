@@ -7,6 +7,8 @@ import { useCurrentUser } from '../hooks/useCurrentUser';
 const CAT_CLASS: Record<string, string> = {
   provider: 'badge--provider', analyzer: 'badge--analyzer',
   condition: 'badge--condition', hook: 'badge--hook', updater: 'badge--updater',
+  generator: 'badge--generator', packager: 'badge--packager',
+  publisher: 'badge--publisher',
 };
 
 export default function PluginsPage() {
@@ -95,7 +97,7 @@ export default function PluginsPage() {
           <select className="select" style={{ width: 160 }} value={category}
             onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
             <option value="">All categories</option>
-            {['provider','analyzer','condition','hook','updater'].map(c => <option key={c} value={c}>{c}</option>)}
+            {['provider','analyzer','condition','hook','updater','generator','packager','publisher'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <select className="select" style={{ width: 180 }} value={`${sort}:${order}`}
             onChange={(e) => {

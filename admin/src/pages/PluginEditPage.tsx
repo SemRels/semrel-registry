@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getPlugin, createPlugin, updatePlugin } from '../lib/api';
 import type { Plugin } from '../lib/api';
 
-const CATS  = ['provider','analyzer','condition','hook','updater'];
+const CATS  = ['provider','analyzer','condition','hook','updater','generator','packager','publisher'];
 const LICS  = ['Apache-2.0','MIT','GPL-3.0','BSD-2-Clause','BSD-3-Clause','MPL-2.0'];
 
 export default function PluginEditPage() {
