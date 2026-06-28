@@ -3,6 +3,17 @@ import { Link, useParams } from 'react-router-dom';
 import { marked } from 'marked';
 import { hasToken } from '../lib/api';
 
+/** Creates or updates a <meta> tag in the document head. */
+function setOrCreate(selector: string, attr: string, attrValue: string, content: string) {
+  let el = document.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, attrValue);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
 type Plugin = {
   id: number;
   namespace?: string;
@@ -186,6 +197,28 @@ export default function PluginDetailPage() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [name]);
+
+  // Update document meta tags for social sharing and SEO
+  useEffect(() => {
+    if (!plugin) return;
+    const pluginRef = plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name;
+    const title = `${pluginRef} — semrel Registry`;
+    const desc  = plugin.description
+      ? `${plugin.description} | semrel plugin for ${plugin.category} — install with: semrel plugin install ${pluginRef}`
+      : `semrel ${plugin.category} plugin: ${pluginRef}. Install with semrel plugin install ${pluginRef}.`;
+
+    document.title = title;
+    setOrCreate('meta[name="description"]',       'name',     'description',       desc);
+    setOrCreate('meta[property="og:title"]',      'property', 'og:title',          title);
+    setOrCreate('meta[property="og:description"]','property', 'og:description',    desc);
+    setOrCreate('meta[property="og:url"]',        'property', 'og:url',            globalThis.location.href);
+    setOrCreate('meta[name="twitter:title"]',     'name',     'twitter:title',     title);
+    setOrCreate('meta[name="twitter:description"]','name',    'twitter:description',desc);
+
+    return () => {
+      document.title = 'semrel Registry — Discover & Install Semantic Release Plugins';
+    };
+  }, [plugin]);
 
   const latest = versions.find(v => !v.prerelease) ?? versions[0] ?? null;
 
