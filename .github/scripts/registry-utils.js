@@ -13,7 +13,9 @@ const VALID_CATEGORIES = new Set([
   'generator',
   'condition',
   'hook',
-  'updater'
+  'updater',
+  'packager',
+  'publisher'
 ]);
 
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
@@ -21,6 +23,7 @@ const PLUGIN_NAME_PATTERN = /^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$/;
 const HTTP_URL_PATTERN = /^https?:\/\//;
 const SPDX_PATTERN = /^[A-Za-z0-9.-]+(?:\+[A-Za-z0-9.-]+)?$/;
 const SHA256_PATTERN = /^[A-Fa-f0-9]{64}$/;
+const GRPC_VERSION_PATTERN = /^v[0-9]+(?:[A-Za-z0-9._-]*)?$/;
 
 function deriveCategory(pluginName) {
   for (const category of VALID_CATEGORIES) {
@@ -35,7 +38,9 @@ function deriveCategory(pluginName) {
     ['generator-', 'generator'],
     ['condition-', 'condition'],
     ['hook-', 'hook'],
-    ['updater-', 'updater']
+    ['updater-', 'updater'],
+    ['packager-', 'packager'],
+    ['publisher-', 'publisher']
   ]);
 
   for (const [prefix, category] of legacyPrefixes) {
@@ -192,6 +197,28 @@ function validateVersion(version, pluginName, index) {
 
   if (version.prerelease !== undefined && typeof version.prerelease !== 'boolean') {
     errors.push(`${prefix}.prerelease must be a boolean when present.`);
+  }
+
+  if (version.compatibility !== undefined) {
+    const compatibility = version.compatibility;
+    if (!compatibility || typeof compatibility !== 'object' || Array.isArray(compatibility)) {
+      errors.push(`${prefix}.compatibility must be an object when present.`);
+    } else {
+      if (!parseSemver(compatibility.minSemrelVersion)) {
+        errors.push(`${prefix}.compatibility.minSemrelVersion must be a valid semver string.`);
+      }
+
+      if (compatibility.maxSemrelVersion !== undefined && !parseSemver(compatibility.maxSemrelVersion)) {
+        errors.push(`${prefix}.compatibility.maxSemrelVersion must be a valid semver string when present.`);
+      }
+
+      if (
+        compatibility.gRPCVersion !== undefined &&
+        (typeof compatibility.gRPCVersion !== 'string' || !GRPC_VERSION_PATTERN.test(compatibility.gRPCVersion))
+      ) {
+        errors.push(`${prefix}.compatibility.gRPCVersion must match v<number> format when present.`);
+      }
+    }
   }
 
   const checksums = version.checksums;

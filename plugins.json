@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-11T07:23:19.678Z",
+  "generatedAt": "2026-06-28T14:59:13.908Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -16,6 +16,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:05Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9937f0905a5bb193b33d21de4d23641b96dd083bdd2e4f200eb25fb31cb61043",
+            "linux_arm64": "543be1a6e34de4546996a3304261dfc01d70f9a8c97c5eaf5a363b1264106d33",
+            "darwin_amd64": "0e0bf96eac2aba74405e1a5e4961864f286fb2b6bcf33db424db50debe69918e",
+            "darwin_arm64": "72163ae2bc68a5487dd1403fc2219c510cd57e4773b8d9b6d9048d82ab3d1b07",
+            "windows_amd64": "e7a6a9860af13f9a2f60d5e5d4d12c3f17df0d989d7d036c52edddb9c4ac8109",
+            "windows_arm64": "f598f2b2162c99dcfc1bee9ff556402dd03fd90420ed6e846e45e6593e951da3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:50:22Z",
           "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.2.4/plugin-linux-amd64",
@@ -28,6 +47,10 @@
             "windows_arm64": "0c5dd37f5ec4748203039582358d053833ac3313f9a2af988742827e1b2dd9d4"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.2.3...v0.2.4"
         },
         {
@@ -43,6 +66,10 @@
             "windows_arm64": "9c3881356bed93ca54b29215b0a65dc23260da22ebf087299108530db6d89b68"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/7\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/6\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/5\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/3\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-bitbucket/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-bitbucket/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-bitbucket/commits/v0.1.0"
         }
       ]
@@ -61,6 +88,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:08:46Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5dda79e1a57f7179653a6d6cd1da3b903e243e404811d092c41dcd7c16b0e8e5",
+            "linux_arm64": "fc8e9bbe0c7ed23fa7cc51e14b2d386b7e42682a324057c9f32f46f22d8e5e0c",
+            "darwin_amd64": "090cc274b320e9638f0a7b5ce62ebdff3cf847ce68165822d6ebe82b5e9191c2",
+            "darwin_arm64": "49f97841d4f7658bd788b5b2dd8eded25e319ea042b0622dc0c0e00c74a6956c",
+            "windows_amd64": "94b055da352926f6616c46233af9cd75b2df03c352db838d30005e122ccf52da",
+            "windows_arm64": "75b0edae15c59a75c8beed3ca6e368d981fe6c85152b563e913a487efc62630d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:52:00Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.2.4/plugin-linux-amd64",
@@ -73,6 +119,10 @@
             "windows_arm64": "30a99e0aae59ca3506a7206bf9b40874c611e67c8a59dfd28827ec36c174a104"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.2.3...v0.2.4"
         },
         {
@@ -88,6 +138,10 @@
             "windows_arm64": "e60cf9f7e62fdbee2c7a49cc22caa6db2402af16819f620856dd0b2d9e4b8515"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/6\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/2\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-git/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-git/commits/v0.1.0"
         }
       ]
@@ -106,6 +160,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:12Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7ee2bc633fa7ab9ca959ac524ce9dc375d4ee6e6b7a27f2f7c0d5908239078de",
+            "linux_arm64": "d8a2c7a38c8395b6bf726c5fa71cab073006449a8c4e37d3e3eeebda554c5817",
+            "darwin_amd64": "84346075799f7c3e1465468abdc0a3e0470a0725bc1482967b424b63646fe251",
+            "darwin_arm64": "3abd28ab2bb07fbf0d3cc94049558f2b82c9fcca9bde235ba8e77bbbf829ace6",
+            "windows_amd64": "c61f8433bbf8fb8e52890278456dc1c39d874e1fb072f2171f576e171a8b61c5",
+            "windows_arm64": "3199efe99d1d71b75a85c840cb584c0e4b35d46bb1f9e2679b634e21ca3db4ed"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.2.3...v0.3.0"
+        },
+        {
           "version": "0.2.3",
           "releaseDate": "2026-06-10T10:51:17Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.2.3/plugin-linux-amd64",
@@ -118,6 +191,10 @@
             "windows_arm64": "985090f0746fc58f22a12c52d3546e0120596369106e38eaa1ad10532f108f46"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.2.2...v0.2.3"
         },
         {
@@ -133,6 +210,10 @@
             "windows_arm64": "9a56cf61b175cdfe8cbdbf8fb3b2d6e5ce3489810bd90f9d9bf8cbfa1a969e4f"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/10\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/5\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/6\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/3\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/2\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-gitea/pull/10\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-gitea/pull/5\n\n**Full Changelog**: https://github.com/SemRels/provider-gitea/commits/v0.1.0"
         }
       ]
@@ -151,6 +232,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:10:44Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cf61cf536c934e2ffec840d4a309067e20709232af7723eee024567d7c081386",
+            "linux_arm64": "3c2c91975122fcfc601b501603c4dbb5661b804cb28f39fa5b6f578eea514edd",
+            "darwin_amd64": "ffbfabe8afda77771db6ccb63f335f474e8f1d03963b07f702f5702f3a43fe19",
+            "darwin_arm64": "071dca031937955277d4158d9138ab0ae567a9f9c032b447400d63fbf731aac7",
+            "windows_amd64": "ecc584ed59375061d76b1457a20f083b8305d9346f7dd10d2643e6aa31041cf4",
+            "windows_arm64": "8103f93402d12cad4455a55d2ccd9e4de0aa472fd1cab62ef8c4fcd28e8d4ac9"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.3.3...v0.4.0"
+        },
+        {
           "version": "0.3.3",
           "releaseDate": "2026-06-10T10:52:01Z",
           "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.3.3/plugin-linux-amd64",
@@ -163,6 +263,10 @@
             "windows_arm64": "ed2fe66ab46aaba868743e0d9e092281439cc1017625bc3e7168dd265f2eb609"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.3.2...v0.3.3"
         },
         {
@@ -178,6 +282,10 @@
             "windows_arm64": "0fd9d7ecdebfd223b5c8d95f8091e1cef75d9cdef40f30717a2527cfd71e814e"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat(provider): implement GitHub REST API provider plugin by @mwaldheim in https://github.com/SemRels/provider-github/pull/11\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-github/pull/12\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/provider-github/pull/15\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/19\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/18\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-github/pull/11\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-github/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.2.0\n\n## What's Changed\n* feat(provider): implement GitHub REST API provider plugin by @mwaldheim in https://github.com/SemRels/provider-github/pull/11\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-github/pull/12\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/provider-github/pull/15\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/19\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/18\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-github/pull/11\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-github/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.2.0"
         },
         {
@@ -193,6 +301,10 @@
             "windows_arm64": "41bbf10e73528894d61688db66bebe38ea5474beb1a8098bd23b2ec58a1f6e32"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/commits/v0.1.0"
         }
       ]
@@ -211,6 +323,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:01Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0e32ee57db37f5e2349bac2f1950b599023eb58d2ffd919e5360910630d6c58c",
+            "linux_arm64": "941f098eefe764a6730867c2132fef36ea76959d2bd27f5539da20fde51a3222",
+            "darwin_amd64": "15f55266bdc8514653a0e60d7f8236a56e61b4e3d50728efe06895461d7c74bd",
+            "darwin_arm64": "1d30cb877438b6d91d3511bebe8447160ccb4389d4d9f8aa7f6691033889b4b5",
+            "windows_amd64": "8d1a32bd6299c3891f3fc9aff497545dd75e1f0a89149db90477a4c5d07187d7",
+            "windows_arm64": "464223cf77a35e5197bab31e615b9352b89096c2a8d1c37e95bcc6c809d28330"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:35Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.2.4/plugin-linux-amd64",
@@ -223,6 +354,10 @@
             "windows_arm64": "8c730607bf1c592312b991d5b923be457a3ad9d77d70ada58d181898c7fbcf07"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.2.3...v0.2.4"
         },
         {
@@ -238,6 +373,10 @@
             "windows_arm64": "19b58f43b9aa449105b7210acf2f6149df4d6b907bb0e7a554a94cbba0f2fa18"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/10\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/6\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/5\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/3\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/provider-gitlab/pull/10\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/provider-gitlab/pull/6\n\n**Full Changelog**: https://github.com/SemRels/provider-gitlab/commits/v0.1.0"
         }
       ]
@@ -256,6 +395,44 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:11:09Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6ff5e55e198e2728f94486f55fd095034a26af87c17f9dbadde53b1b5ceb5687",
+            "linux_arm64": "f7e456a97e73f688bb663c29141d3354e4d5093e546e66eab9c10477c3f6a412",
+            "darwin_amd64": "a0e16196f2e7f50c9fd92c244f393c9aa0bd388d672983d82fd48765bceb66aa",
+            "darwin_arm64": "f8884bc0ced8b359117673804e5f832aadb79ecacb9e3dac599dc7b9da2182bd",
+            "windows_amd64": "2a004c579e125c15e743a1db637ad358ede367766cdd3714d44ded6783131c01",
+            "windows_arm64": "9e14619a069ddc9462d54dc68b0437b2603017e8d6c69e83b827f23385594467"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/31\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/compare/v0.2.0...v0.3.0"
+        },
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-11T08:55:28Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a1764c40ccd1dfc77cd19c3128b41b4d545da193648249bb05122611af6dff57",
+            "linux_arm64": "99d8fdfbbebb825613069842c1e2db786c3ee563220f551a87a6063dbacc243a",
+            "darwin_amd64": "624de8d50d4bc8d6df8ae8dd60c6ac9570dfcc3e185ce1daf2ad420c14f3cea5",
+            "darwin_arm64": "259b077d6d4fdf9642f7f354277aa1ab58387c4b676084e22961026496a68d60",
+            "windows_amd64": "08c6ab8d1789d6a653eb6977178304657e4405f8315ed7c7b933a1ab0e17cbfa",
+            "windows_arm64": "cefc9294e788c7044ad99b6792e4f838e3fc04553d8b1b5f05e9ea058111bc2a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* feat(analyzer): implement Conventional Commits analyzer by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/6\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/2\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/3\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/18\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/21\n* test: add bang-notation test coverage and document ! shorthand in README by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/22\n* feat: add schema versioning support by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/23\n* fix: REUSE schema coverage + CI setup-go v5→v6 by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/24\n* fix: remove obsolete proto/ directory (broken Windows symlink) by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/25\n* fix: dependency-review v5 + skip on unsupported repos by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/26\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/analyzer-conventional/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/analyzer-conventional/pull/6\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.2.0"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:35:16Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.1.0/plugin-linux-amd64",
@@ -268,6 +445,10 @@
             "windows_arm64": "7d01a553af80ff51b45e3e490cb7c47f1182527390b1b790b8b17998e5e04544"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/commits/v0.1.0"
         }
       ]
@@ -286,6 +467,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:09:27Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a4942ba974f610f9f2d409240d35ffa59094ee08855ff5653a5547d5ae134750",
+            "linux_arm64": "6fef6c9eb9cffb2179e71f4807e4d5bd93584597106c5316708f720bf701bad6",
+            "darwin_amd64": "bab7b46d801768c670f43ecf01ba680e001f15854da7e218fcfaa83297916c6d",
+            "darwin_arm64": "f53db44583f8168f18cc0f51e832ed682d6fba44bf631e454a03897bc21f9b7a",
+            "windows_amd64": "2871aa008012d30bf37b820a6021469dac8b45ebd52a9312f629994c5bf94ac1",
+            "windows_arm64": "faa86c26aa27f08731c649c5e37899ffd4e989f78a76d30c9e1b23695f9af499"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.3.3...v0.4.0"
+        },
+        {
           "version": "0.3.3",
           "releaseDate": "2026-06-10T10:49:43Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.3.3/plugin-linux-amd64",
@@ -298,6 +498,10 @@
             "windows_arm64": "bf0cabc6059b3396eac9e753b98fd5afd07d72681bc5d68b33eb84605f2a4057"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: dependency-review v5 + skip on unsupported repos by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/24\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.3.2...v0.3.3"
         },
         {
@@ -313,6 +517,10 @@
             "windows_arm64": "ae31e25eeafdf044a48fd7496068b3e408aa7e6462d42974cf18888e208047d9"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/15\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/20\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/18\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/17\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/analyzer-default/pull/15\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.1.0...v0.2.0"
         },
         {
@@ -328,7 +536,246 @@
             "windows_arm64": "e299913a6d0ae6f154fc7bb31d84be9e3b3e3ea439212654394418ca0f34c344"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/6\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/3\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/2\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/analyzer-default/pull/6\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "changelog-html",
+      "description": "HTML changelog generator",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "generator",
+      "repository": "https://github.com/SemRels/generator-changelog-html",
+      "tags": [
+        "changelog",
+        "html",
+        "generator"
+      ],
+      "versions": [
+        {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:07:08Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5215ae5ba23b3f32af016a7f774664f45df53bba17a1a63c496d39cc182ad2c2",
+            "linux_arm64": "65a021d2e864b91a07dad21606182689cbfddfce0f995e5001b3eec84d541c8a",
+            "darwin_amd64": "b6a70da019834972f5615dc955484a26de3140701833b826391cf899fe2de809",
+            "darwin_arm64": "e65d7ee5f2c1c60d9051cf45268dc8adb51b0bbbc14afba4fe9ca844737db398",
+            "windows_amd64": "038faa5a5e1acb482698eede8899e02cc72011ee9d741b95f2a35f179b5b5e85",
+            "windows_arm64": "df01229b99da63de7e8c82fd6cbb43e42214ad34b7149c182e9c283607c0ced3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.2.4...v0.3.0"
+        },
+        {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:37Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c83cfc1949608853c5c796fc44ee3010036cd7397a6a044428983a54fe3036e4",
+            "linux_arm64": "73f8e44013794e99a6ca2cbd51913b8c08fc9fea88a0a2b379abbbe0a5fc3f85",
+            "darwin_amd64": "ba13aeb9cb5f4b23025e5091e128e132b38c87458934ac38d264b53c760ce12f",
+            "darwin_arm64": "e70984a8c5522af9e4be2c69d2f0da2f8cb492ba301ee19521cf6cfd6b6a3bee",
+            "windows_amd64": "99bd1c67f9ccc47be0335f3f667745483dec0eac78456a10d5a47480dfafc22f",
+            "windows_arm64": "7a745013bb893d4016a8f2dbccdb59d71e38c70242f8ced519c3d6335f0b5c42"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.2.3...v0.2.4"
+        },
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-05-28T10:35:44Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0ce9566cc1343d7b1f9fa076aeabd5f5af5eddebabda7d06b06c5a2dbfa230cd",
+            "linux_arm64": "f48b38e6321c8cbb7c91123ae72a27a5dbe0d7f07fc4a223d8296008cc06cf5a",
+            "darwin_amd64": "cf02223cb1d982a82676acde882a7fca03e247741a9bb2f81cff049ef633610a",
+            "darwin_arm64": "45dd5c92e8ece6d95bc50db75d790121a3fd070607688d1851af5e6d5aafdaad",
+            "windows_amd64": "3614190486fe35eb250e0689f5907f7032d95b50b584bc70d37451e8bd7d3e2a",
+            "windows_arm64": "867a317432f6754149541a14fa10f269d2ff149ffebc85e156dfe0b95fd9d6e4"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/7\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/6\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/4\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/3\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/generator-changelog-html/pull/7\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-html/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "changelog-md",
+      "description": "Markdown changelog generator",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "generator",
+      "repository": "https://github.com/SemRels/generator-changelog-md",
+      "tags": [
+        "changelog",
+        "markdown",
+        "generator"
+      ],
+      "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-06-24T07:07:21Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9daad73972d39fa4a261856f590ae7af9c6a80770e463de3ccfbca8745e0fbdc",
+            "linux_arm64": "56110d5eec48830ddd6bfd62b0d2922aa0f71e9e5e594ec705f4053defa234b7",
+            "darwin_amd64": "67cdd6b29332eb5a073aed257b7482841348fdc50f90bd8945d4f3c8529032c0",
+            "darwin_arm64": "9be1bd3c56ca098ddda77be084ca7c8916bf5c2e241b09105bc421b1b38d6de1",
+            "windows_amd64": "2949f7c8ff725cfce2664c23f4ea1d704bd98a645547be49094eefe21b8d6285",
+            "windows_arm64": "7833155ee8f8389a11177871d16e249f601fb42a68789bd0a9155ab3a6ef971c"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.4.4...v0.5.0"
+        },
+        {
+          "version": "0.4.4",
+          "releaseDate": "2026-06-10T10:49:02Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.4.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a41e130cc2f4302081d646a56cb0a76f38fb281dd73e76ca06f9b077c4da3ab7",
+            "linux_arm64": "bb4ee021237d8a86b92a058d8bbba9f724a384af15051ea2e2f6f7c31c340dda",
+            "darwin_amd64": "5667f0671082d0bbdb8e48aace11c529a6f3c7ffb247f70575a65384073e90bb",
+            "darwin_arm64": "f875450253ea4dc7a242a2a472f6798c2ab6615396d97b4f19fe856988d764a6",
+            "windows_amd64": "a6aaeeed0c08b7e3ab2c34cef6d96426349e90755e805b0922a91e290fd89b32",
+            "windows_arm64": "47407fab1ace01cef5a6dc97fa6bc8b1eb9958b8d1d42bf8d3c2d7998bcb9fc5"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.4.3...v0.4.4"
+        },
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-03T10:45:07Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "f6bd6d9abba1fae45805d43bc3017bc8cdd9ccd79bea6e4c8bb5a63e5ecf3a90",
+            "linux_arm64": "0cd5f1fcbda5a142ec12a7a3195197070fdcca83d6c237377ad04f730fae993b",
+            "darwin_amd64": "dcdc65e961e606794ea894ff04d39dd9fbd26783f35094aa80ef883df2be0566",
+            "darwin_arm64": "4bc7bb1bae82469c13c8022f2f138ad7f594f41682be9e4a8ea7f7d6e4e4ac8b",
+            "windows_amd64": "4b9d09c370dadd13eb743f44528e1b5a12964ddd7adb4af5d2e0e2d5ea18b940",
+            "windows_arm64": "10a1f89dae88cb03c172eebf8038e228fe0f7eeb0217a0dd8a6b9ea9295efa1e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* feat: implement generator-changelog-md plugin by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/3\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/2\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/21\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/24\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/22\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/generator-changelog-md/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/generator-changelog-md/pull/6\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/commits/v0.2.0\n\n## What's Changed\n* feat: implement generator-changelog-md plugin by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/3\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/2\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/1\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/21\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/24\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/22\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/generator-changelog-md/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/generator-changelog-md/pull/6\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/commits/v0.2.0"
+        },
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-05-28T10:35:30Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bf604e585bc1fd022bc38ef7af48e54922e1f0e2302bddbf2fc9fa40aa26664a",
+            "linux_arm64": "f69e2908315f6431134c2c5c3bfeedac2d14ab54d321d73053efa2aa421f2d75",
+            "darwin_amd64": "d9db239a857db1c7d5d544af24cb8e3fc3066b71332eeb26e986ccae3f419dde",
+            "darwin_arm64": "f802ca05ac509d37e133c7ee4427eb9d5e00da02b8e8fb83c71f504b5767950e",
+            "windows_amd64": "8b7678548313060375a408e40da4171be8c4d5159972c0fa27dde4f647f17462",
+            "windows_arm64": "b38d267fbd77b0775807836c45536e5246963e554c727390e62372f6c95cead3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "release-notes",
+      "description": "Release notes generator",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "generator",
+      "repository": "https://github.com/SemRels/generator-release-notes",
+      "tags": [
+        "release-notes",
+        "markdown",
+        "generator"
+      ],
+      "versions": [
+        {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:07:40Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bb5ba9be768eb2bc0923fe56ec021cc9f81e25cd1821faec10740c50fb818514",
+            "linux_arm64": "e4afca4b77634549211c7482d42d7de215a611c7d803eea7790e7c6cf848cd7e",
+            "darwin_amd64": "b475deafd9df6a4ab2154846455e2243e6afe8f2008bc9a042027ce8d8e231c2",
+            "darwin_arm64": "392bd0f9ee1bd7f79e78e01c0aed71552b09bacb75af6df8b08840b86df1ac03",
+            "windows_amd64": "b16db9dec51f943e82375d660e5d10d9f5927c411c9ea8e371fc50d1052986e0",
+            "windows_arm64": "2bfa38151fb57bb8f585cd14a03d0f2d2e6a467dc3039be12b078d89a8a5cfab"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.2.4...v0.3.0"
+        },
+        {
+          "version": "0.2.4",
+          "releaseDate": "2026-06-10T10:51:47Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.2.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c67f4b1bc9736dbfd87ac6a7affc58d645c3f344b788bdd2d946c42074f06d3b",
+            "linux_arm64": "e868be6d3260c28cc6263ae542c8ae0e3671aa92bafaa7710a9cb69d38278369",
+            "darwin_amd64": "969873e06e7b02055bc421e5692bf89b27da0d022e225594222bb22a88a7063e",
+            "darwin_arm64": "1f2dea254a35590b33f43da59431988e389f21c665de426f02ac3983e5fbefd3",
+            "windows_amd64": "0fe32996e38bee613a947a1e08e066ea858b32c8b02faaa91d7191403721b9f3",
+            "windows_arm64": "3f6179c02f80191675ae4bcbacc16e030e5f8469bd743e4d31b21301bc2976d9"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.2.3...v0.2.4"
+        },
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-05-28T10:34:56Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3bc813b1b688c9c6410d12350d3c225251c09558c8771c9ec8d6c1248f546048",
+            "linux_arm64": "c0596e318ccb2a85b95383d714783275fa4922a31f40f79e9ab193b25e2e3a99",
+            "darwin_amd64": "d6a73055e50f37961e644ae52fd460a8d23c1bf4aac0c44bdd2b08064eb16240",
+            "darwin_arm64": "e52dbe1df9823379235dab10df3194f7ba7b7c4734ed952ae26ef55c18a2daa6",
+            "windows_amd64": "6cc95d95b0265c7f7b5b1dfb059e57692ce43dce41c68490f773674eae456a65",
+            "windows_arm64": "a53f128c8b7cc571325a22517cc7b218d41b006a78a75e28d6b949824d37b965"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/7\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/5\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/4\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/3\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/2\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/generator-release-notes/pull/7\n\n**Full Changelog**: https://github.com/SemRels/generator-release-notes/commits/v0.1.0"
         }
       ]
     },
@@ -346,6 +793,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:11:16Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a08b8b5232c1678945c29e987fc5e456cf35b68bd40dced8312116a00b93d37c",
+            "linux_arm64": "1408461477926926c1aa1d297d1fa154bfed3830828ba737463a0ae2684938be",
+            "darwin_amd64": "93536d825301098f35fed1ceac0a4295ab4791e21eceef13dbfbb45af04a612b",
+            "darwin_arm64": "6bc1737381ae093939390bc6886031c368990fce76485988afd59d6ded1e4f5c",
+            "windows_amd64": "460627acb132aced3e47370e693ae6e0a66f3a5f46f55ac86d10ebb5a2f5366a",
+            "windows_arm64": "d01ebaabe771a7c60cda8e64fcb15c7ddb561005ee6b7eab57846c96915bb277"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/28\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.3.3...v0.4.0"
+        },
+        {
           "version": "0.3.3",
           "releaseDate": "2026-06-10T10:52:02Z",
           "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.3.3/plugin-linux-amd64",
@@ -358,6 +824,10 @@
             "windows_arm64": "d0cad5031e5e7da13a435cecd2d7a928e97a295ad9f3e4d9f50b4523aa70958a"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.3.2...v0.3.3"
         },
         {
@@ -373,6 +843,10 @@
             "windows_arm64": "faea4650bee132d4dfeb7a5968483821009ebac1e756f71cdb9f93a562f638f4"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.1.0...v0.2.0"
         },
         {
@@ -388,6 +862,10 @@
             "windows_arm64": "19ef92ec8cf938db29683e8c16442659d1aa8c7ea190683d497ad2867c0489d4"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/7\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/3\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/15\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/14\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-generic/pull/6\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/commits/v0.1.0"
         }
       ]
@@ -406,6 +884,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:06:03Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b1ca4f3332e9504c87a3048ca7444259e73f0008890a28419f5fcc39d29cfb82",
+            "linux_arm64": "a0e848d6183d947116637dc11484d9e7e2e9e2bc6a10b27469d9929dfbec0413",
+            "darwin_amd64": "9926f187e754d6beed3e67fae571c2281a1dc0e9e53b5b331a4e6a49990fbfd1",
+            "darwin_arm64": "d04a975093b4653de8a922689758e917a48dcd23f3aa82a58a3c137bceab92b8",
+            "windows_amd64": "b8b4bcc530ba58af3e59da1595213a8f83bfbd43c6acf9b7895f7159a8aa7c1e",
+            "windows_arm64": "c4d61d8c33bcadfcedfb4d0bc44450612426c6073b75ccf1e71bd9ee2863c62d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.2.3...v0.3.0"
+        },
+        {
           "version": "0.2.3",
           "releaseDate": "2026-06-10T10:51:28Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.2.3/plugin-linux-amd64",
@@ -418,6 +915,10 @@
             "windows_arm64": "c3d7e245583b2b995147c7ba61fb539681a145f70226ca51976b5380621f5aa6"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.2.2...v0.2.3"
         },
         {
@@ -433,6 +934,10 @@
             "windows_arm64": "46c1a81e23c00fd3d06f36abf79e5422cc93007ebb1ac5c6d1dc5e3e58914b46"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/6\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/4\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/1\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-gitea-actions/pull/6\n\n**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/commits/v0.1.0"
         }
       ]
@@ -451,6 +956,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.0",
+          "releaseDate": "2026-06-24T07:24:52Z",
+          "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b521adc8e60c6dead0b27cb121fcdd5952a2f5375e5e2176cd8c9492b0286e27",
+            "linux_arm64": "c1df5b8858f18245486063923f6dd6d9e22c2c689b9b493828e2e6757dbd5a95",
+            "darwin_amd64": "d095875cba0d613fcf7260373fbe27b6606afbc29c1d86d05dfd6644806ee821",
+            "darwin_arm64": "863fe4fabf3445356f62b6bd9be8d4cd35f4a0631e55161e911afe09cc218de3",
+            "windows_amd64": "24a4bda06bb6c6e6dc5f5c914ec8d5e9060ad80d68522cec92d3b8e29c67ed13",
+            "windows_arm64": "a7e77bf571b23b5a37fbfaffb88f30537b092df2db53dbce80fbe3b7fd82eea6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n\n### Features\n- Add multiarch Docker image builds (linux/amd64, linux/arm64) with cosign signing, SBOM attestation, and Trivy CVE scan\n- Full parity with GoReleaser multiarch builds, fully integrated into semrel release pipeline\n\n### Other changes\n- REUSE 3.3 compliance updates\n- ci: add Scorecard workflow with pinned SHAs\n- ci: add actions:write permission for semrel release trigger\n- Schema versioning support\n- Various dependency updates\n\n## What's Changed\n* feat(condition): implement GitHub Actions CI condition plugin by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/11\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/6\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/4\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/2\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/14\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/13\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/12\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/16\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/18\n* feat: add schema versioning support by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/19\n* fix: REUSE schema coverage + CI setup-go v5→v6 by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/20\n* fix: dependency-review v5 + skip on unsupported repos by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/condition-github-actions/pull/11\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.2.0\n\n## What's Changed\n* feat(condition): implement GitHub Actions CI condition plugin by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/11\n* chore(deps): Bump golangci/golangci-lint-action from 7 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/6\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/4\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/2\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/14\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/13\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/12\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/16\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/18\n* feat: add schema versioning support by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/19\n* fix: REUSE schema coverage + CI setup-go v5→v6 by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/20\n* fix: dependency-review v5 + skip on unsupported repos by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/condition-github-actions/pull/11\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.2.0"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-05-28T10:36:20Z",
           "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.1.0/plugin-linux-amd64",
@@ -463,7 +987,11 @@
             "windows_arm64": "af1da6152c2f2c3970164023e9bac45eb0a7ec6ced5b5e4953dc8e15a3b80f6c"
           },
           "prerelease": false,
-          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0"
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/commits/v0.1.0"
         }
       ]
     },
@@ -481,6 +1009,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:05:57Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b7c527cae6cf8db51c148e97e137627d9302c8059fddd4b1e45162df6290c4c3",
+            "linux_arm64": "f222b013c79e9adec85706ec053fd77b4c2b896daa3f76a83fd32da9656b21b3",
+            "darwin_amd64": "718d1442a7589bda828c11b05f5fd9ee647828ca2835df082dd68cdce9a03b89",
+            "darwin_arm64": "f47fde74bc420b7cbc05854fa9907803dc6fc50ab24a36dac12570d3c9ad4ee3",
+            "windows_amd64": "f222b90212e27279095009e7a811c0b599c258966fd705c3b2cd4f9392344c4a",
+            "windows_arm64": "b3693e05bb4efef2d2c63c588fdff8b78c15006e52d14971a67a49de05d43171"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.2.3...v0.3.0"
+        },
+        {
           "version": "0.2.3",
           "releaseDate": "2026-06-10T10:50:24Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.2.3/plugin-linux-amd64",
@@ -493,6 +1040,10 @@
             "windows_arm64": "8c4ea07d8d47072480925a39ca219221211074c29d5872e6072909f8aaffd566"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.2.2...v0.2.3"
         },
         {
@@ -508,6 +1059,10 @@
             "windows_arm64": "e77bbeec32d40b8a597d500ec2da33c73440d920f3f1a147054a7cea463a6a6f"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/7\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/6\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/5\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/3\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/2\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/15\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/14\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/condition-gitlab-ci/pull/7\n\n**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/commits/v0.1.0"
         }
       ]
@@ -526,6 +1081,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:10:20Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c5f9e51986dd87539c0e090e4ae526b4e4aeb10d8720fe21a7122df4e7922ad7",
+            "linux_arm64": "9ea720c2633598509bc7b948ec7d965ebde6b0584366473ee1b4304e3b9e8cfa",
+            "darwin_amd64": "129b2b06647d3389d4b35cca35c718c68428a1c5d0519a3693b20bcedd5970f2",
+            "darwin_arm64": "be6f8f1c79707e5dae549e77d3206264500956b78760f6d0a5273234d576eeec",
+            "windows_amd64": "eb8cdef87fa9a931402ad31d06de18f7b4a76bf637da3b951f0d2669c3bfc8c0",
+            "windows_arm64": "67b2467d526e7455216ce610cca71ed23fcd1bf379f361642fb8dc71e55aabc6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.2.3...v0.3.0"
+        },
+        {
           "version": "0.2.3",
           "releaseDate": "2026-06-10T10:49:31Z",
           "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.2.3/plugin-linux-amd64",
@@ -538,6 +1112,10 @@
             "windows_arm64": "12e24a87205e36792ad50c0047666b98ebf6d3492c6d3490429343736824cfa2"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.2.2...v0.2.3"
         },
         {
@@ -553,6 +1131,10 @@
             "windows_arm64": "6a18bf4053c7b688cdfd5a7c296219bbcee57ea6532cf882efbcf7e1ee32fcd9"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/6\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/3\n* chore(deps): Bump github.com/stretchr/testify from 1.10.0 to 1.11.1 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/4\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/1\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/15\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/14\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/13\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-email/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-email/commits/v0.1.0"
         }
       ]
@@ -571,6 +1153,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:11:05Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "45db6bc6298bcff5a6a05bed13da0b0071e6c145e03c2535dea72429e0a2cecc",
+            "linux_arm64": "6d044d3308d01a6cf8f87c80acb0406dd8d5c0650ff8fd5b1574bd4e3855ff8a",
+            "darwin_amd64": "10a62a9e24828b73c34c8e1684999cc0e81fb26f1d47c6abf39bf997059e9980",
+            "darwin_arm64": "bab3346176fc73f1e0c03dc612c7970c5e5e283729ac6bc0e24ff5c8d8d76941",
+            "windows_amd64": "7ba3ace3ab130a2bfc94f658a2b29f32de673445c42a7eba62a1c83c64b138e1",
+            "windows_arm64": "ada57faacd58173f8a6e2faa25fe44c0c23c750dd458b5e134ecd8a76caca10b"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:07Z",
           "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.2.4/plugin-linux-amd64",
@@ -583,6 +1184,10 @@
             "windows_arm64": "16ad4e077fc2a81759a42be53e0e23db26587074736f9e2c75f98b607b66a3ea"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.2.3...v0.2.4"
         },
         {
@@ -598,6 +1203,10 @@
             "windows_arm64": "9b15f1aade3d6364b9fd4fc270ff96cc79be9be8e07589ddf9ea4ed985c6f02e"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/8\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/6\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/5\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/2\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/1\n* chore(deps): bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/10\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/9\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-gitplugin/pull/8\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-gitplugin/pull/7\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/commits/v0.1.0"
         }
       ]
@@ -616,6 +1225,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:24Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cb139585cc18e2dfb2ec7b7e69945cf192fba26c004b207157f0c754ee0d00e8",
+            "linux_arm64": "9975ddf90359efba3f05b754231f30d2801fe59f80386d16b37569dc8003f551",
+            "darwin_amd64": "e9a905c8751243d4882f741fbaf63277c087228d73f22ea54be14b70640e15b4",
+            "darwin_arm64": "d116bc4597b2494316a2cb0949188f3863b1d0f22409a956965982e3fde32cfa",
+            "windows_amd64": "9fc32f97bbe03e7e92d9fe09b1d4300c6972878beb721b001b70049e748c49e4",
+            "windows_arm64": "dc7cc99e2258db7dd83b17aef6d2ea21ae847e3f1e62116bbd1005e6d599f3c8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:10Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.2.4/plugin-linux-amd64",
@@ -628,6 +1256,10 @@
             "windows_arm64": "090823ac4713eaa37a56d264ce9c00671c585dee349746112343df0e568f7198"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-jira/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.2.3...v0.2.4"
         },
         {
@@ -643,6 +1275,10 @@
             "windows_arm64": "05e28e665fac31f8dad2ebf60a24e9884d6d37b6c74288ad31972f0f6c3e27dd"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-jira/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/5\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/4\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/2\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-jira/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-jira/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/commits/v0.1.0"
         }
       ]
@@ -661,6 +1297,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:08:50Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2120c5a63b93bc8043d6cb23f457e3a60066f3a7ed2eaab71cd7d9b5e4371157",
+            "linux_arm64": "3637469c95e4d39dfffc9bd7540a1c9d122605a4e5bcfcec7dd6d0f2000825e8",
+            "darwin_amd64": "1897617b338aa42f5891b5532009c2c2c0f17e3b74219f7bf1bf2cab975711d1",
+            "darwin_arm64": "25b3b3427cbff24e16319ebc5e2e1e526e691432dcc67ab7b02f4829d96d0abc",
+            "windows_amd64": "16dc63bf2200f728c017da1f60c917ddbe62f8cb1e11e9ed6287cbfce31f20be",
+            "windows_arm64": "debe8d87d50e17a342a6bd626b886446b63326d0a9e9ce1f1b6738b15f727af1"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.3.4...v0.4.0"
+        },
+        {
           "version": "0.3.4",
           "releaseDate": "2026-06-10T10:51:52Z",
           "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.3.4/plugin-linux-amd64",
@@ -673,6 +1328,10 @@
             "windows_arm64": "53d005fcf5fe6a66ecb33130ddfb7a13d493e8838b7650904b0ac5c119da9c84"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.3.3...v0.3.4"
         },
         {
@@ -688,6 +1347,10 @@
             "windows_arm64": "30edcada2c5b8455514702b6984b3c7cabf0cd3cfd50f08db031a70bd86deb60"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/14\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.1.0...v0.2.0"
         },
         {
@@ -703,6 +1366,10 @@
             "windows_arm64": "92c2988e1ca4cd537933eb29123c61dd1832b7bafa29ae26897a3e4068a11095"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/5\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/4\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/3\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/1\n* chore(deps): bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/10\n* chore(deps): bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/9\n* chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-matrix/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-matrix/pull/6\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/commits/v0.1.0"
         }
       ]
@@ -721,6 +1388,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:08:14Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "03a3f07092e9167f2216726b78ca46e4ad09fa945cc5c36abd55db886459d295",
+            "linux_arm64": "3d70e2ac979a64f352a0c4f96c1262d4b80020879ae8df4c3cc29c7495516d7c",
+            "darwin_amd64": "87072219e4a957470dbe3cb0ac60d5589843b12e64a8c3b963044d677943b6ad",
+            "darwin_arm64": "860251969aa39b363eeeac5e88f85c574be23e7a2e736450e5dc0627bb4dd265",
+            "windows_amd64": "a4883367e63cdd660ee87b83ac236b488af757d6943b663c0dbc25ed4ec0ca5c",
+            "windows_arm64": "6821012c1be6c3a4f6cfd4202fbcd5d6b7ca4dfab0e2a86851b5596c613f89ea"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.3.4...v0.4.0"
+        },
+        {
           "version": "0.3.4",
           "releaseDate": "2026-06-10T10:51:22Z",
           "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.3.4/plugin-linux-amd64",
@@ -733,6 +1419,10 @@
             "windows_arm64": "019098f3649b6d3b486ceb6879166ebef525c8b5bd07ba2d5c9b2d64dafe5357"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.3.3...v0.3.4"
         },
         {
@@ -748,6 +1438,10 @@
             "windows_arm64": "ebe385a5225915dfb6cc738fa1dfce0e1b2824bccd0b0b9d4b8317d4f4a5ae90"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/20\n\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.1.0...v0.2.0"
         },
         {
@@ -763,7 +1457,64 @@
             "windows_arm64": "c77e10fe315ffdb411da08fa586f7ab32d4a07ee9f800b635f357ad0cd6348c8"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/hook-slack/pull/13\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/5\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/4\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/3\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/2\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/16\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/14\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/hook-slack/pull/13\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/hook-slack/pull/5\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "teams",
+      "description": "Microsoft Teams notification hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-teams",
+      "tags": [
+        "hook",
+        "notifications",
+        "teams"
+      ],
+      "versions": [
+        {
+          "version": "0.3.3",
+          "releaseDate": "2026-06-10T10:53:04Z",
+          "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e75ee361257e0b5db500ea73ac75a6526fde7ae77605fd4eacd627b057b632cc",
+            "linux_arm64": "3055823554c328d1654bcce9da157d88e011b9d22fb9136dd68ff8b679813923",
+            "darwin_amd64": "0bc483af8946efcbc6d910eb26f9d41a767db1867dc43e0d80a0fbaff47bfbbc",
+            "darwin_arm64": "9448c4c1ffc96c3b9dd71de11cda72d4dac2a7cd4a6e22978b33ea7ff39821b4",
+            "windows_amd64": "7c3dd1b2f85a195703ddbae6415078cc0b04cb159e064c6b11ad46733cbcab74",
+            "windows_arm64": "7f059da3cb4fe3776253f73ac79ea970c11a56631ae380e4e1812ca048ec4d09"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-teams/compare/v0.3.2...v0.3.3"
+        },
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-05-28T10:36:28Z",
+          "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6446a17a988b15fb2e5a93e7e7345c380985e6ee586d8839c09604cf53e4c776",
+            "linux_arm64": "18081006dd2dd8210d769b78ab9f2ce480f1ec7d9823324170e7bfbaaee1c294",
+            "darwin_amd64": "9d220612a0ef5157d4952326e3a3780edcb02e495880ffbdac6db35501e2e6d1",
+            "darwin_arm64": "3209cdf0a8e923d8bbc61ff68145800731773922b7a6e65b78a4b7e4cf3d0bbb",
+            "windows_amd64": "43597965dd57a8884d62236cbe213f204a1a9e3ab7d97721445bc6c3bf0feb83",
+            "windows_arm64": "b70baf80ce9337bc604b9669b32a82970432314704fdfac1e033b0dd1ab19cd9"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-teams/commits/v0.1.0"
         }
       ]
     },
@@ -781,6 +1532,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:10:26Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "39445245e74b61128bb2896d3ca42a1782c498572dcbf9ac4b9e1f9115cbfae2",
+            "linux_arm64": "3057e23a79acb6a721dd74183ef94d89f4bb4cc0c6a1150ec47999c9fb91ad1b",
+            "darwin_amd64": "267cbd16ad5568055ba6ae0c0e0ae0541f0a3ad838c241df98cef8179372f9e0",
+            "darwin_arm64": "084224238c540884c5b13468189acc387e08f566d026a189d852da6112e1c063",
+            "windows_amd64": "714ac9baddff3bf2f620b07e3a88b037d85a63567a1c606d23c5a6a4d5015951",
+            "windows_arm64": "907b46e8f5d51ea445045db14cc0001c3335697a3200b9b2bba0064bc3d4a373"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:52:00Z",
           "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.2.4/plugin-linux-amd64",
@@ -793,6 +1563,10 @@
             "windows_arm64": "a2c18c55d51ab821c518e1e275cf156ee794bafd52ea00f41963e1f68dfed794"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.2.3...v0.2.4"
         },
         {
@@ -808,6 +1582,10 @@
             "windows_arm64": "9f9f09e49ab5fdb5a124f40dc789c2b343c6cbc75c85094ec63d244ddf7dc7ad"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/7\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/6\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/5\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/2\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-cargo/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-cargo/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/commits/v0.1.0"
         }
       ]
@@ -826,6 +1604,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:26Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "be0a409cfaf7915f527d5f488753a6c4d179b84aaf9595f9bad0d703582186cc",
+            "linux_arm64": "e392c17ebfccc01451c9e19cca969eea4b7f4e2d2475c82b24e9ced020bc358a",
+            "darwin_amd64": "5b7d8ce187771a5f65c042f2cfa6382547931646c45d1bbc2c63c2316ec34cdf",
+            "darwin_arm64": "326b51bade24d0a05d930c2f3f97670837fd54c95e1c3bf9dd5cd8006dcdbca1",
+            "windows_amd64": "2bfe0cbe24194f1abd2fc7ed756362910da0b6b6c1abb91edade1a13a42ca1d0",
+            "windows_arm64": "97df38058d2e8d413619d2921c91de3122502376dfbdb32485e96938550c4e84"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:41Z",
           "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.2.4/plugin-linux-amd64",
@@ -838,6 +1635,10 @@
             "windows_arm64": "d37921af2468deb1f1e6b80b8a9f530e107305fb01ff4040420678ff107921ec"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-docker/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.2.3...v0.2.4"
         },
         {
@@ -853,6 +1654,10 @@
             "windows_arm64": "135af7d7465fe565b96608926c66493914d981635b99491258616d9eab764611"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-docker/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/6\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/4\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/3\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/1\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/10\n* chore(deps): bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/9\n* chore(deps): bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-docker/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-docker/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/commits/v0.1.0"
         }
       ]
@@ -871,6 +1676,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T06:58:59Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fbd1aa2c26ec6d226718fa271a67cefd13484790d7c1be9f500e8d880ac61f5c",
+            "linux_arm64": "7f6e8a028bdee6516c0ca75b920bb265b22d956428f95c388cb95530d3c53b87",
+            "darwin_amd64": "33f5e8e6c8ca834046b952255f794f7d784e22e129831f175355758827e200cd",
+            "darwin_arm64": "8bb8a40117dea462665edd2268f44fdbacb8371907917f5c987500a2e395f9c5",
+            "windows_amd64": "db62caffd2b552beddc97ff70b2798eb4ad33d90bb2c738c2facb5370182a134",
+            "windows_arm64": "6fd9c8a3d356e74aa5fa5e598e59da19d4fe6a592ec6681d7339c69a4e480e83"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:45Z",
           "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.2.4/plugin-linux-amd64",
@@ -883,6 +1707,10 @@
             "windows_arm64": "ce9975d15e86de7a173c5952650d7cab94eeaeffbb690a056d1c15cbbaa51724"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.2.3...v0.2.4"
         },
         {
@@ -898,6 +1726,10 @@
             "windows_arm64": "01b1a1887096ca1400a855cc318219406a3377fac5c29681d7928875e17a25ef"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-go/pull/14\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/6\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/5\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/4\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/3\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-go/pull/14\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-go/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-go/commits/v0.1.0"
         }
       ]
@@ -916,6 +1748,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:34Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d80a259b6e2b06f31f6b877029473b5fccf53bf44c76651972d6b61b34d77d11",
+            "linux_arm64": "62c65659244ee5680de7e696d42ed6b9f2547ca4241401c381fe74c3d703c4ad",
+            "darwin_amd64": "0cd49d6bfbe2b047fc9fe665056855c18bc54d9cfa09f2154b20e9114d0984de",
+            "darwin_arm64": "8c39f7750a37d6e36ad5ee1a412d1069838b7169f7b9685a0ea0d25dd6eb2f21",
+            "windows_amd64": "83f94bc038421faf3b021c4f517ed6893a2a523a4b15c237fa30eb0da3fc629b",
+            "windows_arm64": "a626ad9f17f364e06dcd1749332df45cea11ce0c18e95b8a2de84b689aef2661"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:49:05Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.2.4/plugin-linux-amd64",
@@ -928,6 +1779,10 @@
             "windows_arm64": "7b33b114f5038f45d4ce3181cefc918e7f615d4f369929c6d2f3d5c381bd2b10"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/17\n\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.2.3...v0.2.4"
         },
         {
@@ -943,6 +1798,10 @@
             "windows_arm64": "6093fd75997d69fae40d09f5d8f3870011f843ff43680314e38cc0c14127a37d"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/7\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/6\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/4\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/2\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-gradle/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-gradle/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/commits/v0.1.0"
         }
       ]
@@ -961,6 +1820,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:09:11Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "205e778ef7f311d98f975d6e956e4d6a4f66992951a7a8e6a812ace54d9243f4",
+            "linux_arm64": "247c2f0c31866153f92ac2e4f4288e1708cf8971c30e6aec6db27be48b47da98",
+            "darwin_amd64": "02adeb54f25f3f55aa4bc591baad08bbf65aed2fb36ea0bb5411f53776fb6b40",
+            "darwin_arm64": "a663201727f3d6350a34b8aad2168e7201d0cc4176347dca0a7c4ae6b792b804",
+            "windows_amd64": "bdff5b016f0654124674aa15095834c2d6680b9f7463101bf17313cab260a0b5",
+            "windows_arm64": "741c80a4dd8f17878f3d287e6da9793a3ae2e24b8196bebd1a20a59d12f51a6f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.3.4...v0.4.0"
+        },
+        {
           "version": "0.3.4",
           "releaseDate": "2026-06-10T10:49:32Z",
           "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.3.4/plugin-linux-amd64",
@@ -973,6 +1851,10 @@
             "windows_arm64": "b707276a7bcf40e53e61be3fb771ba5323b55f5a1c60c8aaf06cb6cde6fbaef3"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-helm/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.3.3...v0.3.4"
         },
         {
@@ -988,6 +1870,10 @@
             "windows_arm64": "064617bc6dfd9b394e0160d5d6d03634add350a1540ac9c9f4f051e2a215b3f6"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.1.0...v0.2.0"
         },
         {
@@ -1003,6 +1889,10 @@
             "windows_arm64": "db7089a461a7117beb86642e62fba9a74faf502492f14de7b306bf33f6a38c08"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-helm/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/4\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/3\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/2\n* chore(deps): bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/10\n* chore(deps): bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/9\n* chore(deps): bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/8\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-helm/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-helm/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/commits/v0.1.0"
         }
       ]
@@ -1021,6 +1911,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:10:20Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9375345b98d05eae44132c78edee235b9c3cad18eaf93d79d9fdb5ba2ad3a953",
+            "linux_arm64": "7d13032d5ca84d6858a775635989d485ea4179a1e718d1d9602f1764ecc01dce",
+            "darwin_amd64": "39d36959b0c3f0060b52ded776cfffa47bf9b995c580c914cb7afe632aa4f2d9",
+            "darwin_arm64": "6a4d539a90486f4086fe543c1a45a3b53a1cec004d68dec7406e22ee6116770a",
+            "windows_amd64": "2fdd44621ab2a4496041a7bedee0964c762a4fe13ec8d28cfa9cf819df5114e7",
+            "windows_arm64": "4f48e9c486cd482e5202818e788ab98c5c896ae314888c4d318b433f34480646"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:42Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.2.4/plugin-linux-amd64",
@@ -1033,6 +1942,10 @@
             "windows_arm64": "8a0bc5e2f2155254d694962f8ad6bc77391785837bd70328485a385976244501"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/19\n\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.2.3...v0.2.4"
         },
         {
@@ -1048,6 +1961,10 @@
             "windows_arm64": "dba46f9912e55799232e2c22546bb3e6ba466d3ea23b5f7586a05b848ab3ad5f"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/6\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/3\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/2\n* Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-homebrew/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-homebrew/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/commits/v0.1.0"
         }
       ]
@@ -1066,6 +1983,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:10:16Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "507c4b0a9a407563791a0f3bd4da8ccb9ed88bf17529fd65d1c8433f4a4cfb41",
+            "linux_arm64": "8b0e47fd9578e313f622e4ca1f58c8e7706b2ae335736b38ef9769d6c512de43",
+            "darwin_amd64": "9435a765b85c5c06e31fc61fd16acd36ea2bca0e6b545358ac2295cb37fd816d",
+            "darwin_arm64": "cf3eae36dadefe750dc0af6e6c212e3acbb767cdc830aa74e51af8b899466269",
+            "windows_amd64": "d6da24e9cf556b7d1b4a80454b44d3cc8460fd32b451ec218942dc28a8c06a4e",
+            "windows_arm64": "35c218acc35e28b4bf8c50008c4d8312be7345e66cd51fa0cd72eef8e2d9692a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:50:20Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.2.4/plugin-linux-amd64",
@@ -1078,6 +2014,10 @@
             "windows_arm64": "8b7978d956be501c3b6d53b3053aafe275e46b9c3e8c0a10c3b51a4018f4ae67"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-maven/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.2.3...v0.2.4"
         },
         {
@@ -1093,6 +2033,10 @@
             "windows_arm64": "fa0adad8b2e5375c0c94db82e174753e46fe3f6e38afa27a0509f4bf0e17e621"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-maven/pull/7\n* Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/6\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/5\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/3\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-maven/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-maven/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/commits/v0.1.0"
         }
       ]
@@ -1111,6 +2055,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-24T07:10:35Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9431c01a0fa8d6ca45668b20521c7c3dced1c7d6ac1ef244f5d6560a7ef5470e",
+            "linux_arm64": "93bbbfb5b59f15ad56720c563f0a9ea81e2fdeadda16c871e8088b80ab542f3f",
+            "darwin_amd64": "a6370a0852281abc640b638f24de8b94bd053ae08f07994db013e72252789fd3",
+            "darwin_arm64": "a129f37244e62324cb1e0be3a79191f70d3006fd90d257d20bea8b695976481f",
+            "windows_amd64": "6664fb73a68b092a6a653f7b4812bb7aea33f1b4b6f3b44009a1da201d19b866",
+            "windows_arm64": "f4a0ea7810f2bf5397e82db40f951c817857faa9fa5fd7f1dc670d98a6f44ef2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.3.4...v0.4.0"
+        },
+        {
           "version": "0.3.4",
           "releaseDate": "2026-06-10T10:49:40Z",
           "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.3.4/plugin-linux-amd64",
@@ -1123,6 +2086,10 @@
             "windows_arm64": "085e90574b6d58beda09bab3535a9250209c6e02e9cedd97779cf7e7dfb4c077"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.3.3...v0.3.4"
         },
         {
@@ -1138,6 +2105,10 @@
             "windows_arm64": "15c0bdf543feea4c2f9bb1b5613ef137796d19f168a0243722ca2a88c2f53b67"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-npm/pull/15\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/5\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/1\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/17\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/16\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-npm/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-npm/pull/5\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.2.0\n\n## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-npm/pull/15\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/5\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/6\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/4\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/3\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/2\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/1\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/17\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/16\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/21\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-npm/pull/15\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-npm/pull/5\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.2.0"
         },
         {
@@ -1153,6 +2124,10 @@
             "windows_arm64": "940a01ef4910f6519ec99ab57ad2cac08df502302cc0ea2d67f95b7210a0f279"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/commits/v0.1.0"
         }
       ]
@@ -1171,6 +2146,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:11:12Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ec77435dcf9c020e2ef4055b607e2ff6b8cc9509c88630f364eba07305e5841f",
+            "linux_arm64": "0f133df976641823787b2cf53dd83139d94924545ebd2b33258d93ab513dbadd",
+            "darwin_amd64": "fdff277c9b078baf2fa7792e34d4ebd2cddf1ddac77fce8f2339039bad3e4967",
+            "darwin_arm64": "f48025740c206033495c8d2ad59a0421988f2a70a3839070a3673c4904046bb2",
+            "windows_amd64": "d177bed7ce62f3af6582841f71d8658c4d308af532fbd2dfd14efee35c9a422f",
+            "windows_arm64": "7d25b6bac4c53d029aa11c6b7d07c9351c03855a71b5d71cb3883a0279316912"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:00Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.2.4/plugin-linux-amd64",
@@ -1183,6 +2177,10 @@
             "windows_arm64": "58c672d2813747b654087b8784f60efa4cb2f0b4aeaa3d22ff313a151fb5b422"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/17\n\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.2.3...v0.2.4"
         },
         {
@@ -1198,6 +2196,10 @@
             "windows_arm64": "2a4effe1d291b1140ecfc231407b207eaefd15f5fcb67aa95de58b0f86147c6f"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/7\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/5\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/4\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/2\n* Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-nuget/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-nuget/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/commits/v0.1.0"
         }
       ]
@@ -1216,6 +2218,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:10:56Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "30e66a453809c15d773d423e583f64a89d2c9ddbd29de115a70d56d1d3d526d8",
+            "linux_arm64": "3a30fd6ffde3f94e7de8e7fd53265b1d97baa722cb852034721e4bb410fc29c6",
+            "darwin_amd64": "b23b34e95c82687bf1eae79f93477b0006d02b926d7394d86856ece256ff6b95",
+            "darwin_arm64": "663cbdce5e0acea13621e90d2b399cedbf5f242b7c6b747ecdaf48cdb86edc02",
+            "windows_amd64": "30dcc7c3bce7fb54d396776a67caa359eada38e156ff5f0466d824c19d0a5183",
+            "windows_arm64": "6ec629f88d82466a061348815183577cc13bb5e96f201e1ddedfe5d7064e99c8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:48:59Z",
           "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.2.4/plugin-linux-amd64",
@@ -1228,6 +2249,10 @@
             "windows_arm64": "4b87f543db3113aafc036cfebd8eb8e37842dccdd268e1dd65786972172168bb"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.2.3...v0.2.4"
         },
         {
@@ -1291,6 +2316,48 @@
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/7\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-terraform/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-terraform/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/commits/v0.1.0"
         }
       ]
+    },
+    {
+      "name": "nfpm",
+      "description": "nFPM package builder for deb/rpm/apk artifacts",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "packager",
+      "repository": "https://github.com/SemRels/packager-nfpm",
+      "tags": [
+        "nfpm",
+        "packager",
+        "linux"
+      ],
+      "versions": []
+    },
+    {
+      "name": "generic-http",
+      "description": "Generic HTTP artifact publisher",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "publisher",
+      "repository": "https://github.com/SemRels/publisher-generic-http",
+      "tags": [
+        "publisher",
+        "http",
+        "artifacts"
+      ],
+      "versions": []
+    },
+    {
+      "name": "oci",
+      "description": "OCI artifact publisher",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "publisher",
+      "repository": "https://github.com/SemRels/publisher-oci",
+      "tags": [
+        "publisher",
+        "oci",
+        "registry"
+      ],
+      "versions": []
     }
   ]
 }

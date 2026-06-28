@@ -9,7 +9,7 @@ const {
   validatePlugin
 } = require('./registry-utils');
 
-const CATEGORY_ORDER = ['provider', 'analyzer', 'generator', 'condition', 'hook', 'updater'];
+const CATEGORY_ORDER = ['provider', 'analyzer', 'generator', 'condition', 'hook', 'updater', 'packager', 'publisher'];
 const OFFICIAL_PLUGINS = [
   { repo: 'provider-github', name: 'github', category: 'provider', description: 'GitHub releases provider', tags: ['github', 'provider', 'releases'] },
   { repo: 'provider-gitlab', name: 'gitlab', category: 'provider', description: 'GitLab releases provider', tags: ['gitlab', 'provider', 'releases'] },
@@ -41,7 +41,10 @@ const OFFICIAL_PLUGINS = [
   { repo: 'updater-maven', name: 'maven', category: 'updater', description: 'Maven dependency updater', tags: ['dependencies', 'maven', 'updater'] },
   { repo: 'updater-nuget', name: 'nuget', category: 'updater', description: 'NuGet package updater', tags: ['nuget', 'packages', 'updater'] },
   { repo: 'updater-homebrew', name: 'homebrew', category: 'updater', description: 'Homebrew formula updater', tags: ['formula', 'homebrew', 'updater'] },
-  { repo: 'updater-terraform', name: 'terraform', category: 'updater', description: 'Terraform module updater', tags: ['terraform', 'modules', 'updater'] }
+  { repo: 'updater-terraform', name: 'terraform', category: 'updater', description: 'Terraform module updater', tags: ['terraform', 'modules', 'updater'] },
+  { repo: 'packager-nfpm', name: 'nfpm', category: 'packager', description: 'nFPM package builder for deb/rpm/apk artifacts', tags: ['nfpm', 'packager', 'linux'] },
+  { repo: 'publisher-oci', name: 'oci', category: 'publisher', description: 'OCI artifact publisher', tags: ['publisher', 'oci', 'registry'] },
+  { repo: 'publisher-generic-http', name: 'generic-http', category: 'publisher', description: 'Generic HTTP artifact publisher', tags: ['publisher', 'http', 'artifacts'] }
 ];
 const SEMVER_SOURCE = '(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?';
 
@@ -311,6 +314,8 @@ async function main() {
   const owner = process.env.PLUGIN_SOURCE_OWNER || 'SemRels';
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
   const generatedAtOverride = process.env.PLUGIN_GENERATED_AT || '';
+  const defaultMinSemrelVersion = process.env.SEMREL_MIN_VERSION || '0.15.0';
+  const defaultGRPCVersion = process.env.SEMREL_GRPC_VERSION || 'v1';
 
   const summary = {
     sourceOrganization: owner,
@@ -370,7 +375,11 @@ async function main() {
         releaseDate: release.published_at || release.created_at || new Date().toISOString(),
         downloadUrl: checksumResult.binaryUrls.linux_amd64 || Object.values(checksumResult.binaryUrls)[0] || release.html_url,
         checksums: checksumResult.checksums,
-        prerelease: Boolean(release.prerelease)
+        prerelease: Boolean(release.prerelease),
+        compatibility: {
+          minSemrelVersion: defaultMinSemrelVersion,
+          gRPCVersion: defaultGRPCVersion
+        }
       };
 
       const changelog = String(release.body || '').trim();

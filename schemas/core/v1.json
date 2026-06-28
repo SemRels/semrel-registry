@@ -57,7 +57,7 @@
     },
     "plugins": {
       "type": "array",
-      "description": "Plugins to run during the release pipeline (providers, hooks, updaters, generators, conditions).",
+      "description": "Plugins to run during the release pipeline (providers, hooks, updaters, generators, conditions, packagers, publishers).",
       "items": {
         "$ref": "#/$defs/PluginConfig"
       }
@@ -257,7 +257,7 @@
       "properties": {
         "uses": {
           "type": "string",
-          "description": "Official plugin name as published in the semrel registry (e.g. \"provider-github\").",
+          "description": "Official plugin name as published in the semrel registry (e.g. \"provider-github\", \"packager-nfpm\", \"publisher-oci\").",
           "examples": [
             "provider-github",
             "provider-gitlab",
@@ -289,7 +289,10 @@
             "updater-maven",
             "updater-nuget",
             "updater-python",
-            "updater-terraform"
+            "updater-terraform",
+            "packager-nfpm",
+            "publisher-oci",
+            "publisher-generic-http"
           ]
         },
         "name": {

@@ -20,6 +20,8 @@ The registry is the canonical source for published semrel plugins.
 
 For update-aware clients, each plugin's `versions` array is the source for version checks; clients are expected to select the highest stable release (`prerelease: false`) as the default update target.
 
+Supported plugin categories in the registry are currently `provider`, `analyzer`, `generator`, `condition`, `hook`, `updater`, plus parity-foundation categories `packager` and `publisher`.
+
 ## For plugin authors
 
 See the [registry API docs](https://semrel.io/api/registry) for the full endpoint reference.

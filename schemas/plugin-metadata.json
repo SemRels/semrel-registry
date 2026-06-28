@@ -105,8 +105,14 @@
       "type": "object",
       "description": "Optional compatibility hints used by semrel to decide whether a plugin release can be installed. minSemrelVersion controls the minimum supported go-semrel version; gRPCVersion tracks the ADR-001 protobuf service generation, for example v1.",
       "additionalProperties": false,
+      "required": [
+        "minSemrelVersion"
+      ],
       "properties": {
         "minSemrelVersion": {
+          "$ref": "#/$defs/semver"
+        },
+        "maxSemrelVersion": {
           "$ref": "#/$defs/semver"
         },
         "gRPCVersion": {
@@ -201,7 +207,9 @@
             "generator",
             "condition",
             "hook",
-            "updater"
+            "updater",
+            "packager",
+            "publisher"
           ],
           "description": "semrel plugin category used by semrel.yaml and the registry discovery UX."
         },
