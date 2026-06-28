@@ -2329,7 +2329,27 @@
         "packager",
         "linux"
       ],
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-06-28T15:14:58Z",
+          "downloadUrl": "https://github.com/SemRels/packager-nfpm/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a1f471df7ba8f5c2cc1bf9d3743eb002c073b92642578bc54c0a846a402e080f",
+            "linux_arm64": "bbe33bf5d8b5c9dfa7b44074a647e5fe4ac57d9931bc47b3d798dbcc1d45a625",
+            "darwin_amd64": "5d45f04865693dac05b157ff6e5079004b8b4efb35efc6ff59c4c0ad04fd0f7e",
+            "darwin_arm64": "e1053de85e640fbd9090973ba0e29890f5fe2e87cb96045e81f01fcef215d4bf",
+            "windows_amd64": "601189ad282edefab98687a0311d203e82236e7a0cac353dd84198272834d2fe",
+            "windows_arm64": "7c6ec72159904a173ab484e447631836c623fe42154df4851afde6c4760b88f6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/packager-nfpm/commits/v0.1.0"
+        }
+      ]
     },
     {
       "name": "generic-http",
@@ -2343,7 +2363,27 @@
         "http",
         "artifacts"
       ],
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-06-28T15:15:02Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-generic-http/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a1f471df7ba8f5c2cc1bf9d3743eb002c073b92642578bc54c0a846a402e080f",
+            "linux_arm64": "bbe33bf5d8b5c9dfa7b44074a647e5fe4ac57d9931bc47b3d798dbcc1d45a625",
+            "darwin_amd64": "5d45f04865693dac05b157ff6e5079004b8b4efb35efc6ff59c4c0ad04fd0f7e",
+            "darwin_arm64": "e1053de85e640fbd9090973ba0e29890f5fe2e87cb96045e81f01fcef215d4bf",
+            "windows_amd64": "601189ad282edefab98687a0311d203e82236e7a0cac353dd84198272834d2fe",
+            "windows_arm64": "7c6ec72159904a173ab484e447631836c623fe42154df4851afde6c4760b88f6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/publisher-generic-http/commits/v0.1.0"
+        }
+      ]
     },
     {
       "name": "oci",
@@ -2357,7 +2397,27 @@
         "oci",
         "registry"
       ],
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-06-28T15:15:05Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-oci/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a1f471df7ba8f5c2cc1bf9d3743eb002c073b92642578bc54c0a846a402e080f",
+            "linux_arm64": "bbe33bf5d8b5c9dfa7b44074a647e5fe4ac57d9931bc47b3d798dbcc1d45a625",
+            "darwin_amd64": "5d45f04865693dac05b157ff6e5079004b8b4efb35efc6ff59c4c0ad04fd0f7e",
+            "darwin_arm64": "e1053de85e640fbd9090973ba0e29890f5fe2e87cb96045e81f01fcef215d4bf",
+            "windows_amd64": "601189ad282edefab98687a0311d203e82236e7a0cac353dd84198272834d2fe",
+            "windows_arm64": "7c6ec72159904a173ab484e447631836c623fe42154df4851afde6c4760b88f6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/publisher-oci/commits/v0.1.0"
+        }
+      ]
     }
   ]
 }
