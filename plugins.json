@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-28T14:59:13.908Z",
+  "generatedAt": "2026-06-29T07:23:10.846Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -558,6 +558,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-28T15:07:10Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "540228972c275bd130ae48b2aeacd1def1ae7d750e1b897dc2e7937b5d04f4a5",
+            "linux_arm64": "7231846135ce616ff6a0dc06fc8a3d088188a33314b3f5d8fa7b44ff5b2eb60c",
+            "darwin_amd64": "d820d0d902e4cf1daea6a625af2b60b452ae7d2509d64da9b288641e909e22cb",
+            "darwin_arm64": "d1cd475063874639af8092db6aa7e40a078cb0a1b1bcf96b918ad4012ef1c871",
+            "windows_amd64": "7d1e8e48338c7356e480678be3a74b4023837c4c725c0fc66bd3df277459bb45",
+            "windows_arm64": "abf127a529b7115c868368bf20ec5ca5a75d6bd328a8862bebbcba66465b1e52"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.2.4...v0.4.0"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:07:08Z",
           "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.3.0/plugin-linux-amd64",
@@ -629,6 +648,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.6.0",
+          "releaseDate": "2026-06-28T15:07:06Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.6.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a99f1e1f53093bab74bdbe7f460783b2f9028abf2a9dd3cb8c9afa80ca967a82",
+            "linux_arm64": "ef623f599c292f065712d4fb07dbef6cbf4258824edea24b0c8949f2f5c6d3d1",
+            "darwin_amd64": "18fdb98073213fad4639db0a11aab26a97798e3713034c85313bc5bee27c8d22",
+            "darwin_arm64": "7637be83524c543dadd53ac61eeed643a60208e9054ee005e046847ec12a185b",
+            "windows_amd64": "4aecdc627d831d7199691d4fafe96953b81afe9b3e4a32a1d75e8ca0c679f808",
+            "windows_arm64": "37699eeb4d76907ad32bf85fd275ecda566cccbde495a749c9fc3596114aa32b"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/32\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.4.4...v0.6.0"
+        },
         {
           "version": "0.5.0",
           "releaseDate": "2026-06-24T07:07:21Z",
@@ -720,6 +758,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-06-28T15:07:10Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2cb50e7565d2d6a83fd7b7cfd21bb2bf310a62e672b05b405ce732f48bb5cae2",
+            "linux_arm64": "80991d050dc4c6c2ef481858242f39108017ba1b7e88cf8d95ba6126907674c5",
+            "darwin_amd64": "3b9ae9b9882a25782ac70337ac179a0d5d1284dfe5fbfb53f79f6c999706f8c0",
+            "darwin_arm64": "be3d02d0c3c5ee3ae140e7cece827cfc2710f35423c2e539238c13dd18afa013",
+            "windows_amd64": "9b4ecbdab51b1a2c32765abbe5338f0ff436a1b76e5c58639cf43689bec832b7",
+            "windows_arm64": "b22ee9bdf4253e8dbb9b4c588f5a29b4defda4726e61f2dd1074ca268bd00545"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/25\n\n\n**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.2.4...v0.4.0"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:07:40Z",
@@ -2268,6 +2325,10 @@
             "windows_arm64": "67ee6c0775e5b86ead0bbeb7be4bf800ca6c19b0f2ed275052df1abbd7488ea0"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-python/pull/12\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/3\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/5\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/16\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/14\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/13\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-python/pull/12\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-python/pull/3\n\n**Full Changelog**: https://github.com/SemRels/updater-python/commits/v0.1.0"
         }
       ]
@@ -2286,6 +2347,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-06-24T07:09:52Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "8b3de23eee2bc29dd410b15476ad4aa32114a32d7c3138c55986871ef63d4f7c",
+            "linux_arm64": "5cc78e380594f8fa369be0b686dad60dbbc724ea7692767acc2a7c18562527bb",
+            "darwin_amd64": "b0d5ca951aa6f2150dae93d9a22921a00fefd670856c3689fcaa0dfe755e670d",
+            "darwin_arm64": "0a9d10f64c0cb0f634eff393a5e793abda548d264275b451022c400bc41febf6",
+            "windows_amd64": "8f1acbde22a3632f2d753fc7aa5587130540a9e53822696109b9c1484d9f0f20",
+            "windows_arm64": "b177b99dab613bd81a1206f22a7c3599f980a535d458c1f357c244b9e42da955"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.2.4...v0.3.0"
+        },
+        {
           "version": "0.2.4",
           "releaseDate": "2026-06-10T10:51:42Z",
           "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.2.4/plugin-linux-amd64",
@@ -2298,6 +2378,10 @@
             "windows_arm64": "f0f758cb53adbc47ebb5e45aa81a24e2621a008f8a937f0f615c499d4b52b2a2"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* fix: handle errcheck for fmt.Fprintf in schema version output by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/18\n\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.2.3...v0.2.4"
         },
         {
@@ -2313,6 +2397,10 @@
             "windows_arm64": "364aabb465687d81cb5f6699771def9975e0b5cb7acb238b7123486e941ba2c7"
           },
           "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/7\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-terraform/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-terraform/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/commits/v0.1.0"
         }
       ]
