@@ -57,11 +57,35 @@ export default function Layout() {
               + Submit Plugin
             </NavLink>
           )}
+
+          <div className="sidebar__section-label">Registry</div>
           <NavLink to="/" className="sidebar__link">
             Public Registry ↗
           </NavLink>
           <a href="/api/v1/plugins" className="sidebar__link" target="_blank" rel="noopener">
             Raw API ↗
+          </a>
+          <a href="/schemas/core/v1.json" className="sidebar__link" target="_blank" rel="noopener">
+            Config Schema ↗
+          </a>
+
+          <div className="sidebar__section-label">Resources</div>
+          <a href="https://semrel.io/" className="sidebar__link" target="_blank" rel="noopener">
+            Docs ↗
+          </a>
+          <a href="https://semrel.io/guide/configuration/" className="sidebar__link" target="_blank" rel="noopener">
+            Configuration ↗
+          </a>
+          <a href="https://github.com/SemRels" className="sidebar__link" target="_blank" rel="noopener">
+            GitHub ↗
+          </a>
+
+          <div className="sidebar__section-label">Legal</div>
+          <a href="https://semrel.io/legal/imprint/" className="sidebar__link" target="_blank" rel="noopener">
+            Imprint
+          </a>
+          <a href="https://semrel.io/legal/privacy/" className="sidebar__link" target="_blank" rel="noopener">
+            Privacy
           </a>
         </nav>
         <div className="sidebar__footer">

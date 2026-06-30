@@ -144,6 +144,18 @@ code, pre {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.sidebar__section-label {
+  padding: .75rem 1rem .25rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  opacity: .5;
+  margin-top: .25rem;
 }
 
 .sidebar__link {
