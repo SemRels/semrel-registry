@@ -33,9 +33,9 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 ## Repository layout
 
 - `api/` - Go web service skeleton for the upcoming dynamic registry backend
+- `admin/` - Nginx-served SPA (admin UI) that proxies `/schemas/` and `/api/` to the API container
 - `schemas/` - JSON schemas for registry payloads
 - `docs/` - contributor, API, and publishing documentation
-- `web/` - Astro-based landing page and documentation for `registry.semrel.io`
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
 
@@ -52,6 +52,28 @@ The registry stores all plugin data as JSON files in a named Docker volume (`reg
 This is ideal for self-hosting with small to medium plugin catalogues.
 
 > **Choose PostgreSQL** when you need full-text search, concurrent writes, or plan to host more than ~10 000 plugins.
+
+## Admin UI
+
+The `admin/` directory contains an nginx-served SPA that acts as the public entry point for `registry.semrel.io`. It proxies:
+
+- `/schemas/` → API container (serves embedded JSON schemas)
+- `/api/` → API container (REST endpoints)
+- Everything else → SPA (`index.html`)
+
+### Building the admin container
+
+```bash
+docker build -f admin/Dockerfile -t semrel-registry-admin .
+```
+
+### Runtime configuration
+
+| Environment variable | Default | Description |
+|---|---|---|
+| `API_URL` | `http://api:8080` | URL of the Go API container. Injected into nginx at startup via `envsubst`. |
+
+The value must match the API service name/host as seen from inside the Docker network. For example, if using `docker-compose.file.yml` where the service is named `registry`, set `API_URL=http://registry:8080`.
 
 ## Web app development
 

@@ -7,5 +7,7 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY admin/nginx.conf /etc/nginx/conf.d/default.conf
+# nginx.conf uses ${API_URL} — substituted at container start via envsubst.
+COPY admin/nginx.conf /etc/nginx/templates/default.conf.template
 EXPOSE 80
+ENV API_URL=http://api:8080
