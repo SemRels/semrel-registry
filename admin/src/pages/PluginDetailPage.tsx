@@ -292,7 +292,7 @@ export default function PluginDetailPage() {
                     }}
                     title="Total downloads"
                   >
-                    D {Number(plugin.downloads ?? 0).toLocaleString()}
+                    ↓ {Number(plugin.downloads ?? 0).toLocaleString()}
                   </span>
                   <span
                     style={{
@@ -306,7 +306,7 @@ export default function PluginDetailPage() {
                     }}
                     title="Total views"
                   >
-                    V {Number(plugin.views ?? 0).toLocaleString()}
+                    👁 {Number(plugin.views ?? 0).toLocaleString()}
                   </span>
                 </div>
                 <p className="muted" style={{ margin: '0 0 .5rem', fontSize: 'var(--fs-md)' }}>
