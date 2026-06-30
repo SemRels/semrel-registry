@@ -180,6 +180,7 @@ export default function PluginDetailPage() {
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedVersionId, setExpandedVersionId] = useState<number | null>(null);
   const isLoggedIn = hasToken();
 
   useEffect(() => {
@@ -399,36 +400,53 @@ export default function PluginDetailPage() {
                     </thead>
                     <tbody>
                       {versions.map((v, i) => (
-                        <tr key={v.id} style={{ borderBottom: '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
-                          <td data-label="Version" style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
-                            v{v.version}
-                            {v.prerelease
-                              ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
-                              : <VersionBadge version={v.version} isLatest={i === 0} />
-                            }
-                          </td>
-                          <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
-                            {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
-                          </td>
-                          <td data-label="Install" style={{ padding: '.5rem' }}>
-                            <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
-                              semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
-                            </code>
-                          </td>
-                          <td data-label="Stats" style={{ padding: '.5rem' }}>
-                            <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '10px', fontFamily: 'monospace', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>
-                                D {Number(v.downloads ?? 0).toLocaleString()}
-                              </span>
-                              <span style={{ fontSize: '10px', fontFamily: 'monospace', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 4, padding: '1px 6px' }}>
-                                V {Number(v.views ?? 0).toLocaleString()}
-                              </span>
-                            </div>
-                          </td>
-                          <td data-label="Downloads" style={{ padding: '.5rem' }}>
-                            <DownloadLinks downloadUrls={v.downloadUrls} />
-                          </td>
-                        </tr>
+                        <>
+                          <tr key={v.id} style={{ borderBottom: expandedVersionId === v.id ? undefined : '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
+                            <td data-label="Version" style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedVersionId(expandedVersionId === v.id ? null : v.id)}
+                                style={{ background: 'none', border: 'none', cursor: v.changelog ? 'pointer' : 'default', color: 'var(--fg)', fontFamily: 'monospace', fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: '.25rem' }}
+                                title={v.changelog ? 'Click to view release notes' : 'No release notes'}
+                              >
+                                {v.changelog ? (expandedVersionId === v.id ? '▾' : '▸') : <span style={{ opacity: 0.3 }}>—</span>}
+                                {' '}v{v.version}
+                              </button>
+                              {v.prerelease
+                                ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
+                                : <VersionBadge version={v.version} isLatest={i === 0} />
+                              }
+                            </td>
+                            <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
+                              {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
+                            </td>
+                            <td data-label="Install" style={{ padding: '.5rem' }}>
+                              <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
+                                semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
+                              </code>
+                            </td>
+                            <td data-label="Stats" style={{ padding: '.5rem' }}>
+                              <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
+                                <span title="Downloads" style={{ fontSize: '10px', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                  ↓ {Number(v.downloads ?? 0).toLocaleString()}
+                                </span>
+                                <span title="Views" style={{ fontSize: '10px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                  👁 {Number(v.views ?? 0).toLocaleString()}
+                                </span>
+                              </div>
+                            </td>
+                            <td data-label="Downloads" style={{ padding: '.5rem' }}>
+                              <DownloadLinks downloadUrls={v.downloadUrls} />
+                            </td>
+                          </tr>
+                          {expandedVersionId === v.id && v.changelog && (
+                            <tr key={`${v.id}-notes`} style={{ borderBottom: '1px solid var(--border)' }}>
+                              <td colSpan={5} style={{ padding: '1rem 1.25rem', background: 'rgba(255,255,255,.03)' }}>
+                                <MarkdownContent md={v.changelog} />
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       ))}
                     </tbody>
                   </table>
@@ -436,8 +454,8 @@ export default function PluginDetailPage() {
               )}
             </section>
 
-            {/* Changelog of latest */}
-            {latest?.changelog && (
+            {/* Latest release notes (kept for quick access on page load) */}
+            {latest?.changelog && expandedVersionId === null && (
               <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
                 <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
                   Release notes <span className="muted" style={{ fontWeight: 400, fontSize: 'var(--fs-sm)' }}>v{latest.version}</span>

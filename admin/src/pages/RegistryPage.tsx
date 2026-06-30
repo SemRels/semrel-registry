@@ -242,8 +242,8 @@ export default function RegistryPage() {
             <a href="/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
             <a href="https://semrel.io" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Docs</a>
             <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>GitHub</a>
-            <a href="https://semrel.io/imprint" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Imprint</a>
-            <a href="https://semrel.io/privacy" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Privacy</a>
+            <a href="https://semrel.io/legal/imprint/" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Imprint</a>
+            <a href="https://semrel.io/legal/privacy/" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Privacy</a>
             {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
           </div>
         </footer>
