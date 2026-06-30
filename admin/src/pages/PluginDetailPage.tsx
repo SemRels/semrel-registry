@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { marked } from 'marked';
-import { hasToken } from '../lib/api';
+import { hasToken, revalidatePlugin } from '../lib/api';
+import type { ValidationResult } from '../lib/api';
 
 /** Creates or updates a <meta> tag in the document head. */
 function setOrCreate(selector: string, attr: string, attrValue: string, content: string) {
@@ -12,6 +13,37 @@ function setOrCreate(selector: string, attr: string, attrValue: string, content:
     document.head.appendChild(el);
   }
   el.setAttribute('content', content);
+}
+
+function ValidationPanel({ checks, summary, valid, validatedAt }: ValidationResult & { validatedAt?: string }) {
+  return (
+    <div style={{ marginTop: '.75rem', padding: '.75rem', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.5rem', flexWrap: 'wrap', gap: '.25rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', fontSize: 'var(--fs-xs)', fontWeight: 700, color: valid ? 'var(--success)' : 'var(--danger)' }}>
+          {valid ? '✓ All checks passed' : '✗ Some checks failed'}
+          {summary && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> — {summary}</span>}
+        </div>
+        {validatedAt && (
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
+            checked {new Date(validatedAt).toLocaleString()}
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '.3rem' }}>
+        {checks.map(ch => (
+          <div key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '.4rem', fontSize: 'var(--fs-xs)' }}>
+            <span style={{ color: ch.passed ? 'var(--success)' : 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>
+              {ch.passed ? '✓' : '✗'}
+            </span>
+            <span style={{ color: ch.passed ? 'var(--text)' : 'var(--text-muted)' }}>
+              {ch.label}
+              {ch.message && <span style={{ color: 'var(--danger)', display: 'block' }}>{ch.message}</span>}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 type Plugin = {
@@ -27,6 +59,8 @@ type Plugin = {
   status: string;
   views?: number;
   downloads?: number;
+  validationChecks?: ValidationResult;
+  validatedAt?: string;
 };
 
 type Version = {
@@ -181,6 +215,8 @@ export default function PluginDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedVersionId, setExpandedVersionId] = useState<number | null>(null);
+  const [checks, setChecks] = useState<ValidationResult | null>(null);
+  const [revalidating, setRevalidating] = useState(false);
   const isLoggedIn = hasToken();
 
   useEffect(() => {
@@ -196,11 +232,22 @@ export default function PluginDetailPage() {
       .then(([p, v]) => {
         setPlugin(p);
         setVersions(v.data ?? []);
+        setChecks(p.validationChecks ?? null);
         setError('');
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [name]);
+
+  async function handleRevalidate() {
+    if (!plugin) return;
+    setRevalidating(true);
+    try {
+      const result = await revalidatePlugin(plugin.id);
+      setChecks(result);
+    } catch { /* silent */ }
+    finally { setRevalidating(false); }
+  }
 
   // Update document meta tags for social sharing and SEO
   useEffect(() => {
@@ -335,6 +382,43 @@ export default function PluginDetailPage() {
                 Set <code style={{ background: 'var(--surface2)', padding: '1px 4px', borderRadius: 3 }}>SEMREL_REGISTRY_URL</code> to
                 point at your registry instance, or leave unset to use the default public registry.
               </p>
+            </section>
+
+            {/* Quality / MVP Standards */}
+            <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', flexWrap: 'wrap' }}>
+                <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', fontWeight: 700 }}>
+                  Quality Standards
+                  {checks && (
+                    <span style={{
+                      marginLeft: '.5rem', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                      padding: '1px 8px', borderRadius: 5,
+                      background: checks.valid ? 'rgba(63,185,80,.12)' : 'rgba(248,81,73,.12)',
+                      color: checks.valid ? 'var(--success)' : 'var(--danger)',
+                      border: `1px solid ${checks.valid ? 'rgba(63,185,80,.3)' : 'rgba(248,81,73,.3)'}`,
+                    }}>
+                      {checks.valid ? '✓ MVP' : '✗ MVP'}
+                    </span>
+                  )}
+                </h2>
+                {isLoggedIn && (
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    onClick={() => { void handleRevalidate(); }}
+                    disabled={revalidating}
+                    title="Re-run quality checks"
+                  >
+                    {revalidating ? '⏳ Checking…' : checks ? '↻ Re-check' : '▶ Run check'}
+                  </button>
+                )}
+              </div>
+              {checks
+                ? <ValidationPanel {...checks} validatedAt={plugin.validatedAt} />
+                : <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: '.5rem 0 0' }}>
+                    No quality checks run yet.{isLoggedIn ? ' Click "Run check" to validate.' : ''}
+                  </p>
+              }
             </section>
 
             {/* Configuration */}
