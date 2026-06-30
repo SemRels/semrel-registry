@@ -32,9 +32,9 @@ export default function LoginPage() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div style={{ display:"flex", alignItems:"center", gap:".5rem", marginBottom:"1rem" }}>
-          <img src="/semrel.svg" alt="semrel" style={{ width:"1.75rem", height:"1.75rem" }} />
-          <h1 style={{ margin:0 }}>semrel Registry</h1>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:".5rem", marginBottom:"1.5rem" }}>
+          <img src="/semrel.svg" alt="semrel" style={{ width:"3rem", height:"3rem" }} />
+          <h1 style={{ margin:0, textAlign:"center" }}>semrel Registry</h1>
         </div>
 
         {cfg?.githubOAuthEnabled ? (

@@ -139,14 +139,12 @@ export default function PluginsPage() {
                     <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.views ?? 0).toLocaleString()}</td>
                     <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.downloads ?? 0).toLocaleString()}</td>
                     <td data-label="Status">
-                      {p.status !== 'active' && (
-                        <span style={{
-                          display:'inline-block', padding:'1px 7px', borderRadius:4,
-                          fontSize:'var(--fs-xs)', fontWeight:600, marginRight:'.4rem',
-                          background: p.status === 'pending' ? 'rgba(210,153,34,.2)' : 'rgba(248,81,73,.15)',
-                          color: p.status === 'pending' ? '#d29922' : '#f85149',
-                        }}>{p.status}</span>
-                      )}
+                      <span style={{
+                        display:'inline-block', padding:'1px 7px', borderRadius:4,
+                        fontSize:'var(--fs-xs)', fontWeight:600,
+                        background: p.status === 'pending' ? 'rgba(210,153,34,.2)' : p.status === 'rejected' ? 'rgba(248,81,73,.15)' : 'rgba(63,185,80,.12)',
+                        color: p.status === 'pending' ? '#d29922' : p.status === 'rejected' ? '#f85149' : 'var(--success)',
+                      }}>{p.status ?? 'active'}</span>
                     </td>
                     <td data-label="Actions"><div className="flex gap-sm">
                       {canEdit(p) ? (

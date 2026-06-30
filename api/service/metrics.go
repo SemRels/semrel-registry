@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SemRels/semrel-registry/api/database"
+	"github.com/SemRels/semrel-registry/api/repository"
 )
 
 type MetricType string
@@ -302,3 +303,135 @@ func nullableVersionID(versionID int64) interface{} {
 	}
 	return versionID
 }
+
+// ---------------------------------------------------------------------------
+// FileMetricsRecorder — lightweight metrics recorder for the file storage backend.
+// Events are batched in memory and flushed to the repository via IncrCounters.
+// ---------------------------------------------------------------------------
+
+type fileMetricsRecorder struct {
+	repo      repository.PluginRepository
+	events    chan MetricEvent
+	flushDur  time.Duration
+	dropped   atomic.Int64
+	stopCh    chan struct{}
+	doneCh    chan struct{}
+	once      sync.Once
+}
+
+// NewFileMetricsRecorder returns a MetricsRecorder that persists counts via
+// repo.IncrCounters — suitable for the file storage backend.
+func NewFileMetricsRecorder(repo repository.PluginRepository, flushInterval time.Duration) MetricsRecorder {
+	if repo == nil {
+		return NewNoopMetricsRecorder()
+	}
+	if flushInterval <= 0 {
+		flushInterval = 5 * time.Second
+	}
+	r := &fileMetricsRecorder{
+		repo:     repo,
+		events:   make(chan MetricEvent, 512),
+		flushDur: flushInterval,
+		stopCh:   make(chan struct{}),
+		doneCh:   make(chan struct{}),
+	}
+	go r.run()
+	return r
+}
+
+func (r *fileMetricsRecorder) Record(event MetricEvent) {
+	if event.PluginID <= 0 {
+		return
+	}
+	if event.Type != MetricTypeView && event.Type != MetricTypeDownload {
+		return
+	}
+	if event.OccurredAt.IsZero() {
+		event.OccurredAt = time.Now().UTC()
+	}
+	select {
+	case r.events <- event:
+	default:
+		r.dropped.Add(1)
+	}
+}
+
+func (r *fileMetricsRecorder) Close(ctx context.Context) error {
+	r.once.Do(func() { close(r.stopCh) })
+	select {
+	case <-r.doneCh:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (r *fileMetricsRecorder) run() {
+	defer close(r.doneCh)
+	ticker := time.NewTicker(r.flushDur)
+	defer ticker.Stop()
+
+	buffer := make([]MetricEvent, 0, 64)
+	flush := func() {
+		if len(buffer) == 0 {
+			return
+		}
+		r.flushBatch(buffer)
+		buffer = buffer[:0]
+	}
+
+	for {
+		select {
+		case <-r.stopCh:
+			for {
+				select {
+				case ev := <-r.events:
+					buffer = append(buffer, ev)
+				default:
+					flush()
+					if d := r.dropped.Load(); d > 0 {
+						log.Printf("file metrics recorder dropped %d events", d)
+					}
+					return
+				}
+			}
+		case ev := <-r.events:
+			buffer = append(buffer, ev)
+			if len(buffer) >= 64 {
+				flush()
+			}
+		case <-ticker.C:
+			flush()
+		}
+	}
+}
+
+type pluginVersionKey struct{ pluginID, versionID int64 }
+
+func (r *fileMetricsRecorder) flushBatch(events []MetricEvent) {
+	type counters struct{ views, downloads int64 }
+	totals := make(map[pluginVersionKey]*counters)
+
+	for _, ev := range events {
+		key := pluginVersionKey{pluginID: ev.PluginID, versionID: ev.VersionID}
+		c := totals[key]
+		if c == nil {
+			c = &counters{}
+			totals[key] = c
+		}
+		if ev.Type == MetricTypeDownload {
+			c.downloads++
+		} else {
+			c.views++
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	for key, c := range totals {
+		if err := r.repo.IncrCounters(ctx, key.pluginID, key.versionID, c.views, c.downloads); err != nil {
+			log.Printf("file metrics: incr counters plugin=%d version=%d: %v", key.pluginID, key.versionID, err)
+		}
+	}
+}
+

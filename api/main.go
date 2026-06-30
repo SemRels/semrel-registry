@@ -32,6 +32,7 @@ func main() {
 			log.Fatalf("file repository init failed: %v", err)
 		}
 		pluginRepo = repo
+		metricsRecorder = service.NewFileMetricsRecorder(repo, cfg.MetricsFlushInterval)
 
 	default: // "postgres"
 		db, err := database.Connect(cfg.DatabaseURL)
@@ -188,6 +189,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	authRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
 	authRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
 	authRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
+	authRoutes.DELETE("/plugins/:id/versions/:versionId", pluginHandler.DeletePluginVersion)
 
 	// Admin-only endpoints.
 	adminRoutes := api.Group("")

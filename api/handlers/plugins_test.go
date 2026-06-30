@@ -175,6 +175,14 @@ func (a *mockRepositoryAdapter) UpdateValidationChecks(_ context.Context, _ int6
 	return nil
 }
 
+func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ int64, _ int64) error {
+	return nil
+}
+
+func (a *mockRepositoryAdapter) IncrCounters(_ context.Context, _ int64, _ int64, _ int64, _ int64) error {
+	return nil
+}
+
 func (m *mockPluginRepository) ListVersions(ctx context.Context, ref string, limit, offset int) ([]models.PluginVersion, error) {
 	if m.listVersionsFunc != nil {
 		return m.listVersionsFunc(ctx, ref, limit, offset)

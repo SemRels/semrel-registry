@@ -78,6 +78,7 @@ type PluginManager interface {
 	UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error)
 	DeletePlugin(ctx context.Context, ref string) error
 	CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error)
+	DeleteVersion(ctx context.Context, pluginID, versionID int64) error
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
@@ -344,6 +345,10 @@ func (s *PluginService) CreateVersion(ctx context.Context, ref string, version m
 	}
 
 	return models.PluginVersion{}, appErrors.ErrPluginNotFound
+}
+
+func (s *PluginService) DeleteVersion(ctx context.Context, pluginID, versionID int64) error {
+	return s.repo.DeleteVersion(ctx, pluginID, versionID)
 }
 
 func (s *PluginService) countPlugins(ctx context.Context, params ListPluginsParams) (int64, error) {

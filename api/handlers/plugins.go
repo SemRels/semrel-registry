@@ -389,6 +389,37 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": created})
 }
 
+func (h *PluginHandler) DeletePluginVersion(c *gin.Context) {
+	versionID, err := strconv.ParseInt(c.Param("versionId"), 10, 64)
+	if err != nil {
+		BadRequest(c, "Invalid version ID", gin.H{"issue": "versionId must be an integer"})
+		return
+	}
+
+	plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	// Non-admins can only delete versions of their own plugins.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		if !strings.EqualFold(plugin.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete versions of your own plugins"})
+			return
+		}
+	}
+
+	if err := h.service.DeleteVersion(c.Request.Context(), plugin.ID, versionID); err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 // SubmitPlugin handles community plugin submissions.
 // POST /api/v1/plugins/submit — requires auth; creates plugin with status=pending.
 func (h *PluginHandler) SubmitPlugin(c *gin.Context) {

@@ -28,6 +28,10 @@ type PluginRepository interface {
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
 	Delete(ctx context.Context, id int64) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
+	DeleteVersion(ctx context.Context, pluginID, versionID int64) error
+	// IncrCounters atomically increments views/downloads for a plugin and optionally a version.
+	// Pass non-zero versionID to also update the version counters.
+	IncrCounters(ctx context.Context, pluginID, versionID int64, views, downloads int64) error
 }
 
 type pgRepository struct {
@@ -386,6 +390,39 @@ VALUES ($1, $2, $3, $4)`, version.ID, platform, sha256Algorithm, version.Checksu
 	}
 
 	return version.ID, nil
+}
+
+func (r *pgRepository) DeleteVersion(ctx context.Context, pluginID, versionID int64) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	_, err := r.db.Pool().Exec(ctx, `
+DELETE FROM plugin_versions WHERE id = $1 AND plugin_id = $2`, versionID, pluginID)
+	if err != nil {
+		return wrapWriteError("delete plugin version", err)
+	}
+	return nil
+}
+
+func (r *pgRepository) IncrCounters(ctx context.Context, pluginID, versionID, views, downloads int64) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	_, err := r.db.Pool().Exec(ctx, `
+UPDATE plugins SET views = views + $2, downloads = downloads + $3, updated_at = NOW()
+WHERE id = $1`, pluginID, views, downloads)
+	if err != nil {
+		return wrapWriteError("incr plugin counters", err)
+	}
+	if versionID > 0 {
+		_, err = r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions SET views = views + $2, downloads = downloads + $3
+WHERE id = $1`, versionID, views, downloads)
+		if err != nil {
+			return wrapWriteError("incr version counters", err)
+		}
+	}
+	return nil
 }
 
 func (r *pgRepository) loadChecksums(ctx context.Context, versionID int64) (map[string]string, error) {

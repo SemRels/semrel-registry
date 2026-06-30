@@ -177,6 +177,13 @@ export async function deletePlugin(id: string | number): Promise<void> {
   return request<void>(`/plugins/${id}`, { method: 'DELETE' });
 }
 
+export async function deleteVersion(
+  pluginId: string | number,
+  versionId: number,
+): Promise<void> {
+  return request<void>(`/plugins/${pluginId}/versions/${versionId}`, { method: 'DELETE' });
+}
+
 export async function listVersions(
   pluginId: string | number,
 ): Promise<{ data: PluginVersion[] }> {

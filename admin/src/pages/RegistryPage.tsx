@@ -31,6 +31,8 @@ const SORTS = [
   { value: '', label: 'Default' },
   { value: 'name:asc', label: 'Name (A → Z)' },
   { value: 'name:desc', label: 'Name (Z → A)' },
+  { value: 'downloads:desc', label: '↓ Most downloaded' },
+  { value: 'views:desc', label: '↓ Most viewed' },
   { value: 'updated_at:desc', label: 'Recently updated' },
   { value: 'created_at:desc', label: 'Newest' },
 ];
@@ -191,57 +193,30 @@ export default function RegistryPage() {
                     semrel plugin install {pluginKey}
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.25rem' }}>
-                    <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>by {p.author}</span>
-                    <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.35rem', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '.25rem' }}>
+                    <span className="muted" style={{ fontSize: 'var(--fs-xs)', flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>by {p.author}</span>
+                    <div style={{ display: 'flex', gap: '.3rem', alignItems: 'center', flexShrink: 0 }}>
                       <span
-                        style={{
-                          fontSize: '11px',
-                          fontFamily: 'monospace',
-                          background: 'rgba(63,185,80,.12)',
-                          color: 'var(--success)',
-                          borderRadius: 5,
-                          padding: '1px 7px',
-                          fontWeight: 600,
-                        }}
+                        style={{ fontSize: '11px', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
                         title="Total downloads"
                       >
-                        D {Number(p.downloads ?? 0).toLocaleString()}
+                        ↓ {Number(p.downloads ?? 0).toLocaleString()}
                       </span>
                       <span
-                        style={{
-                          fontSize: '11px',
-                          fontFamily: 'monospace',
-                          background: 'rgba(56,139,253,.12)',
-                          color: 'var(--accent)',
-                          borderRadius: 5,
-                          padding: '1px 7px',
-                          fontWeight: 600,
-                        }}
+                        style={{ fontSize: '11px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
                         title="Total views"
                       >
-                        V {Number(p.views ?? 0).toLocaleString()}
+                        👁 {Number(p.views ?? 0).toLocaleString()}
                       </span>
                       {p.latestVersion && (() => {
                         const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');
                         return (
-                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 7px', fontWeight: 600 }}>
-                            v{ver}{isDev && <span style={{ marginLeft: '.2rem', fontSize: '9px', opacity: .75 }}>dev</span>}
+                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            v{ver}
                           </span>
                         );
                       })()}
-                      {p.repository && (
-                        <a
-                          href={p.repository}
-                          target="_blank"
-                          rel="noopener"
-                          style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          GitHub ↗
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -263,9 +238,12 @@ export default function RegistryPage() {
         {/* Footer */}
         <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
           <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>© semrel · Plugin Registry</span>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <a href="/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
+            <a href="https://semrel.io" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Docs</a>
             <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>GitHub</a>
+            <a href="https://semrel.io/imprint" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Imprint</a>
+            <a href="https://semrel.io/privacy" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Privacy</a>
             {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
           </div>
         </footer>

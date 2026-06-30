@@ -296,6 +296,64 @@ func (s *fileStore) Delete(_ context.Context, id int64) error {
 	return s.savePlugin(p)
 }
 
+func (s *fileStore) DeleteVersion(_ context.Context, pluginID, versionID int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(pluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	found := false
+	updated := p.Versions[:0]
+	for _, v := range p.Versions {
+		if v.ID == versionID {
+			found = true
+			continue
+		}
+		updated = append(updated, v)
+	}
+	if !found {
+		return fmt.Errorf("version not found")
+	}
+	p.Versions = updated
+	p.UpdatedAt = time.Now().UTC()
+	return s.savePlugin(p)
+}
+
+func (s *fileStore) IncrCounters(_ context.Context, pluginID, versionID, views, downloads int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(pluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	p.Views += views
+	p.Downloads += downloads
+	p.UpdatedAt = time.Now().UTC()
+
+	if versionID > 0 {
+		for i := range p.Versions {
+			if p.Versions[i].ID == versionID {
+				p.Versions[i].Views += views
+				p.Versions[i].Downloads += downloads
+				break
+			}
+		}
+	}
+
+	return s.savePlugin(p)
+}
+
 func (s *fileStore) AddVersion(_ context.Context, version *models.PluginVersion) (int64, error) {
 	if version == nil {
 		return 0, fmt.Errorf("plugin version is required")

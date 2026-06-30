@@ -62,6 +62,10 @@ func (stubPluginService) UpdateValidationChecks(_ context.Context, _ int64, _ []
 	return nil
 }
 
+func (stubPluginService) DeleteVersion(_ context.Context, _ int64, _ int64) error {
+	return nil
+}
+
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 	os.Exit(m.Run())
