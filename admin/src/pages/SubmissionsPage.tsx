@@ -222,9 +222,14 @@ export default function SubmissionsPage() {
         {error && <div className="alert alert--error">{error}</div>}
         {loading && <p className="muted">Loading…</p>}
         {!loading && plugins.length === 0 && (
-          <p className="muted">
-            {filter === 'pending' ? '🎉 No pending submissions.' : `No ${filter} submissions.`}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 0', gap: '.75rem', textAlign: 'center' }}>
+            <span style={{ fontSize: '3.5rem', lineHeight: 1 }}>
+              {filter === 'pending' ? '🎉' : '📭'}
+            </span>
+            <p className="muted" style={{ margin: 0, fontSize: 'var(--fs-md)' }}>
+              {filter === 'pending' ? 'No pending submissions.' : `No ${filter} submissions.`}
+            </p>
+          </div>
         )}
         {!loading && plugins.map(p => (
           <SubmissionCard
