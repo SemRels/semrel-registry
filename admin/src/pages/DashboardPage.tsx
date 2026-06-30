@@ -63,20 +63,29 @@ function SeriesLineChart({
   const width = 760;
   const height = 220;
   const pad = 18;
-  const ordered = [...data].reverse();
-  const views = ordered.map((p) => p.views ?? 0);
-  const downloads = ordered.map((p) => p.downloads ?? 0);
+  // data is already oldest→newest (left→right) — no reversal needed
+  const views = data.map((p) => p.views ?? 0);
+  const downloads = data.map((p) => p.downloads ?? 0);
   const max = Math.max(1, ...views, ...downloads);
   const innerW = width - pad * 2;
   const innerH = height - pad * 2;
-  const step = ordered.length <= 1 ? 0 : innerW / (ordered.length - 1);
-  const pointX = (idx: number) => pad + (ordered.length === 1 ? innerW / 2 : idx * step);
+  const step = data.length <= 1 ? 0 : innerW / (data.length - 1);
+  const pointX = (idx: number) => pad + (data.length === 1 ? innerW / 2 : idx * step);
   const pointY = (value: number) => pad + innerH - (value / max) * innerH;
   const viewPath = linePath(views, width, height, pad);
   const downloadPath = linePath(downloads, width, height, pad);
   const hoverX = hoveredIndex === null ? null : pointX(hoveredIndex);
   const hoverViewsY = hoveredIndex === null ? null : pointY(views[hoveredIndex] ?? 0);
   const hoverDownloadsY = hoveredIndex === null ? null : pointY(downloads[hoveredIndex] ?? 0);
+  const hoveredPoint = hoveredIndex !== null ? data[hoveredIndex] : null;
+
+  // Position tooltip box: flip to left side if near right edge
+  const tooltipW = 160;
+  const tooltipH = 56;
+  const tooltipX = hoverX !== null
+    ? (hoverX + tooltipW + 12 > width ? hoverX - tooltipW - 8 : hoverX + 8)
+    : 0;
+  const tooltipY = pad + 4;
 
   return (
     <svg
@@ -100,14 +109,21 @@ function SeriesLineChart({
       <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(3,7,18,.3)" stroke="var(--border)" strokeWidth="1" />
       <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="3" strokeLinecap="round" />
       <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="3" strokeLinecap="round" />
-      {hoverX !== null && (
+      {hoverX !== null && hoveredPoint && (
         <>
           <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.3)" strokeDasharray="3 3" />
           <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="1.5" />
           <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
+          {/* Tooltip box directly on the chart */}
+          <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="6" fill="rgba(13,17,23,.92)" stroke="rgba(201,209,217,.2)" strokeWidth="1" />
+          <text x={tooltipX + 8} y={tooltipY + 14} fontSize="10" fill="rgba(201,209,217,.7)">{hoveredPoint.period}</text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 27} r="4" fill="#3b82f6" />
+          <text x={tooltipX + 20} y={tooltipY + 31} fontSize="11" fill="#c9d1d9">Views: <tspan fontWeight="bold">{Number(hoveredPoint.views ?? 0).toLocaleString()}</tspan></text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 44} r="4" fill="#10b981" />
+          <text x={tooltipX + 20} y={tooltipY + 48} fontSize="11" fill="#c9d1d9">Downloads: <tspan fontWeight="bold">{Number(hoveredPoint.downloads ?? 0).toLocaleString()}</tspan></text>
         </>
       )}
-      {ordered.map((point, idx) => {
+      {data.map((point, idx) => {
         const x = pointX(idx);
         const hit = Math.max(12, step || 24);
         return (
@@ -237,6 +253,7 @@ export default function DashboardPage() {
   const rawSeries = stats?.series?.[seriesRange] ?? [];
   const zeroSeries = buildZeroSeries(seriesRange);
   // Merge sparse API data into zero-filled baseline so the chart always has N points.
+  // activeSeries is oldest→newest (left→right) — matches chart direction.
   const activeSeries = (() => {
     if (rawSeries.length === 0) return zeroSeries;
     const map = new Map(rawSeries.map((p) => [p.period, p]));
@@ -248,11 +265,11 @@ export default function DashboardPage() {
   const totalDownloads = Number(stats?.totalDownloads ?? 0);
   const topPlugins = stats?.topPlugins ?? [];
   const topVersions = stats?.topVersions ?? [];
-  const orderedSeries = [...activeSeries].reverse();
+  // hoveredSeriesIndex maps directly to activeSeries (oldest→newest)
   const activePoint = (() => {
-    if (orderedSeries.length === 0) return null;
-    if (hoveredSeriesIndex !== null && orderedSeries[hoveredSeriesIndex]) return orderedSeries[hoveredSeriesIndex];
-    return orderedSeries[orderedSeries.length - 1] ?? null;
+    if (activeSeries.length === 0) return null;
+    if (hoveredSeriesIndex !== null && activeSeries[hoveredSeriesIndex]) return activeSeries[hoveredSeriesIndex];
+    return activeSeries[activeSeries.length - 1] ?? null;
   })();
 
   return (
