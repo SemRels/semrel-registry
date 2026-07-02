@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-29T07:23:10.846Z",
+  "generatedAt": "2026-07-02T06:31:46.279Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -15,6 +15,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:23:17Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "f0e740a274c96a459627866dfc99b150c80d33cdb4f3e81133b5b9f1b12976e9",
+            "linux_arm64": "16e3912d6e8b5dbc96be801c9df39f6e1f4313f75ccde8c9c757b210d1e7a597",
+            "darwin_amd64": "c1220ed16fe90bda184a85c84684fb925a41be1abc1e5b924f2a299730c3e8db",
+            "darwin_arm64": "9fa7716c33835d9c9569ed49922d87f10570df3c932494ebb11bc13a72c081af",
+            "windows_amd64": "ceab3eb99ab0bf8e8da3b8dd4baeaddf12c62c2586228e9db3e8d7231c4e82ea",
+            "windows_arm64": "c662c44197100ab6ec4950df999332ed18814be0f8612e3ff96d2f56feb7c0b6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:05Z",
@@ -88,6 +107,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:23:09Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "937076fc9c00c21fdeb6c1a44da7c791aced3e502d49c4dd593ae38e2186212a",
+            "linux_arm64": "932710ce386ec62a7e856699e39f2d45942e20c007e14e3ca0a89032a3c2b781",
+            "darwin_amd64": "56fcb3e739e77ef418ef0253d2bbe24b540ff9033da763055759d2b9b7751f52",
+            "darwin_arm64": "292701ab365137315410fd21c7af3e52d4d3f7483b415dbe90b678da43ab7627",
+            "windows_amd64": "122906bb758e3563c2d14fa91cf59e49ef1575ddf85e7079d9c6e8c8c1803353",
+            "windows_arm64": "e83f88cab0b37e1a1e3f96bf79350e16dc2611d86bcea910e716987501623382"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/24\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/provider-git/pull/27\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/provider-git/pull/28\n\n\n**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:08:46Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.0/plugin-linux-amd64",
@@ -160,6 +198,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:22:54Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "20a55126cebc5c00f43fbaec5b9aaed49b7b88ce4731acfc36b786f664bf0937",
+            "linux_arm64": "cc1de2da3a791edf45b6949b25214ecb0120b5b9ac3ac170821a4890ff569ade",
+            "darwin_amd64": "d42dbede7cc41bc2406b3359751f495e33f0fa14bbd7c4ce9d892e1508a99d55",
+            "darwin_arm64": "2572c723a8ff5928c9157357c4d32be48a8f6ddbb6de211cbccd9865bf737d63",
+            "windows_amd64": "c7e503ebbcb63b1fe481ac1f7628fd1a02449e619566cffb833d5c426ebe6fe2",
+            "windows_arm64": "b8e242e13979a30322e78cf513469ca663e0d51d56575319bf074bd5a8c5a0a7"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/23\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/27\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/28\n\n\n**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:12Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.3.0/plugin-linux-amd64",
@@ -231,6 +288,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:23:17Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7ef3feabfd7d515332b123d102ccb6865a6b287ee25865e980beba2512fc9f69",
+            "linux_arm64": "d469562e9f3bf0c92d9719900931a9708293a112bfcf36e95ec846ef4a6cda10",
+            "darwin_amd64": "023418eaa87bb6458bf0984d8df64a3630126bb9498be6b2fa1ae5f00a246d52",
+            "darwin_arm64": "3f63f84f172962427de6b79c65a1aaea8785e1152c7558014411246bf9b0e1f2",
+            "windows_amd64": "ff2aeea8f292a84d9b7f52bde36bea4331976dcbfab898892fbdd900b6416203",
+            "windows_arm64": "a657900bae8915f8fcacf44031249a5fa8bf6be04d60430951d3453bbc60ff61"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/26\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/provider-github/pull/31\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/provider-github/pull/32\n\n\n**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:10:44Z",
@@ -323,6 +399,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:23:04Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d039e7517ff249e57cc48de66bca7f29918829cdac4416ebbe6fecde1036b105",
+            "linux_arm64": "cbda5f3da0aec4113b652444c37f53c2cb397029d410d49d8d286954892d3a15",
+            "darwin_amd64": "b4c2884b1d4c99c06b9064414bbc132d18377774a653e3d51606a457c9ba5e5d",
+            "darwin_arm64": "c9b37912e2a71689234a6ea3014e3eb8511272cea9855cbe86f008d96ca3451e",
+            "windows_amd64": "b48a1eba2483e35e8ec225f8a4e283342786267c8d0c540288e6bcb95d86a578",
+            "windows_arm64": "3518237156ce4ef108e3036e06c11b1400705d47570bc33ceb78b1ad6327161d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/24\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/28\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:01Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.3.0/plugin-linux-amd64",
@@ -395,6 +490,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:21:48Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b6da7cc359fa917dcb8d91e96220231a8562116e06098ee23725ae78e7a109a8",
+            "linux_arm64": "69f0409006c19327ca82f3df5efc5d78736b6521f75ba8141103a1d34126b8ba",
+            "darwin_amd64": "f8d275e47517a48cb6b586b46716b1de22d83d877a4a03ed05a3ce70766d13f0",
+            "darwin_arm64": "c76dfc37dd1ba9ead91c26871c898874b69d210b0f54a1fde416f4bfd4c56634",
+            "windows_amd64": "2a21e84b68b71f800ed0dde40632656eb5fbda01688d16b31e1349115ed9bcc9",
+            "windows_arm64": "745f21764c9d9a96dcc12c59a5dfd9e9c6ea98aec40711629fdd69dbd60698c3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/35\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/36\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:11:09Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.0/plugin-linux-amd64",
@@ -466,6 +580,25 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:22:13Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "8e6c498f5584a898fca2b4e9c7d7c5260523f1e44bdfab0d3414705b3b8a57d4",
+            "linux_arm64": "acf941a60f80e6b04c5d36cbc41642be5800644ff9ac10221a816332e268ce7c",
+            "darwin_amd64": "3bad0b2bc3fc08254fa2d6efd09bb6d8d67609f755615c3652ff5ea2f443665b",
+            "darwin_arm64": "c9856f2959225b5f222391d55e25bc3c7c4acfe053b2b078e1352694f88a415a",
+            "windows_amd64": "0b70db8f5e8719aa8e0a8172be14a4b87b8e29fac7f9b4e1b4eff6a9f1296ac5",
+            "windows_arm64": "f5af057e409e5620671ca8e4e23b77526960d25ba24d7975fb5952d1e2510234"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/32\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:09:27Z",
@@ -558,6 +691,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:22:00Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "96638e128c12db05dff1be3dccc440df86da3f4ce7da9964bf26702192f09f6c",
+            "linux_arm64": "6bbd1cb364c3062261d184bcf71c9cf71ef3836d01b0e6155f9400f574c074bc",
+            "darwin_amd64": "bf893ca935a8a17ae168aa8297b97c52b70010bc32dc07163ea6455bb32f864e",
+            "darwin_arm64": "c66602bce7d7ab975595788294369d7583edf40ed099a98085e36c3963fae688",
+            "windows_amd64": "cebabb5f34b6ef8e17851361b6fe745379dc93de902de835bb0246c480d8188f",
+            "windows_arm64": "ca019b5ef47e70a2e61c9b3f4c901942273c095c79d80dbac1ffbafb39e956f9"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-html/pull/30\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/generator-changelog-html/pull/31\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/generator-changelog-html/pull/32\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.4.0...v0.4.1"
+        },
+        {
           "version": "0.4.0",
           "releaseDate": "2026-06-28T15:07:10Z",
           "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.4.0/plugin-linux-amd64",
@@ -648,6 +800,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.6.1",
+          "releaseDate": "2026-07-01T16:23:16Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.6.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0f5090e56a5f8aa2b287133652c99d1d723f268d5710d698d1fcfe82d676590d",
+            "linux_arm64": "2946bdcf10e10aa3b04083d845cbda9ca3dd1875db94d1965fa6bfdce27a3e44",
+            "darwin_amd64": "d3214d892dfbed389531b45fbd9c3b0341e32f876b5d697d8acaa6eca32ee887",
+            "darwin_arm64": "dba9024d9402216c899902611a399bc58541076b09b2990da54004b9b1867af3",
+            "windows_amd64": "deea0bbd538fb2d3941a485519fd0b41a2360dee810b500f5660e49474126465",
+            "windows_arm64": "e684c55ac6ea4e0ac016032d75e65a728c17bac9b98f61718020bbc14a3d91ae"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/39\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/40\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.6.0...v0.6.1"
+        },
         {
           "version": "0.6.0",
           "releaseDate": "2026-06-28T15:07:06Z",
@@ -759,6 +930,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:23:03Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "83972b7df6a98de99b177a8b32d8ebb530158942e43e673c6df052c13ed1d111",
+            "linux_arm64": "fb7f865da3c08001f6704cc6f21cdc37c21cbb5277a5ed75eb58f8850314d175",
+            "darwin_amd64": "9a72e83196fccd380382e1591b344796aab7c816586ba03ddcab854639effbca",
+            "darwin_arm64": "a348e928da3474e53b47500c3e2d97b78b3e609c59b6ab85836068d849294222",
+            "windows_amd64": "99906de67254f3f7806676cec0d13213307d40e838212a1f83d2aad4bae56fcb",
+            "windows_arm64": "6c60a813cd33b4c7b03e7df4b55e0d7702b95e21f5290e1c556103abfd38416a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/generator-release-notes/pull/32\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/generator-release-notes/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.4.0...v0.4.1"
+        },
+        {
           "version": "0.4.0",
           "releaseDate": "2026-06-28T15:07:10Z",
           "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.4.0/plugin-linux-amd64",
@@ -849,6 +1039,25 @@
         "workflow"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:22:05Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "dd2caa6a9ee093c2a637e1a789ed3e4654d8cc7018ba4326d77d4a9a9f5fb401",
+            "linux_arm64": "7f1e363a1c5ebb023f946634ead8a9958ce63e22fdef86bf14db34df383ff447",
+            "darwin_amd64": "6cae2ae3043b6ee309f7a31f0d458b179b48daa3b8b9f0220db1ed879eebbf1c",
+            "darwin_arm64": "82718753ecb57d9c8456fa4adb9504d343f0915564daa77487aa4b627ee72598",
+            "windows_amd64": "4d68f64e29b8c09659eb2238c107f421c4c3141d8d2e2057138329ca09bd8b2d",
+            "windows_arm64": "af0a7a13ad9594467caddbed16c52b767c81f8cbf6b784136c2e726540d8bea8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/condition-generic/pull/32\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/condition-generic/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:11:16Z",
@@ -941,6 +1150,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:20:23Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b3063ad0b3294f016fde24dc4f61d28f8daa55a9dced1d352a6a576ea0312b61",
+            "linux_arm64": "dfb9be307ce8ec4becbf5bde0946f004dae140455efa5a86684f62a231c63dd8",
+            "darwin_amd64": "16284ccd9ef106483cce80eba4898f189204bdf5c0a31ad468cd147068faa37a",
+            "darwin_arm64": "f8c18b608c3c8deb3509a80133ca15665935366dc9cc084815c11ff4f1c1b6bc",
+            "windows_amd64": "e89ad7f77bfd2580db5bb30012ad34a53ded456fb4da191bb052e70b6f4205cc",
+            "windows_arm64": "7c409e02b8f33eab1a5b274d77cadc02a69eea69ebcbdc13894170f803e63caa"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/27\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/condition-gitea-actions/pull/31\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/condition-gitea-actions/pull/32\n\n\n**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:06:03Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.0/plugin-linux-amd64",
@@ -1013,6 +1241,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.1",
+          "releaseDate": "2026-07-01T16:21:50Z",
+          "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "64b79e2ab1afb59048efcc7e2ef6dc23064065930d2f97f8dc152d1e4e4ced3f",
+            "linux_arm64": "f4bc3aa23bb60a14448017c42ec891042dd02850a3610995676e57ba2b6578a9",
+            "darwin_amd64": "573d9ae60f05d02c1df16d6037c4bf03bc795237bbfb92fa52be873daf94e758",
+            "darwin_arm64": "f01505d7e79ae4a7ea1b49f0ddcb9c887d93dda8de3bd713c99bc7f4519f8065",
+            "windows_amd64": "9929c4ade4242b61ffc7cecab7609643bba4a512133f79f075d02b281fd0ae8b",
+            "windows_arm64": "e5a7bc4aba306dd9160dde01a4eb4a16c52dee62b2fc299848fa29d5751d8c97"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/25\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/30\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/31\n\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/compare/v0.2.0...v0.2.1"
+        },
+        {
           "version": "0.2.0",
           "releaseDate": "2026-06-24T07:24:52Z",
           "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.0/plugin-linux-amd64",
@@ -1065,6 +1312,44 @@
         "ci"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:22:56Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "f757054951621186b5ae0d4adf4d39b625b9805b0885871b56052c28081de3f6",
+            "linux_arm64": "90cc3e619639a230c9a42503d2b76edf432470c2f87d74b6283278e7599cf3d7",
+            "darwin_amd64": "bfe5f8db7255ef069eaa67d34b9b6a561c46a244dd71b9ae175a7cc5f8b7f292",
+            "darwin_arm64": "06852193e05c62e83d930ed7b4d5104061861433b65bade37a5717e926bac238",
+            "windows_amd64": "3e9098735023ccb763e9e4e6570f8f8d5df555c2b2e0b435594af118cbcd9828",
+            "windows_arm64": "4c3219b363289b605fa8131f27d52bc0c0dfe93b60658d2f5022dd8773738026"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/29\n* chore(deps): Bump github/codeql-action/upload-sarif from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/28\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/25\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/condition-gitlab-ci/pull/31\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/condition-gitlab-ci/pull/32\n\n\n**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.4.0...v0.4.1"
+        },
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-07-01T15:42:49Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "27b79fdd0a80ab8e22a13517e2fe5bb83a393db216aebf89b7d923e03ccf749c",
+            "linux_arm64": "51f4dac925d4ecac5aa3cf785257eb08b40bfa50d4a5158aaa8f9a7f71a2938f",
+            "darwin_amd64": "764d2fbf7a19b323281d684da541e95cc384682d30fcd98a30020dae4e9cfe7b",
+            "darwin_arm64": "4d3ca981d006706f3cebe7671b27952a4a572a1f89dfa8a808fc76a333cbeaab",
+            "windows_amd64": "f30051e29f434b8d0a54d20f21eac86a112620124cac46155fe227897a2bf52f",
+            "windows_arm64": "4259c8994eef1e4a85309b6079388b9392d42989423848f1e11a25c0265bf4fc"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/condition-gitlab-ci/pull/26\n* feat: add GitLab CI release component by @mwaldheim in https://github.com/SemRels/condition-gitlab-ci/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.3.0...v0.4.0"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:05:57Z",
@@ -1138,6 +1423,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:22:37Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "8eacd2cdfb192c51e6aabd6d98d57fd0973e64e943cd090b9fb59b6650a1946c",
+            "linux_arm64": "dd693913aa97c15599e3f04b61cc9102f1cd8c5a596bba84b966ff0ab83dee69",
+            "darwin_amd64": "9cb3c8ab852339ebf5ee3342b5b6edf89841021902bb1d598eb17bc19400339c",
+            "darwin_arm64": "8fef295de8c113c375c80992aeb9cb008e790793038cbdfd504e45faedc9e7a1",
+            "windows_amd64": "c7dcc510b2c3375699f06ad522c1ff727d7fab8561056548b3d7db83fe74506b",
+            "windows_arm64": "5b841b3d9d6dddd89d8e911b0f62311afe8e18b568bdd491bce36668b2463034"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/25\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-email/pull/30\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-email/pull/31\n\n\n**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:10:20Z",
           "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.0/plugin-linux-amd64",
@@ -1209,6 +1513,25 @@
         "plugin"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:22:29Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a8a2a308db4a0cf5a496400dcb837cad719eed9927b0440e990a4c5489b02e29",
+            "linux_arm64": "f08c2fa353b93a27066d38cd87e716006cc7ab694c21dfda4b96046a436068fc",
+            "darwin_amd64": "f6976f1908cb267f87e60695c8f5f4385099c58159494d801dbf513a42c1ad20",
+            "darwin_arm64": "dec7e990d403a8f785cb6c632810ad02f31abd7807f8aa9d9f71973b09847d57",
+            "windows_amd64": "37799d0111489bc499e7d2b38973afb08cef82141fdf2d8cf6a8f7f00893df15",
+            "windows_arm64": "cd8da5e36f721638f30bf8256f329310c6c82e3e0047ef55518a9b0ac5bd5836"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:11:05Z",
@@ -1282,6 +1605,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:02Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "62b03f70a5a2b0155e3f0dc78fb1c04bae7bfb8037b94b3d5732cca07e3e1e8c",
+            "linux_arm64": "fca155347e0a9d6c20dcef992e61d26721af55e403da999b4f651bd6a8cbe987",
+            "darwin_amd64": "d2ddd734293321e5071a0bf3c116f8f46a96e6c9b9432066d5a7888e25853ac3",
+            "darwin_arm64": "2ff6c6738a1481e737745f7f1f2be3ede97ff9bc0bc0e555fe8e524e61603cd2",
+            "windows_amd64": "3743083e16a88f04c892679ee2983ba8798dea5e14938704496c9491919459d8",
+            "windows_arm64": "454c8025e26b278c733e57de048bd30c1b03816a39f101e6375d926ee5b6e4b0"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-jira/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-jira/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:24Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.0/plugin-linux-amd64",
@@ -1353,6 +1695,25 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:23:34Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7242c6130b0f47969d4f4af9c99379a0b8449c10e9d504a5f5a4554d3a31468c",
+            "linux_arm64": "f9f7acd6f25252e2f7c8513c4d01e39298bc94fceceea472982eaa78497e39ff",
+            "darwin_amd64": "29d5ab86bbf46e789e9acd1b1aaf8668584353c19280b0cf017509fef8c56a05",
+            "darwin_arm64": "b687bc22f14ee1f7368a092fcd4209c218b7323977ffacec2e17c50b7a91608c",
+            "windows_amd64": "63ffab815bde6cae30a6d92dad700bde5f0fa1e6df636ecc51a67c7e7df147aa",
+            "windows_arm64": "2e0ae4ac1f6bf04d680733ba9e93bc19d7b8f3b0027a8521b99af1f30d5fe3e2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/26\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/27\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:08:50Z",
@@ -1445,6 +1806,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:23:46Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fa779f41b314ad4a3770f4c388a43ca86a779e0eefea76562dcf62e36295c319",
+            "linux_arm64": "8314d76a30b88924a317163cafb8cb233ce6da2343846d65054156b023c9aba4",
+            "darwin_amd64": "6e0cf877497790fe37aa7b6dc2e7d57d70bb5e6a667ac8f45f0b6552113569b0",
+            "darwin_arm64": "6814b59d0cc7d1b87f616387309080492928bb727625d52da699d8fbb4985d33",
+            "windows_amd64": "827cdac9df957b5700c671693ead9ecbf9706788fc6ac2ead5cd771d74274cc9",
+            "windows_arm64": "e4e4f6ca6913deb3c63ae75eb122e9d57c5887dc1dff063d7efd19543a04c4aa"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/28\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-slack/pull/33\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-slack/pull/34\n\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.4.0...v0.4.1"
+        },
+        {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:08:14Z",
           "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.0/plugin-linux-amd64",
@@ -1536,6 +1916,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.4",
+          "releaseDate": "2026-07-01T16:24:10Z",
+          "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "39d0dc875c45c33c1d4baa4c8c9e3e4325e7dd9fae7eaff7a45e89e33b19bd01",
+            "linux_arm64": "9f054d8c83adc23ec63b02995ecc61c0fd4ea2bf28d500fb2be171a0872839c2",
+            "darwin_amd64": "57ebd024ead5548b2a7f6c4987b9abac9022b6addc6f9b235ee4ba80b2f50e1c",
+            "darwin_arm64": "ba883aaeaf0bcc5f055b8c64c57776e95d13a516792e53fc5229d98857a7b8ae",
+            "windows_amd64": "f10fb84ad0a4535d3dd38047da5cc861f44f9e609a516ceca4d039a75cb4ac46",
+            "windows_arm64": "a25c8f2d2a5c9ef2bebd74b4420df27ce6d08c8ca985e10bc5199da7e67f6af6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/hook-teams/pull/7\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/hook-teams/pull/8\n\n\n**Full Changelog**: https://github.com/SemRels/hook-teams/compare/v0.3.3...v0.3.4"
+        },
+        {
           "version": "0.3.3",
           "releaseDate": "2026-06-10T10:53:04Z",
           "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.3/plugin-linux-amd64",
@@ -1588,6 +1987,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:30Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e342092bb52692a6d7df87adc232103f6ebad7f9dba374933145780780b8c10e",
+            "linux_arm64": "693de2e745ed480c613dfd4780d5b770d3b3f4d5d519141787e8aacd8918ca55",
+            "darwin_amd64": "ab92b6510a3f06282de2b6814b08f3aed9f0128803cccad0c15b0d4a00f5acc4",
+            "darwin_arm64": "384463582c670642b0388c440588e137592f7e23da6478d8062872e7d7147125",
+            "windows_amd64": "151d4ea34e72af9da2f9eb11b8351ee0c8c3f5d0e2f2174a53622104b31172c8",
+            "windows_arm64": "4cb343cfd63047b476e3c94b4b4203bf6fc4fd97a12954375d6d135f98dddf34"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/26\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/27\n\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:10:26Z",
@@ -1661,6 +2079,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:24Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "da892dff5455e9e28e729e0e0d822f82857c35ce5a6cc16983e8fda7d1548d01",
+            "linux_arm64": "2bace4ae075c931071806db598f88c7afa6e046667cebfc2d03bff3a4eda12a1",
+            "darwin_amd64": "15a628fcf0a6322698a615156651f17ebbda56265ae6c068b42704e1bfb40438",
+            "darwin_arm64": "4b4f1f24a0edd54a55a3d4a97356997889f7c9465c7baea2cea757ab167aff52",
+            "windows_amd64": "9263a7f3a535dac84809ac8ce76608b6e027b2a5c881eb04b81ad545eed568e4",
+            "windows_arm64": "afcc0cd6f6f0a707f6a71c093e30ba839da76b07b83db9864b2859ee4a92c0f5"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/23\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-docker/pull/26\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-docker/pull/27\n\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:26Z",
           "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.3.0/plugin-linux-amd64",
@@ -1732,6 +2169,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:23:57Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "69f7a35d9d5c4abade33e09d390587ad7a835496be1d9bf3324b17cd59065677",
+            "linux_arm64": "6e3073e0517ac29446d6609839d651d3872765a8e88aee6d08c3d1f52fa02fea",
+            "darwin_amd64": "a0ed0d03851319100afe78313ce242a9c406e63a603fa0dab022a3c361200113",
+            "darwin_arm64": "1562437fbb52883b00dc9ea7671bbf82a93cdd1f54b5435bcc1fe96752a16b37",
+            "windows_amd64": "0f9406c5fcf3d6e47105f594e02632ec056b1e62bfb52b055e0a32ad5e381590",
+            "windows_arm64": "d52a9939b3fa1aeb5cc3f97abbdd8afe6de18bc72fc11e3e2cc2fc352fed88e0"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/29\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-go/pull/32\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-go/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T06:58:59Z",
@@ -1805,6 +2261,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:07Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "05461cb57e02cc796bf257ddadd9a1affe981e5f3addcbd619d4ade3adafc2aa",
+            "linux_arm64": "6912495d5b2e803a3f5d9d4d120d1bd159280c7d63ea8173fe61b80fe43ed105",
+            "darwin_amd64": "ba0515403d7d60414a20ff40ce4fc238f5b3811dbe74ae86cfecaeecd0167f92",
+            "darwin_arm64": "fe41564fb99a99bb5250faf13a6740045045aa5720f8962164f903e4e5c46699",
+            "windows_amd64": "344085e9a3761b263a671aa304346664786dacec986a227bf1d8347e05a0a5a8",
+            "windows_arm64": "8d696b673869ad23a3bc419676db3f28daa609e84b491b90fb748abddcb9e603"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/22\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:34Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.0/plugin-linux-amd64",
@@ -1876,6 +2351,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:24:14Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9b1bf7ad224f8b618be070e2f36e0045b0572ee19d06cf78a7726714cbe9053d",
+            "linux_arm64": "8cff52a1279e5bef3cbd57cfc916b801ceaae205cf3445ad2d336590569ab37a",
+            "darwin_amd64": "5df142a40aefaeab7c252d39b658acc6353f06330a9c415982de5cdb9c382112",
+            "darwin_arm64": "324096ee6be608f12a709bb157aede4b227aa9ed837900d2d8b4c756802ed495",
+            "windows_amd64": "222245158b9bec5fb3f6de84d4d5e5b965f070deab3b4140f12c9c7d5b51f2e2",
+            "windows_arm64": "aa418658c8508b8ca02f4fdecd870ddb8d2a3ac3cedb42a69b6698dd8b66bf1e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-helm/pull/26\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-helm/pull/27\n\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:09:11Z",
@@ -1968,6 +2462,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:14Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "98f86c8497733056702c94d7379f372223e37369eed4903168d7b3adaee28d29",
+            "linux_arm64": "d8a25e56ebcf6a8fbdfd0cc767136eea4cc55fe482a147879e6c66668c36a8bf",
+            "darwin_amd64": "6c265f62faff3b963db7a888b8f1bfa62629daa0e139fe648556d2b63877e4dd",
+            "darwin_arm64": "c3d6b0f3506a1817d33369a1d03d8f038eef09d747c1b709df43a33e134365c5",
+            "windows_amd64": "a3fa819aa0bd684639234b443d05c668793cff8af6519c61e96ed11fd7672c48",
+            "windows_arm64": "faf3e73ad135da1edbb321e12731eb2818b7f785c8351e7c2cfb90dc00fef5b6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/26\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/27\n\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:10:20Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.0/plugin-linux-amd64",
@@ -2040,6 +2553,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:13Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2363254c4cf47dc4725843ce6e7c6cbc771e2fe4c13b89d64c7dac84d461d60d",
+            "linux_arm64": "43147c8bf4a9e4376c8e395a81a8fc84bed282d2c1f8e0413a436a2c8bc88c1c",
+            "darwin_amd64": "00b198d148ebe766cd3b04c2cc36b1b584e1252e3fa431ccf1de55426b157de5",
+            "darwin_arm64": "21bfebf3ca26cc69dbb0c5acb5d3396b6975e2cc00909edf2463f79a6c1b69e2",
+            "windows_amd64": "8b6fbd47935b4106e21c2bc38bcb77a3300fa8651091d5168f8e5a9a8fe5239b",
+            "windows_arm64": "f7793adadbfa9f30b34237139a5a4eaccd3eb0f053da11af7e2148212f01a365"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-maven/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-maven/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:10:16Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.0/plugin-linux-amd64",
@@ -2111,6 +2643,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.1",
+          "releaseDate": "2026-07-01T16:24:05Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fd954f8ddc34b56b18b33f02a02377d948930db19064dcc3ab49808a2a74940e",
+            "linux_arm64": "205afcb9ced3668fbfa1b6e822051245b04d0ade3deea44c0aa60819373781cd",
+            "darwin_amd64": "4e346217f441672b62a05fa655d0209629364eb3d27232467ba67e2919977f4f",
+            "darwin_arm64": "1de63a1d78229ce40274d32c03d4fecacfda2b17b59c1f693bc9afc6229c0835",
+            "windows_amd64": "9d3a290c9f6c87d0a2f9840dada156cd2264d4434d0172e78da6ab597f92e595",
+            "windows_arm64": "1f5c2e4534ddd1b9e9e3c9b4d42867998ef05ab3e8b35940674957e930a4d00f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/29\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-npm/pull/34\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-npm/pull/35\n\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.4.0...v0.4.1"
+        },
         {
           "version": "0.4.0",
           "releaseDate": "2026-06-24T07:10:35Z",
@@ -2203,6 +2754,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:23:55Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cb736701938b6e16aa384984addf756293cb9f634bad1fca1d7099a9b9e24c93",
+            "linux_arm64": "e67416cc5ee0832880f3072f8585b86f690d87f01b28ef2e7ceae8de999f5f54",
+            "darwin_amd64": "9751bb4d2e7139ee78d34f523f34d9c7afc91dd6ee278b0173f65289bf159e9b",
+            "darwin_arm64": "e5705c1f81a821c1150ae6d8ca852a9a9b0da1c9ec1833eb2eab3b1fa5f54545",
+            "windows_amd64": "bfb5bc319831888ca7b3c3ca57ece7e63e9a8da5f05a96bcd16c8c2b7581e5de",
+            "windows_arm64": "a270ea321826ac147c882168bf5bd5cb082117952422923f0568bb77479daf6c"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/24\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/25\n\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:11:12Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.0/plugin-linux-amd64",
@@ -2275,6 +2845,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:11Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fe411aa70dba50e30c6e032fac5401a0244a64644b9d525b83f8588e59c54598",
+            "linux_arm64": "83941a1f4255c2fb94be823b9a6ba2367cbbafce5ce6647d8c2968364f035af6",
+            "darwin_amd64": "e86ba88515eafa475efd15e6181e6017b112d460ebd193f4fbc0c196f295e89d",
+            "darwin_arm64": "f8d186bae26193adf71b50a770aff67e5fe5878393684c745a5b655c761b354a",
+            "windows_amd64": "124198e2279de037e26fd8f97832d32e2257382a6afd897a9003859632aa5a62",
+            "windows_arm64": "5743766e765a64cc7440cdb382749f3475e78d94f002638e539b745263bfe93e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/28\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-python/pull/32\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-python/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.3.0...v0.3.1"
+        },
+        {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:10:56Z",
           "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.3.0/plugin-linux-amd64",
@@ -2346,6 +2935,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-07-01T16:24:29Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cc6a74d992f2c2e646fb702f62fa287842da8340c3d97ad22ca5bf808d854f72",
+            "linux_arm64": "adad4996162b52188dab93dbd7086fc95f45e805ad5a2a6a9976b07635e5e55f",
+            "darwin_amd64": "cff72ad361b3305074a60682db8f73947499d926ef490aaa6fb0415fb4d927ce",
+            "darwin_arm64": "fe90a38bf94ef71e10c004633d212d6aa1f308b3fcf703f64c05ff51caebdb6e",
+            "windows_amd64": "28edad227395b6c634df290c1df740eaf3d614e0d2947802358bb89275b40326",
+            "windows_arm64": "e250d4ca01f2745a98fb725531031d2f7b69f667adc958e718a9740838721849"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/25\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/26\n\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.3.0",
           "releaseDate": "2026-06-24T07:09:52Z",
