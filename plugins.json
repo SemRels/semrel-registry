@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-02T06:31:46.279Z",
+  "generatedAt": "2026-07-07T06:39:18.216Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -15,6 +15,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:59:25Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "492141a23a73b0667b422dac572a0969f9282a927362a661b7c4e18ff5806ae4",
+            "linux_arm64": "957369b3b4934b495b88cf431e0cce0faca80d7b13b96e79c3cb6f4eb3de83c3",
+            "darwin_amd64": "70d493afc0f96b2efad3a49b4bf0f3b0e8904d63f671cca35798e5fa69e565f2",
+            "darwin_arm64": "ecd460ab2477ac0f882f0c506167513d7567e71dfa2d1484955c0c70be19ff97",
+            "windows_amd64": "27bfbc811e692ebecd1a1ae5e685658c7064bf5642e9ec043ed9e912701282e3",
+            "windows_arm64": "c952e2b939240be8c671e6e4cbb11a92e24adbf85a126b3814cdbfd1523738d2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/27\n* build(deps): bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/24\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/21\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/20\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/22\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/provider-bitbucket/pull/23\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/provider-bitbucket/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.3.1...v0.3.2"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:23:17Z",
@@ -107,6 +126,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:59:01Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2c001795dd5da6593f0ac1a3ceaf6479d12275456b108b23bb8f88a2ac352167",
+            "linux_arm64": "7ca1170aae61d1b6d24624db3bddeb00cc6234fa03a9df04e5684c8d55ebf04e",
+            "darwin_amd64": "e6827fe171e8209184fe62b3054f6a76b823964518da0e63727571dc4ad8d50a",
+            "darwin_arm64": "c533a5ee4ac0be567a167e6135f530e72b5ff1f45fa036d26df6fd552c22d535",
+            "windows_amd64": "f3ceebacb1f02b1b15b5c747313f80377fc11bd49372ee616f8931cfabf24680",
+            "windows_arm64": "83c464bd78490c062715f94714814e63188578ec65bff3d76e4bc1f1951d7e30"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/provider-git/pull/29\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/26\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/21\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/22\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/23\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/provider-git/pull/25\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/provider-git/pull/31\n\n\n**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:23:09Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.1/plugin-linux-amd64",
@@ -198,6 +236,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:58:22Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fcac4dac3842cca11b9f47c3a29a2ef222c58c332a0757b1d6c2d36059c87faf",
+            "linux_arm64": "df4c50e8a6e624fedf87c70aee3987e4e4d05c62d8a8ce3fc70326e9c2290b73",
+            "darwin_amd64": "86f2cff4a432ab4ac281edaeb722c7ba7c8838b2e34b9b03c9f1e343b6d7f130",
+            "darwin_arm64": "196bf0e28bfe92c6369d2649e2b10369e5f12961dcff826fdad84f9715ca38bd",
+            "windows_amd64": "3f31b22c9313ac887bfa77bc1398b5a0a93995f0c7d487250a90c3b535d93a75",
+            "windows_arm64": "edb932dcef4a40455e6f4346c9775d04da5461de92a60a0fcda8fba8a4bfe53e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/29\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/26\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/21\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/22\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/24\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/provider-gitea/pull/25\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/provider-gitea/pull/31\n\n\n**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:22:54Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.3.1/plugin-linux-amd64",
@@ -288,6 +345,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:58:38Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "032fa029257849f11d758f5cc8bcac3b9cac155e74b0057a97a65a0c0eb0036b",
+            "linux_arm64": "75d374f40b0940685c47707c1e5332809c702b5ec061ed27f9e24b9bc1f3fa9b",
+            "darwin_amd64": "39bba6ab4fd22e0273bddf60a0d677defd570883450960f64331356ad6fd9939",
+            "darwin_arm64": "17b24ce81a42e66981fb11b1fa0cea30d4fa70003c8b447be877075b27236c78",
+            "windows_amd64": "3af6525e5e929b544b3ffca1b9a10860bd29416c1d881cceb4bf6c22f0865248",
+            "windows_arm64": "a6fdce377b54700022c7857da51dffa284bda1435c8684a37cc24770109335ee"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/provider-github/pull/33\n* fix(releases): set explicit Content-Length when uploading release assets by @mwaldheim in https://github.com/SemRels/provider-github/pull/34\n* chore(deps): bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/30\n* chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/25\n* chore(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/27\n* chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/28\n* chore(deps): bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/provider-github/pull/29\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/provider-github/pull/36\n\n\n**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:23:17Z",
@@ -399,6 +475,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-07-06T09:00:18Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b809a6b5b693690ab1bf382a589d01387a7805a3dfa4a38b6654d50e88cd8a3d",
+            "linux_arm64": "65a9fe751c37ee248b862429a1f876b0dba71cae8b4aa5be44fc27da6d1a4e64",
+            "darwin_amd64": "780903d71366e8c47369553d71ce29deba145dc041db487fd67883e241e0745a",
+            "darwin_arm64": "341fd90e7a865e0f90e363b2a199ab888b611beb52e62b0a245c2204d6dbd60e",
+            "windows_amd64": "ca90c1812777b36d4e019077ba898267f7d4f0d29c8f07d11b1193f3946b10e1",
+            "windows_arm64": "7613e20b3cf018cd5d5921f0e2fbee464bb0da231b2820186860da4fa562eaa6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/30\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/27\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/22\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/23\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/25\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/provider-gitlab/pull/26\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/provider-gitlab/pull/33\n\n\n**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.3.1...v0.4.0"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:23:04Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.3.1/plugin-linux-amd64",
@@ -490,6 +585,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:51:08Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e4f1d40669e7d00fca06ca8a3a23d4c841f41eb45935c9330ea83f8b346a7dcb",
+            "linux_arm64": "c370178fee2b0da59879d0ca229166a640d2bd8d5b0c69dc979bf00e8a868f38",
+            "darwin_amd64": "a85cd08dc79ca837eccba0db1d0081302887b190be99e2e56e49c30a428132ba",
+            "darwin_arm64": "743b9f10a87c1ee13162346c09144b8b433a52ac1c3461aaa20cb638d91c0684",
+            "windows_amd64": "bd78cc2f085b9f45c110db108ae094d11557f3962753e224a354014f94986250",
+            "windows_arm64": "be6f9e35da7e38d883fa737ed8cb9959904b47b07622f9088f788cf93e0cf63f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/37\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/34\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/28\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/30\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/32\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-conventional/pull/33\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/analyzer-conventional/pull/39\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-conventional/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:21:48Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.1/plugin-linux-amd64",
@@ -580,6 +694,25 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:54:39Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "69cad6cfbe30a0d9491efa836fe50275b64691b20679a6ae5c99a7a312b8bd4a",
+            "linux_arm64": "69ee7127e164a0b08027eee707d057610e7bf48868c6cdb5dc15e2f866ca6fa5",
+            "darwin_amd64": "8f4b9d321964d080433c50f6ab4104aa1d22b6698a4f08a7c85484ab8f23534c",
+            "darwin_arm64": "aefd585a8cd79a4559b117bba811c10ffb1f4fb79bf83c3dcacbbe4e8f648e8b",
+            "windows_amd64": "a9b1826d297ccfcabb5f605f6f0c9f21be9cd6e7689d7e0da1d90c19a4bd2bd6",
+            "windows_arm64": "6e505040bf74f096b09cb8a2be73b4e1ae17590a69b9e36014af3f697a25f87f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/34\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/31\n* chore(deps): Bump github/codeql-action/upload-sarif from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/30\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/26\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/27\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/28\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/35\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.4.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/36\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/37\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/38\n* chore(deps): Bump github/codeql-action/upload-sarif from 4.36.2 to 4.36.3 by @dependabot[bot] in https://github.com/SemRels/analyzer-default/pull/39\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/analyzer-default/pull/41\n\n\n**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:22:13Z",
@@ -691,6 +824,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-07-06T08:56:04Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "53d44bf4e7494ac0fa81fccfcabde2ea5a51bd2e58d9ec54d6a72f62e800229d",
+            "linux_arm64": "79642a361f4d6df84c3df14170fb1652160f7ccf28a9e687a7443776b076a1da",
+            "darwin_amd64": "48ac1fe55c1c8845897d913044b2b47d2bcb4aa5d5657531a2037a1fbb638e9d",
+            "darwin_arm64": "83ce7d42a9d9c3661e02f5a6aacc4656469d7af8990b1f34ffdecf5a38bf94de",
+            "windows_amd64": "756daa7347987dd4962930e964d14252d64e0830ea11e4e49f944af390358eeb",
+            "windows_arm64": "5a0bc7ae9a3f2637b4106c7aa22cf37ae9913f38ce654c08b6794ac0948771df"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/generator-changelog-html/pull/33\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/generator-changelog-html/pull/35\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.4.1...v0.5.0"
+        },
+        {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:22:00Z",
           "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.4.1/plugin-linux-amd64",
@@ -800,6 +952,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.6.2",
+          "releaseDate": "2026-07-06T08:56:29Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.6.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ab47a09742c79d690ade5b9aada5b0bf7faccf2c3ecfb5d954e84382b80e47e2",
+            "linux_arm64": "73469c85455f9501ed5b74e392c6d6819d60698976a98f68286fca74a3cf787e",
+            "darwin_amd64": "e141a6fb0465e446d534378a4f86ed31a08299ac618576ced2deeafe4e0c6729",
+            "darwin_arm64": "563079794d76996f2fa3911148bf91354d362b4189f1c631ab75f23ae986650c",
+            "windows_amd64": "62738d53787d2f81d58e16b7398c0abc61d01be55aa10d0139c064cda9932fad",
+            "windows_arm64": "9b809d41dcc282774db5facf25272cb7e3a7fc19b831f4c3b619f9c320e61795"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/41\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/35\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/37\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.4.0 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/42\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.3.0 by @dependabot[bot] in https://github.com/SemRels/generator-changelog-md/pull/43\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/45\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.6.1...v0.6.2"
+        },
         {
           "version": "0.6.1",
           "releaseDate": "2026-07-01T16:23:16Z",
@@ -930,6 +1101,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-07-06T08:58:24Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7da1ea18348fdd425ecb30846a3b6d84165883a6eec033daedf6482d2543ebc2",
+            "linux_arm64": "7314373aa703a31c59c71615dc22215cebce62eb6048c3800fd7e1642a2dec5f",
+            "darwin_amd64": "dfc3e3cadd5ba5325dfba7249396fafbf0a54f093f537dac7fd6614474cfea78",
+            "darwin_arm64": "cc598868efa65629ec9bfe85c23bc826c878abbd4dc7b6a706c2cae1d75ee5fb",
+            "windows_amd64": "6b2d6082bbdd593011e6901836d301e021d35e2efb5158c7cdbed64fb7d727a0",
+            "windows_arm64": "11b73db053390e6907ab566a43814bfe4cb2229384200f36e1b545448b0cd15e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/generator-release-notes/pull/34\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.3.0 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/28\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/29\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/30\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/generator-release-notes/pull/31\n* feat: contributor recognition — first-time contributors and release MVP by @mwaldheim in https://github.com/SemRels/generator-release-notes/pull/35\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/generator-release-notes/pull/37\n\n\n**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.4.1...v0.5.0"
+        },
+        {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:23:03Z",
           "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.4.1/plugin-linux-amd64",
@@ -1039,6 +1229,25 @@
         "workflow"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:56:15Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "4f5122d5c84409cd7b44499b25df2a325b8a124be5d1657087b43153bae70f24",
+            "linux_arm64": "d226087bb10b32c80f147990339f836e0885841395b81398912e710bcc9e70d1",
+            "darwin_amd64": "053ca98d2901a8089f17dd63afa078accda6e521073b658ca3bc960c186b0a68",
+            "darwin_arm64": "fbad146f9c463c7b2d05d4b5b5a03f3dc0267c8953f32b1c226341eddf0f9af8",
+            "windows_amd64": "522bbe37f26e52f8e6357f5156c8f7d82a47898c8b7e8164dd0af618571b916c",
+            "windows_arm64": "c91c50175e55662191446d0176b3028d4d54a01df465c0e03bbafd8c7e2d5aa4"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/condition-generic/pull/34\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/31\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/25\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/27\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/29\n* chore(deps): Bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 by @dependabot[bot] in https://github.com/SemRels/condition-generic/pull/30\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/condition-generic/pull/36\n\n\n**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:22:05Z",
@@ -1150,6 +1359,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:56:28Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "74d648dc598618219bcce92c28c6bdcd857863788429ba1c3a8deb94e41cd9df",
+            "linux_arm64": "bb2c340a24e0768b2e239e1a9968d969aa1df3b20365088d02d6a2414ec42bc1",
+            "darwin_amd64": "bbcb8b86f6192fdba9f4e19022e654faf38ebdcf6d8bbb0900375be7e18716fb",
+            "darwin_arm64": "f2e872d0d3b58694bc9ef0f83bd0d1e133d875244fe48233ca35c6d6c0860263",
+            "windows_amd64": "27565beeb7fbe4122d2405aaefb1306e4e299440bede751c7e2236584eb2870a",
+            "windows_arm64": "c8dc1d7af8ef5a79d1dbcbb3957a45bed80f6a28343cb210059a1fbe3f582cd2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/condition-gitea-actions/pull/33\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/30\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/25\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/26\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/28\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/condition-gitea-actions/pull/29\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/condition-gitea-actions/pull/35\n\n\n**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:20:23Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.1/plugin-linux-amd64",
@@ -1241,6 +1469,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.2",
+          "releaseDate": "2026-07-06T08:56:17Z",
+          "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c93b6d5937da39a03c704e961ae6bda7d2bc2e492977fb3d6277bd070153274e",
+            "linux_arm64": "a6829306f09ebc14c80e4f383509b162be18135f0e6efa520f019a026bf96416",
+            "darwin_amd64": "638f95ba7064af168a444ca3005dd24427fcd1d6f80d7da06b0e0a35ac55c963",
+            "darwin_arm64": "73f1482ddb8c10d533d6619b5f90b84b7059a73db07fa486b4c0310a320239fe",
+            "windows_amd64": "572cf25a2c016fe8aedf4650fac7d04421e793be69a2dbbf0df3ceceaa5528fc",
+            "windows_arm64": "abf9f26a54494a76b7a3a50261ce5137c5d2d5d9a6043dda9a9840ed632f1dc2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/32\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/29\n* chore(deps): Bump github/codeql-action/upload-sarif from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/28\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/24\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/26\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/condition-github-actions/pull/27\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/condition-github-actions/pull/34\n\n\n**Full Changelog**: https://github.com/SemRels/condition-github-actions/compare/v0.2.1...v0.2.2"
+        },
+        {
           "version": "0.2.1",
           "releaseDate": "2026-07-01T16:21:50Z",
           "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.1/plugin-linux-amd64",
@@ -1312,6 +1559,25 @@
         "ci"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:56:35Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1939ee19faade63a928ea6c5a06bb642e7a2562063599d350f2850d4a6f880cd",
+            "linux_arm64": "824289851b12542a4962ae16153c4ad39e399db84034b47abdd6d616607ccf6e",
+            "darwin_amd64": "869f40522486365ce51833a611c6345b3fa5f69ee65a999199bd05a9d1bbcc4e",
+            "darwin_arm64": "e9b17a2c984d3f2491d5f24bf8ddce7da77e13a3c295461931c509cad98f990b",
+            "windows_amd64": "b85d25252158d3df87e519d2bcee056d44486e296264223d5b641b5e794fdb68",
+            "windows_arm64": "9a9bbbf5f85cff2a2ce4f06c9cc072bf36f9e8d32264501a2b8817637bfbce53"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/condition-gitlab-ci/pull/33\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/condition-gitlab-ci/pull/35\n\n\n**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:22:56Z",
@@ -1423,6 +1689,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:57:17Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a027b6a2a0b11d70b1eb6414d9d143668c745e72cdfb80c4c30b23665b9b4beb",
+            "linux_arm64": "a6208f6c1104199fcb6b666de5052934b1411ce31e435c55d3427ef42034679a",
+            "darwin_amd64": "93fe8b15c841e1935a2cd84ac0ebf6f2d1ac9f19e4b13b8f68dc74e8510b43a4",
+            "darwin_arm64": "1678b5197dcc29291c03c0f79db0c1938db62a2cc95f6af8ca0657f6eea04b49",
+            "windows_amd64": "54fa3922ad439cd48e21615bc51f0ecd24a52fe36852bda36c281ae951b139fd",
+            "windows_arm64": "590de9c3a7ca777ee4f6a03153e0d27d5a2139833d6f70c9922795278d4fe0ab"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-email/pull/32\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/29\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/24\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/26\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/27\n* chore(deps): Bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/hook-email/pull/28\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-email/pull/34\n\n\n**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:22:37Z",
           "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.1/plugin-linux-amd64",
@@ -1513,6 +1798,25 @@
         "plugin"
       ],
       "versions": [
+        {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:56:51Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7720bf4f11254eb0c4211317369a45505cd453b0245f182cd576c9acbd3450ce",
+            "linux_arm64": "9c8ef22341c0ec62f102b587b1b0981ac3bc2e8a047c1441a369cb3a6d0bcb2c",
+            "darwin_amd64": "10e2619ff5e7fb7584f2e2bcb707fe7c73854f8ba243734be3df50f96b7b54e1",
+            "darwin_arm64": "f8c3bd7ceb02b476bd10e82347da645d0188dce07b885326b007eb642fc22055",
+            "windows_amd64": "983aeafb1e53768f0f70a35a77d3f3ebcb2253a593e3d2d84efee3f51def2052",
+            "windows_arm64": "fe21ebf229a507107c83173f4e8305c15aaaca565a652ea499d5f269dd1ea4ce"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/27\n* chore(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/24\n* chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/21\n* chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/20\n* chore(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/22\n* chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-gitplugin/pull/23\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-gitplugin/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.3.1...v0.3.2"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:22:29Z",
@@ -1605,6 +1909,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:56:39Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0963eecab96088e5c2bc6e89f0c4636b04ad5a8e85df557b6f00d14df1806853",
+            "linux_arm64": "3096db6b92d96857449b146164870e6d469ac07e79bdc90e980c30d3951cdc8d",
+            "darwin_amd64": "bd748288b8140214e26fc72aa58aa3b638b81afb60284419921c67d00f1cd8c2",
+            "darwin_arm64": "40a682b613548704dd8d168762b3d008629d8b875102358e879f1fa39fa396cf",
+            "windows_amd64": "bdd4d8cf1e2d794eae97c7d3cc3a5e5e9988c6280172f73ab0dd42df2ac2adc8",
+            "windows_arm64": "da21fb67778224b935a9817472ac3c183f28f284dc3ca680a83ec86b3124605b"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-jira/pull/27\n* build(deps): bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/24\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/21\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/20\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/22\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/23\n* build(deps): bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/32\n* build(deps): bump docker/build-push-action from 6.16.0 to 7.3.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/31\n* build(deps): bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/30\n* build(deps): bump docker/login-action from 3.4.0 to 4.4.0 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/29\n* build(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/hook-jira/pull/28\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-jira/pull/34\n\n\n**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:02Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.1/plugin-linux-amd64",
@@ -1695,6 +2018,25 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:57:56Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5fc6bcd4c27e450bd7b2157b146c76f84740ebfde1ed950961f74e48189fdb51",
+            "linux_arm64": "badbd4657bea00f28ca2ab4e8aceeeb7b23171806f437b288ca1b2d27e9617fe",
+            "darwin_amd64": "ec64d8b6aab4e7e4b1254fc08d16413bd212f53142c2347b079aa169a3f9c8a0",
+            "darwin_arm64": "37a9a3f07eadf6013896458ea67c6d3b7d465a6ca3ce1a407c6f4a7f4d2b153f",
+            "windows_amd64": "7bea03a59449e866aa6622680d46d3369cd07db6f9e4541b3e4004b94d294cd4",
+            "windows_arm64": "9bf42376692615d69af86d87521c5adb8e5be51e952c0355fde294d8e5b828c2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/28\n* chore(deps): bump github/codeql-action/upload-sarif from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/25\n* chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/22\n* chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/21\n* chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/23\n* chore(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/hook-matrix/pull/24\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-matrix/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:23:34Z",
@@ -1806,6 +2148,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:57:29Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "997d2b21a48980fb04711730785e408b8317c80ad36bfa26e6f329b5800343cd",
+            "linux_arm64": "c44056efcdc93a1b1dee11c3445bb88fd217ba10bffdc96b6edc4eb5fc1da814",
+            "darwin_amd64": "b8e07dd39a672d1c9a9d9ed985fb9237cfe6626bf68d9455ee2f271fba2348ca",
+            "darwin_arm64": "186321568fd7d1618a86bc84e1fdf398aa3d1e0dae16e71939350a41368cc807",
+            "windows_amd64": "970179aba842bcdee28248ca8aa109a258613d2daf77d991677fbdfaaa5d1fad",
+            "windows_arm64": "dff182f1c95f718675e9a8241d01e7d114cd6226e34e6df3af18e9381586d7f8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-slack/pull/35\n* chore(deps): Bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/31\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/27\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/29\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/30\n* chore(deps): Bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 by @dependabot[bot] in https://github.com/SemRels/hook-slack/pull/32\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-slack/pull/37\n\n\n**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.4.1...v0.4.2"
+        },
+        {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:23:46Z",
           "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.1/plugin-linux-amd64",
@@ -1916,6 +2277,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.5",
+          "releaseDate": "2026-07-06T08:58:20Z",
+          "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.5/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "983cb90a4715c3ad124e07595263dcfa2f85adb72e998a5087ddcd89f1779a00",
+            "linux_arm64": "3befe31a5a6463e3bd81f720bfebbc37984652025f16f80561581ec2d28699d6",
+            "darwin_amd64": "b819e4d4f7bcfb1fd0cdc3487169ebea574af2e794176dc75d293d277f86eef3",
+            "darwin_arm64": "c9b8c454949b85c6c8584816ce11682ba269c5c660d0fc00370b0b5ff4d57368",
+            "windows_amd64": "9db4837c540be6db8b90cec8e4cd352314c82be40f2ba4023874b347a9716cce",
+            "windows_arm64": "fa6accdd1b991542f0bad65848dd8758523ff64e31b771dbfa06902ec6e9a3f1"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/hook-teams/pull/9\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/hook-teams/pull/10\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/hook-teams/pull/11\n\n\n**Full Changelog**: https://github.com/SemRels/hook-teams/compare/v0.3.4...v0.3.5"
+        },
+        {
           "version": "0.3.4",
           "releaseDate": "2026-07-01T16:24:10Z",
           "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.4/plugin-linux-amd64",
@@ -1987,6 +2367,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:58:55Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9f93bf55f33510981acdf4f87b93afcf83504eb1bbd5df665f4f34b9d9eaf93f",
+            "linux_arm64": "9bfb49e85dce93d67436b9cc834772d74009af99074c2fcd45c6fbcf75c40bcc",
+            "darwin_amd64": "608e16c3057c2fa34fe8b3c56b2f2aa1fc7c4080a6c0565f4d2a894be5529dbb",
+            "darwin_arm64": "f880ea0292bd2fdf1cdc9c13bad9d30232d357f60e28f215b148c87544c48514",
+            "windows_amd64": "3fd0873bd94fa61faaaf559d5042c19f6db7f43661327c8123331476ace504b5",
+            "windows_arm64": "eafbb32465a9d9b6cf4f83b5498f096f0114931e36d590110718bc3c33dd9d91"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/28\n* build(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/25\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/22\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/21\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/23\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-cargo/pull/24\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-cargo/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.3.1...v0.3.2"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:30Z",
@@ -2079,6 +2478,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:59:34Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bbd3f1b9159d64b118c9722d69506cd969b7f1330aa049f0c169aec05bdfe1c3",
+            "linux_arm64": "ce7abf22a3b36255303dd9972744f9bfb4e89b7a719d6eff52a3e13e91a702f9",
+            "darwin_amd64": "33eade607d6d3914c4bb2ec8f470fc6a819a447a81709407927ff076a782c2b8",
+            "darwin_arm64": "bcc8d39ca3b7ec7d64b9721a8f1aef496e30ef93c98a0ef52ecf0e3c82ce85d6",
+            "windows_amd64": "4af6daa1a4ec10a8938387b2076a68262f4d068f04b8ce7cee27dd98d653341c",
+            "windows_arm64": "4c58ae521b307fc4b50b5cdfc3c0b6c5e19dfd0b81d3064058a2d34cd0c02d6d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-docker/pull/28\n* chore(deps): bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/25\n* chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/20\n* chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/21\n* chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/22\n* chore(deps): bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 by @dependabot[bot] in https://github.com/SemRels/updater-docker/pull/24\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-docker/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:24Z",
           "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.3.1/plugin-linux-amd64",
@@ -2169,6 +2587,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:58:36Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6afeef08ea39408cb7f2952e8cea6f2d739238cc6c7c519c94c39d85de9b07c4",
+            "linux_arm64": "647af7ea2a5e9f68cf2578ef993402eb06d72c4bc992d9542487629ac37655d9",
+            "darwin_amd64": "0c12d56b1fbb10037605b02f118c28aef47a6d1784cb021bbcf593e443a994e7",
+            "darwin_arm64": "4348663ad313ebb87ecf0477e17371877f06e8f1d6bf4947f2f1a81aab9048a3",
+            "windows_amd64": "01c5767bfc43ab81b1b79bd08740b3510c1a6c0d5e33adda50058489e33fce3c",
+            "windows_arm64": "82b698dc1e20caaeb537b974bd299d1493074e429e535ac2886bc42d02c89e48"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-go/pull/34\n* chore(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/31\n* chore(deps): bump github/codeql-action/upload-sarif from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/30\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/27\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/26\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-go/pull/28\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-go/pull/36\n\n\n**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.3.1...v0.3.2"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:23:57Z",
@@ -2261,6 +2698,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T09:00:11Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6bfcdb931c7837b1ad009d90da7acb2c70b89f527f038e1ca3c51a4f29abf8d6",
+            "linux_arm64": "8cd3d3b4c214347e9a336ed00d5746534255aa7e089f3081590244fa3af482dd",
+            "darwin_amd64": "b01f48c42309620dec0f8b6af57d66cb2e8525c0d71d0df12cd05e5f7070b92c",
+            "darwin_arm64": "4d4eb9abb30ada63ea513d629a8479ac9db6c0d745c674ca3affc457eb45ec5d",
+            "windows_amd64": "7d8a181dab3110cca1b489e4840b0ec102cbab8ca2a80ce06f70f2c70ad59cb5",
+            "windows_arm64": "d10d0afc0f9b6e8d7c4092da3f4cfef64cee3688da8cd1afbea6f18bfc2bac1b"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/27\n* build(deps): bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/24\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/19\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/20\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/21\n* build(deps): bump docker/build-push-action from 6.16.0 to 7.2.0 by @dependabot[bot] in https://github.com/SemRels/updater-gradle/pull/23\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-gradle/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:07Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.1/plugin-linux-amd64",
@@ -2351,6 +2807,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:58:58Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "04ad95d52358d3279c5980c75c199975521b08197e8f1008a937aa5d6c2060c1",
+            "linux_arm64": "dc6c2d34f96a00cb23a9db6aaef5809dc3e3767767c031a9516b97ffc648235e",
+            "darwin_amd64": "04de679b5abe690019c61902c66c93a59913efd6895b8bf313822271e6e1ee30",
+            "darwin_arm64": "1954b1a3c105cdc04bac7ea4ddf57e2e56a147ba16a4f747fe9f13b58f146337",
+            "windows_amd64": "89bc834af7ef48ca0ea072b19621c95abd1609cfe17ffc346eeab335b294955f",
+            "windows_arm64": "65f5461dce3f58f913166c7fc7783e2fe765df45dd1e09fb2518ef6cf5b8b72e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-helm/pull/28\n* chore(deps): bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/25\n* chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/22\n* chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/21\n* chore(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/23\n* chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-helm/pull/24\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-helm/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:24:14Z",
@@ -2462,6 +2937,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T09:00:12Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a30972020c3835009d87c6179ef3bf47a644eead5ea1b607ee272e32ee0b590d",
+            "linux_arm64": "5d1f10818139a185b424043d1144ecb7a3cac83ddfeb8d98592a6bb294a72735",
+            "darwin_amd64": "e906cc5dc20d4212b02a9bf71480001f24d4b214cef66eaff28cfbf4cf2a3223",
+            "darwin_arm64": "991097b9bfd8d6b3e07e224dda8c559ada2e7e99d658b9c0d3c49d94467c9226",
+            "windows_amd64": "f1ebf0284b1c25dad2124d3bdaab578da9ee4058f8b8c0743525bc7118267d7d",
+            "windows_arm64": "acde006284bf691ee4eed06ecbef54eec48d4c3f48f0db8150e13f0b5cc07722"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/28\n* build(deps): bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/25\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/22\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/21\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/23\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-homebrew/pull/24\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-homebrew/pull/30\n\n\n**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:14Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.1/plugin-linux-amd64",
@@ -2553,6 +3047,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T08:59:41Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0ab6dd8e66a24f5e660dffa17083ffa1191db705b592355427fa0329374165d3",
+            "linux_arm64": "764e749402ab2b7a7b6b2480a9ec92f907a1f677a95cac7e82b949bc9de8b572",
+            "darwin_amd64": "27484127cc9de084c133b663ad91b126885ac200578f0a561395dde95e3eb15b",
+            "darwin_arm64": "4226fa2574800430db26d6b96fb28d408e61c8ec5b9e6ad1cadc29cf25a719af",
+            "windows_amd64": "b5e345e424e4a25cdfde4825321966ad2f7c5b1696a6852d6f45f1581ab9a3cc",
+            "windows_arm64": "f02eae29a385263e18ab4fa92eaaa49d3b7dbc207d137fe6321cc43a4f7455ce"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-maven/pull/27\n* build(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/24\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/21\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/20\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/22\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-maven/pull/23\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-maven/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:13Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.1/plugin-linux-amd64",
@@ -2643,6 +3156,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-07-06T08:59:39Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5dd16b5513153b64703c24fdc1231faceb9cfe1b87104c45e500e22d4ba8a0c3",
+            "linux_arm64": "4e3e50bf99bcfe4a53cdd23716415fcb8ad9a2951ab981e2c2d4c2db621ce4c5",
+            "darwin_amd64": "4ba74ab386725ed720d8bf0bf70a1929d794f0199cc656cdcafe00c6a378df21",
+            "darwin_arm64": "3ec0d6e541fed19abbab85ee3f5d28f9b8417bd287b644a112fac98f7625d2ac",
+            "windows_amd64": "950f66558ab862c1fc89756eddca763eb1466f21acfddb72e0c2258d9c9cc374",
+            "windows_arm64": "95e8ffc92b7fe2857216fe1740699526c844e9ce503c94c308375e2df121253e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-npm/pull/36\n* chore(deps): Bump golang.org/x/net from 0.51.0 to 0.55.0 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/37\n* chore(deps): Bump docker/login-action from 3.4.0 to 4.2.0 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/33\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/28\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/30\n* chore(deps): Bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/31\n* chore(deps): Bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 by @dependabot[bot] in https://github.com/SemRels/updater-npm/pull/32\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-npm/pull/39\n\n\n**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.4.1",
           "releaseDate": "2026-07-01T16:24:05Z",
@@ -2754,6 +3286,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T09:00:17Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "02a14143889b109d13ad6eca3ea3d32dc8d025c58518023f6ff599d0309f734e",
+            "linux_arm64": "344cc4cc45b7e7ede287a40da19878c97968dbdbce8e2719f9f83234be3ee559",
+            "darwin_amd64": "02767bc5a73347934d0d71b91173e645b92ea35614e294210b3c1eeb0046b66e",
+            "darwin_arm64": "fd7a7169d8c87b003d7f85f45bc8551111109a4d8c6f3298420a6d5e46b42b11",
+            "windows_amd64": "9fec669c61283e3180fdbc07b3515a4f53ed05e45cac9b8071f8490370eb9e44",
+            "windows_arm64": "8461c275004c7f7cff3ef7a59daf5f50827a73a65db4d8cf280a9aef46dedca8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/26\n* build(deps): bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/23\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/20\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/19\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/21\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-nuget/pull/22\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-nuget/pull/28\n\n\n**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:23:55Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.1/plugin-linux-amd64",
@@ -2844,6 +3395,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T09:00:07Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b7c8a80f8044139f0228ab5bb0cc336fca253357f7baf7545021e7c4a24462ef",
+            "linux_arm64": "ced8e689ec45745fb66b62fb5cc024597dc30c67eb37fe20581a712112878667",
+            "darwin_amd64": "5d6296ad1420fdf387c771b729785440f83cbf4b1afdfbe3827832aee025ef2e",
+            "darwin_arm64": "8138661504c0bb5c8f4934e0c12191aaaebfef8c25dc1eead68fc2816317ae4d",
+            "windows_amd64": "37b3a01295a3c6528a80cc8b4728ed3a7c47176ee79cfa0f23fedf26ab66a1f1",
+            "windows_arm64": "352e54c89abc3c031cae3b5dcf2ebbcfd9629c86a2cd8870de311f939e31ca4a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-python/pull/34\n* chore(deps): Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/31\n* chore(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/26\n* chore(deps): Bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/27\n* chore(deps): Bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/29\n* chore(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/30\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-python/pull/36\n\n\n**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.3.1...v0.3.2"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:11Z",
@@ -2936,6 +3506,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.2",
+          "releaseDate": "2026-07-06T09:00:10Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.3.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a3ad0f42bcc34d30453fb9d2f8b7f17cf608fe38749db4ba980871be8b63d4f9",
+            "linux_arm64": "099a9a7d7bf038fe7c9a370986847c7b42bec48002581b2beceb4dc79802541d",
+            "darwin_amd64": "0808c00d3e20a7e8f8f7e27ef0bd097dc9d4ab8da8b2452995ab5cd4af8c7ae8",
+            "darwin_arm64": "f169601656c9b5c661b6fe98d7c32bedffa7fe7a6fa3e0faf02abf49a20a88c7",
+            "windows_amd64": "849a678089dc6bf1bdd96b72be262a4237915b606a213925846413cd102339d2",
+            "windows_arm64": "48608bf26a6c5a0815ecaf1a1de4547ee06a33bef3359e44298daec17f61b159"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/27\n* build(deps): bump sigstore/cosign-installer from 3.8.2 to 4.1.2 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/24\n* build(deps): bump github/codeql-action from 4.36.0 to 4.36.2 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/21\n* build(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/20\n* build(deps): bump actions/checkout from 6.0.3 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/22\n* build(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/23\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/29\n\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.3.1...v0.3.2"
+        },
+        {
           "version": "0.3.1",
           "releaseDate": "2026-07-01T16:24:29Z",
           "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.3.1/plugin-linux-amd64",
@@ -3027,6 +3616,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.0",
+          "releaseDate": "2026-07-06T08:58:56Z",
+          "downloadUrl": "https://github.com/SemRels/packager-nfpm/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "95c3a96e89a797e534250a74e24df9c15f409be52fb3988a93d7f66d86ce5de4",
+            "linux_arm64": "8716a805d71d4713ed369de5ce43de1276a15ec9303aa3825724dd520d3b3d8f",
+            "darwin_amd64": "1d2046f9b6bb1776fdc3dba2649eb67f383b4b83d1ee49cc01c51bca84246c44",
+            "darwin_arm64": "871720e696389e67b11636328871b8aa027ae47ac5eaa3ea64571b0c412512ae",
+            "windows_amd64": "9d23266cd5de96f1dc9f38131ca67ea3e309b0a0db0ed3f8da77b3080fedd254",
+            "windows_arm64": "58613f8215bdeb8e942190b23487c3d380cdc3e01ff488849dacb9a38fc6615f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/packager-nfpm/pull/2\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/packager-nfpm/pull/3\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/packager-nfpm/pull/4\n* build(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/SemRels/packager-nfpm/pull/1\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/packager-nfpm/pull/5\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/packager-nfpm/pull/2\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/packager-nfpm/pull/1\n\n**Full Changelog**: https://github.com/SemRels/packager-nfpm/compare/v0.1.0...v0.2.0"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-06-28T15:14:58Z",
           "downloadUrl": "https://github.com/SemRels/packager-nfpm/releases/download/v0.1.0/plugin-linux-amd64",
@@ -3061,6 +3669,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.0",
+          "releaseDate": "2026-07-06T08:59:26Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-generic-http/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6e5f228a1b0a521354bf2255641f50ef912d0e000a7f90ed30d9efe491a525b4",
+            "linux_arm64": "86579b7788fd06ec27c9192be1d8e8d29ff572aa9ac78307c068fff8fe47cc22",
+            "darwin_amd64": "2cad026751f763ffee6eaab0b4f123a3da8ede153b760881ddbe937e7e3c5514",
+            "darwin_arm64": "7245d6402ebad5874ea1ee919875dc788d634bdb747f50ddeedc1472797751a3",
+            "windows_amd64": "198f10530f4e65c07d097296fa96bef512fd860a9a2f16b220aac1ef1bd2c8e2",
+            "windows_arm64": "19f79a76b349e94d948e6acf3b3dc4d0a7d29909c666dce4853c2adca30e560a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/2\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/3\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/4\n* build(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/SemRels/publisher-generic-http/pull/1\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/5\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/publisher-generic-http/pull/2\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/publisher-generic-http/pull/1\n\n**Full Changelog**: https://github.com/SemRels/publisher-generic-http/compare/v0.1.0...v0.2.0"
+        },
+        {
           "version": "0.1.0",
           "releaseDate": "2026-06-28T15:15:02Z",
           "downloadUrl": "https://github.com/SemRels/publisher-generic-http/releases/download/v0.1.0/plugin-linux-amd64",
@@ -3094,6 +3721,25 @@
         "registry"
       ],
       "versions": [
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-07-06T09:00:07Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-oci/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ee2d1eb4e84fe0fd639d7096157d435a980f919c3d10c792ed1705de5381eee0",
+            "linux_arm64": "257a761345a4925ed5c871c488012b287cc8cd331ee796f60aaa86a00a37e960",
+            "darwin_amd64": "bd306b1cb073b9d21b74fc2228044dc91c71a969f707691d5088ac1011794699",
+            "darwin_arm64": "ea283d73e8b126b4ee3cc00c3d2c6a2a475225abb1f5f88a1272323eb1f0544d",
+            "windows_amd64": "cf04ebe60d324b17f460cb8b3910edea00c56d1f47517265d92e122676c19b2f",
+            "windows_arm64": "aaf45d6f7fc11e20d40cb016ba0abc57a07609efaf2dd3d217d9c7eec006b393"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* docs: add dynamic latest-release version badge to README by @mwaldheim in https://github.com/SemRels/publisher-oci/pull/2\n* fix: remove stray backslash in version badge URL by @mwaldheim in https://github.com/SemRels/publisher-oci/pull/3\n* ci: add Go 1.27rc1 to test matrix by @mwaldheim in https://github.com/SemRels/publisher-oci/pull/4\n* build(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/SemRels/publisher-oci/pull/1\n* fix(ci): extract semrel release tarball into a dedicated subdir by @mwaldheim in https://github.com/SemRels/publisher-oci/pull/5\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/publisher-oci/pull/2\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/publisher-oci/pull/1\n\n**Full Changelog**: https://github.com/SemRels/publisher-oci/compare/v0.1.0...v0.2.0"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-06-28T15:15:05Z",
