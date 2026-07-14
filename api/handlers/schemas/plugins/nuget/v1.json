@@ -1,20 +1,34 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/nuget/v1.json",
-  "title": "semrel plugin args: nuget",
-  "description": "Updates the version property in a .csproj file.",
+  "title": "updater-nuget plugin configuration",
+  "description": "Schema v1 for the updater-nuget semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path or glob to the .csproj file.",
-      "default": "*.csproj"
+      "default": "*.csproj",
+      "description": "Path or glob for the .csproj file to update."
     },
-    "property": {
+    "SEMREL_VERSION": {
       "type": "string",
-      "description": "XML property element name that stores the version.",
-      "default": "Version"
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

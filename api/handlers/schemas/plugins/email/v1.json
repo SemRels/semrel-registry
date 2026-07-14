@@ -1,44 +1,68 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/email/v1.json",
-  "title": "semrel plugin args: email",
-  "description": "Sends a release notification via SMTP.",
+  "title": "hook-email plugin configuration",
+  "description": "Schema v1 for the hook-email semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "smtp_host": {
+    "SEMREL_PLUGIN_SMTP_HOST": {
       "type": "string",
-      "description": "SMTP server hostname."
+      "description": "SMTP host name used to send the release email."
     },
-    "smtp_port": {
+    "SEMREL_PLUGIN_SMTP_PORT": {
       "type": "string",
-      "description": "SMTP server port.",
-      "default": "587"
+      "default": "587",
+      "description": "SMTP port used to send the release email.",
+      "pattern": "^[0-9]+$"
     },
-    "smtp_user": {
+    "SEMREL_PLUGIN_USERNAME": {
       "type": "string",
-      "description": "SMTP username."
+      "description": "SMTP username for authentication."
     },
-    "smtp_pass": {
+    "SEMREL_PLUGIN_PASSWORD": {
       "type": "string",
-      "description": "SMTP password."
+      "description": "SMTP password for authentication.",
+      "writeOnly": true
     },
-    "from": {
+    "SEMREL_PLUGIN_FROM": {
       "type": "string",
-      "description": "Sender address."
+      "description": "Sender email address.",
+      "format": "email"
     },
-    "to": {
+    "SEMREL_PLUGIN_TO": {
       "type": "string",
-      "description": "Comma-separated recipient addresses."
+      "description": "Recipient email address list. Multiple recipients may be comma-separated.",
+      "examples": [
+        "dev@example.com,release@example.com"
+      ]
     },
-    "subject_template": {
+    "SEMREL_VERSION": {
       "type": "string",
-      "description": "Go template for the subject line (e.g. `Release {{ .TagName }} is live`)."
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "smtp_host",
-    "from",
-    "to"
-  ]
+  "additionalProperties": true
 }

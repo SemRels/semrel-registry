@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/changelog-md/v1.json",
+  "title": "generator-changelog-md plugin configuration",
+  "description": "Schema v1 for the generator-changelog-md semrel plugin. Configure via SEMREL_PLUGIN_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_GROUP_BY_TYPE": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "true",
+      "description": "Group changelog entries under '### Features', '### Bug Fixes' etc. headings. Set to 'false' to emit a flat list."
+    },
+    "SEMREL_PLUGIN_LINK_PRS": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "true",
+      "description": "Auto-link PR numbers (#123) in commit subjects to the pull-request URL on the configured forge."
+    },
+    "SEMREL_PLUGIN_LINK_COMMITS": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "true",
+      "description": "Append the short commit SHA as a hyperlink to each changelog line."
+    },
+    "SEMREL_PLUGIN_NEW_CONTRIBUTORS": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "true",
+      "description": "Append a '### New Contributors' section listing first-time contributors in this release. Requires SEMREL_PLUGIN_CONTRIBUTORS_JSON to be set."
+    },
+    "SEMREL_PLUGIN_MVP": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "false",
+      "description": "Append a '### ðŸ† MVP' section highlighting the contributor with the most impact. Requires SEMREL_PLUGIN_CONTRIBUTORS_JSON to be set."
+    },
+    "SEMREL_PLUGIN_MVP_METRIC": {
+      "type": "string",
+      "enum": ["commits", "prs", "reviews"],
+      "default": "commits",
+      "description": "Metric used to determine the MVP when SEMREL_PLUGIN_MVP=true."
+    },
+    "SEMREL_PLUGIN_SECTIONS_JSON": {
+      "type": "string",
+      "description": "JSON array overriding the built-in feat/fix/perfâ†’section mapping used to group changelog entries, similar to the 'presetConfig.types' option of @semantic-release/release-notes-generator. Each object has a required 'type' (conventional-commit type, e.g. 'feat'), an optional 'section' (custom heading; commits are grouped under the first matching rule's section, in declaration order) and an optional 'hidden' (bool, drops matching commits entirely). Types with no matching rule fall back to 'Other Changes'. BREAKING CHANGE commits and '!' markers always go to 'Breaking Changes'.",
+      "examples": [
+        "[{\"type\":\"feat\",\"section\":\"Features\"},{\"type\":\"fix\",\"section\":\"Bugfixes\"},{\"type\":\"deps\",\"section\":\"Dependencies\"},{\"type\":\"chore\",\"section\":\"Miscellaneous\"},{\"type\":\"docs\",\"hidden\":true},{\"type\":\"refactor\",\"hidden\":true}]"
+      ]
+    },
+    "SEMREL_PLUGIN_CONTRIBUTORS_JSON": {
+      "type": "string",
+      "description": "JSON array of contributor objects for the New Contributors and MVP sections. Each object must have 'login' (string) and may have 'firstRelease' (bool), 'prCount' (int), 'reviewCount' (int), 'commitCount' (int).",
+      "examples": [
+        "[{\"login\": \"octocat\", \"firstRelease\": true, \"commitCount\": 3}]"
+      ]
+    },
+    "SEMREL_PLUGIN_KEEP_RELEASES": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "default": "0",
+      "description": "Number of most-recent release sections to keep expanded in CHANGELOG.md. Older sections are archived. 0 disables changelog compression."
+    },
+    "SEMREL_PLUGIN_CHANGELOG_FILE": {
+      "type": "string",
+      "default": "CHANGELOG.md",
+      "description": "Path to the changelog file that is updated when SEMREL_PLUGIN_KEEP_RELEASES > 0."
+    },
+    "SEMREL_PLUGIN_CHANGELOG_DIR": {
+      "type": "string",
+      "default": "changelogs/",
+      "description": "Directory where archived changelog fragments are written when SEMREL_PLUGIN_ARCHIVE_LINK=file or both."
+    },
+    "SEMREL_PLUGIN_ARCHIVE_LINK": {
+      "type": "string",
+      "enum": ["release_url", "file", "both"],
+      "default": "release_url",
+      "description": "How archived release sections are linked. 'release_url' adds a link to the GitHub/GitLab release; 'file' writes a separate Markdown file; 'both' does both."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "false",
+      "description": "When true, the plugin prints the changelog entry to stdout but does not write or modify CHANGELOG.md."
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/changelog-html/v1.json",
+  "title": "generator-changelog-html plugin configuration",
+  "description": "Schema v1 for the generator-changelog-html semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_CURRENT_VERSION": {
+      "type": "string",
+      "description": "Previously released version before this release."
+    },
+    "SEMREL_BRANCH": {
+      "type": "string",
+      "description": "Release branch name for the current semrel execution."
+    },
+    "SEMREL_COMMITS": {
+      "type": "string",
+      "description": "JSON-encoded array of raw commit message strings since the last release tag. Populated automatically by semrel core.",
+      "examples": [
+        "[\"feat: add feature\", \"fix: patch issue\"]"
+      ]
+    },
+    "SEMREL_PLUGIN_SECTIONS_JSON": {
+      "type": "string",
+      "description": "JSON array overriding the built-in feat/fixâ†’section mapping used to group changelog entries, similar to the 'presetConfig.types' option of @semantic-release/release-notes-generator. Each object has a required 'type' (conventional-commit type, e.g. 'feat'), an optional 'section' (custom heading; commits are grouped under the first matching rule's section, in declaration order) and an optional 'hidden' (bool, drops matching commits entirely). Types with no matching rule fall back to 'Other Changes'. BREAKING CHANGE commits and '!' markers always go to 'Breaking Changes'.",
+      "examples": [
+        "[{\"type\":\"feat\",\"section\":\"Features\"},{\"type\":\"fix\",\"section\":\"Bugfixes\"},{\"type\":\"deps\",\"section\":\"Dependencies\"},{\"type\":\"chore\",\"section\":\"Miscellaneous\"},{\"type\":\"docs\",\"hidden\":true},{\"type\":\"refactor\",\"hidden\":true}]"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

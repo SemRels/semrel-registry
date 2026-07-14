@@ -1,20 +1,42 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/docker/v1.json",
-  "title": "semrel plugin args: docker",
-  "description": "Updates a `ARG VERSION=` line in a Dockerfile.",
+  "title": "updater-docker plugin configuration",
+  "description": "Schema v1 for the updater-docker semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path to the Dockerfile.",
-      "default": "Dockerfile"
+      "default": "Dockerfile",
+      "description": "Path to the Dockerfile to update."
     },
-    "arg_name": {
+    "SEMREL_PLUGIN_IMAGE": {
       "type": "string",
-      "description": "Docker build argument name that stores the version.",
-      "default": "VERSION"
+      "description": "Optional image name filter. Only matching FROM lines are updated."
+    },
+    "SEMREL_PLUGIN_REGISTRY": {
+      "type": "string",
+      "description": "Optional registry prefix used when matching image references."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

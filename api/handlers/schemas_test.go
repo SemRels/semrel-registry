@@ -23,15 +23,14 @@ func TestSchemaHandlerCoreSchema(t *testing.T) {
 }
 
 func TestSchemaHandlerPluginSchema(t *testing.T) {
-	resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/analyzer-conventional/v1.json")
+	resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/conventional/v1.json")
 
 	require.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, "application/schema+json", resp.Header().Get("Content-Type"))
 
 	var payload map[string]any
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &payload))
-	assert.Equal(t, "analyzer-conventional plugin schema", payload["title"])
-	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/analyzer-conventional/v1.json", payload["$id"])
+	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/conventional/v1.json", payload["$id"])
 }
 
 func TestSchemaHandlerMissingPluginSchema(t *testing.T) {
@@ -42,10 +41,10 @@ func TestSchemaHandlerMissingPluginSchema(t *testing.T) {
 }
 
 func TestSchemaHandlerLatestPluginRedirect(t *testing.T) {
-	resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/analyzer-conventional/latest.json")
+	resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/conventional/latest.json")
 
 	require.Equal(t, http.StatusMovedPermanently, resp.Code)
-	assert.Equal(t, "/schemas/plugins/analyzer-conventional/v1.json", resp.Header().Get("Location"))
+	assert.Equal(t, "/schemas/plugins/conventional/v1.json", resp.Header().Get("Location"))
 }
 
 func schemaTestRouter() *gin.Engine {
@@ -70,11 +69,13 @@ func TestSchemaHandlerAllOfficialPlugins(t *testing.T) {
 	// Verify that every official plugin has an embedded schema served correctly.
 	plugins := []string{
 		"github", "gitlab", "gitea", "git", "bitbucket",
-		"github-actions", "gitlab-ci", "gitea-actions", "generic",
+		"github-actions", "gitlab-ci", "gitea-actions", "generic", "circleci", "bitbucket-pipelines",
 		"conventional", "default",
-		"slack", "teams", "email", "jira", "matrix", "gitplugin",
-		"go", "npm", "cargo", "docker", "helm", "gradle", "maven",
-		"python", "terraform", "homebrew", "nuget",
+		"changelog-md", "changelog-html", "release-notes",
+		"slack", "teams", "email", "jira", "matrix", "gitplugin", "discord",
+		"go", "npm", "cargo", "docker", "helm", "gradle", "maven", "composer",
+		"python", "terraform", "homebrew", "nuget", "pubspec",
+		"nfpm", "generic-http", "oci", "crates", "pypi", "publisher-npm",
 	}
 	for _, name := range plugins {
 		t.Run(name, func(t *testing.T) {

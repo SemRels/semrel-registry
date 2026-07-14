@@ -1,23 +1,50 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/default/v1.json",
-  "title": "semrel plugin args: default",
-  "description": "Matches commit messages against configurable regex patterns to determine the SemVer bump level.",
+  "title": "analyzer-default plugin configuration",
+  "description": "Schema v1 for the analyzer-default semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "major_patterns": {
+    "SEMREL_PLUGIN_MAJOR_PATTERNS": {
       "type": "string",
-      "description": "Comma-separated regexes for major bumps.",
-      "default": "BREAKING CHANGE,feat!"
+      "description": "Comma-separated regular expressions that trigger a major version bump.",
+      "examples": [
+        "(?i)BREAKING CHANGE,(?i)^major:"
+      ]
     },
-    "minor_patterns": {
+    "SEMREL_PLUGIN_MINOR_PATTERNS": {
       "type": "string",
-      "description": "Comma-separated regexes for minor bumps."
+      "description": "Comma-separated regular expressions that trigger a minor version bump.",
+      "examples": [
+        "(?i)^feat(?:\\(|:)"
+      ]
     },
-    "patch_patterns": {
+    "SEMREL_PLUGIN_PATCH_PATTERNS": {
       "type": "string",
-      "description": "Comma-separated regexes for patch bumps."
+      "description": "Comma-separated regular expressions that trigger a patch version bump.",
+      "examples": [
+        "(?i)^fix(?:\\(|:),(?i)^perf(?:\\(|:)"
+      ]
+    },
+    "SEMREL_PLUGIN_MAJOR_PATTERN": {
+      "type": "string",
+      "description": "Backward-compatible singular major bump regexp. Prefer SEMREL_PLUGIN_MAJOR_PATTERNS."
+    },
+    "SEMREL_PLUGIN_MINOR_PATTERN": {
+      "type": "string",
+      "description": "Backward-compatible singular minor bump regexp. Prefer SEMREL_PLUGIN_MINOR_PATTERNS."
+    },
+    "SEMREL_PLUGIN_PATCH_PATTERN": {
+      "type": "string",
+      "description": "Backward-compatible singular patch bump regexp. Prefer SEMREL_PLUGIN_PATCH_PATTERNS."
+    },
+    "SEMREL_COMMITS": {
+      "type": "string",
+      "description": "JSON-encoded array of raw commit message strings since the last release tag. Populated automatically by semrel core.",
+      "examples": [
+        "[\"feat: add feature\", \"fix: patch issue\"]"
+      ]
     }
-  }
+  },
+  "additionalProperties": true
 }

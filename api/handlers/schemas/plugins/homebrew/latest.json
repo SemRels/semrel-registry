@@ -1,25 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/homebrew/latest.json",
-  "title": "semrel plugin args: homebrew",
-  "description": "Updates a Homebrew formula's `url` and `sha256` fields.",
+  "$id": "https://registry.semrel.io/schemas/plugins/homebrew/v1.json",
+  "title": "updater-homebrew plugin configuration",
+  "description": "Schema v1 for the updater-homebrew semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "formula_file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path to the Homebrew formula file."
+      "description": "Path to the Homebrew formula file to update.",
+      "examples": [
+        "Formula/my-tool.rb"
+      ]
     },
-    "url_template": {
+    "SEMREL_VERSION": {
       "type": "string",
-      "description": "Go template for the download URL (e.g. `https://\u2026/v{{ .Version }}.tar.gz`)."
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
     },
-    "sha256": {
+    "SEMREL_NEXT_VERSION": {
       "type": "string",
-      "description": "SHA-256 checksum of the release tarball."
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "formula_file"
-  ]
+  "additionalProperties": true
 }

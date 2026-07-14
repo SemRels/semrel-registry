@@ -1,20 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/go/v1.json",
-  "title": "semrel plugin args: go",
-  "description": "Updates a version variable in a Go source file.",
+  "title": "updater-go plugin configuration",
+  "description": "Schema v1 for the updater-go semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path to the Go source file containing the version variable.",
-      "default": "version.go"
+      "default": "internal/version/version.go",
+      "description": "Path to the Go source file containing the version variable."
     },
-    "variable": {
+    "SEMREL_PLUGIN_VAR_NAME": {
       "type": "string",
-      "description": "Go variable name to update.",
-      "default": "Version"
+      "default": "Version",
+      "description": "Go variable name to update."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

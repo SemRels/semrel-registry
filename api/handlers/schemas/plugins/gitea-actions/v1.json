@@ -1,9 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/gitea-actions/v1.json",
-  "title": "semrel plugin args: gitea-actions",
-  "description": "Passes only when running inside Gitea Actions (GITEA_ACTIONS=true). No args required.",
+  "title": "condition-gitea-actions plugin configuration",
+  "description": "Schema v1 for the condition-gitea-actions semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
-  "properties": {}
+  "properties": {
+    "SEMREL_PLUGIN_BRANCH": {
+      "type": "string",
+      "description": "Optional branch name override. When set, require the Gitea Actions ref branch to match this value."
+    },
+    "SEMREL_BRANCH": {
+      "type": "string",
+      "description": "Release branch name for the current semrel execution."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    }
+  },
+  "additionalProperties": true
 }

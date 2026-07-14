@@ -1,25 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/conventional/v1.json",
-  "title": "semrel plugin args: conventional",
-  "description": "Parses Conventional Commits and determines the SemVer bump level.",
+  "title": "analyzer-conventional plugin configuration",
+  "description": "Schema v1 for the analyzer-conventional semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "breaking_change_label": {
+    "SEMREL_COMMITS": {
       "type": "string",
-      "description": "Footer token that signals a breaking change.",
-      "default": "BREAKING CHANGE"
-    },
-    "minor_types": {
-      "type": "string",
-      "description": "Comma-separated commit types that trigger a minor bump.",
-      "default": "feat"
-    },
-    "patch_types": {
-      "type": "string",
-      "description": "Comma-separated commit types that trigger a patch bump.",
-      "default": "fix,perf,refactor"
+      "description": "JSON-encoded array of raw commit message strings since the last release tag. Populated automatically by semrel core.",
+      "examples": [
+        "[\"feat: add dark mode\", \"fix(ui): correct button alignment\"]"
+      ]
     }
-  }
+  },
+  "additionalProperties": true,
+  "notes": [
+    "This plugin has no user-configurable SEMREL_PLUGIN_* env vars in schema v1.",
+    "The commit type-to-bump mapping is hard-coded to the Conventional Commits convention:",
+    "  - feat â†’ minor, feat! / BREAKING CHANGE â†’ major",
+    "  - fix, perf, refactor, revert, chore â†’ patch",
+    "  - docs, style, test, ci â†’ no-release"
+  ]
 }

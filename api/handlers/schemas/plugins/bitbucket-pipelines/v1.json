@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/bitbucket-pipelines/v1.json",
+  "title": "condition-bitbucket-pipelines plugin configuration",
+  "description": "Schema v1 for the condition-bitbucket-pipelines semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_BRANCH": {
+      "type": "string",
+      "description": "Optional branch name override. When set, require the Bitbucket Pipelines branch to match this value."
+    }
+  },
+  "additionalProperties": true
+}

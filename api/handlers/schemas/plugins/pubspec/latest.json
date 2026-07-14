@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/pubspec/v1.json",
+  "title": "updater-pubspec plugin configuration",
+  "description": "Schema v1 for the updater-pubspec semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_PUBSPEC_PATH": {
+      "type": "string",
+      "default": "./pubspec.yaml",
+      "description": "Path to the pubspec.yaml file to update."
+    },
+    "SEMREL_PLUGIN_PUBSPEC_BUILD_STRATEGY": {
+      "type": "string",
+      "enum": [
+        "none",
+        "increment",
+        "release-count"
+      ],
+      "default": "none",
+      "description": "How to compute the pubspec build number suffix (\"version+build\"). \"none\" leaves the build number untouched, \"increment\" bumps the existing build number by one, \"release-count\" sets it from SEMREL_RELEASE_COUNT (or SEMREL_BUILD_NUMBER as a fallback)."
+    },
+    "SEMREL_PLUGIN_PUBSPEC_BUILD_NUMBER": {
+      "type": "string",
+      "description": "Explicit build number to use, overriding SEMREL_PLUGIN_PUBSPEC_BUILD_STRATEGY entirely."
+    },
+    "SEMREL_RELEASE_COUNT": {
+      "type": "string",
+      "description": "Total number of releases so far, supplied by semrel core. Used as the build number when SEMREL_PLUGIN_PUBSPEC_BUILD_STRATEGY is \"release-count\"."
+    },
+    "SEMREL_BUILD_NUMBER": {
+      "type": "string",
+      "description": "Fallback build number supplied by semrel core, used when SEMREL_RELEASE_COUNT is unavailable."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

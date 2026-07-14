@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/generic-http/v1.json",
+  "title": "publisher-generic-http plugin configuration",
+  "description": "Schema v1 for the publisher-generic-http semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_URL": {
+      "type": "string",
+      "description": "URL template to upload artifacts to. Supports {version} and {artifact} placeholders. Required.",
+      "format": "uri-template"
+    },
+    "SEMREL_PLUGIN_METHOD": {
+      "type": "string",
+      "default": "PUT",
+      "description": "HTTP method used to upload each artifact."
+    },
+    "SEMREL_PLUGIN_ARTIFACTS": {
+      "type": "string",
+      "description": "Comma-separated list of artifact file paths to upload."
+    },
+    "SEMREL_PLUGIN_ARTIFACTS_JSON": {
+      "type": "string",
+      "description": "JSON array of artifact file paths to upload. Alternative to SEMREL_PLUGIN_ARTIFACTS."
+    },
+    "SEMREL_PLUGIN_ARTIFACT": {
+      "type": "string",
+      "description": "Single artifact file path to upload. Alternative to SEMREL_PLUGIN_ARTIFACTS / SEMREL_PLUGIN_ARTIFACTS_JSON."
+    },
+    "SEMREL_PLUGIN_HEADERS_JSON": {
+      "type": "string",
+      "description": "JSON object of extra HTTP headers to send with each upload request."
+    },
+    "SEMREL_PLUGIN_TOKEN": {
+      "type": "string",
+      "description": "Optional bearer/API token used for authenticating the upload request.",
+      "writeOnly": true
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "required": [
+    "SEMREL_PLUGIN_URL"
+  ],
+  "additionalProperties": true
+}

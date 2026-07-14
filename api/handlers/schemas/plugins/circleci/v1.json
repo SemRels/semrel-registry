@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/circleci/v1.json",
+  "title": "condition-circleci plugin configuration",
+  "description": "Schema v1 for the condition-circleci semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_BRANCH": {
+      "type": "string",
+      "description": "Optional branch name override. When set, require the CircleCI branch to match this value."
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/composer/v1.json",
+  "title": "updater-composer plugin configuration",
+  "description": "Schema v1 for the updater-composer semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_FILE": {
+      "type": "string",
+      "default": "composer.json",
+      "description": "Path to the composer.json file to update."
+    },
+    "SEMREL_PLUGIN_COMPOSER_FILE": {
+      "type": "string",
+      "description": "Alias for SEMREL_PLUGIN_FILE when a Composer-specific override variable is preferred."
+    },
+    "SEMREL_PLUGIN_UPDATE_VERSION_FIELD": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, update or add the version field in composer.json."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

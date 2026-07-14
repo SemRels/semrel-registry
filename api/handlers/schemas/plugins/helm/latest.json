@@ -1,29 +1,64 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/helm/latest.json",
-  "title": "semrel plugin args: helm",
-  "description": "Updates `version` (and optionally `appVersion`) in a Helm Chart.yaml.",
+  "$id": "https://registry.semrel.io/schemas/plugins/helm/v1.json",
+  "title": "updater-helm plugin configuration",
+  "description": "Schema v1 for the updater-helm semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path to Chart.yaml.",
-      "default": "Chart.yaml"
+      "default": "Chart.yaml",
+      "description": "Path to the Helm Chart.yaml file to update."
     },
-    "update_app_version": {
+    "SEMREL_PLUGIN_APP_VERSION": {
       "type": "string",
-      "description": "Also update the `appVersion` field.",
-      "default": "false",
+      "description": "Optional explicit appVersion value. If unset, the release version is used."
+    },
+    "SEMREL_PLUGIN_UPDATE_APP_VERSION": {
+      "type": "string",
       "enum": [
         "true",
-        "false"
-      ]
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, also update the appVersion field."
     },
-    "app_version_prefix": {
+    "SEMREL_PLUGIN_APP_VERSION_ONLY": {
       "type": "string",
-      "description": "Prefix applied to `appVersion` (e.g. `v`).",
-      "default": ""
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, update only appVersion and leave chart version unchanged."
+    },
+    "SEMREL_PLUGIN_APP_VERSION_PREFIX": {
+      "type": "string",
+      "description": "Optional prefix applied to appVersion, for example \"v\"."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

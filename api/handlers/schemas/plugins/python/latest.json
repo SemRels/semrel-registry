@@ -1,25 +1,34 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/python/latest.json",
-  "title": "semrel plugin args: python",
-  "description": "Updates the version in a Python packaging file (pyproject.toml, setup.cfg, setup.py).",
+  "$id": "https://registry.semrel.io/schemas/plugins/python/v1.json",
+  "title": "updater-python plugin configuration",
+  "description": "Schema v1 for the updater-python semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "file": {
+    "SEMREL_PLUGIN_FILE": {
       "type": "string",
-      "description": "Path to the packaging file.",
-      "default": "pyproject.toml"
+      "default": "pyproject.toml",
+      "description": "Path to the pyproject.toml file to update."
     },
-    "backend": {
+    "SEMREL_VERSION": {
       "type": "string",
-      "description": "Backend format: `pyproject`, `setup_cfg`, or `setup_py`.",
-      "default": "pyproject",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
       "enum": [
-        "pyproject",
-        "setup_cfg",
-        "setup_py"
-      ]
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

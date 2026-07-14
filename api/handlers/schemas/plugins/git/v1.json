@@ -1,28 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/git/v1.json",
-  "title": "semrel plugin args: git",
-  "description": "Creates an annotated git tag and pushes it to the remote.",
+  "title": "provider-git plugin configuration",
+  "description": "Schema v1 for the provider-git semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "remote": {
+    "SEMREL_TAG_NAME": {
       "type": "string",
-      "description": "Git remote name to push to.",
-      "default": "origin"
+      "description": "Release tag name for the current semrel execution."
     },
-    "signing_key": {
+    "SEMREL_BRANCH": {
       "type": "string",
-      "description": "Path to a GPG key for signing the tag."
+      "description": "Release branch name for the current semrel execution."
     },
-    "push_branch": {
+    "SEMREL_PLUGIN_REMOTE": {
       "type": "string",
-      "description": "Push the current branch in addition to the tag.",
-      "default": "false",
+      "default": "origin",
+      "description": "Git remote to push to."
+    },
+    "SEMREL_REMOTE": {
+      "type": "string",
+      "default": "origin",
+      "description": "Fallback git remote name used when SEMREL_PLUGIN_REMOTE is unset."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
       "enum": [
         "true",
-        "false"
-      ]
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

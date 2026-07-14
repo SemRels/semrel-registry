@@ -1,37 +1,70 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/matrix/v1.json",
-  "title": "semrel plugin args: matrix",
-  "description": "Sends a release notification to a Matrix room.",
+  "title": "hook-matrix plugin configuration",
+  "description": "Schema v1 for the hook-matrix semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "homeserver_url": {
+    "SEMREL_PLUGIN_HOMESERVER_URL": {
       "type": "string",
-      "description": "Matrix homeserver base URL."
+      "description": "Matrix homeserver base URL.",
+      "format": "uri"
     },
-    "token": {
+    "SEMREL_PLUGIN_ROOM_ID": {
       "type": "string",
-      "description": "Matrix access token."
+      "description": "Matrix room ID to post the release notification to."
     },
-    "room_id": {
+    "SEMREL_PLUGIN_TOKEN": {
       "type": "string",
-      "description": "Matrix room ID (e.g. `!abcdef:matrix.org`)."
+      "description": "Matrix access token.",
+      "writeOnly": true
     },
-    "max_retries": {
+    "SEMREL_PLUGIN_REPOSITORY": {
       "type": "string",
-      "description": "Retry count on transient failures.",
-      "default": "3"
+      "description": "Repository URL included in generated messages or release notes."
     },
-    "retry_delay": {
+    "SEMREL_PLUGIN_MAX_RETRIES": {
       "type": "string",
-      "description": "Delay between retries (Go duration string).",
-      "default": "2s"
+      "default": "3",
+      "description": "Maximum number of retry attempts for failed sends.",
+      "pattern": "^[0-9]+$"
+    },
+    "SEMREL_PLUGIN_RETRY_DELAY": {
+      "type": "string",
+      "default": "5s",
+      "description": "Retry delay as a Go duration string.",
+      "examples": [
+        "5s",
+        "1m"
+      ]
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "homeserver_url",
-    "token",
-    "room_id"
-  ]
+  "additionalProperties": true
 }

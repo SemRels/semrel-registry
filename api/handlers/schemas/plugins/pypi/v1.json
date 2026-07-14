@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/pypi/v1.json",
+  "title": "publisher-pypi plugin configuration",
+  "description": "Schema v1 for the publisher-pypi semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_WORKDIR": {
+      "type": "string",
+      "description": "Working directory containing the Python package to build and publish. Defaults to the current directory."
+    },
+    "SEMREL_PLUGIN_PYTHON_BIN": {
+      "type": "string",
+      "description": "Path to the Python interpreter used to build the package. Defaults to \"python3\" on PATH."
+    },
+    "SEMREL_PLUGIN_TWINE_BIN": {
+      "type": "string",
+      "description": "Path to the twine binary used to upload the package. Defaults to \"twine\" on PATH."
+    },
+    "SEMREL_PLUGIN_PYPI_TOKEN": {
+      "type": "string",
+      "description": "PyPI API token used to authenticate the upload.",
+      "writeOnly": true
+    },
+    "SEMREL_PLUGIN_PYPI_REPOSITORY_URL": {
+      "type": "string",
+      "description": "Alternate package index URL (e.g. for TestPyPI or a private index). Defaults to the public PyPI index.",
+      "format": "uri"
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

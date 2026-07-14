@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/discord/v1.json",
+  "title": "hook-discord plugin configuration",
+  "description": "Schema v1 for the hook-discord semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_DISCORD_WEBHOOK_URL": {
+      "type": "string",
+      "description": "Discord webhook URL.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_REPOSITORY": {
+      "type": "string",
+      "description": "Repository name or URL included in generated messages."
+    },
+    "SEMREL_PLUGIN_RELEASE_URL": {
+      "type": "string",
+      "description": "Explicit release URL used for the embed title link.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_FIRST_TIME_CONTRIBUTORS": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "false",
+      "description": "Add a New Contributors field when contributor metadata is available."
+    },
+    "SEMREL_PLUGIN_RELEASE_MVP": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "false",
+      "description": "Add a Release MVP field using the contributor with the most commits."
+    },
+    "SEMREL_PLUGIN_MAX_RETRIES": {
+      "type": "string",
+      "default": "3",
+      "description": "Maximum number of retry attempts for transient network failures or HTTP 5xx responses.",
+      "pattern": "^[0-9]+$"
+    },
+    "SEMREL_PLUGIN_RETRY_DELAY": {
+      "type": "string",
+      "default": "2s",
+      "description": "Retry delay as a Go duration string.",
+      "examples": ["2s", "5s", "1m"]
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_CONTRIBUTORS": {
+      "type": "string",
+      "description": "Contributor metadata JSON supplied by semrel core."
+    },
+    "SEMREL_REPOSITORY_URL": {
+      "type": "string",
+      "description": "Repository base URL used to derive the release link when SEMREL_PLUGIN_RELEASE_URL is unset.",
+      "format": "uri"
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": ["true", "false", "1", "0"],
+      "default": "false",
+      "description": "When true, print the JSON payload to stdout instead of calling Discord."
+    }
+  },
+  "additionalProperties": true
+}

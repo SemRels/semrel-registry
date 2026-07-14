@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/crates/v1.json",
+  "title": "publisher-crates plugin configuration",
+  "description": "Schema v1 for the publisher-crates semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_CARGO_REGISTRY_TOKEN": {
+      "type": "string",
+      "description": "crates.io (or alternate registry) API token used to publish. Required unless SEMREL_DRY_RUN is true.",
+      "writeOnly": true
+    },
+    "SEMREL_PLUGIN_CARGO_MANIFEST_PATH": {
+      "type": "string",
+      "description": "Path to the Cargo.toml manifest to publish. Defaults to the workspace root manifest."
+    },
+    "SEMREL_PLUGIN_CARGO_WORKSPACE_MEMBER": {
+      "type": "string",
+      "description": "Comma-separated list of workspace member directories to publish, for Cargo workspaces with multiple crates."
+    },
+    "SEMREL_PLUGIN_CARGO_PACKAGE": {
+      "type": "string",
+      "description": "Comma-separated list of package names to publish, for Cargo workspaces with multiple crates."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

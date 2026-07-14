@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/nfpm/v1.json",
+  "title": "packager-nfpm plugin configuration",
+  "description": "Schema v1 for the packager-nfpm semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_CONFIG": {
+      "type": "string",
+      "default": "nfpm.yaml",
+      "description": "Path to the nfpm configuration file."
+    },
+    "SEMREL_PLUGIN_TARGET": {
+      "type": "string",
+      "default": "dist",
+      "description": "Output directory for built packages."
+    },
+    "SEMREL_PLUGIN_PACKAGERS": {
+      "type": "string",
+      "description": "Comma-separated list of nfpm packagers to build (e.g. \"deb,rpm,apk\"). Defaults to nfpm's own default set when omitted."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}
