@@ -1,30 +1,52 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/gitlab/latest.json",
-  "title": "semrel plugin args: gitlab",
-  "description": "Publishes a GitLab Release on the configured instance.",
+  "$id": "https://registry.semrel.io/schemas/plugins/gitlab/v1.json",
+  "title": "provider-gitlab plugin configuration",
+  "description": "Schema v1 for the provider-gitlab semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "token": {
+    "SEMREL_PLUGIN_TOKEN": {
       "type": "string",
-      "description": "GitLab API token (Personal Access Token with `api` scope)."
+      "description": "GitLab API token. In practice this is often sourced from GITLAB_TOKEN.",
+      "writeOnly": true
     },
-    "base_url": {
+    "SEMREL_PLUGIN_PROJECT_ID": {
       "type": "string",
-      "description": "Base URL of the GitLab instance.",
-      "default": "https://gitlab.com"
+      "description": "GitLab project ID. If unset, the plugin may derive it from CI metadata."
     },
-    "project_id": {
+    "SEMREL_PLUGIN_BASE_URL": {
       "type": "string",
-      "description": "GitLab project ID. Derived from the git remote when absent."
+      "default": "https://gitlab.com",
+      "description": "GitLab base URL.",
+      "format": "uri"
     },
-    "milestone": {
+    "SEMREL_PLUGIN_MILESTONE": {
       "type": "string",
-      "description": "Milestone template to associate with the release (e.g. `v{{ .Version }}`)."
+      "description": "Optional milestone name to associate with the release."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_BRANCH": {
+      "type": "string",
+      "description": "Release branch name for the current semrel execution."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "token"
-  ]
+  "additionalProperties": true
 }

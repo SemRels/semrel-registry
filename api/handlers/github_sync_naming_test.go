@@ -10,6 +10,9 @@ func TestPluginNameFromRepo(t *testing.T) {
 	}{
 		{name: "provider repo", repoName: "provider-bitbucket", want: "bitbucket"},
 		{name: "analyzer repo", repoName: "analyzer-conventional", want: "conventional"},
+		{name: "packager repo", repoName: "packager-nfpm", want: "nfpm"},
+		{name: "publisher repo", repoName: "publisher-oci", want: "oci"},
+		{name: "publisher-npm disambiguated from updater-npm", repoName: "publisher-npm", want: "publisher-npm"},
 		{name: "unknown prefix", repoName: "tool-foo", want: "tool-foo"},
 		{name: "already simplified", repoName: "bitbucket", want: "bitbucket"},
 	}

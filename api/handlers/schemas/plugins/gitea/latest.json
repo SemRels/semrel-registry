@@ -1,39 +1,101 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/gitea/latest.json",
-  "title": "semrel plugin args: gitea",
-  "description": "Publishes a Gitea Release on the configured instance.",
+  "$id": "https://registry.semrel.io/schemas/plugins/gitea/v1.json",
+  "title": "provider-gitea plugin configuration",
+  "description": "Schema v1 for the provider-gitea semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "base_url": {
+    "SEMREL_PLUGIN_TOKEN": {
       "type": "string",
-      "description": "Base URL of the Gitea instance."
+      "description": "Gitea API token.",
+      "writeOnly": true
     },
-    "token": {
+    "SEMREL_PLUGIN_OWNER": {
       "type": "string",
-      "description": "Gitea API token."
+      "description": "Gitea repository owner or organization."
     },
-    "owner": {
+    "SEMREL_PLUGIN_REPO": {
       "type": "string",
-      "description": "Repository owner. Derived from the git remote when absent."
+      "description": "Gitea repository name."
     },
-    "repo": {
+    "SEMREL_PLUGIN_BASE_URL": {
       "type": "string",
-      "description": "Repository slug. Derived from the git remote when absent."
+      "default": "https://gitea.com",
+      "description": "Gitea base URL.",
+      "format": "uri"
     },
-    "draft": {
+    "SEMREL_PLUGIN_DRAFT": {
       "type": "string",
-      "description": "Create the release as a draft.",
-      "default": "false",
       "enum": [
         "true",
-        "false"
-      ]
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Create the release as a draft."
+    },
+    "SEMREL_PLUGIN_PRERELEASE": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Mark the release as a prerelease."
+    },
+    "SEMREL_PLUGIN_NAME": {
+      "type": "string",
+      "description": "Optional release name override."
+    },
+    "SEMREL_PLUGIN_BODY": {
+      "type": "string",
+      "description": "Optional release body override. Falls back to SEMREL_CHANGELOG."
+    },
+    "SEMREL_PLUGIN_TAG_NAME": {
+      "type": "string",
+      "description": "Optional tag name override."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    },
+    "SEMREL_IS_PRERELEASE": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Core-provided prerelease flag used when SEMREL_PLUGIN_PRERELEASE is unset."
     }
   },
-  "required": [
-    "base_url",
-    "token"
-  ]
+  "additionalProperties": true
 }

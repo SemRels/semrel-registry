@@ -1,22 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/generic/v1.json",
-  "title": "semrel plugin args: generic",
-  "description": "Runs one or more shell commands as a custom release gate.",
+  "title": "condition-generic plugin configuration",
+  "description": "Schema v1 for the condition-generic semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "command": {
+    "SEMREL_PLUGIN_COMMAND": {
       "type": "string",
-      "description": "Newline-separated shell commands. All must exit 0 for the condition to pass."
+      "description": "Optional newline-separated shell commands to run. All commands must succeed for the condition to pass.",
+      "examples": [
+        "test -f CHANGELOG.md\ngit diff --quiet"
+      ]
     },
-    "env_var": {
+    "SEMREL_PLUGIN_ENV_VAR": {
       "type": "string",
-      "description": "(Legacy) Environment variable name to compare."
+      "description": "Optional environment variable name to check."
     },
-    "env_value": {
+    "SEMREL_PLUGIN_ENV_VALUE": {
       "type": "string",
-      "description": "(Legacy) Expected value for env_var."
+      "description": "Expected value for SEMREL_PLUGIN_ENV_VAR. Leave empty to require only presence."
     }
-  }
+  },
+  "additionalProperties": true
 }

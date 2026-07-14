@@ -353,8 +353,8 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 	}
 
 	// Valid plugin name pattern: <category>-<name>
-	// Categories: analyzer, condition, generator, hook, provider, updater
-	validCategory := regexp.MustCompile(`^(analyzer|condition|generator|hook|provider|updater)-(.+)$`)
+	// Categories: analyzer, condition, generator, hook, packager, provider, publisher, updater
+	validCategory := regexp.MustCompile(`^(analyzer|condition|generator|hook|packager|provider|publisher|updater)-(.+)$`)
 
 	// The GITHUB_ORG_NAMESPACE env var maps a GitHub org to a plugin namespace,
 	// e.g. org="SemRels" → namespace="@semrel". Plugins from this org are stored
@@ -448,7 +448,12 @@ func pluginNameFromRepo(repoName string) string {
 		return strings.TrimSpace(repoName)
 	}
 	category := parts[0]
-	if category == "analyzer" || category == "condition" || category == "generator" || category == "hook" || category == "provider" || category == "updater" {
+	if category == "analyzer" || category == "condition" || category == "generator" || category == "hook" || category == "packager" || category == "provider" || category == "publisher" || category == "updater" {
+		// publisher-npm would otherwise collide with the existing updater-npm
+		// plugin name ("npm"); keep the full repo name to disambiguate.
+		if repoName == "publisher-npm" {
+			return repoName
+		}
 		return parts[1]
 	}
 	return strings.TrimSpace(repoName)

@@ -1,44 +1,96 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/github/v1.json",
-  "title": "semrel plugin args: github",
-  "description": "Publishes a GitHub Release and optionally attaches binary assets.",
+  "title": "provider-github plugin configuration",
+  "description": "Schema v1 for the provider-github semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "token": {
+    "SEMREL_PLUGIN_TOKEN": {
       "type": "string",
-      "description": "GitHub token with `repo` scope (or `SEMREL_PLUGIN_TOKEN` env var)."
+      "description": "GitHub token used to create the release. In practice this is often sourced from GITHUB_TOKEN.",
+      "writeOnly": true
     },
-    "owner": {
+    "SEMREL_PLUGIN_OWNER": {
       "type": "string",
-      "description": "Repository owner or organisation. Derived from the git remote when absent."
+      "description": "GitHub repository owner or organization."
     },
-    "repo": {
+    "SEMREL_PLUGIN_REPO": {
       "type": "string",
-      "description": "Repository slug. Derived from the git remote when absent."
+      "description": "GitHub repository name."
     },
-    "draft": {
+    "SEMREL_PLUGIN_BASE_URL": {
       "type": "string",
-      "description": "Create the release as a draft.",
-      "default": "false",
+      "default": "https://github.com",
+      "description": "GitHub web base URL.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_API_URL": {
+      "type": "string",
+      "default": "https://api.github.com",
+      "description": "GitHub API base URL.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_DRAFT": {
+      "type": "string",
       "enum": [
         "true",
-        "false"
-      ]
-    },
-    "prerelease": {
-      "type": "string",
-      "description": "Mark the release as a pre-release.",
+        "false",
+        "1",
+        "0"
+      ],
       "default": "false",
+      "description": "Create the release as a draft."
+    },
+    "SEMREL_PLUGIN_PRERELEASE": {
+      "type": "string",
       "enum": [
         "true",
-        "false"
-      ]
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Mark the release as a prerelease."
     },
-    "assets": {
+    "SEMREL_PLUGIN_NAME": {
       "type": "string",
-      "description": "Comma-separated glob patterns for binary assets to upload (e.g. `dist/*.tar.gz`)."
+      "description": "Optional release name override."
+    },
+    "SEMREL_PLUGIN_TAG_NAME": {
+      "type": "string",
+      "description": "Optional tag name override."
+    },
+    "SEMREL_PLUGIN_ASSETS": {
+      "type": "string",
+      "description": "Optional comma-separated file globs for release assets to upload."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
-  }
+  },
+  "additionalProperties": true
 }

@@ -1,26 +1,88 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/gitplugin/v1.json",
-  "title": "semrel plugin args: gitplugin",
-  "description": "Pushes the release tag or a changelog commit to a secondary git repository.",
+  "title": "hook-gitplugin plugin configuration",
+  "description": "Schema v1 for the hook-gitplugin semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "repo": {
+    "SEMREL_PLUGIN_FILES": {
       "type": "string",
-      "description": "Target git repository URL."
+      "description": "Comma-, semicolon-, or newline-separated file paths to include in the release commit."
     },
-    "branch": {
+    "SEMREL_PLUGIN_COMMIT_MESSAGE": {
       "type": "string",
-      "description": "Branch to update.",
-      "default": "main"
+      "description": "Optional commit message override for the release commit."
     },
-    "token": {
+    "SEMREL_PLUGIN_BRANCH": {
       "type": "string",
-      "description": "Authentication token for the target repository."
+      "description": "Optional branch override. Falls back to SEMREL_BRANCH."
+    },
+    "SEMREL_PLUGIN_REMOTE": {
+      "type": "string",
+      "default": "origin",
+      "description": "Git remote to push to."
+    },
+    "SEMREL_PLUGIN_TAG_NAME": {
+      "type": "string",
+      "description": "Optional tag name override. Falls back to SEMREL_TAG_NAME / SEMREL_VERSION / SEMREL_NEXT_VERSION."
+    },
+    "SEMREL_PLUGIN_TAG_MESSAGE": {
+      "type": "string",
+      "description": "Optional annotated tag message."
+    },
+    "SEMREL_PLUGIN_SIGN_TAG": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, create a signed tag."
+    },
+    "SEMREL_PLUGIN_SIGNED_OFF_BY": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, add a Signed-off-by line to the release commit."
+    },
+    "SEMREL_BRANCH": {
+      "type": "string",
+      "description": "Release branch name for the current semrel execution."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_TAG_PREFIX": {
+      "type": "string",
+      "description": "Tag prefix used by semrel core, for example \"v\"."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "repo"
-  ]
+  "additionalProperties": true
 }

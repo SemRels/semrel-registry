@@ -34,7 +34,7 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 
 - `api/` - Go web service skeleton for the upcoming dynamic registry backend
 - `admin/` - Nginx-served SPA (admin UI) that proxies `/schemas/` and `/api/` to the API container
-- `schemas/` - JSON schemas for registry payloads
+- `api/handlers/schemas/` - JSON Schema documents (core config + one folder per plugin), embedded into the API binary via `go:embed` and served at `/schemas/`. This is the single source of truth — there is no separate top-level `schemas/` copy to keep in sync.
 - `docs/` - contributor, API, and publishing documentation
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages

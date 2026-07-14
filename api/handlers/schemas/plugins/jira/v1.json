@@ -1,32 +1,61 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/jira/v1.json",
-  "title": "semrel plugin args: jira",
-  "description": "Creates a Jira release version and marks issues as fixed.",
+  "title": "hook-jira plugin configuration",
+  "description": "Schema v1 for the hook-jira semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "base_url": {
+    "SEMREL_PLUGIN_BASE_URL": {
       "type": "string",
-      "description": "Base URL of the Jira instance."
+      "description": "Base URL of the Jira instance.",
+      "format": "uri"
     },
-    "token": {
+    "SEMREL_PLUGIN_EMAIL": {
       "type": "string",
-      "description": "Jira API token."
+      "description": "Jira account email used for API authentication.",
+      "format": "email"
     },
-    "project": {
+    "SEMREL_PLUGIN_API_TOKEN": {
       "type": "string",
-      "description": "Jira project key (e.g. `REL`)."
+      "description": "Jira API token.",
+      "writeOnly": true
     },
-    "fix_version_template": {
+    "SEMREL_PLUGIN_PROJECT_KEY": {
       "type": "string",
-      "description": "Template for the fix version name.",
-      "default": "{{ .Version }}"
+      "description": "Jira project key used when creating the release version."
+    },
+    "SEMREL_PLUGIN_TRANSITION_NAME": {
+      "type": "string",
+      "default": "Done",
+      "description": "Optional workflow transition name applied to referenced issues."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "base_url",
-    "token",
-    "project"
-  ]
+  "additionalProperties": true
 }

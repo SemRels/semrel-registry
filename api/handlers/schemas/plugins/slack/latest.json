@@ -1,41 +1,73 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/slack/latest.json",
-  "title": "semrel plugin args: slack",
-  "description": "Posts a release announcement to a Slack channel via Incoming Webhook.",
+  "$id": "https://registry.semrel.io/schemas/plugins/slack/v1.json",
+  "title": "hook-slack plugin configuration",
+  "description": "Schema v1 for the hook-slack semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "webhook_url": {
+    "SEMREL_PLUGIN_WEBHOOK_URL": {
       "type": "string",
-      "description": "Slack Incoming Webhook URL."
+      "description": "Slack incoming webhook URL.",
+      "format": "uri"
     },
-    "channel": {
+    "SEMREL_PLUGIN_CHANNEL": {
       "type": "string",
-      "description": "Target channel (e.g. `#releases`)."
+      "description": "Optional Slack channel override."
     },
-    "username": {
+    "SEMREL_PLUGIN_USERNAME": {
       "type": "string",
-      "description": "Bot display name.",
-      "default": "semrel"
+      "description": "Optional bot display name override."
     },
-    "icon_emoji": {
+    "SEMREL_PLUGIN_ICON_EMOJI": {
       "type": "string",
-      "description": "Emoji icon for the bot message.",
-      "default": ":rocket:"
+      "description": "Optional emoji icon, for example :rocket:."
     },
-    "max_retries": {
+    "SEMREL_PLUGIN_REPOSITORY": {
       "type": "string",
-      "description": "Maximum retry attempts on transient failures.",
-      "default": "3"
+      "description": "Repository URL included in generated messages or release notes."
     },
-    "retry_delay": {
+    "SEMREL_PLUGIN_MAX_RETRIES": {
       "type": "string",
-      "description": "Delay between retries (Go duration string).",
-      "default": "2s"
+      "default": "3",
+      "description": "Maximum number of retry attempts for failed sends.",
+      "pattern": "^[0-9]+$"
+    },
+    "SEMREL_PLUGIN_RETRY_DELAY": {
+      "type": "string",
+      "default": "5s",
+      "description": "Retry delay as a Go duration string.",
+      "examples": [
+        "5s",
+        "1m"
+      ]
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
     }
   },
-  "required": [
-    "webhook_url"
-  ]
+  "additionalProperties": true
 }

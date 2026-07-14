@@ -1,9 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://registry.semrel.io/schemas/plugins/github-actions/v1.json",
-  "title": "semrel plugin args: github-actions",
-  "description": "Passes only when running inside GitHub Actions (GITHUB_ACTIONS=true). No args required.",
+  "title": "condition-github-actions plugin configuration",
+  "description": "Schema v1 for the condition-github-actions semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
-  "additionalProperties": false,
-  "properties": {}
+  "properties": {
+    "SEMREL_PLUGIN_BRANCH": {
+      "type": "string",
+      "description": "Optional branch name override. When set, require the GitHub Actions ref branch to match this value."
+    }
+  },
+  "additionalProperties": true
 }
