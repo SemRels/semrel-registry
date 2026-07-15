@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-07T06:39:18.216Z",
+  "generatedAt": "2026-07-15T05:26:23.762Z",
   "plugins": [
     {
       "name": "bitbucket",
@@ -952,6 +952,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.7.0",
+          "releaseDate": "2026-07-14T07:26:49Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.7.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d87f37c4c8a90ecec6151bb0a705e1c092a3f55e09a35e94efc4a01085d9c387",
+            "linux_arm64": "4870b822e80703664c8353cc8cd09bf758a693820eb8b397aad7648ebfad849c",
+            "darwin_amd64": "5984b3931b89c2e6dbe7ff0476de7a0dd705e37f423c0a006800dd71a4df0d7c",
+            "darwin_arm64": "fe187a491d5574f67828704f83e9250dc146625e83e1dd4e4ed84b0dbd1c8c70",
+            "windows_amd64": "0e626e95f0389cf6759a5cc2d6368593b66ba4cb59cbb41e6eedd82031e720ad",
+            "windows_arm64": "402a770978b1e22458f58daa779cc837d87c3b3fe077c38c271e8bd165b8e5c1"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* feat: support custom section mapping via SEMREL_PLUGIN_SECTIONS_JSON by @mwaldheim in https://github.com/SemRels/generator-changelog-md/pull/47\n\n\n**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.6.2...v0.7.0"
+        },
         {
           "version": "0.6.2",
           "releaseDate": "2026-07-06T08:56:29Z",
