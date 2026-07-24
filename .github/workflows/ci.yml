@@ -96,12 +96,8 @@ jobs:
           context: .
           file: api/Dockerfile
           push: false
-      - name: Build admin image
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
-        with:
-          context: .
-          file: admin/Dockerfile
-          push: false
+      - name: Build and smoke test admin image
+        run: .github/scripts/admin-nginx-smoke.sh
 
   actionlint:
     name: Validate GitHub Actions
