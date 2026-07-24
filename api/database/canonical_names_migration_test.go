@@ -182,6 +182,77 @@ func TestCanonicalMigrationRecoversDirtyVersionNineWithHistoricalURL(t *testing.
 	assert.Equal(t, "canonical", description)
 }
 
+func TestCanonicalMigrationMergesDeletedCanonicalIdentityOccupant(t *testing.T) {
+	adminDSN := testutil.DatabaseURL(t, "..")
+	admin, err := pgxpool.New(context.Background(), adminDSN)
+	require.NoError(t, err)
+	_, err = admin.Exec(context.Background(), `CREATE DATABASE semrel_deleted_canonical`)
+	require.NoError(t, err)
+	admin.Close()
+
+	dsn := strings.Replace(adminDSN, "/semrel_registry?", "/semrel_deleted_canonical?", 1)
+	migrateToVersion(t, dsn, 8)
+	pool, err := pgxpool.New(context.Background(), dsn)
+	require.NoError(t, err)
+	defer pool.Close()
+
+	var activeID, deletedID int64
+	require.NoError(t, pool.QueryRow(context.Background(), `
+		INSERT INTO plugins (namespace, name, category, repository, description)
+		VALUES ('@semrel', 'gitea-actions', 'condition',
+		        'https://github.com/SemRels/condition-gitea-actions', 'active metadata')
+		RETURNING id`).Scan(&activeID))
+	require.NoError(t, pool.QueryRow(context.Background(), `
+		INSERT INTO plugins
+		    (namespace, name, category, repository, description, deleted_at)
+		VALUES ('@semrel', 'condition-gitea-actions', 'condition',
+		        'https://github.com/SemRels/condition-gitea-actions',
+		        'deleted metadata', NOW())
+		RETURNING id`).Scan(&deletedID))
+	_, err = pool.Exec(context.Background(), `
+		INSERT INTO plugin_versions (plugin_id, version, download_url)
+		VALUES ($1, '1.0.0', 'https://example.invalid/gitea-actions/1.0.0');
+		INSERT INTO plugin_aliases (plugin_id, alias)
+		VALUES ($1, 'deleted-gitea-actions-alias');
+		UPDATE schema_migrations SET version = 9, dirty = TRUE`, deletedID)
+	require.NoError(t, err)
+
+	db, err := Connect(dsn)
+	require.NoError(t, err)
+	defer db.Close()
+	require.NoError(t, db.RunMigrations("migrations"))
+
+	var version int
+	var dirty bool
+	require.NoError(t, pool.QueryRow(context.Background(),
+		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
+	assert.Equal(t, 9, version)
+	assert.False(t, dirty)
+
+	var retainedID int64
+	var name, description string
+	require.NoError(t, pool.QueryRow(context.Background(), `
+		SELECT id, name, description
+		FROM plugins
+		WHERE repository = 'https://github.com/SemRels/condition-gitea-actions'`).
+		Scan(&retainedID, &name, &description))
+	assert.Equal(t, activeID, retainedID)
+	assert.Equal(t, "condition-gitea-actions", name)
+	assert.Equal(t, "active metadata", description)
+
+	var deletedCount, versionCount, aliasCount int
+	require.NoError(t, pool.QueryRow(context.Background(), `
+		SELECT
+		    (SELECT COUNT(*) FROM plugins WHERE id = $1),
+		    (SELECT COUNT(*) FROM plugin_versions WHERE plugin_id = $2),
+		    (SELECT COUNT(*) FROM plugin_aliases
+		     WHERE plugin_id = $2 AND alias = 'deleted-gitea-actions-alias')`,
+		deletedID, activeID).Scan(&deletedCount, &versionCount, &aliasCount))
+	assert.Zero(t, deletedCount)
+	assert.Equal(t, 1, versionCount)
+	assert.Equal(t, 1, aliasCount)
+}
+
 func TestCanonicalFirstPartyMigrationDetectsIrreconcilableIdentityCollision(t *testing.T) {
 	dsn := testutil.DatabaseURL(t, "..")
 	admin, err := pgxpool.New(context.Background(), dsn)
