@@ -14,10 +14,6 @@ type migrationPlugin struct {
 	namespace  string
 	name       string
 	repository string
-	description string
-	author      string
-	license     string
-	status      string
 	deleted    bool
 	canonical  naming.FirstPartyPlugin
 	firstParty bool
@@ -193,34 +189,12 @@ func (d *Database) preflightCanonicalNamesMigration() error {
 		}
 	}
 
-	metadata := make(map[string]migrationPlugin)
-	for _, plugin := range plugins {
-		if plugin.deleted || !plugin.firstParty {
-			continue
-		}
-		owner := ownerFor(plugin)
-		if existing, ok := metadata[owner]; ok {
-			if incompatibleText(existing.description, plugin.description) ||
-				incompatibleText(existing.author, plugin.author) ||
-				incompatibleText(existing.license, plugin.license) ||
-				existing.status != plugin.status {
-				return fmt.Errorf("duplicate first-party plugin %s has differing metadata",
-					plugin.canonical.Name)
-			}
-			if existing.description == "" {
-				existing.description = plugin.description
-			}
-			if existing.author == "" {
-				existing.author = plugin.author
-			}
-			if existing.license == "" {
-				existing.license = plugin.license
-			}
-			metadata[owner] = existing
-		} else {
-			metadata[owner] = plugin
-		}
-	}
+	// Plugin description, author, license, and status are intentionally not
+	// preflight conflicts. Migration 9 deterministically prefers the exact
+	// canonical typed row, then a scoped legacy row, then the oldest ID. The
+	// merge keeps nonempty target display metadata, fills only empty target
+	// fields from sources, and leaves target status unchanged. These fields do
+	// not identify artifacts, unlike version metadata and checksums below.
 
 	return d.preflightDuplicateVersions(ctx, plugins, ownerFor)
 }
@@ -228,8 +202,7 @@ func (d *Database) preflightCanonicalNamesMigration() error {
 func (d *Database) migrationPlugins(ctx context.Context) ([]migrationPlugin, error) {
 	rows, err := d.pool.Query(ctx, `
 		SELECT id, COALESCE(namespace, ''), name, COALESCE(repository, ''),
-		       COALESCE(description, ''), COALESCE(author, ''),
-		       COALESCE(license, ''), status, deleted_at IS NOT NULL
+		       deleted_at IS NOT NULL
 		FROM plugins
 		ORDER BY id`)
 	if err != nil {
@@ -241,8 +214,7 @@ func (d *Database) migrationPlugins(ctx context.Context) ([]migrationPlugin, err
 	for rows.Next() {
 		var plugin migrationPlugin
 		if err := rows.Scan(&plugin.id, &plugin.namespace, &plugin.name,
-			&plugin.repository, &plugin.description, &plugin.author,
-			&plugin.license, &plugin.status, &plugin.deleted); err != nil {
+			&plugin.repository, &plugin.deleted); err != nil {
 			return nil, fmt.Errorf("scan plugin: %w", err)
 		}
 		plugin.canonical, plugin.firstParty =
@@ -348,10 +320,6 @@ func (d *Database) preflightDuplicateChecksums(
 		return fmt.Errorf("iterate plugin checksums: %w", err)
 	}
 	return nil
-}
-
-func incompatibleText(left, right string) bool {
-	return left != "" && right != "" && left != right
 }
 
 func equalTime(left, right *time.Time) bool {
