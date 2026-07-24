@@ -214,6 +214,14 @@ func TestCanonicalMigrationMergesDeletedCanonicalIdentityOccupant(t *testing.T) 
 		VALUES ($1, '1.0.0', 'https://example.invalid/gitea-actions/1.0.0')`, deletedID)
 	require.NoError(t, err)
 	_, err = pool.Exec(context.Background(), `
+		CREATE TABLE plugin_aliases (
+		    plugin_id INT NOT NULL REFERENCES plugins(id) ON DELETE CASCADE,
+		    alias VARCHAR(356) NOT NULL,
+		    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+		    PRIMARY KEY (plugin_id, alias)
+		)`)
+	require.NoError(t, err)
+	_, err = pool.Exec(context.Background(), `
 		INSERT INTO plugin_aliases (plugin_id, alias)
 		VALUES ($1, 'deleted-gitea-actions-alias')`, deletedID)
 	require.NoError(t, err)
