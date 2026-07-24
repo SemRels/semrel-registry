@@ -211,10 +211,14 @@ func TestCanonicalMigrationMergesDeletedCanonicalIdentityOccupant(t *testing.T) 
 		RETURNING id`).Scan(&deletedID))
 	_, err = pool.Exec(context.Background(), `
 		INSERT INTO plugin_versions (plugin_id, version, download_url)
-		VALUES ($1, '1.0.0', 'https://example.invalid/gitea-actions/1.0.0');
+		VALUES ($1, '1.0.0', 'https://example.invalid/gitea-actions/1.0.0')`, deletedID)
+	require.NoError(t, err)
+	_, err = pool.Exec(context.Background(), `
 		INSERT INTO plugin_aliases (plugin_id, alias)
-		VALUES ($1, 'deleted-gitea-actions-alias');
-		UPDATE schema_migrations SET version = 9, dirty = TRUE`, deletedID)
+		VALUES ($1, 'deleted-gitea-actions-alias')`, deletedID)
+	require.NoError(t, err)
+	_, err = pool.Exec(context.Background(),
+		`UPDATE schema_migrations SET version = 9, dirty = TRUE`)
 	require.NoError(t, err)
 
 	db, err := Connect(dsn)
