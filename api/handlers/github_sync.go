@@ -372,7 +372,7 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 			continue
 		}
 		category := m[1]
-		pluginName := m[2]
+		pluginName := pluginNameFromRepo(repo.Name)
 		repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repo.Name)
 
 		// Build the canonical lookup ref: "@semrel/default" or bare "default".
@@ -449,9 +449,9 @@ func pluginNameFromRepo(repoName string) string {
 	}
 	category := parts[0]
 	if category == "analyzer" || category == "condition" || category == "generator" || category == "hook" || category == "packager" || category == "provider" || category == "publisher" || category == "updater" {
-		// publisher-npm would otherwise collide with the existing updater-npm
-		// plugin name ("npm"); keep the full repo name to disambiguate.
-		if repoName == "publisher-npm" {
+		// Publisher variants keep their repository name when the short name is
+		// already owned by an updater.
+		if repoName == "publisher-docker" || repoName == "publisher-npm" {
 			return repoName
 		}
 		return parts[1]

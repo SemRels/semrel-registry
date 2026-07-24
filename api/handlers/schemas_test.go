@@ -47,6 +47,20 @@ func TestSchemaHandlerLatestPluginRedirect(t *testing.T) {
 	assert.Equal(t, "/schemas/plugins/conventional/v1.json", resp.Header().Get("Location"))
 }
 
+func TestSchemaHandlerDockerSchemasRemainDistinct(t *testing.T) {
+	for name, expectedID := range map[string]string{
+		"docker":           "https://registry.semrel.io/schemas/plugins/docker/v1.json",
+		"publisher-docker": "https://registry.semrel.io/schemas/plugins/publisher-docker/v1.json",
+	} {
+		resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/"+name+"/v1.json")
+		require.Equal(t, http.StatusOK, resp.Code)
+
+		var payload map[string]any
+		require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &payload))
+		assert.Equal(t, expectedID, payload["$id"])
+	}
+}
+
 func schemaTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -75,7 +89,7 @@ func TestSchemaHandlerAllOfficialPlugins(t *testing.T) {
 		"slack", "teams", "email", "jira", "matrix", "gitplugin", "discord",
 		"go", "npm", "cargo", "docker", "helm", "gradle", "maven", "composer",
 		"python", "terraform", "homebrew", "nuget", "pubspec",
-		"nfpm", "generic-http", "oci", "crates", "pypi", "publisher-npm",
+		"nfpm", "generic-http", "oci", "crates", "pypi", "publisher-npm", "publisher-docker",
 	}
 	for _, name := range plugins {
 		t.Run(name, func(t *testing.T) {

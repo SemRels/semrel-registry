@@ -12,7 +12,9 @@ func TestPluginNameFromRepo(t *testing.T) {
 		{name: "analyzer repo", repoName: "analyzer-conventional", want: "conventional"},
 		{name: "packager repo", repoName: "packager-nfpm", want: "nfpm"},
 		{name: "publisher repo", repoName: "publisher-oci", want: "oci"},
+		{name: "publisher-docker disambiguated from updater-docker", repoName: "publisher-docker", want: "publisher-docker"},
 		{name: "publisher-npm disambiguated from updater-npm", repoName: "publisher-npm", want: "publisher-npm"},
+		{name: "updater-docker keeps bare name", repoName: "updater-docker", want: "docker"},
 		{name: "unknown prefix", repoName: "tool-foo", want: "tool-foo"},
 		{name: "already simplified", repoName: "bitbucket", want: "bitbucket"},
 	}
