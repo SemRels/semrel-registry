@@ -12,6 +12,7 @@ import (
 	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	}
 
 	var pluginRepo repository.PluginRepository
+	var postgresDB *database.Database
 	metricsRecorder := service.NewNoopMetricsRecorder()
 	statsProvider := service.NewNoopRegistryStatsProvider()
 
@@ -46,6 +48,7 @@ func main() {
 		if err := db.RunMigrations(cfg.MigrateDir); err != nil {
 			log.Fatalf("migration failed: %v", err)
 		}
+		postgresDB = db
 
 		deleted, normalized, err := db.CleanupSemrelDuplicates(context.Background())
 		if err != nil {
@@ -70,9 +73,13 @@ func main() {
 
 	pluginService := service.NewPluginService(pluginRepo)
 
-	// Auto-seed from plugins.json on first startup (when DB is empty).
-	if err := seedPluginsIfEmpty(context.Background(), pluginService, os.Getenv("PLUGINS_JSON_PATH")); err != nil {
-		log.Printf("seed warning: %v", err)
+	var pool *pgxpool.Pool
+	if postgresDB != nil {
+		pool = postgresDB.Pool()
+	}
+	source := resolveCatalogSource(os.Getenv("PLUGINS_JSON_PATH"), cfg.Environment)
+	if err := seedStartupCatalog(context.Background(), pluginRepo, pool, source); err != nil {
+		log.Fatalf("startup seed failed: %v", err)
 	}
 
 	router := newRouter(pluginService, routerDependencies{

@@ -16,6 +16,7 @@ type Plugin struct {
 	ID               int64           `json:"id"`
 	Namespace        string          `json:"namespace,omitempty"`
 	Name             string          `json:"name"`
+	Aliases          []string        `json:"aliases,omitempty"`
 	Description      string          `json:"description"`
 	Author           string          `json:"author"`
 	Category         string          `json:"category"`
@@ -51,6 +52,7 @@ type PluginVersion struct {
 type PluginPatch struct {
 	Namespace   *string   `json:"namespace"`
 	Name        *string   `json:"name"`
+	Aliases     *[]string `json:"aliases"`
 	Description *string   `json:"description"`
 	Author      *string   `json:"author"`
 	Category    *string   `json:"category"`
@@ -72,6 +74,7 @@ func (p Plugin) Ref() string {
 func (p PluginPatch) Empty() bool {
 	return p.Namespace == nil &&
 		p.Name == nil &&
+		p.Aliases == nil &&
 		p.Description == nil &&
 		p.Author == nil &&
 		p.Category == nil &&

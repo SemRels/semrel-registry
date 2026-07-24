@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/naming"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 )
@@ -134,6 +135,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 	type semrelPlugin struct {
 		Namespace   string                `json:"namespace,omitempty"`
 		Name        string                `json:"name"`
+		Aliases     []string              `json:"aliases,omitempty"`
 		Description string                `json:"description"`
 		Author      string                `json:"author"`
 		License     string                `json:"license"`
@@ -144,10 +146,11 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Versions    []semrelPluginVersion `json:"versions"`
 	}
 	type semrelRegistry struct {
-		Plugins []semrelPlugin `json:"plugins"`
+		SchemaVersion int            `json:"schemaVersion"`
+		Plugins       []semrelPlugin `json:"plugins"`
 	}
 
-	registry := semrelRegistry{Plugins: make([]semrelPlugin, 0, len(result.Data))}
+	registry := semrelRegistry{SchemaVersion: 2, Plugins: make([]semrelPlugin, 0, len(result.Data))}
 	for _, p := range result.Data {
 		// Use the canonical ref so namespaced plugins resolve correctly.
 		versions, listErr := h.svc.ListVersions(ctx, p.Ref(), 100, 0)
@@ -177,6 +180,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		registry.Plugins = append(registry.Plugins, semrelPlugin{
 			Namespace:   p.Namespace,
 			Name:        p.Name,
+			Aliases:     p.Aliases,
 			Description: p.Description,
 			Author:      p.Author,
 			License:     p.License,
@@ -262,9 +266,7 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 		return
 	}
 
-	// Build the canonical plugin ref. If GITHUB_ORG_NAMESPACE is configured,
-	// map repo names like "provider-bitbucket" to namespaced plugin refs like
-	// "@semrel/bitbucket" to match the seeded naming convention.
+	// Build the canonical plugin ref without removing its category prefix.
 	orgNS := namespaceForOrg(payload.Owner)
 	pluginName := pluginNameFromRepo(payload.Repository)
 	pluginRef := pluginName
@@ -273,10 +275,15 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 	}
 	plugin, err := h.svc.GetPlugin(ctx, pluginRef)
 	if err != nil && orgNS != "" {
-		// Fallback: try both bare forms for community plugins without a namespace.
-		plugin, err = h.svc.GetPlugin(ctx, pluginName)
-		if err != nil {
-			plugin, err = h.svc.GetPlugin(ctx, payload.Repository)
+		if canonical, ok := naming.FirstPartyByRepository(payload.Repository); ok {
+			for _, alias := range canonical.Aliases {
+				plugin, err = h.svc.GetPlugin(ctx, alias)
+				if err == nil {
+					break
+				}
+			}
+		} else {
+			plugin, err = h.svc.GetPlugin(ctx, pluginName)
 		}
 	}
 	if err != nil {
@@ -351,11 +358,12 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 	if err != nil {
 		return nil, err
 	}
+	return h.syncOrgRepositories(ctx, org, repos)
+}
 
-	// Valid plugin name pattern: <category>-<name>
-	// Categories: analyzer, condition, generator, hook, provider, updater
-	validCategory := regexp.MustCompile(`^(analyzer|condition|generator|hook|provider|updater)-(.+)$`)
-
+func (h *SyncHandler) syncOrgRepositories(
+	ctx context.Context, org string, repos []ghRepo,
+) ([]syncResult, error) {
 	// The GITHUB_ORG_NAMESPACE env var maps a GitHub org to a plugin namespace,
 	// e.g. org="SemRels" → namespace="@semrel". Plugins from this org are stored
 	// and looked up as "@semrel/analyzer-default", etc.
@@ -367,16 +375,14 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 		if repo.Private || repo.Archived || repo.Fork {
 			continue
 		}
-		m := validCategory.FindStringSubmatch(repo.Name)
-		if m == nil {
+		canonical, repoURL, known := discoverFirstPartyRepository(org, repo.Name)
+		if !known {
 			continue
 		}
-		category := m[1]
-		pluginName := m[2]
-		repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repo.Name)
+		category := canonical.Category
+		pluginName := canonical.Name
 
-		// Build the canonical lookup ref: "@semrel/default" or bare "default".
-		// The seed normalizes SemRels repo names by stripping category prefixes.
+		// Build the canonical lookup ref: "@semrel/analyzer-default".
 		pluginRef := pluginName
 		if orgNS != "" {
 			pluginRef = orgNS + "/" + pluginName
@@ -384,14 +390,19 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 
 		existing, getErr := h.svc.GetPlugin(ctx, pluginRef)
 		if getErr != nil && orgNS != "" {
-			// Namespaced lookup failed. Check whether old bare-name entries exist
-			// and migrate one to the configured namespace instead of duplicating.
-			bare, bareErr := h.svc.GetPlugin(ctx, pluginName)
-			if bareErr != nil {
-				bare, bareErr = h.svc.GetPlugin(ctx, repo.Name)
+			var bare models.Plugin
+			var bareErr error
+			for _, alias := range canonical.Aliases {
+				bare, bareErr = h.svc.GetPlugin(ctx, alias)
+				if bareErr == nil {
+					break
+				}
 			}
-			if bareErr == nil && bare.Namespace == "" && strings.Contains(bare.Repository, "/"+org+"/") {
-				migrated, patchErr := h.svc.UpdatePlugin(ctx, bare.Ref(), models.PluginPatch{Namespace: &orgNS})
+			if bareErr == nil && matchesDiscoveredFirstPartyRepository(repoURL, bare.Repository) {
+				name := canonical.Name
+				migrated, patchErr := h.svc.UpdatePlugin(ctx, bare.Ref(), models.PluginPatch{
+					Namespace: &orgNS, Name: &name,
+				})
 				if patchErr != nil {
 					results = append(results, syncResult{Repo: repo.Name, Action: "error", Error: "namespace migration: " + patchErr.Error()})
 					log.Printf("version sync: namespace migration error for %s: %v", repo.Name, patchErr)
@@ -401,6 +412,13 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 				results = append(results, syncResult{Repo: repo.Name, Action: "migrated", Versions: createdV})
 				continue
 			}
+		}
+		if getErr == nil && !matchesDiscoveredFirstPartyRepository(repoURL, existing.Repository) {
+			results = append(results, syncResult{
+				Repo: repo.Name, Action: "skipped",
+				Error: "stored repository does not exactly match the allowlisted repository",
+			})
+			continue
 		}
 		if getErr != nil {
 			// Plugin does not exist yet — create it with the correct namespace.
@@ -440,17 +458,29 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 	return results, nil
 }
 
-// pluginNameFromRepo maps plugin repository names to canonical plugin names.
-// Example: "provider-bitbucket" -> "bitbucket".
+func matchesDiscoveredFirstPartyRepository(discoveredRepository, storedRepository string) bool {
+	discovered, discoveredOK := naming.FirstPartyByRepositoryURL(discoveredRepository)
+	stored, storedOK := naming.FirstPartyByRepositoryURL(storedRepository)
+	return discoveredOK && storedOK && stored.Name == discovered.Name
+}
+
+var firstPartyRepositoryPattern = regexp.MustCompile(
+	`^(analyzer|condition|generator|hook|packager|provider|publisher|updater)-(.+)$`)
+
+func discoverFirstPartyRepository(org, repository string) (naming.FirstPartyPlugin, string, bool) {
+	repoURL := fmt.Sprintf("https://github.com/%s/%s", org, repository)
+	matches := firstPartyRepositoryPattern.FindStringSubmatch(repository)
+	canonical, allowlisted := naming.FirstPartyByRepositoryURL(repoURL)
+	if len(matches) != 3 || !allowlisted ||
+		canonical.Name != repository || canonical.Category != matches[1] {
+		return naming.FirstPartyPlugin{}, "", false
+	}
+	return canonical, repoURL, true
+}
+
+// pluginNameFromRepo preserves the complete repository name. Category prefixes
+// are part of first-party package identity.
 func pluginNameFromRepo(repoName string) string {
-	parts := strings.SplitN(strings.TrimSpace(repoName), "-", 2)
-	if len(parts) != 2 {
-		return strings.TrimSpace(repoName)
-	}
-	category := parts[0]
-	if category == "analyzer" || category == "condition" || category == "generator" || category == "hook" || category == "provider" || category == "updater" {
-		return parts[1]
-	}
 	return strings.TrimSpace(repoName)
 }
 

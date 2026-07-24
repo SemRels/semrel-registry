@@ -295,6 +295,64 @@ func TestFileRepo_GetAll_NamespaceFilter(t *testing.T) {
 	assert.Equal(t, "provider-github", plugins[0].Name)
 }
 
+func TestFileRepo_ResolvesAliasesDeterministically(t *testing.T) {
+	repo := newTestFileRepo(t)
+	ctx := context.Background()
+	updater := basePlugin("updater-npm")
+	updater.Namespace = "@semrel"
+	updater.Aliases = []string{"updater-npm", "@semrel/npm", "npm"}
+	updaterID, err := repo.Create(ctx, updater)
+	require.NoError(t, err)
+
+	publisher := basePlugin("publisher-npm")
+	publisher.Namespace = "@semrel"
+	publisher.Aliases = []string{"publisher-npm"}
+	publisherID, err := repo.Create(ctx, publisher)
+	require.NoError(t, err)
+
+	for _, ref := range []string{"npm", "updater-npm"} {
+		got, lookupErr := repo.GetByName(ctx, ref)
+		require.NoError(t, lookupErr)
+		assert.Equal(t, updaterID, got.ID)
+	}
+	got, err := repo.GetByNamespacedName(ctx, "@semrel", "npm")
+	require.NoError(t, err)
+	assert.Equal(t, updaterID, got.ID)
+	got, err = repo.GetByNamespacedName(ctx, "@semrel", "publisher-npm")
+	require.NoError(t, err)
+	assert.Equal(t, publisherID, got.ID)
+}
+
+func TestFileRepo_RejectsDuplicateAliases(t *testing.T) {
+	repo := newTestFileRepo(t)
+	ctx := context.Background()
+	first := basePlugin("hook-teams")
+	first.Namespace = "@semrel"
+	first.Aliases = []string{"teams"}
+	_, err := repo.Create(ctx, first)
+	require.NoError(t, err)
+
+	second := basePlugin("community-teams")
+	second.Aliases = []string{"TEAMS"}
+	_, err = repo.Create(ctx, second)
+	require.ErrorIs(t, err, appErrors.ErrDuplicatePlugin)
+}
+
+func TestFileRepo_SearchIncludesAliases(t *testing.T) {
+	repo := newTestFileRepo(t)
+	ctx := context.Background()
+	plugin := basePlugin("hook-teams")
+	plugin.Namespace = "@semrel"
+	plugin.Aliases = []string{"legacy-chat-hook"}
+	_, err := repo.Create(ctx, plugin)
+	require.NoError(t, err)
+
+	got, err := repo.GetAll(ctx, 10, 0, SearchFilter{Query: "legacy-chat"})
+	require.NoError(t, err)
+	require.Len(t, got, 1)
+	assert.Equal(t, "hook-teams", got[0].Name)
+}
+
 func TestFileRepo_GetAll_SortDescending(t *testing.T) {
 	repo := newTestFileRepo(t)
 	for _, name := range []string{"alpha", "gamma", "beta"} {

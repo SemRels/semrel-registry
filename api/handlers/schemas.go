@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"net/http"
 	"strings"
 
+	"github.com/SemRels/semrel-registry/api/naming"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,14 +50,55 @@ func (h *SchemaHandler) GetNamespacedPluginSchema(c *gin.Context) {
 		return
 	}
 	path := "schemas/plugins/@" + namespace + "/" + name + "/" + schemaVersionFile(version)
-	h.serveSchema(c, path)
+	canonicalID := ""
+	if strings.EqualFold("@"+namespace, naming.FirstPartyNamespace) {
+		if plugin, ok := naming.ResolveFirstPartyRef("@" + namespace + "/" + name); ok {
+			if name != plugin.Name {
+				c.Redirect(http.StatusMovedPermanently,
+					"/schemas/plugins/@semrel/"+plugin.Name+"/"+schemaVersionFile(version))
+				return
+			}
+			canonicalID = "https://registry.semrel.io/schemas/plugins/@semrel/" + plugin.Name + "/" + schemaVersionFile(version)
+			file := schemaVersionFile(version)
+			candidates := []string{"schemas/plugins/" + plugin.Name + "/" + file}
+			for _, alias := range plugin.Aliases {
+				if !strings.HasPrefix(alias, "@") && alias != plugin.Name {
+					candidates = append(candidates, "schemas/plugins/"+alias+"/"+file)
+				}
+			}
+			for _, candidate := range candidates {
+				if _, err := fs.Stat(schemaFS, candidate); err == nil {
+					path = candidate
+					break
+				}
+			}
+		}
+	}
+	h.serveSchemaWithID(c, path, canonicalID)
 }
 
 func (h *SchemaHandler) serveSchema(c *gin.Context, path string) {
+	h.serveSchemaWithID(c, path, "")
+}
+
+func (h *SchemaHandler) serveSchemaWithID(c *gin.Context, path, canonicalID string) {
 	data, err := fs.ReadFile(schemaFS, path)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "schema not found", "path": path})
 		return
+	}
+	if canonicalID != "" {
+		var schema map[string]any
+		if err := json.Unmarshal(data, &schema); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid embedded schema", "path": path})
+			return
+		}
+		schema["$id"] = canonicalID
+		data, err = json.Marshal(schema)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot serialize schema", "path": path})
+			return
+		}
 	}
 	c.Header("Content-Type", "application/schema+json")
 	c.Header("Cache-Control", "public, max-age=86400")

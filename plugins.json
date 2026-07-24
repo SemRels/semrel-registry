@@ -1,9 +1,15 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-07-15T05:26:23.762Z",
   "plugins": [
     {
-      "name": "bitbucket",
+      "namespace": "@semrel",
+      "name": "provider-bitbucket",
+      "aliases": [
+        "@semrel/bitbucket",
+        "bitbucket",
+        "provider-bitbucket"
+      ],
       "description": "Bitbucket releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -113,7 +119,13 @@
       ]
     },
     {
-      "name": "git",
+      "namespace": "@semrel",
+      "name": "provider-git",
+      "aliases": [
+        "@semrel/git",
+        "git",
+        "provider-git"
+      ],
       "description": "Git provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -223,7 +235,13 @@
       ]
     },
     {
-      "name": "gitea",
+      "namespace": "@semrel",
+      "name": "provider-gitea",
+      "aliases": [
+        "@semrel/gitea",
+        "gitea",
+        "provider-gitea"
+      ],
       "description": "Gitea releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -333,7 +351,13 @@
       ]
     },
     {
-      "name": "github",
+      "namespace": "@semrel",
+      "name": "provider-github",
+      "aliases": [
+        "@semrel/github",
+        "github",
+        "provider-github"
+      ],
       "description": "GitHub releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -462,7 +486,13 @@
       ]
     },
     {
-      "name": "gitlab",
+      "namespace": "@semrel",
+      "name": "provider-gitlab",
+      "aliases": [
+        "@semrel/gitlab",
+        "gitlab",
+        "provider-gitlab"
+      ],
       "description": "GitLab releases provider",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -572,7 +602,13 @@
       ]
     },
     {
-      "name": "conventional",
+      "namespace": "@semrel",
+      "name": "analyzer-conventional",
+      "aliases": [
+        "@semrel/conventional",
+        "analyzer-conventional",
+        "conventional"
+      ],
       "description": "Conventional commits analyzer",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -682,7 +718,13 @@
       ]
     },
     {
-      "name": "default",
+      "namespace": "@semrel",
+      "name": "analyzer-default",
+      "aliases": [
+        "@semrel/default",
+        "analyzer-default",
+        "default"
+      ],
       "description": "Default version analyzer",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -811,7 +853,13 @@
       ]
     },
     {
-      "name": "changelog-html",
+      "namespace": "@semrel",
+      "name": "generator-changelog-html",
+      "aliases": [
+        "@semrel/changelog-html",
+        "changelog-html",
+        "generator-changelog-html"
+      ],
       "description": "HTML changelog generator",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -940,7 +988,13 @@
       ]
     },
     {
-      "name": "changelog-md",
+      "namespace": "@semrel",
+      "name": "generator-changelog-md",
+      "aliases": [
+        "@semrel/changelog-md",
+        "changelog-md",
+        "generator-changelog-md"
+      ],
       "description": "Markdown changelog generator",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1107,7 +1161,13 @@
       ]
     },
     {
-      "name": "release-notes",
+      "namespace": "@semrel",
+      "name": "generator-release-notes",
+      "aliases": [
+        "@semrel/release-notes",
+        "generator-release-notes",
+        "release-notes"
+      ],
       "description": "Release notes generator",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1236,7 +1296,13 @@
       ]
     },
     {
-      "name": "generic",
+      "namespace": "@semrel",
+      "name": "condition-generic",
+      "aliases": [
+        "@semrel/generic",
+        "condition-generic",
+        "generic"
+      ],
       "description": "Generic external condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1365,7 +1431,13 @@
       ]
     },
     {
-      "name": "gitea-actions",
+      "namespace": "@semrel",
+      "name": "condition-gitea-actions",
+      "aliases": [
+        "@semrel/gitea-actions",
+        "condition-gitea-actions",
+        "gitea-actions"
+      ],
       "description": "Gitea Actions condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1475,7 +1547,13 @@
       ]
     },
     {
-      "name": "github-actions",
+      "namespace": "@semrel",
+      "name": "condition-github-actions",
+      "aliases": [
+        "@semrel/github-actions",
+        "condition-github-actions",
+        "github-actions"
+      ],
       "description": "GitHub Actions condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1566,7 +1644,13 @@
       ]
     },
     {
-      "name": "gitlab-ci",
+      "namespace": "@semrel",
+      "name": "condition-gitlab-ci",
+      "aliases": [
+        "@semrel/gitlab-ci",
+        "condition-gitlab-ci",
+        "gitlab-ci"
+      ],
       "description": "GitLab CI condition",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1695,7 +1779,13 @@
       ]
     },
     {
-      "name": "email",
+      "namespace": "@semrel",
+      "name": "hook-email",
+      "aliases": [
+        "@semrel/email",
+        "email",
+        "hook-email"
+      ],
       "description": "Email notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1805,7 +1895,13 @@
       ]
     },
     {
-      "name": "gitplugin",
+      "namespace": "@semrel",
+      "name": "hook-gitplugin",
+      "aliases": [
+        "@semrel/gitplugin",
+        "gitplugin",
+        "hook-gitplugin"
+      ],
       "description": "Git plugin execution hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -1915,7 +2011,13 @@
       ]
     },
     {
-      "name": "jira",
+      "namespace": "@semrel",
+      "name": "hook-jira",
+      "aliases": [
+        "@semrel/jira",
+        "hook-jira",
+        "jira"
+      ],
       "description": "Jira integration hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2025,7 +2127,13 @@
       ]
     },
     {
-      "name": "matrix",
+      "namespace": "@semrel",
+      "name": "hook-matrix",
+      "aliases": [
+        "@semrel/matrix",
+        "hook-matrix",
+        "matrix"
+      ],
       "description": "Matrix notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2154,7 +2262,13 @@
       ]
     },
     {
-      "name": "slack",
+      "namespace": "@semrel",
+      "name": "hook-slack",
+      "aliases": [
+        "@semrel/slack",
+        "hook-slack",
+        "slack"
+      ],
       "description": "Slack notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2283,7 +2397,13 @@
       ]
     },
     {
-      "name": "teams",
+      "namespace": "@semrel",
+      "name": "hook-teams",
+      "aliases": [
+        "@semrel/teams",
+        "hook-teams",
+        "teams"
+      ],
       "description": "Microsoft Teams notification hook",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2374,7 +2494,13 @@
       ]
     },
     {
-      "name": "cargo",
+      "namespace": "@semrel",
+      "name": "updater-cargo",
+      "aliases": [
+        "@semrel/cargo",
+        "cargo",
+        "updater-cargo"
+      ],
       "description": "Cargo dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2484,7 +2610,13 @@
       ]
     },
     {
-      "name": "docker",
+      "namespace": "@semrel",
+      "name": "updater-docker",
+      "aliases": [
+        "@semrel/docker",
+        "docker",
+        "updater-docker"
+      ],
       "description": "Docker image updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2594,7 +2726,13 @@
       ]
     },
     {
-      "name": "go",
+      "namespace": "@semrel",
+      "name": "updater-go",
+      "aliases": [
+        "@semrel/go",
+        "go",
+        "updater-go"
+      ],
       "description": "Go module updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2704,7 +2842,13 @@
       ]
     },
     {
-      "name": "gradle",
+      "namespace": "@semrel",
+      "name": "updater-gradle",
+      "aliases": [
+        "@semrel/gradle",
+        "gradle",
+        "updater-gradle"
+      ],
       "description": "Gradle dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2814,7 +2958,13 @@
       ]
     },
     {
-      "name": "helm",
+      "namespace": "@semrel",
+      "name": "updater-helm",
+      "aliases": [
+        "@semrel/helm",
+        "helm",
+        "updater-helm"
+      ],
       "description": "Helm chart updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -2943,7 +3093,13 @@
       ]
     },
     {
-      "name": "homebrew",
+      "namespace": "@semrel",
+      "name": "updater-homebrew",
+      "aliases": [
+        "@semrel/homebrew",
+        "homebrew",
+        "updater-homebrew"
+      ],
       "description": "Homebrew formula updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3053,7 +3209,13 @@
       ]
     },
     {
-      "name": "maven",
+      "namespace": "@semrel",
+      "name": "updater-maven",
+      "aliases": [
+        "@semrel/maven",
+        "maven",
+        "updater-maven"
+      ],
       "description": "Maven dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3163,7 +3325,13 @@
       ]
     },
     {
-      "name": "npm",
+      "namespace": "@semrel",
+      "name": "updater-npm",
+      "aliases": [
+        "@semrel/npm",
+        "npm",
+        "updater-npm"
+      ],
       "description": "npm package updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3292,7 +3460,13 @@
       ]
     },
     {
-      "name": "nuget",
+      "namespace": "@semrel",
+      "name": "updater-nuget",
+      "aliases": [
+        "@semrel/nuget",
+        "nuget",
+        "updater-nuget"
+      ],
       "description": "NuGet package updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3402,7 +3576,13 @@
       ]
     },
     {
-      "name": "python",
+      "namespace": "@semrel",
+      "name": "updater-python",
+      "aliases": [
+        "@semrel/python",
+        "python",
+        "updater-python"
+      ],
       "description": "Python dependency updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3512,7 +3692,13 @@
       ]
     },
     {
-      "name": "terraform",
+      "namespace": "@semrel",
+      "name": "updater-terraform",
+      "aliases": [
+        "@semrel/terraform",
+        "terraform",
+        "updater-terraform"
+      ],
       "description": "Terraform module updater",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3622,7 +3808,13 @@
       ]
     },
     {
-      "name": "nfpm",
+      "namespace": "@semrel",
+      "name": "packager-nfpm",
+      "aliases": [
+        "@semrel/nfpm",
+        "nfpm",
+        "packager-nfpm"
+      ],
       "description": "nFPM package builder for deb/rpm/apk artifacts",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3675,7 +3867,13 @@
       ]
     },
     {
-      "name": "generic-http",
+      "namespace": "@semrel",
+      "name": "publisher-generic-http",
+      "aliases": [
+        "@semrel/generic-http",
+        "generic-http",
+        "publisher-generic-http"
+      ],
       "description": "Generic HTTP artifact publisher",
       "author": "semrel Authors",
       "license": "Apache-2.0",
@@ -3728,7 +3926,13 @@
       ]
     },
     {
-      "name": "oci",
+      "namespace": "@semrel",
+      "name": "publisher-oci",
+      "aliases": [
+        "@semrel/oci",
+        "oci",
+        "publisher-oci"
+      ],
       "description": "OCI artifact publisher",
       "author": "semrel Authors",
       "license": "Apache-2.0",

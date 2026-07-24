@@ -9,6 +9,11 @@ DROP TABLE IF EXISTS metric_daily_version;
 DROP TABLE IF EXISTS metric_daily_plugin;
 DROP TABLE IF EXISTS metric_events;
 
+-- Migration 000009 deliberately retains aliases for a 9 -> 8 -> 9 round trip.
+-- Once the rollback proceeds below version 8, remove that compatibility table
+-- before migration 000001 drops its referenced plugins table.
+DROP TABLE IF EXISTS plugin_aliases;
+
 ALTER TABLE plugin_versions
     DROP COLUMN IF EXISTS downloads,
     DROP COLUMN IF EXISTS views;

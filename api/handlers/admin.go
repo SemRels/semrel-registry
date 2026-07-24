@@ -60,6 +60,7 @@ func (h *AdminHandler) SyncPlugins(c *gin.Context) {
 			_, err = h.service.CreatePlugin(ctx, models.Plugin{
 				Namespace:   sp.Namespace,
 				Name:        sp.Name,
+				Aliases:     sp.Aliases,
 				Description: sp.Description,
 				Author:      sp.Author,
 				Category:    sp.Category,
@@ -81,6 +82,7 @@ func (h *AdminHandler) SyncPlugins(c *gin.Context) {
 				Repository:  &repo,
 				License:     &lic,
 				Tags:        &sp.Tags,
+				Aliases:     &sp.Aliases,
 			})
 			if err != nil {
 				failed++
@@ -135,6 +137,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 			_, err = h.service.CreatePlugin(c.Request.Context(), models.Plugin{
 				Namespace:   sp.Namespace,
 				Name:        sp.Name,
+				Aliases:     sp.Aliases,
 				Description: sp.Description,
 				Author:      sp.Author,
 				Category:    sp.Category,
@@ -156,6 +159,7 @@ func (h *AdminHandler) SyncFromFile(c *gin.Context) {
 				Repository:  &repo,
 				License:     &lic,
 				Tags:        &sp.Tags,
+				Aliases:     &sp.Aliases,
 			})
 			if err != nil {
 				failed++
@@ -266,6 +270,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 type syncPlugin struct {
 	Namespace   string   `json:"namespace,omitempty"`
 	Name        string   `json:"name"`
+	Aliases     []string `json:"aliases,omitempty"`
 	Description string   `json:"description"`
 	Author      string   `json:"author"`
 	Category    string   `json:"category"`

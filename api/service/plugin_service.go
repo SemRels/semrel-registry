@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
 	appErrors "github.com/SemRels/semrel-registry/api/internal"
 	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/naming"
 	"github.com/SemRels/semrel-registry/api/repository"
 )
 
@@ -18,6 +20,7 @@ const (
 	defaultVersionLimit  = 20
 	maxListLimit         = 100
 	maxNameLength        = 255
+	maxAliasLength       = 356
 	maxNamespaceLength   = 100
 	maxDescriptionLength = 4000
 	maxAuthorLength      = 255
@@ -51,7 +54,7 @@ type ListPluginsParams struct {
 	Category  string
 	Search    string
 	Sort      string
-	SortDir   string // "asc" or "desc"; defaults to "asc"
+	SortDir   string   // "asc" or "desc"; defaults to "asc"
 	Namespace string   // when set, filter by namespace (e.g. "@semrel")
 	Author    string   // when set, only return plugins by this author (exact, case-insensitive)
 	Statuses  []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
@@ -196,6 +199,7 @@ func (s *PluginService) ListVersions(ctx context.Context, ref string, limit, off
 
 func (s *PluginService) CreatePlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error) {
 	plugin = normalizePlugin(plugin)
+	normalizeFirstPartyPlugin(&plugin)
 	if plugin.Status == "" {
 		plugin.Status = models.StatusActive
 	}
@@ -225,6 +229,7 @@ func (s *PluginService) CreatePlugin(ctx context.Context, plugin models.Plugin) 
 // SubmitPlugin creates a plugin with status=pending for community review.
 func (s *PluginService) SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error) {
 	plugin = normalizePlugin(plugin)
+	normalizeFirstPartyPlugin(&plugin)
 	plugin.Status = models.StatusPending
 	if err := validatePlugin(plugin, true); err != nil {
 		return models.Plugin{}, err
@@ -291,6 +296,13 @@ func (s *PluginService) UpdatePlugin(ctx context.Context, ref string, patch mode
 		return models.Plugin{}, err
 	}
 	applyPatch(plugin, patch)
+	firstParty := normalizeFirstPartyPlugin(plugin)
+	if firstParty || patch.Namespace != nil || patch.Name != nil || patch.Aliases != nil ||
+		patch.Category != nil || patch.Repository != nil {
+		if err := validatePlugin(*plugin, true); err != nil {
+			return models.Plugin{}, err
+		}
+	}
 
 	if err := s.repo.Update(ctx, plugin); err != nil {
 		return models.Plugin{}, err
@@ -447,6 +459,7 @@ func validatePluginRef(ref string) error {
 func normalizePlugin(plugin models.Plugin) models.Plugin {
 	plugin.Namespace = strings.TrimSpace(plugin.Namespace)
 	plugin.Name = strings.TrimSpace(plugin.Name)
+	plugin.Aliases = normalizeAliases(plugin.Aliases)
 	plugin.Description = strings.TrimSpace(plugin.Description)
 	plugin.Author = strings.TrimSpace(plugin.Author)
 	plugin.Category = strings.TrimSpace(plugin.Category)
@@ -462,6 +475,10 @@ func normalizePlugin(plugin models.Plugin) models.Plugin {
 func normalizePatch(patch models.PluginPatch) models.PluginPatch {
 	patch.Namespace = trimPointer(patch.Namespace)
 	patch.Name = trimPointer(patch.Name)
+	if patch.Aliases != nil {
+		aliases := normalizeAliases(*patch.Aliases)
+		patch.Aliases = &aliases
+	}
 	patch.Description = trimPointer(patch.Description)
 	patch.Author = trimPointer(patch.Author)
 	patch.Category = trimPointer(patch.Category)
@@ -503,6 +520,19 @@ func validatePlugin(plugin models.Plugin, requireName bool) error {
 	if plugin.Name != "" {
 		if len(plugin.Name) > maxNameLength {
 			return &appErrors.ValidationError{Field: "name", Issue: fmt.Sprintf("must be at most %d characters", maxNameLength)}
+		}
+		for _, alias := range plugin.Aliases {
+			if len(alias) > maxAliasLength {
+				return &appErrors.ValidationError{Field: "aliases", Issue: fmt.Sprintf("each alias must be at most %d characters", maxAliasLength)}
+			}
+			if strings.HasPrefix(alias, "@") {
+				namespace, name, ok := strings.Cut(alias, "/")
+				if !ok || !namespacePattern.MatchString(namespace) || !pluginNamePattern.MatchString(name) {
+					return &appErrors.ValidationError{Field: "aliases", Issue: "must contain valid bare or namespaced plugin references"}
+				}
+			} else if !pluginNamePattern.MatchString(alias) {
+				return &appErrors.ValidationError{Field: "aliases", Issue: "must contain valid bare or namespaced plugin references"}
+			}
 		}
 		if !pluginNamePattern.MatchString(plugin.Name) {
 			return &appErrors.ValidationError{Field: "name", Issue: "must contain only letters, numbers, dots, dashes, or underscores"}
@@ -553,10 +583,12 @@ func validatePatch(patch models.PluginPatch) error {
 	}
 	if patch.Name != nil {
 		if err := validatePlugin(models.Plugin{Name: *patch.Name, Category: "patched"}, true); err != nil {
-			if validationErr, ok := err.(*appErrors.ValidationError); ok && validationErr.Field == "category" {
-			} else if err != nil {
-				return err
-			}
+			return err
+		}
+	}
+	if patch.Aliases != nil {
+		if err := validatePlugin(models.Plugin{Name: "patched", Category: "patched", Aliases: *patch.Aliases}, true); err != nil {
+			return err
 		}
 	}
 	if patch.Description != nil && len(*patch.Description) > maxDescriptionLength {
@@ -645,6 +677,40 @@ func normalizeTags(tags []string) []string {
 	return normalized
 }
 
+func normalizeAliases(aliases []string) []string {
+	seen := make(map[string]struct{}, len(aliases))
+	normalized := make([]string, 0, len(aliases))
+	for _, alias := range aliases {
+		alias = strings.TrimSpace(alias)
+		key := strings.ToLower(alias)
+		if alias == "" {
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		normalized = append(normalized, alias)
+	}
+	sort.Strings(normalized)
+	return normalized
+}
+
+func normalizeFirstPartyPlugin(plugin *models.Plugin) bool {
+	if plugin == nil {
+		return false
+	}
+	canonical, ok := naming.FirstPartyByRepositoryURL(plugin.Repository)
+	if !ok {
+		return false
+	}
+	plugin.Namespace = naming.FirstPartyNamespace
+	plugin.Name = canonical.Name
+	plugin.Category = canonical.Category
+	plugin.Aliases = normalizeAliases(append(canonical.Aliases, plugin.Aliases...))
+	return true
+}
+
 func trimPointer(value *string) *string {
 	if value == nil {
 		return nil
@@ -673,6 +739,9 @@ func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {
 	}
 	if patch.Name != nil {
 		plugin.Name = *patch.Name
+	}
+	if patch.Aliases != nil {
+		plugin.Aliases = *patch.Aliases
 	}
 	if patch.Description != nil {
 		plugin.Description = *patch.Description

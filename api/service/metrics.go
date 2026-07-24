@@ -193,6 +193,9 @@ func (r *asyncMetricsRecorder) flushBatch(events []MetricEvent) error {
 	defer func() {
 		_ = tx.Rollback(ctx)
 	}()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return err
+	}
 
 	pluginTotals := make(map[int64]*metricCounter)
 	versionTotals := make(map[int64]*metricCounter)

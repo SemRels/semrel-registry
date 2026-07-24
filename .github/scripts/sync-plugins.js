@@ -280,8 +280,17 @@ function parseVersionFromTag(tag, repo, pluginName) {
 
 function buildPluginEntry(spec, owner, repoMetadata, existingPlugin) {
   const repository = repoMetadata?.html_url || `https://github.com/${owner}/${spec.repo}`;
+  const aliases = [spec.repo];
+  // npm historically identified updater-npm. publisher-npm must never claim
+  // that short alias if it is added to this inventory later.
+  if (spec.repo !== 'publisher-npm') {
+    aliases.push(`@semrel/${spec.name}`, spec.name);
+  }
+  aliases.sort();
   return {
-    name: spec.name,
+    namespace: '@semrel',
+    name: spec.repo,
+    aliases,
     description: spec.description,
     author: existingPlugin?.author || 'semrel Authors',
     license: existingPlugin?.license || (repoMetadata?.license?.spdx_id && repoMetadata.license.spdx_id !== 'NOASSERTION' ? repoMetadata.license.spdx_id : 'Apache-2.0'),
@@ -331,7 +340,7 @@ async function main() {
     warning(summary, `Schema file not found at ${schemaPath}. Validation will use built-in checks only.`);
   }
 
-  const registry = readJson(pluginsPath, { schemaVersion: 1, generatedAt: null, plugins: [] });
+  const registry = readJson(pluginsPath, { schemaVersion: 2, generatedAt: null, plugins: [] });
   const pluginsMap = new Map();
   for (const plugin of Array.isArray(registry.plugins) ? registry.plugins : []) {
     if (plugin && typeof plugin.name === 'string') {
@@ -341,7 +350,7 @@ async function main() {
 
   for (const spec of OFFICIAL_PLUGINS) {
     summary.processedRepositories += 1;
-    const existingPlugin = pluginsMap.get(spec.name);
+    const existingPlugin = pluginsMap.get(spec.repo);
     const repoMetadata = await fetchRepoMetadata(owner, spec.repo, token, summary).catch(() => ({}));
     const plugin = buildPluginEntry(spec, owner, repoMetadata, existingPlugin);
     const versionsByNumber = new Map((plugin.versions || []).map((version) => [version.version, version]));
@@ -388,29 +397,29 @@ async function main() {
       }
 
       if (!versionsByNumber.has(version)) {
-        summary.newVersions.push(`${spec.name}@${version}`);
+        summary.newVersions.push(`${spec.repo}@${version}`);
       }
       versionsByNumber.set(version, versionEntry);
     }
 
     plugin.versions = sortVersionsDescending(Array.from(versionsByNumber.values()));
-    const validationErrors = validatePlugin(plugin, spec.name);
+    const validationErrors = validatePlugin(plugin, spec.repo);
     if (validationErrors.length > 0) {
-      warning(summary, `Skipping ${spec.name} because validation failed: ${validationErrors.join(' | ')}`);
+      warning(summary, `Skipping ${spec.repo} because validation failed: ${validationErrors.join(' | ')}`);
       continue;
     }
 
-    pluginsMap.set(spec.name, plugin);
+    pluginsMap.set(spec.repo, plugin);
   }
 
   const finalPlugins = OFFICIAL_PLUGINS
-    .map((spec) => pluginsMap.get(spec.name))
+    .map((spec) => pluginsMap.get(spec.repo))
     .filter(Boolean)
     .sort(comparePlugin);
 
   summary.syncedPlugins = finalPlugins.length;
   const nextRegistry = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: samePluginData(registry, finalPlugins)
       ? (registry.generatedAt === undefined ? null : registry.generatedAt)
       : (generatedAtOverride || new Date().toISOString()),
