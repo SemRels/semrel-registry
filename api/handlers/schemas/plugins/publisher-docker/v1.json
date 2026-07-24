@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/publisher-docker/v1.json",
+  "title": "publisher-docker plugin configuration",
+  "description": "Schema v1 for publishing one existing local Docker image.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_IMAGE": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+      "description": "Existing local Docker image reference or image ID."
+    },
+    "SEMREL_PLUGIN_REF": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\r\\n]*\\{version\\}[^\\r\\n]*$",
+      "description": "Tagged destination Docker reference containing the {version} placeholder."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+      "description": "Resolved release version. Takes precedence over SEMREL_NEXT_VERSION."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+      "description": "Release version fallback when SEMREL_VERSION is empty."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Inspect and plan without tagging or pushing."
+    }
+  },
+  "required": [
+    "SEMREL_PLUGIN_IMAGE",
+    "SEMREL_PLUGIN_REF"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "SEMREL_VERSION"
+      ]
+    },
+    {
+      "required": [
+        "SEMREL_NEXT_VERSION"
+      ]
+    }
+  ],
+  "additionalProperties": true
+}

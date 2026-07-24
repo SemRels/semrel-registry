@@ -23,7 +23,7 @@ var firstPartyRepositories = []string{
 	"hook-discord", "hook-email", "hook-gitplugin", "hook-jira", "hook-matrix", "hook-slack", "hook-teams",
 	"packager-nfpm",
 	"provider-bitbucket", "provider-git", "provider-gitea", "provider-github", "provider-gitlab",
-	"publisher-crates", "publisher-generic-http", "publisher-npm", "publisher-oci", "publisher-pypi",
+	"publisher-crates", "publisher-docker", "publisher-generic-http", "publisher-npm", "publisher-oci", "publisher-pypi",
 	"updater-cargo", "updater-composer", "updater-docker", "updater-go", "updater-gradle",
 	"updater-helm", "updater-homebrew", "updater-maven", "updater-npm", "updater-nuget",
 	"updater-pubspec", "updater-python", "updater-terraform",

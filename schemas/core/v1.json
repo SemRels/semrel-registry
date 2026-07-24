@@ -338,6 +338,7 @@
             "updater-python",
             "updater-terraform",
             "packager-nfpm",
+            "publisher-docker",
             "publisher-oci",
             "publisher-generic-http"
           ]

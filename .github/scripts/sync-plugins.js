@@ -43,6 +43,8 @@ const OFFICIAL_PLUGINS = [
   { repo: 'updater-homebrew', name: 'homebrew', category: 'updater', description: 'Homebrew formula updater', tags: ['formula', 'homebrew', 'updater'] },
   { repo: 'updater-terraform', name: 'terraform', category: 'updater', description: 'Terraform module updater', tags: ['terraform', 'modules', 'updater'] },
   { repo: 'packager-nfpm', name: 'nfpm', category: 'packager', description: 'nFPM package builder for deb/rpm/apk artifacts', tags: ['nfpm', 'packager', 'linux'] },
+  // The catalog entry is emitted only after sync validates a real release and its checksummed assets.
+  { repo: 'publisher-docker', name: 'docker', category: 'publisher', description: 'Existing Docker image publisher', tags: ['publisher', 'docker', 'images', 'registry'] },
   { repo: 'publisher-oci', name: 'oci', category: 'publisher', description: 'OCI artifact publisher', tags: ['publisher', 'oci', 'registry'] },
   { repo: 'publisher-generic-http', name: 'generic-http', category: 'publisher', description: 'Generic HTTP artifact publisher', tags: ['publisher', 'http', 'artifacts'] }
 ];
@@ -281,9 +283,9 @@ function parseVersionFromTag(tag, repo, pluginName) {
 function buildPluginEntry(spec, owner, repoMetadata, existingPlugin) {
   const repository = repoMetadata?.html_url || `https://github.com/${owner}/${spec.repo}`;
   const aliases = [spec.repo];
-  // npm historically identified updater-npm. publisher-npm must never claim
-  // that short alias if it is added to this inventory later.
-  if (spec.repo !== 'publisher-npm') {
+  // Historical short references stay with their original typed plugin.
+  const shortAliasOwners = { docker: 'updater-docker', npm: 'updater-npm' };
+  if (!shortAliasOwners[spec.name] || shortAliasOwners[spec.name] === spec.repo) {
     aliases.push(`@semrel/${spec.name}`, spec.name);
   }
   aliases.sort();
@@ -403,6 +405,10 @@ async function main() {
     }
 
     plugin.versions = sortVersionsDescending(Array.from(versionsByNumber.values()));
+    if (plugin.versions.length === 0) {
+      summary.skippedReleases.push(`${spec.repo} (no validated release assets yet)`);
+      continue;
+    }
     const validationErrors = validatePlugin(plugin, spec.repo);
     if (validationErrors.length > 0) {
       warning(summary, `Skipping ${spec.repo} because validation failed: ${validationErrors.join(' | ')}`);
@@ -431,7 +437,14 @@ async function main() {
   process.stdout.write(`Synced ${summary.syncedPlugins} plugins and ${summary.newVersions.length} versions.\n`);
 }
 
-main().catch((error) => {
-  process.stdout.write(`::warning::${escapeWorkflowMessage(`Plugin sync terminated early: ${error.message}`)}\n`);
-  process.exitCode = 0;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    process.stdout.write(`::warning::${escapeWorkflowMessage(`Plugin sync terminated early: ${error.message}`)}\n`);
+    process.exitCode = 0;
+  });
+}
+
+module.exports = {
+  OFFICIAL_PLUGINS,
+  buildPluginEntry
+};
