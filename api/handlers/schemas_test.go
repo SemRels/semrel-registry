@@ -48,6 +48,18 @@ func TestSchemaHandlerLatestPluginRedirect(t *testing.T) {
 	assert.Equal(t, "/schemas/plugins/analyzer-conventional/v1.json", resp.Header().Get("Location"))
 }
 
+func TestSchemaHandlerCanonicalAndLegacyNamespacedRoutes(t *testing.T) {
+	canonical := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/@semrel/provider-github/v1.json")
+	require.Equal(t, http.StatusOK, canonical.Code)
+	var payload map[string]any
+	require.NoError(t, json.Unmarshal(canonical.Body.Bytes(), &payload))
+	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/@semrel/provider-github/v1.json", payload["$id"])
+
+	legacy := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/@semrel/github/v1.json")
+	require.Equal(t, http.StatusMovedPermanently, legacy.Code)
+	assert.Equal(t, "/schemas/plugins/@semrel/provider-github/v1.json", legacy.Header().Get("Location"))
+}
+
 func schemaTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()

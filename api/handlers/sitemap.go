@@ -64,11 +64,7 @@ func (h *SitemapHandler) Sitemap(c *gin.Context) {
 
 	// Plugin detail pages
 	for _, plugin := range result.Data {
-		pluginRef := plugin.Name
-		if plugin.Namespace != "" {
-			pluginRef = "@" + plugin.Namespace + "/" + plugin.Name
-		}
-		loc := sitemapBase + "/plugins/" + pluginRef
+		loc := sitemapBase + "/plugins/" + plugin.Ref()
 		lastmod := now
 		if !plugin.UpdatedAt.IsZero() {
 			lastmod = plugin.UpdatedAt.UTC().Format("2006-01-02")

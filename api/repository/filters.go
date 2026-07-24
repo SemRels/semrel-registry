@@ -40,7 +40,7 @@ func (f SearchFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	}
 
 	*args = append(*args, "%"+query+"%")
-	builder.WriteString(fmt.Sprintf(" AND (name ILIKE $%[1]d OR description ILIKE $%[1]d OR author ILIKE $%[1]d OR repository ILIKE $%[1]d)", len(*args)))
+	builder.WriteString(fmt.Sprintf(" AND (name ILIKE $%[1]d OR description ILIKE $%[1]d OR author ILIKE $%[1]d OR repository ILIKE $%[1]d OR EXISTS (SELECT 1 FROM plugin_aliases WHERE plugin_id = plugins.id AND alias ILIKE $%[1]d))", len(*args)))
 }
 
 // AuthorFilter restricts results to plugins owned by a specific author (exact, case-insensitive).
@@ -99,7 +99,6 @@ func (f NamespaceFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) 
 	*args = append(*args, ns)
 	builder.WriteString(fmt.Sprintf(" AND LOWER(namespace) = LOWER($%d)", len(*args)))
 }
-
 
 type SortFilter struct {
 	Field     string

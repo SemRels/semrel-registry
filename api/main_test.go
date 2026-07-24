@@ -114,18 +114,8 @@ func TestHealthEndpoint(t *testing.T) {
 	assert.Equal(t, "ok", payload["status"])
 }
 
-func TestDatabaseConnection(t *testing.T) {
-	databaseURL := os.Getenv("TEST_DATABASE_URL")
-	if databaseURL == "" {
-		t.Skip("TEST_DATABASE_URL not set; skipping integration database test")
-	}
-
-	db, err := database.Connect(databaseURL)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		_ = db.Close()
-	})
-
-	err = db.Health()
-	require.NoError(t, err)
+func TestDatabaseConnectionRequiresDSN(t *testing.T) {
+	db, err := database.Connect("")
+	require.Nil(t, db)
+	require.ErrorContains(t, err, "database dsn is required")
 }

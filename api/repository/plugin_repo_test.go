@@ -1,7 +1,14 @@
 package repository
 
-import "testing"
+import (
+	"context"
+	"testing"
 
-func TestRepositoryIntegrationSkipped(t *testing.T) {
-	t.Skip("repository integration tests are skipped in the default suite")
+	"github.com/stretchr/testify/require"
+)
+
+func TestPostgresRepositoryWithoutDatabaseFailsFast(t *testing.T) {
+	repo := NewPluginRepository(nil)
+	_, err := repo.GetAll(context.Background(), 10, 0)
+	require.ErrorContains(t, err, "database is not initialized")
 }

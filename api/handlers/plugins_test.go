@@ -500,6 +500,44 @@ func newPluginTestRouter(repo *mockPluginRepository) *gin.Engine {
 	return router
 }
 
+func TestPluginAPIResolvesLegacyAliasToCanonicalIdentity(t *testing.T) {
+	fileRepo, err := repository.NewFileRepository(t.TempDir())
+	require.NoError(t, err)
+	manager := service.NewPluginService(fileRepo)
+	created, err := manager.CreatePlugin(context.Background(), models.Plugin{
+		Name:       "teams",
+		Category:   "hook",
+		Repository: "https://github.com/SemRels/hook-teams",
+		Status:     models.StatusActive,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "@semrel/hook-teams", created.Ref())
+
+	handler := NewPluginHandler(manager)
+	router := gin.New()
+	router.GET("/api/v1/plugins/@:namespace/:name", handler.GetPluginByNamespace)
+	router.GET("/api/v1/plugins/:id", handler.GetPlugin)
+
+	for _, path := range []string{
+		"/api/v1/plugins/@semrel/teams",
+		"/api/v1/plugins/hook-teams",
+		"/api/v1/plugins/teams",
+	} {
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, request)
+		require.Equal(t, http.StatusOK, response.Code, path)
+
+		var payload struct {
+			Data models.Plugin `json:"data"`
+		}
+		require.NoError(t, json.Unmarshal(response.Body.Bytes(), &payload))
+		assert.Equal(t, "@semrel", payload.Data.Namespace)
+		assert.Equal(t, "hook-teams", payload.Data.Name)
+		assert.Contains(t, payload.Data.Aliases, "@semrel/teams")
+	}
+}
+
 func performRequest(t *testing.T, router *gin.Engine, method, target string, body any, token string) *httptest.ResponseRecorder {
 	t.Helper()
 

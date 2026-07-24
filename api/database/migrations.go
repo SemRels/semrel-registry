@@ -33,6 +33,18 @@ func (d *Database) RunMigrations(dir string) error {
 
 	sqlDB := stdlib.OpenDB(*connConfig)
 	defer sqlDB.Close()
+	sqlDB.SetMaxOpenConns(1)
+	sqlDB.SetMaxIdleConns(1)
+	if _, err := sqlDB.Exec(`SELECT pg_advisory_lock($1)`,
+		PluginWriteAdvisoryLockKey); err != nil {
+		return fmt.Errorf("lock migrations against plugin writes: %w", err)
+	}
+	defer func() {
+		_, _ = sqlDB.Exec(`SELECT pg_advisory_unlock($1)`, PluginWriteAdvisoryLockKey)
+	}()
+	if err := d.installMigrationWriteGuard(); err != nil {
+		return fmt.Errorf("install migration write guard: %w", err)
+	}
 
 	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
 	if err != nil {
@@ -48,6 +60,9 @@ func (d *Database) RunMigrations(dir string) error {
 		_, _ = migrator.Close()
 	}()
 
+	if err := d.preflightCanonicalNamesMigration(); err != nil {
+		return fmt.Errorf("preflight canonical names migration: %w", err)
+	}
 	if err := migrator.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("apply migrations: %w", err)
 	}

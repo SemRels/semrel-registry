@@ -20,6 +20,8 @@ const VALID_CATEGORIES = new Set([
 
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 const PLUGIN_NAME_PATTERN = /^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$/;
+const NAMESPACE_PATTERN = /^@[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$/;
+const PLUGIN_REF_PATTERN = /^(?:@[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?\/)?[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$/;
 const HTTP_URL_PATTERN = /^https?:\/\//;
 const SPDX_PATTERN = /^[A-Za-z0-9.-]+(?:\+[A-Za-z0-9.-]+)?$/;
 const SHA256_PATTERN = /^[A-Fa-f0-9]{64}$/;
@@ -248,6 +250,27 @@ function validatePlugin(plugin, index) {
   if (typeof plugin.name !== 'string' || !PLUGIN_NAME_PATTERN.test(plugin.name)) {
     errors.push(`${prefix}.name must be kebab-case.`);
   }
+  if (plugin.namespace !== undefined &&
+      (typeof plugin.namespace !== 'string' || !NAMESPACE_PATTERN.test(plugin.namespace))) {
+    errors.push(`${prefix}.namespace must be a valid @scope.`);
+  }
+  if (plugin.aliases !== undefined) {
+    if (!Array.isArray(plugin.aliases)) {
+      errors.push(`${prefix}.aliases must be an array when present.`);
+    } else {
+      const aliases = new Set();
+      for (const alias of plugin.aliases) {
+        if (typeof alias !== 'string' || !PLUGIN_REF_PATTERN.test(alias)) {
+          errors.push(`${prefix}.aliases entries must be valid plugin references.`);
+          break;
+        }
+        aliases.add(alias.toLowerCase());
+      }
+      if (aliases.size !== plugin.aliases.length) {
+        errors.push(`${prefix}.aliases must be unique (case-insensitive).`);
+      }
+    }
+  }
 
   if (typeof plugin.description !== 'string' || plugin.description.trim() === '') {
     errors.push(`${prefix}.description must be a non-empty string.`);
@@ -271,6 +294,24 @@ function validatePlugin(plugin, index) {
 
   if (plugin.repository !== undefined && (typeof plugin.repository !== 'string' || !HTTP_URL_PATTERN.test(plugin.repository))) {
     errors.push(`${prefix}.repository must be an HTTP(S) URL when present.`);
+  }
+  const officialRepo = typeof plugin.repository === 'string'
+    ? plugin.repository.match(/^https:\/\/github\.com\/SemRels\/([^/]+)\/?$/i)
+    : null;
+  if (officialRepo) {
+    const canonicalName = officialRepo[1];
+    if (plugin.namespace !== '@semrel') {
+      errors.push(`${prefix}.namespace must be @semrel for official plugins.`);
+    }
+    if (plugin.name !== canonicalName) {
+      errors.push(`${prefix}.name must preserve official repository name ${canonicalName}.`);
+    }
+    if (!canonicalName.startsWith(`${plugin.category}-`)) {
+      errors.push(`${prefix}.name must start with category prefix ${plugin.category}-.`);
+    }
+    if (!Array.isArray(plugin.aliases) || !plugin.aliases.includes(canonicalName)) {
+      errors.push(`${prefix}.aliases must include the legacy unscoped typed reference ${canonicalName}.`);
+    }
   }
 
   if (plugin.tags !== undefined) {
@@ -319,8 +360,8 @@ function validateRegistryDocument(document) {
     return ['Registry document must be an object.'];
   }
 
-  if (document.schemaVersion !== undefined && document.schemaVersion !== 1) {
-    errors.push('schemaVersion must be 1 when present.');
+  if (document.schemaVersion !== undefined && document.schemaVersion !== 2) {
+    errors.push('schemaVersion must be 2 when present.');
   }
 
   if (document.generatedAt !== null && document.generatedAt !== undefined && !isIsoDateTime(document.generatedAt)) {
@@ -335,6 +376,26 @@ function validateRegistryDocument(document) {
   document.plugins.forEach((plugin, index) => {
     for (const error of validatePlugin(plugin, index)) {
       errors.push(error);
+    }
+  });
+
+  const refOwners = new Map();
+  document.plugins.forEach((plugin, index) => {
+    if (!plugin || typeof plugin !== 'object') {
+      return;
+    }
+    const canonical = plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name;
+    const refs = [canonical, ...(Array.isArray(plugin.aliases) ? plugin.aliases : [])];
+    for (const ref of refs) {
+      if (typeof ref !== 'string') {
+        continue;
+      }
+      const key = ref.toLowerCase();
+      if (refOwners.has(key) && refOwners.get(key) !== index) {
+        errors.push(`plugins[${index}] reference ${ref} is already owned by plugins[${refOwners.get(key)}].`);
+      } else {
+        refOwners.set(key, index);
+      }
     }
   });
 

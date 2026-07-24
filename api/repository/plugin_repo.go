@@ -50,6 +50,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 	var query strings.Builder
 	query.WriteString(`
 	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+       COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
        COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
 FROM plugins
 WHERE deleted_at IS NULL`)
@@ -106,7 +107,8 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+       COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
 
@@ -129,9 +131,16 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+       COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
-WHERE name = $1 AND deleted_at IS NULL`, name)
+WHERE deleted_at IS NULL
+  AND (
+      ((namespace IS NULL OR namespace = '') AND LOWER(name) = LOWER($1))
+      OR EXISTS (SELECT 1 FROM plugin_aliases WHERE plugin_id = plugins.id AND LOWER(alias) = LOWER($1))
+  )
+ORDER BY CASE WHEN namespace IS NULL OR namespace = '' THEN 0 ELSE 1 END
+LIMIT 1`, name)
 
 	plugin, err := scanPlugin(row)
 	if err != nil {
@@ -152,9 +161,19 @@ func (r *pgRepository) GetByNamespacedName(ctx context.Context, namespace, name 
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+       COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
-WHERE LOWER(namespace) = LOWER($1) AND name = $2 AND deleted_at IS NULL`, namespace, name)
+WHERE deleted_at IS NULL
+  AND (
+      (LOWER(namespace) = LOWER($1) AND LOWER(name) = LOWER($2))
+      OR EXISTS (
+          SELECT 1 FROM plugin_aliases
+          WHERE plugin_id = plugins.id AND LOWER(alias) = LOWER($1 || '/' || $2)
+      )
+  )
+ORDER BY CASE WHEN LOWER(namespace) = LOWER($1) AND LOWER(name) = LOWER($2) THEN 0 ELSE 1 END
+LIMIT 1`, namespace, name)
 
 	plugin, err := scanPlugin(row)
 	if err != nil {
@@ -221,6 +240,9 @@ func (r *pgRepository) Create(ctx context.Context, plugin *models.Plugin) (int64
 	defer func() {
 		_ = tx.Rollback(ctx)
 	}()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return 0, err
+	}
 
 	err = tx.QueryRow(ctx, `
 INSERT INTO plugins (namespace, name, description, author, category, repository, license, status, tags)
@@ -239,6 +261,9 @@ RETURNING id, created_at, updated_at`,
 	if err != nil {
 		return 0, wrapWriteError("create plugin", err)
 	}
+	if err := replaceAliases(ctx, tx, plugin.ID, plugin.Aliases); err != nil {
+		return 0, err
+	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return 0, fmt.Errorf("commit create plugin: %w", err)
@@ -255,7 +280,18 @@ func (r *pgRepository) Update(ctx context.Context, plugin *models.Plugin) error 
 		return fmt.Errorf("plugin is required")
 	}
 
-	row := r.db.Pool().QueryRow(ctx, `
+	tx, err := r.db.BeginTx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return err
+	}
+
+	row := tx.QueryRow(ctx, `
 UPDATE plugins
 SET namespace = $1,
     name = $2,
@@ -285,7 +321,13 @@ RETURNING updated_at`,
 		}
 		return wrapWriteError("update plugin", err)
 	}
+	if err := replaceAliases(ctx, tx, plugin.ID, plugin.Aliases); err != nil {
+		return err
+	}
 
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit update plugin: %w", err)
+	}
 	return nil
 }
 
@@ -293,7 +335,7 @@ func (r *pgRepository) UpdateStatus(ctx context.Context, id int64, status string
 	if err := r.validate(); err != nil {
 		return err
 	}
-	result, err := r.db.Pool().Exec(ctx, `
+	result, err := r.execPluginWrite(ctx, `
 UPDATE plugins SET status = $1, updated_at = NOW()
 WHERE id = $2 AND deleted_at IS NULL`, status, id)
 	if err != nil {
@@ -309,7 +351,7 @@ func (r *pgRepository) UpdateValidationChecks(ctx context.Context, id int64, che
 	if err := r.validate(); err != nil {
 		return err
 	}
-	result, err := r.db.Pool().Exec(ctx, `
+	result, err := r.execPluginWrite(ctx, `
 UPDATE plugins SET validation_checks = $1, validated_at = NOW(), updated_at = NOW()
 WHERE id = $2 AND deleted_at IS NULL`, checksJSON, id)
 	if err != nil {
@@ -326,7 +368,7 @@ func (r *pgRepository) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-	result, err := r.db.Pool().Exec(ctx, `
+	result, err := r.execPluginWrite(ctx, `
 UPDATE plugins
 SET deleted_at = NOW(), updated_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL`, id)
@@ -338,6 +380,29 @@ WHERE id = $1 AND deleted_at IS NULL`, id)
 	}
 
 	return nil
+}
+
+func (r *pgRepository) execPluginWrite(
+	ctx context.Context,
+	query string,
+	args ...interface{},
+) (pgconn.CommandTag, error) {
+	tx, err := r.db.BeginTx()
+	if err != nil {
+		return pgconn.CommandTag{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return pgconn.CommandTag{}, err
+	}
+	tag, err := tx.Exec(ctx, query, args...)
+	if err != nil {
+		return pgconn.CommandTag{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return pgconn.CommandTag{}, err
+	}
+	return tag, nil
 }
 
 func (r *pgRepository) AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error) {
@@ -355,6 +420,9 @@ func (r *pgRepository) AddVersion(ctx context.Context, version *models.PluginVer
 	defer func() {
 		_ = tx.Rollback(ctx)
 	}()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return 0, err
+	}
 
 	err = tx.QueryRow(ctx, `
 INSERT INTO plugin_versions (plugin_id, version, release_date, changelog, download_url, prerelease)
@@ -460,6 +528,31 @@ func (r *pgRepository) validate() error {
 	return nil
 }
 
+func replaceAliases(ctx context.Context, tx pgx.Tx, pluginID int64, aliases []string) error {
+	if _, err := tx.Exec(ctx, `DELETE FROM plugin_aliases WHERE plugin_id = $1`, pluginID); err != nil {
+		return fmt.Errorf("delete plugin aliases: %w", err)
+	}
+	seen := make(map[string]struct{}, len(aliases))
+	for _, alias := range aliases {
+		alias = strings.TrimSpace(alias)
+		key := strings.ToLower(alias)
+		if alias == "" {
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO plugin_aliases (plugin_id, alias) VALUES ($1, $2)`,
+			pluginID, alias,
+		); err != nil {
+			return wrapWriteError("save plugin alias", err)
+		}
+	}
+	return nil
+}
+
 func scanPlugin(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Plugin, error) {
@@ -482,6 +575,7 @@ func scanPlugin(scanner interface {
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
+		&plugin.Aliases,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, appErrors.ErrPluginNotFound
@@ -493,6 +587,9 @@ func scanPlugin(scanner interface {
 	}
 	if plugin.Versions == nil {
 		plugin.Versions = []models.PluginVersion{}
+	}
+	if plugin.Aliases == nil {
+		plugin.Aliases = []string{}
 	}
 	return &plugin, nil
 }
@@ -520,6 +617,7 @@ func scanPluginWithLatest(scanner interface {
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
+		&plugin.Aliases,
 		&plugin.LatestVersion,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -529,6 +627,9 @@ func scanPluginWithLatest(scanner interface {
 	}
 	if plugin.Tags == nil {
 		plugin.Tags = []string{}
+	}
+	if plugin.Aliases == nil {
+		plugin.Aliases = []string{}
 	}
 	plugin.Versions = []models.PluginVersion{}
 	return &plugin, nil

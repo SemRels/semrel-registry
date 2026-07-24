@@ -20,7 +20,7 @@ services:
       RATE_LIMIT_PUBLIC_RPM: ${RATE_LIMIT_PUBLIC_RPM:-60}
       RATE_LIMIT_PLUGINS_JSON_RPM: ${RATE_LIMIT_PLUGINS_JSON_RPM:-10}
       RATE_LIMIT_AUTH_RPM: ${RATE_LIMIT_AUTH_RPM:-20}
-      PLUGINS_JSON_PATH: ""
+      PLUGINS_JSON_PATH: /app/plugins.json
     volumes:
       - registry_data:/data
     restart: unless-stopped
