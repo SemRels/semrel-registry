@@ -71,9 +71,11 @@ docker build -f admin/Dockerfile -t semrel-registry-admin .
 
 | Environment variable | Default | Description |
 |---|---|---|
-| `API_URL` | `http://api:8080` | URL of the Go API container. Injected into nginx at startup via `envsubst`. |
+| `API_URL` | `http://api:8080` | Origin URL of the Go API as reachable from the admin container. |
 
-The value must match the API service name/host as seen from inside the Docker network. For example, if using `docker-compose.file.yml` where the service is named `registry`, set `API_URL=http://registry:8080`.
+The default works only when the admin and API containers share a network where the API has the DNS name `api`. For a separate deployment, set `API_URL` to a reachable internal or public API origin (without a path) and either attach both services to a shared network or provide working DNS and routing. For example, if the API service is named `registry`, set `API_URL=http://registry:8080`. A permanently incorrect hostname continues to return `502`; there is no fallback backend.
+
+The image uses the official nginx entrypoint's local resolver discovery and resolves the API hostname at request time. This lets nginx start before the API DNS record exists and recover after it appears. Only `API_URL` and the discovered resolver list are substituted into the template; nginx request variables remain intact. The image health check verifies that nginx can serve the SPA, not that the API backend is ready.
 
 ## Web app development
 
