@@ -221,6 +221,8 @@ WITH ranked AS (
     -- Canonical precedence is exact typed identity, then scoped legacy identity,
     -- then oldest ID. This makes every source merge deterministic.
     SELECT c.id,
+           c.repository_key,
+           c.target_name,
            FIRST_VALUE(c.id) OVER (
                PARTITION BY c.repository_key
                ORDER BY (LOWER(COALESCE(p.namespace, '')) = '@semrel'
@@ -237,10 +239,34 @@ WITH ranked AS (
            ) AS position
     FROM semrel_canonical_candidates c
     JOIN plugins p ON p.id = c.id
+),
+active_targets AS (
+    SELECT DISTINCT repository_key, target_name, target_id
+    FROM ranked
+),
+deleted_canonical_duplicates AS (
+    -- Soft-deleted canonical rows still occupy the database unique index.
+    -- Merge only rows whose canonical identity and normalized allowlisted
+    -- repository both match an active first-party target.
+    SELECT deleted.id AS source_id, target.target_id
+    FROM plugins deleted
+    JOIN semrel_first_party_names first_party
+      ON LOWER(COALESCE(deleted.namespace, '')) = '@semrel'
+     AND LOWER(deleted.name) = first_party.target_name
+    JOIN active_targets target
+      ON target.target_name = first_party.target_name
+     AND target.repository_key = LOWER(regexp_replace(
+           regexp_replace(BTRIM(deleted.repository), '/+$', ''),
+           '\.git$', '', 'i'
+         ))
+    WHERE deleted.deleted_at IS NOT NULL
 )
 SELECT id AS source_id, target_id
 FROM ranked
-WHERE position > 1;
+WHERE position > 1
+UNION ALL
+SELECT source_id, target_id
+FROM deleted_canonical_duplicates;
 
 CREATE TEMP TABLE semrel_canonical_version_map ON COMMIT DROP AS
 WITH version_candidates AS (
@@ -282,8 +308,12 @@ BEGIN
      AND LOWER(COALESCE(occupied.namespace, '')) = '@semrel'
      AND LOWER(occupied.name) = LOWER(c.target_name)
     LEFT JOIN semrel_canonical_candidates occupied_candidate ON occupied_candidate.id = occupied.id
-    WHERE occupied_candidate.repository_key IS NULL
-       OR occupied_candidate.repository_key <> c.repository_key
+    LEFT JOIN semrel_canonical_duplicate_map occupied_duplicate
+      ON occupied_duplicate.source_id = occupied.id
+    LEFT JOIN semrel_canonical_duplicate_map candidate_duplicate
+      ON candidate_duplicate.source_id = c.id
+    WHERE COALESCE(occupied_duplicate.target_id, occupied_candidate.id, occupied.id)
+          <> COALESCE(candidate_duplicate.target_id, c.id)
     LIMIT 1;
 
     IF collision IS NOT NULL THEN
