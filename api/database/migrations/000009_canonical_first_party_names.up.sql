@@ -202,11 +202,17 @@ INSERT INTO semrel_first_party_names (target_name) VALUES
 
 CREATE TEMP TABLE semrel_canonical_candidates ON COMMIT DROP AS
 SELECT plugin.id,
-       LOWER(regexp_replace(plugin.repository, '\.git$', '', 'i')) AS repository_key,
+       LOWER(regexp_replace(
+           regexp_replace(BTRIM(plugin.repository), '/+$', ''),
+           '\.git$', '', 'i'
+       )) AS repository_key,
        first_party.target_name
 FROM plugins plugin
 JOIN semrel_first_party_names first_party
-  ON LOWER(regexp_replace(plugin.repository, '\.git$', '', 'i'))
+  ON LOWER(regexp_replace(
+         regexp_replace(BTRIM(plugin.repository), '/+$', ''),
+         '\.git$', '', 'i'
+     ))
      = 'https://github.com/semrels/' || first_party.target_name
 WHERE plugin.deleted_at IS NULL;
 
