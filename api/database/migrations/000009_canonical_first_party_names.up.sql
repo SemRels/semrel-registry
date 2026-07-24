@@ -1,3 +1,7 @@
+-- Corrected before migration 000009's first production rollout from version 8.
+-- Databases already recorded at version 9 will not rerun this file; any such
+-- pre-release environment needs the equivalent function replacement or rebuild.
+
 CREATE TABLE IF NOT EXISTS plugin_aliases (
     plugin_id INT NOT NULL REFERENCES plugins(id) ON DELETE CASCADE,
     alias VARCHAR(356) NOT NULL,
@@ -29,33 +33,15 @@ BEGIN
             source_plugin_id, target_plugin_id;
     END IF;
 
-    IF EXISTS (
-        SELECT 1
-        FROM plugins source
-        JOIN plugins target ON target.id = target_plugin_id
-        WHERE source.id = source_plugin_id
-          AND (
-              (NULLIF(source.description, '') IS NOT NULL
-               AND NULLIF(target.description, '') IS NOT NULL
-               AND source.description IS DISTINCT FROM target.description)
-              OR (NULLIF(source.author, '') IS NOT NULL
-                  AND NULLIF(target.author, '') IS NOT NULL
-                  AND source.author IS DISTINCT FROM target.author)
-              OR (NULLIF(source.license, '') IS NOT NULL
-                  AND NULLIF(target.license, '') IS NOT NULL
-                  AND source.license IS DISTINCT FROM target.license)
-              OR source.status IS DISTINCT FROM target.status
-          )
-    ) THEN
-        RAISE EXCEPTION
-            'cannot merge duplicate first-party plugins: plugin metadata differs';
-    END IF;
-
     SELECT ARRAY_AGG(alias ORDER BY alias) INTO source_aliases
     FROM plugin_aliases
     WHERE plugin_id = source_plugin_id;
     DELETE FROM plugin_aliases WHERE plugin_id = source_plugin_id;
 
+    -- The caller deterministically selects the canonical target. Description,
+    -- author, license, and status are non-artifact display/workflow metadata:
+    -- keep nonempty target fields, fill only empty fields from the source, and
+    -- leave target status unchanged. Artifact conflicts remain fatal below.
     UPDATE plugins target
     SET views = target.views + source.views,
         downloads = target.downloads + source.downloads,
@@ -226,6 +212,8 @@ WHERE plugin.deleted_at IS NULL;
 
 CREATE TEMP TABLE semrel_canonical_duplicate_map ON COMMIT DROP AS
 WITH ranked AS (
+    -- Canonical precedence is exact typed identity, then scoped legacy identity,
+    -- then oldest ID. This makes every source merge deterministic.
     SELECT c.id,
            FIRST_VALUE(c.id) OVER (
                PARTITION BY c.repository_key

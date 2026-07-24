@@ -55,6 +55,271 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		assert.False(t, dirty)
 	})
 
+	t.Run("version eight startup keeps canonical metadata while merging production data", func(t *testing.T) {
+		testDSN := createDatabase(t, dsn, "migration_metadata_precedence")
+		migrateVersion(t, testDSN, 8)
+		db, err := database.Connect(testDSN)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = db.Close() })
+		ctx := context.Background()
+
+		_, err = db.Pool().Exec(ctx, `
+			CREATE TABLE plugin_aliases (
+			    plugin_id INT NOT NULL REFERENCES plugins(id) ON DELETE CASCADE,
+			    alias VARCHAR(356) NOT NULL,
+			    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+			    PRIMARY KEY (plugin_id, alias)
+			)`)
+		require.NoError(t, err)
+
+		var legacyID, canonicalID int64
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository,
+			     license, status, tags, views, downloads, validation_checks, validated_at)
+			VALUES
+			    ('@semrel', 'conventional', 'legacy description', 'legacy author',
+			     'analyzer', 'https://github.com/SemRels/analyzer-conventional',
+			     'MIT', 'rejected', ARRAY['legacy', 'shared'], 17, 19,
+			     '{"source":"legacy"}'::jsonb, TIMESTAMPTZ '2026-07-22 00:00:00+00')
+			RETURNING id`).Scan(&legacyID))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository,
+			     license, status, tags, views, downloads, validation_checks, validated_at)
+			VALUES
+			    ('@semrel', 'analyzer-conventional', 'canonical description',
+			     'canonical author', 'analyzer',
+			     'https://github.com/SemRels/analyzer-conventional',
+			     'Apache-2.0', 'pending', ARRAY['canonical', 'shared'], 11, 13,
+			     '{"source":"canonical"}'::jsonb, TIMESTAMPTZ '2026-07-21 00:00:00+00')
+			RETURNING id`).Scan(&canonicalID))
+		require.Greater(t, canonicalID, legacyID,
+			"the exact canonical row must win even when it is not the oldest")
+
+		_, err = db.Pool().Exec(ctx, `
+			INSERT INTO plugin_aliases (plugin_id, alias) VALUES
+			    ($1, 'legacy-existing-alias'),
+			    ($2, 'canonical-existing-alias')`, legacyID, canonicalID)
+		require.NoError(t, err)
+
+		var legacyVersionID, uniqueVersionID, canonicalVersionID int64
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugin_versions
+			    (plugin_id, version, release_date, changelog, download_url,
+			     prerelease, views, downloads)
+			VALUES
+			    ($1, '1.0.0', TIMESTAMP '2026-07-01 00:00:00',
+			     'shared release', 'https://example.invalid/analyzer/1.0.0',
+			     FALSE, 11, 13)
+			RETURNING id`, legacyID).Scan(&legacyVersionID))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugin_versions
+			    (plugin_id, version, release_date, changelog, download_url,
+			     prerelease, views, downloads)
+			VALUES
+			    ($1, '2.0.0', TIMESTAMP '2026-07-02 00:00:00',
+			     'legacy-only release', 'https://example.invalid/analyzer/2.0.0',
+			     FALSE, 17, 19)
+			RETURNING id`, legacyID).Scan(&uniqueVersionID))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugin_versions
+			    (plugin_id, version, release_date, changelog, download_url,
+			     prerelease, views, downloads)
+			VALUES
+			    ($1, '1.0.0', TIMESTAMP '2026-07-01 00:00:00',
+			     'shared release', 'https://example.invalid/analyzer/1.0.0',
+			     FALSE, 5, 7)
+			RETURNING id`, canonicalID).Scan(&canonicalVersionID))
+		_, err = db.Pool().Exec(ctx, `
+			INSERT INTO plugin_checksums (version_id, platform, algorithm, hash) VALUES
+			    ($1, 'LINUX-AMD64', 'sha256', 'shared-hash'),
+			    ($2, 'darwin-arm64', 'sha256', 'unique-hash'),
+			    ($3, 'linux-amd64', 'sha256', 'shared-hash')`,
+			legacyVersionID, uniqueVersionID, canonicalVersionID)
+		require.NoError(t, err)
+
+		_, err = db.Pool().Exec(ctx, `
+			INSERT INTO metric_events (plugin_id, version_id, metric_type) VALUES
+			    ($1, $2, 'download'),
+			    ($3, $4, 'view')`,
+			legacyID, legacyVersionID, canonicalID, canonicalVersionID)
+		require.NoError(t, err)
+		_, err = db.Pool().Exec(ctx, `
+			INSERT INTO metric_daily_plugin (day, plugin_id, metric_type, count) VALUES
+			    (CURRENT_DATE, $1, 'view', 3),
+			    (CURRENT_DATE, $2, 'view', 2)`,
+			legacyID, canonicalID)
+		require.NoError(t, err)
+		_, err = db.Pool().Exec(ctx, `
+			INSERT INTO metric_daily_version
+			    (day, plugin_id, version_id, metric_type, count) VALUES
+			    (CURRENT_DATE, $1, $2, 'view', 6),
+			    (CURRENT_DATE, $3, $4, 'view', 4),
+			    (CURRENT_DATE, $1, $5, 'download', 8)`,
+			legacyID, legacyVersionID, canonicalID, canonicalVersionID, uniqueVersionID)
+		require.NoError(t, err)
+
+		require.NoError(t, db.RunMigrations("database/migrations"))
+		require.NoError(t, db.RunMigrations("database/migrations"),
+			"repeat production startup must be idempotent")
+
+		var version int
+		var dirty bool
+		require.NoError(t, db.Pool().QueryRow(ctx,
+			`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
+		assert.Equal(t, 9, version)
+		assert.False(t, dirty)
+
+		var retainedID, views, downloads int64
+		var namespace, name, category, description, author, license, status string
+		var tags []string
+		var validation []byte
+		var keptNewestValidation bool
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT id, namespace, name, category, description, author, license, status,
+			       tags, views, downloads, validation_checks,
+			       validated_at = TIMESTAMPTZ '2026-07-22 00:00:00+00'
+			FROM plugins
+			WHERE repository = 'https://github.com/SemRels/analyzer-conventional'`).
+			Scan(&retainedID, &namespace, &name, &category, &description, &author,
+				&license, &status, &tags, &views, &downloads, &validation,
+				&keptNewestValidation))
+		assert.Equal(t, canonicalID, retainedID)
+		assert.Equal(t, "@semrel", namespace)
+		assert.Equal(t, "analyzer-conventional", name)
+		assert.Equal(t, "analyzer", category)
+		assert.Equal(t, "canonical description", description)
+		assert.Equal(t, "canonical author", author)
+		assert.Equal(t, "Apache-2.0", license)
+		assert.Equal(t, "pending", status)
+		assert.ElementsMatch(t, []string{"canonical", "legacy", "shared"}, tags)
+		assert.EqualValues(t, 28, views)
+		assert.EqualValues(t, 32, downloads)
+		assert.JSONEq(t, `{"source":"legacy"}`, string(validation))
+		assert.True(t, keptNewestValidation)
+
+		var aliases []string
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT ARRAY_AGG(alias ORDER BY alias)
+			FROM plugin_aliases
+			WHERE plugin_id = $1`, canonicalID).Scan(&aliases))
+		assert.ElementsMatch(t, []string{
+			"@semrel/conventional",
+			"analyzer-conventional",
+			"canonical-existing-alias",
+			"conventional",
+			"legacy-existing-alias",
+		}, aliases)
+
+		var pluginCount, versionCount, checksumCount, eventCount, eventVersionOwnerCount int
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT
+			    (SELECT COUNT(*) FROM plugins
+			     WHERE repository = 'https://github.com/SemRels/analyzer-conventional'),
+			    (SELECT COUNT(*) FROM plugin_versions WHERE plugin_id = $1),
+			    (SELECT COUNT(*) FROM plugin_checksums c
+			     JOIN plugin_versions v ON v.id = c.version_id
+			     WHERE v.plugin_id = $1),
+			    (SELECT COUNT(*) FROM metric_events WHERE plugin_id = $1),
+			    (SELECT COUNT(*) FROM metric_events e
+			     JOIN plugin_versions v ON v.id = e.version_id
+			     WHERE e.plugin_id = $1 AND v.plugin_id = $1)`,
+			canonicalID).Scan(&pluginCount, &versionCount, &checksumCount, &eventCount,
+			&eventVersionOwnerCount))
+		assert.Equal(t, 1, pluginCount)
+		assert.Equal(t, 2, versionCount)
+		assert.Equal(t, 2, checksumCount)
+		assert.Equal(t, 2, eventCount)
+		assert.Equal(t, 2, eventVersionOwnerCount)
+
+		var checksums []string
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT ARRAY_AGG(LOWER(c.platform) || ':' || c.hash
+			                 ORDER BY LOWER(c.platform), c.hash)
+			FROM plugin_checksums c
+			JOIN plugin_versions v ON v.id = c.version_id
+			WHERE v.plugin_id = $1`, canonicalID).Scan(&checksums))
+		assert.Equal(t, []string{
+			"darwin-arm64:unique-hash",
+			"linux-amd64:shared-hash",
+		}, checksums)
+
+		var mergedVersionID, versionViews, versionDownloads int64
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT id, views, downloads
+			FROM plugin_versions
+			WHERE plugin_id = $1 AND version = '1.0.0'`, canonicalID).
+			Scan(&mergedVersionID, &versionViews, &versionDownloads))
+		assert.Equal(t, canonicalVersionID, mergedVersionID)
+		assert.EqualValues(t, 16, versionViews)
+		assert.EqualValues(t, 20, versionDownloads)
+		var uniqueOwner int64
+		require.NoError(t, db.Pool().QueryRow(ctx,
+			`SELECT plugin_id FROM plugin_versions WHERE id = $1`, uniqueVersionID).
+			Scan(&uniqueOwner))
+		assert.Equal(t, canonicalID, uniqueOwner)
+
+		var pluginDaily, mergedVersionDaily, uniqueVersionDaily int64
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT count FROM metric_daily_plugin
+			WHERE plugin_id = $1 AND day = CURRENT_DATE AND metric_type = 'view'`,
+			canonicalID).Scan(&pluginDaily))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT count FROM metric_daily_version
+			WHERE version_id = $1 AND day = CURRENT_DATE AND metric_type = 'view'`,
+			canonicalVersionID).Scan(&mergedVersionDaily))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT count FROM metric_daily_version
+			WHERE version_id = $1 AND day = CURRENT_DATE AND metric_type = 'download'`,
+			uniqueVersionID).Scan(&uniqueVersionDaily))
+		assert.EqualValues(t, 5, pluginDaily)
+		assert.EqualValues(t, 10, mergedVersionDaily)
+		assert.EqualValues(t, 8, uniqueVersionDaily)
+	})
+
+	t.Run("version eight startup fills only empty canonical metadata", func(t *testing.T) {
+		testDSN := createDatabase(t, dsn, "migration_metadata_fallback")
+		migrateVersion(t, testDSN, 8)
+		db, err := database.Connect(testDSN)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = db.Close() })
+		ctx := context.Background()
+
+		var legacyID, canonicalID int64
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository, license, status)
+			VALUES
+			    ('@semrel', 'conventional', 'fallback description', 'fallback author',
+			     'analyzer', 'https://github.com/SemRels/analyzer-conventional',
+			     'MIT', 'active')
+			RETURNING id`).Scan(&legacyID))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository, license, status)
+			VALUES
+			    ('@semrel', 'analyzer-conventional', '', '', 'analyzer',
+			     'https://github.com/SemRels/analyzer-conventional', '', 'pending')
+			RETURNING id`).Scan(&canonicalID))
+		require.Greater(t, canonicalID, legacyID)
+
+		require.NoError(t, db.RunMigrations("database/migrations"))
+
+		var retainedID int64
+		var description, author, license, status string
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT id, description, author, license, status
+			FROM plugins
+			WHERE repository = 'https://github.com/SemRels/analyzer-conventional'`).
+			Scan(&retainedID, &description, &author, &license, &status))
+		assert.Equal(t, canonicalID, retainedID)
+		assert.Equal(t, "fallback description", description)
+		assert.Equal(t, "fallback author", author)
+		assert.Equal(t, "MIT", license)
+		assert.Equal(t, "pending", status)
+	})
+
 	t.Run("startup seed repairs partial catalog and is idempotent", func(t *testing.T) {
 		testDSN := createDatabase(t, dsn, "seed_aliases")
 		db := migratedDatabase(t, testDSN)
@@ -618,72 +883,60 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		assert.Equal(t, 2, pluginCount)
 	})
 
-	t.Run("cleanup rejects incompatible plugin metadata atomically", func(t *testing.T) {
-		testDSN := createDatabase(t, dsn, "cleanup_plugin_metadata_collision")
+	t.Run("cleanup uses canonical plugin metadata precedence", func(t *testing.T) {
+		testDSN := createDatabase(t, dsn, "cleanup_metadata_precedence")
 		db := migratedDatabase(t, testDSN)
 		ctx := context.Background()
 
-		_, err := db.Pool().Exec(ctx, `
-			INSERT INTO plugins
-			    (namespace, name, description, author, category, repository, license, status)
-			VALUES
-			    ('@semrel', 'provider-git', 'canonical', 'SemRels', 'provider',
-			     'https://github.com/SemRels/provider-git', 'Apache-2.0', 'active'),
-			    ('@legacy', 'legacy-git', 'different', 'SemRels', 'provider',
-			     'https://github.com/SemRels/provider-git', 'Apache-2.0', 'active')`)
-		require.NoError(t, err)
-
-		_, _, err = db.CleanupSemrelDuplicates(ctx)
-		require.ErrorContains(t, err, "plugin metadata differs")
-		var pluginCount int
+		var legacyID, canonicalID int64
 		require.NoError(t, db.Pool().QueryRow(ctx, `
-			SELECT COUNT(*) FROM plugins
-			WHERE repository = 'https://github.com/SemRels/provider-git'`).
-			Scan(&pluginCount))
-		assert.Equal(t, 2, pluginCount)
-	})
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository,
+			     license, status, tags, views, downloads)
+			VALUES
+			    ('@semrel', 'git', 'legacy description', 'legacy author', 'provider',
+			     'https://github.com/SemRels/provider-git', 'MIT', 'rejected',
+			     ARRAY['legacy'], 5, 7)
+			RETURNING id`).Scan(&legacyID))
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			INSERT INTO plugins
+			    (namespace, name, description, author, category, repository,
+			     license, status, tags, views, downloads)
+			VALUES
+			    ('@semrel', 'provider-git', 'canonical description',
+			     'canonical author', 'provider',
+			     'https://github.com/SemRels/provider-git', 'Apache-2.0',
+			     'pending', ARRAY['canonical'], 2, 3)
+			RETURNING id`).Scan(&canonicalID))
+		require.Greater(t, canonicalID, legacyID)
 
-	for _, metadataCase := range []struct {
-		name                         string
-		targetAuthor, sourceAuthor   string
-		targetLicense, sourceLicense string
-		targetStatus, sourceStatus   string
-	}{
-		{
-			name: "author", targetAuthor: "canonical author", sourceAuthor: "different author",
-			targetLicense: "Apache-2.0", sourceLicense: "Apache-2.0",
-			targetStatus: "active", sourceStatus: "active",
-		},
-		{
-			name: "license", targetAuthor: "SemRels", sourceAuthor: "SemRels",
-			targetLicense: "Apache-2.0", sourceLicense: "MIT",
-			targetStatus: "active", sourceStatus: "active",
-		},
-		{
-			name: "status", targetAuthor: "SemRels", sourceAuthor: "SemRels",
-			targetLicense: "Apache-2.0", sourceLicense: "Apache-2.0",
-			targetStatus: "active", sourceStatus: "pending",
-		},
-	} {
-		t.Run("cleanup rejects incompatible "+metadataCase.name, func(t *testing.T) {
-			testDSN := createDatabase(t, dsn, "cleanup_metadata_"+metadataCase.name)
-			db := migratedDatabase(t, testDSN)
-			ctx := context.Background()
-			_, err := db.Pool().Exec(ctx, `
-				INSERT INTO plugins
-				    (namespace, name, author, category, repository, license, status)
-				VALUES
-				    ('@semrel', 'provider-git', $1, 'provider',
-				     'https://github.com/SemRels/provider-git', $2, $3),
-				    ('@legacy', 'legacy-git', $4, 'provider',
-				     'https://github.com/SemRels/provider-git', $5, $6)`,
-				metadataCase.targetAuthor, metadataCase.targetLicense, metadataCase.targetStatus,
-				metadataCase.sourceAuthor, metadataCase.sourceLicense, metadataCase.sourceStatus)
-			require.NoError(t, err)
-			_, _, err = db.CleanupSemrelDuplicates(ctx)
-			require.ErrorContains(t, err, "plugin metadata differs")
-		})
-	}
+		deleted, normalized, err := db.CleanupSemrelDuplicates(ctx)
+		require.NoError(t, err)
+		assert.EqualValues(t, 1, deleted)
+		assert.Zero(t, normalized)
+		deleted, normalized, err = db.CleanupSemrelDuplicates(ctx)
+		require.NoError(t, err)
+		assert.Zero(t, deleted)
+		assert.Zero(t, normalized)
+
+		var retainedID, views, downloads int64
+		var description, author, license, status string
+		var tags []string
+		require.NoError(t, db.Pool().QueryRow(ctx, `
+			SELECT id, description, author, license, status, tags, views, downloads
+			FROM plugins
+			WHERE repository = 'https://github.com/SemRels/provider-git'`).
+			Scan(&retainedID, &description, &author, &license, &status, &tags,
+				&views, &downloads))
+		assert.Equal(t, canonicalID, retainedID)
+		assert.Equal(t, "canonical description", description)
+		assert.Equal(t, "canonical author", author)
+		assert.Equal(t, "Apache-2.0", license)
+		assert.Equal(t, "pending", status)
+		assert.ElementsMatch(t, []string{"canonical", "legacy"}, tags)
+		assert.EqualValues(t, 7, views)
+		assert.EqualValues(t, 10, downloads)
+	})
 
 	t.Run("concurrent canonical create has one durable winner", func(t *testing.T) {
 		testDSN := createDatabase(t, dsn, "concurrency")
