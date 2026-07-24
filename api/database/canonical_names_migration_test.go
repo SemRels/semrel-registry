@@ -131,6 +131,57 @@ func TestCanonicalFirstPartyMigrationUpgradesExistingRows(t *testing.T) {
 	require.NoError(t, db.RunMigrations("migrations"))
 }
 
+func TestCanonicalMigrationRecoversDirtyVersionNineWithHistoricalURL(t *testing.T) {
+	adminDSN := testutil.DatabaseURL(t, "..")
+	admin, err := pgxpool.New(context.Background(), adminDSN)
+	require.NoError(t, err)
+	_, err = admin.Exec(context.Background(), `CREATE DATABASE semrel_dirty_v9_recovery`)
+	require.NoError(t, err)
+	admin.Close()
+
+	dsn := strings.Replace(adminDSN, "/semrel_registry?", "/semrel_dirty_v9_recovery?", 1)
+	migrateToVersion(t, dsn, 8)
+	pool, err := pgxpool.New(context.Background(), dsn)
+	require.NoError(t, err)
+	defer pool.Close()
+
+	_, err = pool.Exec(context.Background(), `
+		INSERT INTO plugins (namespace, name, category, repository, description) VALUES
+		('@semrel', 'gitea-actions', 'condition',
+		 'https://github.com/SemRels/condition-gitea-actions', 'legacy'),
+		('@semrel', 'condition-gitea-actions', 'condition',
+		 'https://github.com/SemRels/condition-gitea-actions/', 'canonical')`)
+	require.NoError(t, err)
+	_, err = pool.Exec(context.Background(),
+		`UPDATE schema_migrations SET version = 9, dirty = TRUE`)
+	require.NoError(t, err)
+
+	db, err := Connect(dsn)
+	require.NoError(t, err)
+	defer db.Close()
+	require.NoError(t, db.RunMigrations("migrations"))
+	require.NoError(t, db.RunMigrations("migrations"))
+
+	var version int
+	var dirty bool
+	require.NoError(t, pool.QueryRow(context.Background(),
+		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
+	assert.Equal(t, 9, version)
+	assert.False(t, dirty)
+
+	var count int
+	var name, description string
+	require.NoError(t, pool.QueryRow(context.Background(), `
+		SELECT COUNT(*), MIN(name), MIN(description)
+		FROM plugins
+		WHERE LOWER(RTRIM(repository, '/')) =
+		      'https://github.com/semrels/condition-gitea-actions'`).
+		Scan(&count, &name, &description))
+	assert.Equal(t, 1, count)
+	assert.Equal(t, "condition-gitea-actions", name)
+	assert.Equal(t, "canonical", description)
+}
+
 func TestCanonicalFirstPartyMigrationDetectsIrreconcilableIdentityCollision(t *testing.T) {
 	dsn := testutil.DatabaseURL(t, "..")
 	admin, err := pgxpool.New(context.Background(), dsn)

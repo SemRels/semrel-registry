@@ -1,7 +1,9 @@
 package database
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -60,6 +62,9 @@ func (d *Database) RunMigrations(dir string) error {
 		_, _ = migrator.Close()
 	}()
 
+	if err := recoverDirtyCanonicalNamesMigration(migrator); err != nil {
+		return err
+	}
 	if err := d.preflightCanonicalNamesMigration(); err != nil {
 		return fmt.Errorf("preflight canonical names migration: %w", err)
 	}
@@ -67,6 +72,28 @@ func (d *Database) RunMigrations(dir string) error {
 		return fmt.Errorf("apply migrations: %w", err)
 	}
 
+	return nil
+}
+
+func recoverDirtyCanonicalNamesMigration(migrator *migrate.Migrate) error {
+	version, dirty, err := migrator.Version()
+	if errors.Is(err, migrate.ErrNilVersion) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("inspect migration state: %w", err)
+	}
+	if version != 9 || !dirty {
+		return nil
+	}
+
+	// Migration 9 can be retried safely: its DDL is idempotent and all data
+	// rewrites select from the current state. Restrict automatic recovery to
+	// this known migration so unrelated dirty versions still require review.
+	log.Printf("recovering interrupted canonical names migration from dirty version 9")
+	if err := migrator.Force(8); err != nil {
+		return fmt.Errorf("restore canonical names migration to version 8: %w", err)
+	}
 	return nil
 }
 
