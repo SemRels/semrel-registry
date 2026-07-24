@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-15T05:26:23.762Z",
+  "generatedAt": "2026-07-24T21:58:39.773Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -3863,6 +3863,45 @@
             "gRPCVersion": "v1"
           },
           "changelog": "**Full Changelog**: https://github.com/SemRels/packager-nfpm/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "namespace": "@semrel",
+      "name": "publisher-docker",
+      "aliases": [
+        "publisher-docker"
+      ],
+      "description": "Existing Docker image publisher",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "publisher",
+      "repository": "https://github.com/SemRels/publisher-docker",
+      "tags": [
+        "publisher",
+        "docker",
+        "images",
+        "registry"
+      ],
+      "versions": [
+        {
+          "version": "0.1.1",
+          "releaseDate": "2026-07-24T21:54:19Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-docker/releases/download/v0.1.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "419046d250f32c08dd5c0c2a6a3d3565098d96eb8bf43795d118586565e55877",
+            "linux_arm64": "7abbb950934c99811114bdaf4ee043b6c82574da286a8459a23d8866c9088538",
+            "darwin_amd64": "c25ee7912c93ed575c9fca3f70d883225388905ffebafffe035ad0130d48bf5e",
+            "darwin_arm64": "0d0a7623756d9ee32d73a0ee8303819fe70d69d988b94b52a045636ad0d2b3b7",
+            "windows_amd64": "4de7e6ffb665c55caeb0fd841b5fa60b408d7c5c1c1498c5f0846d5b560a2a4a",
+            "windows_arm64": "6949e27cf00cbc7b6528b05ba84d98e59ed5ea54f7e5c3eb40f650a45649ed4d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* fix: update embedded Docker CLI by @mwaldheim in https://github.com/SemRels/publisher-docker/pull/9\n\n\n**Full Changelog**: https://github.com/SemRels/publisher-docker/compare/v0.1.0...v0.1.1"
         }
       ]
     },
