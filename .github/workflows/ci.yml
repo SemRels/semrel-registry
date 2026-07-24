@@ -79,6 +79,8 @@ jobs:
           node-version: 24
       - name: Validate plugins.json
         run: node .github/scripts/validate-plugins.js plugins.json schemas/plugin-metadata.json
+      - name: Test registry sync inventory
+        run: node --test .github/scripts/*.test.js
 
   containers:
     name: Validate container artifacts

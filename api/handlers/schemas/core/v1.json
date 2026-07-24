@@ -336,7 +336,8 @@
             "updater-maven",
             "updater-nuget",
             "updater-python",
-            "updater-terraform"
+            "updater-terraform",
+            "publisher-docker"
           ]
         },
         "name": {

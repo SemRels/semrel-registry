@@ -60,6 +60,24 @@ func TestSchemaHandlerCanonicalAndLegacyNamespacedRoutes(t *testing.T) {
 	assert.Equal(t, "/schemas/plugins/@semrel/provider-github/v1.json", legacy.Header().Get("Location"))
 }
 
+func TestSchemaHandlerPublisherDockerCanonicalOnly(t *testing.T) {
+	direct := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/publisher-docker/v1.json")
+	require.Equal(t, http.StatusOK, direct.Code)
+	var directPayload map[string]any
+	require.NoError(t, json.Unmarshal(direct.Body.Bytes(), &directPayload))
+	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/publisher-docker/v1.json", directPayload["$id"])
+
+	canonical := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/@semrel/publisher-docker/v1.json")
+	require.Equal(t, http.StatusOK, canonical.Code)
+	var canonicalPayload map[string]any
+	require.NoError(t, json.Unmarshal(canonical.Body.Bytes(), &canonicalPayload))
+	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/@semrel/publisher-docker/v1.json", canonicalPayload["$id"])
+
+	legacyDocker := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/@semrel/docker/v1.json")
+	require.Equal(t, http.StatusMovedPermanently, legacyDocker.Code)
+	assert.Equal(t, "/schemas/plugins/@semrel/updater-docker/v1.json", legacyDocker.Header().Get("Location"))
+}
+
 func schemaTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
