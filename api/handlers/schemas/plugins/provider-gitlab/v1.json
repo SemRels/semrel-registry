@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/provider-gitlab/v1.json",
+  "title": "provider-gitlab plugin configuration",
+  "description": "Schema v1 for the provider-gitlab semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_TOKEN": {
+      "type": "string",
+      "description": "GitLab API token. In practice this is often sourced from GITLAB_TOKEN.",
+      "writeOnly": true
+    },
+    "SEMREL_PLUGIN_PROJECT_ID": {
+      "type": "string",
+      "description": "GitLab project ID. If unset, the plugin may derive it from CI metadata."
+    },
+    "SEMREL_PLUGIN_BASE_URL": {
+      "type": "string",
+      "default": "https://gitlab.com",
+      "description": "GitLab base URL.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_MILESTONE": {
+      "type": "string",
+      "description": "Optional milestone name to associate with the release."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_BRANCH": {
+      "type": "string",
+      "description": "Release branch name for the current semrel execution."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

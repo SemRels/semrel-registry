@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://registry.semrel.io/schemas/plugins/gitlab-ci/v1.json",
-  "title": "semrel plugin args: gitlab-ci",
-  "description": "Passes only when running inside GitLab CI (GITLAB_CI=true). No args required.",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {}
-}

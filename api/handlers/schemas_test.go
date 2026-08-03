@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/SemRels/semrel-registry/api/naming"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,6 @@ func TestSchemaHandlerPluginSchema(t *testing.T) {
 
 	var payload map[string]any
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &payload))
-	assert.Equal(t, "analyzer-conventional plugin schema", payload["title"])
 	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/analyzer-conventional/v1.json", payload["$id"])
 }
 
@@ -58,6 +58,18 @@ func TestSchemaHandlerCanonicalAndLegacyNamespacedRoutes(t *testing.T) {
 	legacy := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/@semrel/github/v1.json")
 	require.Equal(t, http.StatusMovedPermanently, legacy.Code)
 	assert.Equal(t, "/schemas/plugins/@semrel/provider-github/v1.json", legacy.Header().Get("Location"))
+}
+
+func TestSchemaHandlerCanonicalAndLegacyDirectRoutes(t *testing.T) {
+	canonical := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/provider-github/v1.json")
+	require.Equal(t, http.StatusOK, canonical.Code)
+	var payload map[string]any
+	require.NoError(t, json.Unmarshal(canonical.Body.Bytes(), &payload))
+	assert.Equal(t, "https://registry.semrel.io/schemas/plugins/provider-github/v1.json", payload["$id"])
+
+	legacy := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/github/v1.json")
+	require.Equal(t, http.StatusMovedPermanently, legacy.Code)
+	assert.Equal(t, "/schemas/plugins/provider-github/v1.json", legacy.Header().Get("Location"))
 }
 
 func TestSchemaHandlerPublisherDockerCanonicalOnly(t *testing.T) {
@@ -98,15 +110,8 @@ func performSchemaRequest(t *testing.T, method, target string) *httptest.Respons
 
 func TestSchemaHandlerAllOfficialPlugins(t *testing.T) {
 	// Verify that every official plugin has an embedded schema served correctly.
-	plugins := []string{
-		"github", "gitlab", "gitea", "git", "bitbucket",
-		"github-actions", "gitlab-ci", "gitea-actions", "generic",
-		"conventional", "default",
-		"slack", "teams", "email", "jira", "matrix", "gitplugin",
-		"go", "npm", "cargo", "docker", "helm", "gradle", "maven",
-		"python", "terraform", "homebrew", "nuget",
-	}
-	for _, name := range plugins {
+	for _, plugin := range naming.FirstPartyPlugins() {
+		name := plugin.Name
 		t.Run(name, func(t *testing.T) {
 			resp := performSchemaRequest(t, http.MethodGet, "/schemas/plugins/"+name+"/v1.json")
 			require.Equal(t, http.StatusOK, resp.Code, "plugin %s: expected 200", name)

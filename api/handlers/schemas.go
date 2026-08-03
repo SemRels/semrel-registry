@@ -35,6 +35,11 @@ func (h *SchemaHandler) GetPluginSchema(c *gin.Context) {
 			strings.Replace(c.Request.URL.Path, "/latest.json", "/v1.json", 1))
 		return
 	}
+	if plugin, ok := naming.ResolveFirstPartyRef(name); ok && name != plugin.Name {
+		c.Redirect(http.StatusMovedPermanently,
+			"/schemas/plugins/"+plugin.Name+"/"+schemaVersionFile(version))
+		return
+	}
 	path := "schemas/plugins/" + name + "/" + schemaVersionFile(version)
 	h.serveSchema(c, path)
 }
@@ -59,19 +64,7 @@ func (h *SchemaHandler) GetNamespacedPluginSchema(c *gin.Context) {
 				return
 			}
 			canonicalID = "https://registry.semrel.io/schemas/plugins/@semrel/" + plugin.Name + "/" + schemaVersionFile(version)
-			file := schemaVersionFile(version)
-			candidates := []string{"schemas/plugins/" + plugin.Name + "/" + file}
-			for _, alias := range plugin.Aliases {
-				if !strings.HasPrefix(alias, "@") && alias != plugin.Name {
-					candidates = append(candidates, "schemas/plugins/"+alias+"/"+file)
-				}
-			}
-			for _, candidate := range candidates {
-				if _, err := fs.Stat(schemaFS, candidate); err == nil {
-					path = candidate
-					break
-				}
-			}
+			path = "schemas/plugins/" + plugin.Name + "/" + schemaVersionFile(version)
 		}
 	}
 	h.serveSchemaWithID(c, path, canonicalID)

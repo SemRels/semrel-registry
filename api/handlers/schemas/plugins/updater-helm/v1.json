@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/updater-helm/v1.json",
+  "title": "updater-helm plugin configuration",
+  "description": "Schema v1 for the updater-helm semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_FILE": {
+      "type": "string",
+      "default": "Chart.yaml",
+      "description": "Path to the Helm Chart.yaml file to update."
+    },
+    "SEMREL_PLUGIN_APP_VERSION": {
+      "type": "string",
+      "description": "Optional explicit appVersion value. If unset, the release version is used."
+    },
+    "SEMREL_PLUGIN_UPDATE_APP_VERSION": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, also update the appVersion field."
+    },
+    "SEMREL_PLUGIN_APP_VERSION_ONLY": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, update only appVersion and leave chart version unchanged."
+    },
+    "SEMREL_PLUGIN_APP_VERSION_PREFIX": {
+      "type": "string",
+      "description": "Optional prefix applied to appVersion, for example \"v\"."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/publisher-npm/v1.json",
+  "title": "publisher-npm plugin configuration",
+  "description": "Schema v1 for the publisher-npm semrel plugin. Configure via SEMREL_* environment variables. Registered as \"publisher-npm\" (rather than the short name \"npm\") to avoid colliding with the updater-npm plugin, which is already registered as \"npm\".",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_NPM_TOKEN": {
+      "type": "string",
+      "description": "npm registry auth token used to publish the package.",
+      "writeOnly": true
+    },
+    "SEMREL_PLUGIN_NPM_TAG": {
+      "type": "string",
+      "default": "latest",
+      "description": "npm dist-tag to publish under."
+    },
+    "SEMREL_PLUGIN_NPM_ACCESS": {
+      "type": "string",
+      "enum": [
+        "public",
+        "restricted"
+      ],
+      "description": "npm package access level. Only relevant for scoped packages."
+    },
+    "SEMREL_PLUGIN_NPM_PROVENANCE": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false"
+      ],
+      "default": "false",
+      "description": "When true, publish with npm provenance attestation."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}
