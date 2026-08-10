@@ -46,6 +46,14 @@ jobs:
       - name: Validate generated plugins registry
         run: node .github/scripts/validate-plugins.js plugins.json schemas/plugin-metadata.json
 
+      - name: Sync schemas from source repositories
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node .github/scripts/sync-schemas.js \
+            --plugins plugins.json \
+            --schemas-dir api/handlers/schemas
+
       - name: Publish workflow summary
         if: always()
         run: |
@@ -53,12 +61,12 @@ jobs:
 
       - name: Commit and push updated plugins.json
         run: |
-          if git diff --quiet plugins.json; then
-            echo "plugins.json unchanged — nothing to commit."
+          if git diff --quiet -- plugins.json api/handlers/schemas; then
+            echo "plugins.json and schemas unchanged — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins.json
-          git commit -m "chore: sync plugins registry [skip ci]"
+          git add plugins.json api/handlers/schemas
+          git commit -m "chore: sync plugins registry and schemas [skip ci]"
           git push origin HEAD:main
