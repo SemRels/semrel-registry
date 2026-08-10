@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/hook-teams/v1.json",
+  "title": "hook-teams plugin configuration",
+  "description": "Schema v1 for the hook-teams semrel plugin. Configure via SEMREL_* environment variables.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_WEBHOOK_URL": {
+      "type": "string",
+      "description": "Microsoft Teams incoming webhook URL.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_TITLE": {
+      "type": "string",
+      "description": "Optional message title."
+    },
+    "SEMREL_PLUGIN_THEME_COLOR": {
+      "type": "string",
+      "description": "Optional hex color for the Teams card.",
+      "examples": [
+        "0078D7"
+      ]
+    },
+    "SEMREL_PLUGIN_MENTION": {
+      "type": "string",
+      "description": "Optional Teams user or entity mention rendered in the notification."
+    },
+    "SEMREL_PLUGIN_MAX_RETRIES": {
+      "type": "string",
+      "default": "3",
+      "description": "Maximum number of retry attempts for failed sends.",
+      "pattern": "^[0-9]+$"
+    },
+    "SEMREL_PLUGIN_RETRY_DELAY": {
+      "type": "string",
+      "default": "5s",
+      "description": "Retry delay as a Go duration string.",
+      "examples": [
+        "5s",
+        "1m"
+      ]
+    },
+    "SEMREL_CHANGELOG": {
+      "type": "string",
+      "description": "Generated release notes or changelog content from semrel core."
+    },
+    "SEMREL_VERSION": {
+      "type": "string",
+      "description": "Release version for the current semrel execution. semrel core may expose this as SEMREL_VERSION, SEMREL_TAG_NAME, or SEMREL_NEXT_VERSION depending on phase."
+    },
+    "SEMREL_TAG_NAME": {
+      "type": "string",
+      "description": "Release tag name for the current semrel execution."
+    },
+    "SEMREL_NEXT_VERSION": {
+      "type": "string",
+      "description": "Calculated next release version when SEMREL_VERSION is not yet finalized."
+    },
+    "SEMREL_DRY_RUN": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "When true, perform validation and logging only without executing side effects."
+    }
+  },
+  "additionalProperties": true
+}

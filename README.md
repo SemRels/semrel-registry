@@ -34,7 +34,8 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 
 - `api/` - Go web service skeleton for the upcoming dynamic registry backend
 - `admin/` - Nginx-served SPA (admin UI) that proxies `/schemas/` and `/api/` to the API container
-- `schemas/` - JSON schemas for registry payloads
+- `api/handlers/schemas/` - embedded core and canonical first-party plugin configuration schemas served at `/schemas/`
+- `schemas/plugin-metadata.json` - metadata schema used to validate the generated registry index
 - `docs/` - contributor, API, and publishing documentation
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
