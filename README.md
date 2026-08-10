@@ -34,7 +34,7 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 
 - `api/` - Go web service skeleton for the upcoming dynamic registry backend
 - `admin/` - Nginx-served SPA (admin UI) that proxies `/schemas/` and `/api/` to the API container
-- `api/handlers/schemas/` - embedded core and canonical first-party plugin configuration schemas served at `/schemas/`
+- `api/handlers/schemas/` - embedded core and first-party plugin configuration schemas served at `/schemas/`; the scheduled sync fetches them from the semrel core and plugin repositories
 - `schemas/plugin-metadata.json` - metadata schema used to validate the generated registry index
 - `docs/` - contributor, API, and publishing documentation
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
