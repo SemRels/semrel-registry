@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-24T21:58:39.773Z",
+  "generatedAt": "2026-08-18T03:41:12.795Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -21,6 +21,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:47:41Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e52de18b5ab567fd9f70368017f5c7398ffc8ed54efdb84fab3da77ffd3d05b4",
+            "linux_arm64": "716a683ded14acda341e1a3538923ba206f37ea41fb537e43e3fce120d151335",
+            "darwin_amd64": "480d780c8482c381f3d51f938db98d75b75e61288f32b8ec1f944a2473f11c9e",
+            "darwin_arm64": "e2c0505930d3288c9b344025e1ed11f398335ce4e4893b3219faff0d3adaa24d",
+            "windows_amd64": "4b99923ba65d52721c275c47c6e8aa477ec736b1e1fac83ba56d3564455bf8f7",
+            "windows_arm64": "13e2a00108a88ca72ba8c3a4eab01578261a7367e0ad1992e158a73ca1438f83"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-bitbucket/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:59:25Z",
@@ -138,6 +157,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.4",
+          "releaseDate": "2026-08-17T20:46:35Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.4.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c93b1709efc2621a15e71dfff35783ed6c8ce064fb9a2342e5f2324a268ae8e1",
+            "linux_arm64": "5c438a6a79ba7bfa82a796ddb5ad44a4598725592279094a2b4252f28dcb0174",
+            "darwin_amd64": "ba841a262f031d8d0443ca0af87bd3ce5f31015d2b443bf770e0f6dd2cd5e4f3",
+            "darwin_arm64": "7c6c583be00e7986111ff1f1b60063c18a910b4a1d96211d8a0da5dff817abe1",
+            "windows_amd64": "a269251d5415838e21af76f9a1d73a6c4aa6515918617957847b58a8235bfaa1",
+            "windows_arm64": "d983f7f520163429543c78a9aadf996f1ea5095c17afb9cab282c42414890038"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-git/compare/v0.4.3...v0.4.4"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:59:01Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.3.2/plugin-linux-amd64",
@@ -253,6 +291,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.4.3",
+          "releaseDate": "2026-08-17T20:47:35Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.4.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "7a0bd4a41974d75663600ba453735093872643734c3359281e5900fa5c1ba1e3",
+            "linux_arm64": "52914a858fcac57bce896e0560beb5e0bd8d84dbfcfe7f201fa4aad38ddeebb4",
+            "darwin_amd64": "b58c74576d3c8147e6946f94c922839adf3380994c27ec01158bc07183ed1270",
+            "darwin_arm64": "93b853ebdc404e5690b39e47cd896addf2e0fcd6b7f4db8dc02b8826a0ed0d9d",
+            "windows_amd64": "9a80ac5f8e55121e13928e7d0376fc805ba75e84778fea79a59fd26f1214c145",
+            "windows_arm64": "62ed0726702c41c77fc348111f08dc568507894c2135e51cc592c9bbcd978a82"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitea/compare/v0.4.2...v0.4.3"
+        },
         {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:58:22Z",
@@ -505,6 +562,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.3",
+          "releaseDate": "2026-08-17T20:47:40Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.5.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2d1f26c1a0e500a795328164663e4d79f13eb92ac75326b5c8b9f37a777ab5d9",
+            "linux_arm64": "8382e4c9de28f27457eae030b403191e403a2c57291a29e6ea9f41503a9edc61",
+            "darwin_amd64": "3dffc9e43a06960023e065dc3addb7ee1f9f7f41317dfd8c8b6dba3e9d092331",
+            "darwin_arm64": "ba353f2ada8bb13716f75e43d783b9811794aa6bfe837841345986743f1a5e01",
+            "windows_amd64": "aac7ef6f7f02167280cc6edbedaace61dfb06a5cafd1bb7641803d573a2f29b2",
+            "windows_arm64": "171ec685c7e0676e76f17d89d195a57ab542e784933762aff9620d4cfe5050ab"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-gitlab/compare/v0.5.2...v0.5.3"
+        },
+        {
           "version": "0.4.0",
           "releaseDate": "2026-07-06T09:00:18Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.4.0/plugin-linux-amd64",
@@ -621,6 +697,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.6",
+          "releaseDate": "2026-08-17T20:48:41Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5561075899f0aa2a902e957dbdaf6ddaf05b5109d7cc03b4d7f338cb1cc3b19a",
+            "linux_arm64": "d487f047bf1924620d92d93a86565b7ff016309816bf915a1291c14226aeae67",
+            "darwin_amd64": "7496e383e433da41bd7416dc39b1d860ab15ee550ddf4f2fb11a20356b0349e1",
+            "darwin_arm64": "aa9faac7f4dfd2748ac1aed7bc7ed9a15f60295bbf0d56e97bf2c47edf20291b",
+            "windows_amd64": "d8dd64460d56d0dcd3241968944cde2e40dbe75dec1346232fc7cc67fbb15ac8",
+            "windows_arm64": "bda8ebbff49ffa992c4b4cf7c1bd39d102b467e00685acfe7d69c53a934d1f20"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-conventional/compare/v0.3.5...v0.3.6"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:51:08Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.2/plugin-linux-amd64",
@@ -736,6 +831,25 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.4.6",
+          "releaseDate": "2026-08-17T20:48:58Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.4.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "18d8720ca4b33f2c49fe02bfac1d6baf07e32d26e80062333df6d4df2435c514",
+            "linux_arm64": "fa584e870dc28bedb44205b32e36d11ad28a8a4be956372250549531c1dd7590",
+            "darwin_amd64": "67cb8f641fc3e2b7c2c06a66f54bbb3c550f291d9a912279c8d6f66be8b04a3b",
+            "darwin_arm64": "94c28d05c0ac25c2f681d9b6a88df15172d012e87b97d4dfa8a08cf3a96a5e5f",
+            "windows_amd64": "203ceeee8065b382f86d6de08da06bb1bc7b5a04a4cb14c43bb41bc810e4d497",
+            "windows_arm64": "924de5e85b73edacfa72b257f674479c9ba7cd2a723b9dc0a76dee91961f81a2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/analyzer-default/compare/v0.4.5...v0.4.6"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:54:39Z",
@@ -872,6 +986,25 @@
       ],
       "versions": [
         {
+          "version": "0.6.3",
+          "releaseDate": "2026-08-17T20:43:26Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.6.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d3b8e186794b28691c76459d005d33ec65fab5178a9ab06437ea5b46ed796a8d",
+            "linux_arm64": "cffacec7797b7f7bd4861a409177af07bc1740cd8c4fa836b0b38f40db0b8ebd",
+            "darwin_amd64": "770eeed79428d05ffe35dede8f04fb84ae21daeb6fae21ba89e0641e790107fd",
+            "darwin_arm64": "158439cebd954ee19bde43277a1f42b4bdd4e27e18929c6236eed42993722334",
+            "windows_amd64": "bfa47a8858a1f3e77ca5015aa40de632b04fdeb9f0a48d4e39270d020714e625",
+            "windows_arm64": "40db1f6ccfbd456c5508a9e76baccc4bc12d0a1d7db8b22df93c342465163a34"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-html/compare/v0.6.2...v0.6.3"
+        },
+        {
           "version": "0.5.0",
           "releaseDate": "2026-07-06T08:56:04Z",
           "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.5.0/plugin-linux-amd64",
@@ -1006,6 +1139,82 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.7.7",
+          "releaseDate": "2026-08-17T20:37:36Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.7.7/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1eca08ac6289eaaa006f3a3d05e900b796cd1ea025fdf29176300b5ff30b50b2",
+            "linux_arm64": "da0dd6859913bc3e9595abcdc374136204fdc351c0137fa0919995507f6d196b",
+            "darwin_amd64": "b5d4fd604c7dfa733fef4f26baadc373159d482971499e280e4ca098c5ca6e57",
+            "darwin_arm64": "9a36119fc7c3221aba27a50e458651573588dbac6ab3f9a25fe23b984d304c76",
+            "windows_amd64": "c81a4cf51c5bf121635c2d9126d160e7fcf5c35b23f24ab17e10a2d10865615d",
+            "windows_arm64": "93b39af3e39b560a6c0a19c52bcac1363a72ddfabe28cfda34484245f45030bc"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.7.6...v0.7.7"
+        },
+        {
+          "version": "0.7.6",
+          "releaseDate": "2026-08-17T19:57:59Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.7.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2d06bcb4d1bb58fdd781bb758ae34f4c20397bcb666fe399dc6ccf529d9319ae",
+            "linux_arm64": "85bb7f597bb68628d463658938d3486a84d95397f0b6d0948fb498cbd32425e6",
+            "darwin_amd64": "0c8ec947b6622a8380a95316ced3c5c7c7bc043996adaa3402b72abe97dec39a",
+            "darwin_arm64": "8bd32399c9dd077744b441a1f3b6d82b403ca81e6cea135e63636b1cdb97f166",
+            "windows_amd64": "1b5e0d9ce957ead791457556c4139aae6ae1b243a6c33c42f9229781fe454e55",
+            "windows_arm64": "1707d58582e359230f7f7ffe49b49496ecbae3dc7d21194020719a96fd80e7cd"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.7.4...v0.7.6"
+        },
+        {
+          "version": "0.7.5",
+          "releaseDate": "2026-08-17T19:52:05Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.7.5/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bf465a4087ea98e042f65051a628300879dc73508f3712f0db0a66bf12cc82cc",
+            "linux_arm64": "bcda9316c92d1f042df4c723dba681ce92cda951078d45db95ccb53494abef3e",
+            "darwin_amd64": "a3964dd1baa94f923d985ff2473a9d07049e914840b7d2f1d4f65eef0f9f28e0",
+            "darwin_arm64": "240ff83af3216e90d1c2d34a908817910ff0eec4911be5f5c6e80df505d617a7",
+            "windows_amd64": "56f4f36813897ec8157cffaf07de20e887066bb3c9766202f38d3faa4bffb942",
+            "windows_arm64": "1ecab2d638bdce6338ee70a6ab34720334e2b9446ced30acd823b4bc13849a5a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.7.3...v0.7.5"
+        },
+        {
+          "version": "0.7.4",
+          "releaseDate": "2026-08-17T19:35:22Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.7.4/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "bf465a4087ea98e042f65051a628300879dc73508f3712f0db0a66bf12cc82cc",
+            "linux_arm64": "bcda9316c92d1f042df4c723dba681ce92cda951078d45db95ccb53494abef3e",
+            "darwin_amd64": "a3964dd1baa94f923d985ff2473a9d07049e914840b7d2f1d4f65eef0f9f28e0",
+            "darwin_arm64": "240ff83af3216e90d1c2d34a908817910ff0eec4911be5f5c6e80df505d617a7",
+            "windows_amd64": "56f4f36813897ec8157cffaf07de20e887066bb3c9766202f38d3faa4bffb942",
+            "windows_arm64": "1ecab2d638bdce6338ee70a6ab34720334e2b9446ced30acd823b4bc13849a5a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-changelog-md/compare/v0.7.3...v0.7.4"
+        },
         {
           "version": "0.7.0",
           "releaseDate": "2026-07-14T07:26:49Z",
@@ -1180,6 +1389,25 @@
       ],
       "versions": [
         {
+          "version": "0.6.3",
+          "releaseDate": "2026-08-17T20:44:45Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.6.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3fac85638d367119ec4c6136c40e82a11cdff945f1f8eae8bfe8719a7faa2cc1",
+            "linux_arm64": "d600faeecd2fa24635441995a34d8436cddfe6da37d1ff36d38d931a857b86d8",
+            "darwin_amd64": "abf8984649d0c9f73ee8641f22c8df5810bc433386a5ff1f4763542e518c37d2",
+            "darwin_arm64": "7fc6acd9c84effefc4cbd26a30b7c134f645786e254063baa7f418e396656f97",
+            "windows_amd64": "fb6cf563c15dea3bc64214f6b9fe72e30e303b172741fc96dee8c470a506fb77",
+            "windows_arm64": "bc718c5a9e62725407b56b295352de536c5ae12388bd53aef97c0a10e5bc2c97"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/generator-release-notes/compare/v0.6.2...v0.6.3"
+        },
+        {
           "version": "0.5.0",
           "releaseDate": "2026-07-06T08:58:24Z",
           "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.5.0/plugin-linux-amd64",
@@ -1314,6 +1542,25 @@
         "workflow"
       ],
       "versions": [
+        {
+          "version": "0.4.6",
+          "releaseDate": "2026-08-17T20:48:29Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.4.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ed55737e3a8cc2094aacb2620d861824e1be7b7f5f32e4446f3a61c669468811",
+            "linux_arm64": "4953eb9ac72f9acb92505c94fb6101a4a8260c36fc6cc4834dcae1be7a62eb19",
+            "darwin_amd64": "1653c2c902bcfe04e7cf4ec9cc4461231e7e4fd6ece60123b110d12aae792883",
+            "darwin_arm64": "5f74244cddb52a7396c3f417a332c655f3143a12547505ec27c346819b4e2f61",
+            "windows_amd64": "d62d453cf02d48c2e01fc765b7d1268d4c8933d0eb8ea051af1ea940181d9ad7",
+            "windows_arm64": "f0db3087c480d08d9bff3802ab763852a813b133ec760d69ff49d98ec6d1385e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-generic/compare/v0.4.5...v0.4.6"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:56:15Z",
@@ -1450,6 +1697,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.6",
+          "releaseDate": "2026-08-17T20:49:29Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2d705db835ead8f0b6e92e684175755adbc96f2dce62fba616c74cf4b8c6330b",
+            "linux_arm64": "7aaf41dcce36b210052ef5ae016b1b042ddc187e83359f6c7ecabb1513cd0a5e",
+            "darwin_amd64": "64aaed1e1e9d13b6fcd388444a4cea2a732c7a092b0a8942a99f30fa8fc92d2a",
+            "darwin_arm64": "750bad3e3aa5929d765576a9bc9f3687a844574b5d9bcf88137961d1218c8a70",
+            "windows_amd64": "94e5e4897c314af4cb71531b79ddfa4b71bbd5235063f5d774efc896286774a6",
+            "windows_arm64": "4f5de613486c0405e2f3862bb42548862578e39f73ce40760caaa3d25f4f7446"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitea-actions/compare/v0.3.5...v0.3.6"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:56:28Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.2/plugin-linux-amd64",
@@ -1566,6 +1832,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.6",
+          "releaseDate": "2026-08-17T20:46:57Z",
+          "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5e55ae96e0c69045584e859697037b30fda70399a69c12910d9ace6f2fbe2ba9",
+            "linux_arm64": "c7c3b4670b1fff67bf549cfb21b6fe6ba2ff9d9b19adee7e3d460d216ad8068d",
+            "darwin_amd64": "7dfc3d61c7abc6bd1c9b0702bef30b652549b33795c55a5db9cad627410ee007",
+            "darwin_arm64": "f95b513cec9805e2131d817aea28dafe56ea7f3b2eac07f6dcc94cbe35124d88",
+            "windows_amd64": "82c2feee1d3663551d6c9050afb81b5ebea8647a5b7d9f0564662e09b6f64994",
+            "windows_arm64": "9d67c32c78cc788c17679e7d0cb5562ec9246e8b8fcc82ea80e8add6c3a0c5ae"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-github-actions/compare/v0.2.5...v0.2.6"
+        },
+        {
           "version": "0.2.2",
           "releaseDate": "2026-07-06T08:56:17Z",
           "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.2/plugin-linux-amd64",
@@ -1662,6 +1947,25 @@
         "ci"
       ],
       "versions": [
+        {
+          "version": "0.4.6",
+          "releaseDate": "2026-08-17T20:49:24Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.4.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "10f03404abea99265b2320998d68a35841f5e453db807c34dd80ed63c42223a4",
+            "linux_arm64": "4cc472f8b1dc46a7dcf9e9181d1bb1c886b244638940383bd0b41948f3e4e298",
+            "darwin_amd64": "b6ed03bfcb1539b15d511936cc30e32eea06886c160171a6de1a50ca73ec2db1",
+            "darwin_arm64": "2a454d62fd00e42705973f3b64f4955d25eb7c5ef47a4d3e41dd2fac9c42219d",
+            "windows_amd64": "0a953c0d258657b7a4b583b6650f4b72a5a4c8aeeffa5f4fd4ca28fc4cc5a8ce",
+            "windows_arm64": "3c2ab52cfb001c296b7e76a0e40a9c674b61141c344384ae9a8ca2f0b3ac8cfd"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/condition-gitlab-ci/compare/v0.4.5...v0.4.6"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:56:35Z",
@@ -1798,6 +2102,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.6",
+          "releaseDate": "2026-08-17T20:47:24Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "71c64ecae86a93026a6614839bb1b507ef6502767a573a6d648ea9cc04e1e3bd",
+            "linux_arm64": "e6896c8d752488757848c740a05a4b55a86aa2b2a9ba5f7bcc9496cfe4cde926",
+            "darwin_amd64": "02b934550d126aa854dcc3627343c33b4ba7dde7f87e7565a93961479a1b3659",
+            "darwin_arm64": "a49139a3ca8bd988187a132c6f77375cc12f8b238a6ccd2e845b287879480ccd",
+            "windows_amd64": "abd3e7e5f557785f65978d087c73bcc09a082df210989f4b59da5fab1e8f5ef4",
+            "windows_arm64": "2c24ed72bcd022f012605ad2453843b07e5c41998e72cac3f326b77c4a431b75"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-email/compare/v0.3.5...v0.3.6"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:57:17Z",
           "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.3.2/plugin-linux-amd64",
@@ -1913,6 +2236,25 @@
         "plugin"
       ],
       "versions": [
+        {
+          "version": "0.3.5",
+          "releaseDate": "2026-08-17T20:43:59Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.3.5/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1676a911d5fe67db6290d363f099cef04ca84be9bbcbc23793f3ac482ce71ca7",
+            "linux_arm64": "0dad204b36180d372f27ee2911d975c01329d5f30c21d1f588b845e45f24d50e",
+            "darwin_amd64": "6c7825fece818b6426f741ea84a9d4e49f604e4d13fece890f8f0e8ae9d5d9b4",
+            "darwin_arm64": "ba90cf8d7c6a3b1145d8ebff547923643297d683a933295b5e8efb22a0ca7ec0",
+            "windows_amd64": "c5257aa331807d071e44d7f0ce390ad0d14c5fb6aa55cd666110eaa19c709038",
+            "windows_arm64": "8ff51fe6feb14adea25c737c0176dcd677272e5f0f51ccabfaf2b3540a6b98d6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-gitplugin/compare/v0.3.4...v0.3.5"
+        },
         {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:56:51Z",
@@ -2030,6 +2372,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.5",
+          "releaseDate": "2026-08-17T20:45:14Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.5/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a6283ed17dad1e69643cd2ab36d1d242519acb752615f13d013d7b6aff0beba7",
+            "linux_arm64": "f5d937d57ebdc2ac87d770d994fcaeaf4338e99e60bb5f457335d01f60419797",
+            "darwin_amd64": "550e982489ae9c68ad674b034dec76bcce25917a3fbd59f37ec2b6b46cdd028c",
+            "darwin_arm64": "8f77152c731cd2e2b2763c777e9c8a7114fded5aaa4bf518076180c2c76eb170",
+            "windows_amd64": "64f1ab7e1ee6e4e0bca119ac45cc2bd784c1a4286b78bae41a4706120a883e10",
+            "windows_arm64": "00581ea41209dbfd1f9a175f25af7fc4e8b9f301ff4bb93af570b569c1a2b41e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-jira/compare/v0.3.4...v0.3.5"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:56:39Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.2/plugin-linux-amd64",
@@ -2145,6 +2506,25 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.4.5",
+          "releaseDate": "2026-08-17T20:44:21Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.4.5/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d1bb2c4ca4e07e4174dc57a7c9f607437ccd045830037211dcc0a92cb046951a",
+            "linux_arm64": "fae6c7a69cd02a92b3291412ad05c8f4c5d0e98bbf9d134bfa9ce8b7f6a633c7",
+            "darwin_amd64": "58285979b1d9d595eb58a57e6b882058a273c4bf6dfee34cd76b560b732b9372",
+            "darwin_arm64": "95ed2dc38d49abddf36db030c3a84fab3c5985d270875391c2684012bbf34873",
+            "windows_amd64": "33313863560cbb3809368ad4dc03774a1e5872625df212816ce03a0c3d0f146a",
+            "windows_arm64": "43e2c7dbd9cc248f09a4a070f6a9b009745df58498fd9c9ed4dd046c66379578"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-matrix/compare/v0.4.4...v0.4.5"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:57:56Z",
@@ -2280,6 +2660,25 @@
         "slack"
       ],
       "versions": [
+        {
+          "version": "0.4.6",
+          "releaseDate": "2026-08-17T20:46:16Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6af2c847479b585cd3e8ca540d7a20c2cffb90585a23b0b951101edaf24f0782",
+            "linux_arm64": "3d020cc06cb5199742fea498047f69bcd47ea3f23830bea01385dba827ec3060",
+            "darwin_amd64": "31dd8ab14bb01c5712bc520e2dd1e9ef9586c0bdb0983e1cce0de66a304ab8bc",
+            "darwin_arm64": "8bbedf233c1851427bd2624c9a72755f492fbbace40bcf0fea7dad6a87214808",
+            "windows_amd64": "8b3b7288b1d01562a703033801e72c62759ae3f8ebdb3bedb4f5d6516199be54",
+            "windows_arm64": "334403059c7711b79e67a1efed5d4d769dc764a6cb7ee9c64816ac5a7371f627"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-slack/compare/v0.4.5...v0.4.6"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:57:29Z",
@@ -2513,6 +2912,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:39:13Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "246795de51df860591ed19de0aa8453d82e86cea3718ceea5046baefb4f8cd5b",
+            "linux_arm64": "9192492071acedb6b8c72786739616b16121e28d5345534899c32eea52fe0771",
+            "darwin_amd64": "1d4f87f44da66c693dd82225e761d024af309a6964ad07e2ffec131c2e839aca",
+            "darwin_arm64": "74c58260be60e770fd2262c09e268b0304f3a602db1bb4c5be28fe417c6f1255",
+            "windows_amd64": "fdb428c6148beeef0fae5b756a807b2b62b0a782a974ec88b9eb61499b19144d",
+            "windows_arm64": "4437ad59eb118b2234a851ebffc203a7c47e1453fe119dbc8fbd79a3357fd67f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-cargo/compare/v0.4.1...v0.4.2"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:58:55Z",
           "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.3.2/plugin-linux-amd64",
@@ -2628,6 +3046,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.3",
+          "releaseDate": "2026-08-17T20:48:14Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.4.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "28e99915dbc471aee042d7fdeb2bf2c9e23352d6378b7e776b78a746abb126c6",
+            "linux_arm64": "6ad651adde5791c03ed93a4e71f8b912a6169977d826b0fd1f4087cf49bab335",
+            "darwin_amd64": "0caaba4020de7e43fd040bc67412069981f5d00097fe6bfd9a1b8d3c73b16d69",
+            "darwin_arm64": "f30928c9bce1963fe5bb7978fa9500188735e0db463f21b44c1c7e2ef0f22161",
+            "windows_amd64": "bdd01f50970727f77e4a2c28169728e4eb7d1181fb669fc2a2a05b0bf16c3768",
+            "windows_arm64": "82a9dc29a58160eb477d5ce2db9ad78e60500e01dfcaa56ec7cf89175e2dab43"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-docker/compare/v0.4.2...v0.4.3"
+        },
         {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:59:34Z",
@@ -2745,6 +3182,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.3",
+          "releaseDate": "2026-08-17T20:49:36Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.4.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "05d1a20525fae6ce505e12bd8ec12a15fb18050d810fdb87669a5ade054f05f8",
+            "linux_arm64": "0769daa02064f026404c291e2307bc5cbe66731c5e9de457e18ae8c97735d4b7",
+            "darwin_amd64": "a006b3e063edf784255b2ef71ec0ed8947e359b8d98a07c9b06ffffd9446ea2a",
+            "darwin_arm64": "fbf26a6df9227c53a68040f7afeca5dc74720aff2f169b28e5e801ed34b99e09",
+            "windows_amd64": "c08d00bf4c0213b903ad846221583c7ff0495a00ac2ec7a01428673a1f7588b0",
+            "windows_arm64": "bc547d6a5701f6753be90054ad551db188c7f0abc6105a3013175b914251904a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-go/compare/v0.4.2...v0.4.3"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:58:36Z",
           "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.3.2/plugin-linux-amd64",
@@ -2861,6 +3317,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.3",
+          "releaseDate": "2026-08-17T20:48:28Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.4.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "8496660b95b6051bff77d4da056e829da3b8d7333b8ffa41c42cadfedce386da",
+            "linux_arm64": "6a5fd59d4a7e82d51a0718c9eb485ea905af22920ea2e29b163a1cf2b198d4b7",
+            "darwin_amd64": "72dde019215e6720f793e8a5657c9b2c41efc007e9af72f2418d579bf7c14f86",
+            "darwin_arm64": "3aef465fe40fbb34f813e8b0a1ea9430441c2a03e21add52547471053e0c12d7",
+            "windows_amd64": "1de6aa434d7f5639f818d4aba408f35eb6499e7d420abf615b504d1f08b15a25",
+            "windows_arm64": "6b19f9e06c1f261c260ec6e1a9fb62da9498c970ecd9fa6e2dae92949402a68a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-gradle/compare/v0.4.2...v0.4.3"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T09:00:11Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.3.2/plugin-linux-amd64",
@@ -2976,6 +3451,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.2",
+          "releaseDate": "2026-08-17T20:45:23Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.5.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "931cf6908fde28f834a595df3a68777638c601560ec4d917ba9777acc8a367ac",
+            "linux_arm64": "850cfa547380b90c56f689425905013b7d2d5062c5546518c2b3a85e305717d1",
+            "darwin_amd64": "2c3aa0195dc5aea3ab6ba0c3ff30c4d711e62d74973a1cc8f4b5bc5f05a3598a",
+            "darwin_arm64": "045c3ba493c0957c7ef25d3eef714163f4220fd6de8ca560b426f4c251c40684",
+            "windows_amd64": "99a88c4bf17f51926c7992b1679a7f7c4ec5e6bdb1b728a3e386e84fb3001b92",
+            "windows_arm64": "e24cc2035a3b1e92a930682f91c39d4ba8b9288a43473c6ba13ec735c9ea17ca"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-helm/compare/v0.5.1...v0.5.2"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:58:58Z",
@@ -3112,6 +3606,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:49:13Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "f291d694dd904d23475b39cf4c9131e73f13d25333595843d35dce7059877e70",
+            "linux_arm64": "1e9c891f7fbc913b174891bf14c5933178fee8d39adb592c4706d724d1d8d76a",
+            "darwin_amd64": "b2d9c73939acffdcc208db24b019358c881e1b73ae83f0512c7ef0f1c1b94552",
+            "darwin_arm64": "2f0216656ba7e4f2ed0a7f22540c57a05f846e3bbc665b62d17ffa5c7cb64a63",
+            "windows_amd64": "d74cb8b31508cb30ce2cbbad25f95db2dfba1d7e70887bb42f2c0ce5349e9c4b",
+            "windows_arm64": "384f8f0011b923e1aae6e2b8254ed71fe978249d1dbf015acdd5c38bffa94db2"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-homebrew/compare/v0.4.1...v0.4.2"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T09:00:12Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.3.2/plugin-linux-amd64",
@@ -3228,6 +3741,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:46:00Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0633313e4987a07429cdc1add93174f8a290cd6fa34b29d14b88cb12a5749e77",
+            "linux_arm64": "471f5138f45820bced31d1031297e8252f019443cb64be9786f816ff8e0e2e02",
+            "darwin_amd64": "987c83304066150dc30e30ed85112a4a7a1e5ab3480121324249d71ad5ee0531",
+            "darwin_arm64": "6bf1643f3183556c2b7d8410619798d01611553c5689fdf7e6cbbe94af2a01fe",
+            "windows_amd64": "4bf491c478aaab900cc750e7755e2fe1fd03c997cb741a7d9e01d74a844bf3a6",
+            "windows_arm64": "f731e296eec971cc632655ebac67ce72e51582e0df480b3e26a64ffc3c276ed4"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-maven/compare/v0.4.1...v0.4.2"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T08:59:41Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.3.2/plugin-linux-amd64",
@@ -3343,6 +3875,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.3",
+          "releaseDate": "2026-08-17T20:39:52Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.5.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d7f552e8b77e6d798ce79f8e2812b14490b3c192886c01a63db12899fc08e3bb",
+            "linux_arm64": "2009e0d8c5d0fc407bb7a94528d8ea0913c2a0e1dc679dc3744c79cfbfab12ec",
+            "darwin_amd64": "79af28cfc492a01ddcbefbf4c60af2392d1e91c312504a5fc52dc96c3775e5b2",
+            "darwin_arm64": "71ec34630498678d1ee377b31d2ca495e87065fedbae2626befd6e5e0cba7dd3",
+            "windows_amd64": "d66aba18101b99f283b39c52cb3625ecf7ce209514f5cd088e5526e6a6d43774",
+            "windows_arm64": "4bf7df453e8a3dee4f2a594989a3d5733f937615ae7d987b56b2176fc46420fa"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-npm/compare/v0.5.2...v0.5.3"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:59:39Z",
@@ -3479,6 +4030,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:46:26Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "95281babbe3eef55da4a0805ed89bedd1aada154fae2c0576daf10725bcc97b4",
+            "linux_arm64": "61f8e89f3d870aa41aa1ac1ddbb688b1c418a27777687fb2445d0ed37ee74b4b",
+            "darwin_amd64": "09ccef401c8d45cc6fd9b4ee420d4b718f3146c53d34666751bcd71e67afed65",
+            "darwin_arm64": "1dae74189f159c7d5e80225081317032aedaceb12ef2880ecc56b29ed9f8475e",
+            "windows_amd64": "d82a7c8647b1c85584623476dab532eb9d081277a94b890cc7997a1b0f9f1a75",
+            "windows_arm64": "339f658229fdd3e0de556841b17f1b0475bfbe29cd483b0d4d2bca4fce9a0dcf"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-nuget/compare/v0.4.1...v0.4.2"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T09:00:17Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.3.2/plugin-linux-amd64",
@@ -3595,6 +4165,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.3",
+          "releaseDate": "2026-08-17T20:47:17Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.4.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cd46be2f5326bc81dc3856419c743d4be459a5ac3403fc63281d6d39733520e1",
+            "linux_arm64": "f242f630325b72e622b1922dcd761366629ac332a0b9a4ce133944ac76c47f72",
+            "darwin_amd64": "b7aab26c3a4d8fab4e133c87e28903749abdcde1ff90068a597eaff432241480",
+            "darwin_arm64": "6ec2e03d49c9d8ed6eedf4bfbd90eb60d0c7ddc060ec2c62606a7f6ff55f1fe5",
+            "windows_amd64": "d5c0b5cede8a42f8118a3e003505e8896ffd5a457846f35545a4c9e2dda5a8d9",
+            "windows_arm64": "b881a1cefd6bb750e74b0c89bcbb4a8dfe31fed3d9ff58435cce74cd7cad107f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-python/compare/v0.4.2...v0.4.3"
+        },
+        {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T09:00:07Z",
           "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.3.2/plugin-linux-amd64",
@@ -3710,6 +4299,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.4.2",
+          "releaseDate": "2026-08-17T20:46:02Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.4.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "014bcfa3066aad2654e8c8e3cf2b8538169d90c9cc2e318320d76abe92ab5695",
+            "linux_arm64": "5bfdf71c32c319e61afa68ee5fc6641e8faf2f9c431811f63e99be4db24e3cfd",
+            "darwin_amd64": "d5e63c585834d52e4dfce9cd52ff5c5470e90f4f463e98188de218e14f0b970b",
+            "darwin_arm64": "05d71c9a1c5ea06e614a1f2d8ba0c57df2b25af7f98c56ffb2ccd4dbe91c263f",
+            "windows_amd64": "096b7a0d32fecc8b9fdb34ffc2677f2ea2cb7e7d339c65fe1563896d4e5b7a3c",
+            "windows_arm64": "0d7423a319855ad9ded6c0964113cb35356f3b5db0d97593da3fba06f74aa427"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-terraform/compare/v0.4.1...v0.4.2"
+        },
         {
           "version": "0.3.2",
           "releaseDate": "2026-07-06T09:00:10Z",
@@ -3924,6 +4532,25 @@
         "artifacts"
       ],
       "versions": [
+        {
+          "version": "0.3.1",
+          "releaseDate": "2026-08-17T20:49:46Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-generic-http/releases/download/v0.3.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5555b73265ad9ce4a93ea8bc22271df9983201a58927706ddb274287be6fa221",
+            "linux_arm64": "89732e16b2b0547cb21864c1d08c1ea76152029faf39b7cfa4a26bb6098b88bf",
+            "darwin_amd64": "afaadfac8524a2ec307aee7bcd04dae1f8b08d48b36e88d981a5bff0313e1bfe",
+            "darwin_arm64": "fc753d355d1fe03f78e4d7f48d6f16e9cc6a9633fac6a3e4298bb28556e588d3",
+            "windows_amd64": "ff74bc47c321eb0f60ec8e70bc7b37825c47fd7e89526a505eeb612cb614fc1c",
+            "windows_arm64": "3e6ef2c9c9b8518d9b7701e655793873106f377f65216c0907f9691bbe5820db"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* chore: sync from plugin-template by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/15\n* docs(schema): add JSON Schema for editor validation by @mwaldheim in https://github.com/SemRels/publisher-generic-http/pull/6\n\n\n**Full Changelog**: https://github.com/SemRels/publisher-generic-http/compare/v0.3.0...v0.3.1"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-07-06T08:59:26Z",

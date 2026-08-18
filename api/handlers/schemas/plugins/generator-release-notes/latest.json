@@ -31,6 +31,13 @@
       "examples": [
         "[\"feat: add feature\", \"fix: patch issue\"]"
       ]
+    },
+    "SEMREL_PLUGIN_SECTIONS_JSON": {
+      "type": "string",
+      "description": "JSON array overriding the built-in feat/fix→section mapping used to group release-note entries, similar to the 'presetConfig.types' option of @semantic-release/release-notes-generator. Each object has a required 'type' (conventional-commit type, e.g. 'feat'), an optional 'section' (custom heading; commits are grouped under the first matching rule's section, in declaration order) and an optional 'hidden' (bool, drops matching commits entirely). Types with no matching rule fall back to 'Other'.",
+      "examples": [
+        "[{\"type\":\"feat\",\"section\":\"Features\"},{\"type\":\"fix\",\"section\":\"Bugfixes\"},{\"type\":\"deps\",\"section\":\"Dependencies\"},{\"type\":\"chore\",\"section\":\"Miscellaneous\"},{\"type\":\"docs\",\"hidden\":true},{\"type\":\"refactor\",\"hidden\":true}]"
+      ]
     }
   },
   "additionalProperties": true
