@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { listPlugins, deletePlugin } from '../lib/api';
+import { listPlugins, deletePlugin, revalidateAllPlugins } from '../lib/api';
+import type { BatchRevalidationResponse } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 
@@ -27,6 +28,10 @@ export default function PluginsPage() {
   const [page, setPage]               = useState(Number.isFinite(initialPage) && initialPage > 0 ? initialPage : 1);
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [revalidating, setRevalidating] = useState(false);
+  const [revalidation, setRevalidation] = useState<BatchRevalidationResponse | null>(null);
+  const [revalidationError, setRevalidationError] = useState('');
   const navigate                      = useNavigate();
 
   useEffect(() => {
@@ -62,7 +67,22 @@ export default function PluginsPage() {
       })
       .catch((e: unknown) => { if (!cancelled) { setError(e instanceof Error ? e.message : 'Failed'); setLoading(false); } });
     return () => { cancelled = true; };
-  }, [page, search, category, sort, order, user, isAdmin]);
+  }, [page, search, category, sort, order, user, isAdmin, refreshKey]);
+
+  async function handleRevalidateAll() {
+    setRevalidating(true);
+    setRevalidation(null);
+    setRevalidationError('');
+    try {
+      setRevalidation(await revalidateAllPlugins());
+      setRefreshKey((key) => key + 1);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to re-check plugins';
+      setRevalidationError(message === 'Unauthorized' ? 'Your admin session has expired. Please sign in again.' : `Re-check failed: ${message}`);
+    } finally {
+      setRevalidating(false);
+    }
+  }
 
   async function handleDelete(p: Plugin) {
     if (!globalThis.confirm(`Delete "${p.name}"?`)) return;
@@ -79,7 +99,12 @@ export default function PluginsPage() {
     <>
       <div className="page__header">
         <h1 className="page__title">{isAdmin ? 'Plugins' : 'My Plugins'}</h1>
-        <button type="button" className="btn btn--primary" onClick={() => navigate('/admin/plugins/new')}>+ Add</button>
+        <div className="flex gap-sm">
+          {isAdmin && <button type="button" className="btn btn--secondary" onClick={() => { void handleRevalidateAll(); }} disabled={revalidating}>
+            {revalidating ? 'Re-checking…' : 'Re-check all'}
+          </button>}
+          <button type="button" className="btn btn--primary" onClick={() => navigate('/admin/plugins/new')}>+ Add</button>
+        </div>
       </div>
       <div className="page__body">
         {!isAdmin && (
@@ -91,6 +116,20 @@ export default function PluginsPage() {
           </div>
         )}
         {error && <div className="alert alert--error">{error}</div>}
+        {revalidationError && <div className="alert alert--error">{revalidationError}</div>}
+        {revalidation && (
+          <div className={revalidation.summary.failed > 0 ? 'alert alert--error' : 'alert alert--success'}>
+            Re-checked {revalidation.summary.processed} of {revalidation.summary.total} plugins:
+            {' '}{revalidation.summary.succeeded} completed, {revalidation.summary.failed} failed.
+            {revalidation.summary.failed > 0 && (
+              <ul style={{ margin: '.5rem 0 0 1.25rem' }}>
+                {revalidation.data.filter((item) => item.error).map((item) => (
+                  <li key={item.id}><strong>{item.name}</strong>: {item.error}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         <div className="search-bar" style={{ marginBottom: '.75rem' }}>
           <input type="search" className="search-input" placeholder="Search…" value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
