@@ -312,6 +312,28 @@ export async function revalidatePlugin(id: number | string): Promise<ValidationR
   return request<{ data: ValidationResult }>(`/admin/plugins/${id}/revalidate`, { method: 'POST' }).then(r => r.data);
 }
 
+export interface BatchRevalidationResult {
+  id: number;
+  name: string;
+  repository: string;
+  result?: ValidationResult;
+  error?: string;
+}
+
+export interface BatchRevalidationResponse {
+  data: BatchRevalidationResult[];
+  summary: {
+    total: number;
+    processed: number;
+    succeeded: number;
+    failed: number;
+  };
+}
+
+export async function revalidateAllPlugins(): Promise<BatchRevalidationResponse> {
+  return request<BatchRevalidationResponse>('/admin/plugins/revalidate-all', { method: 'POST' });
+}
+
 // ---- Admin: sync GitHub org ----
 
 export interface OrgSyncResult {
