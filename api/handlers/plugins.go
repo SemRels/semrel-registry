@@ -349,6 +349,12 @@ func (h *PluginHandler) UpdatePlugin(c *gin.Context) {
 }
 
 func (h *PluginHandler) DeletePlugin(c *gin.Context) {
+	var request models.PluginDeletionRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
+		return
+	}
+
 	// Non-admin users can only delete their own plugins.
 	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
 		login, _ := c.Get("login")
@@ -364,7 +370,7 @@ func (h *PluginHandler) DeletePlugin(c *gin.Context) {
 		}
 	}
 
-	if err := h.service.DeletePlugin(c.Request.Context(), c.Param("id")); err != nil {
+	if err := h.service.DeletePluginWithRequest(c.Request.Context(), c.Param("id"), request, currentDeleteActor(c)); err != nil {
 		HandleError(c, err)
 		return
 	}
@@ -390,6 +396,12 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 }
 
 func (h *PluginHandler) DeletePluginVersion(c *gin.Context) {
+	var request models.VersionDeletionRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
+		return
+	}
+
 	versionID, err := strconv.ParseInt(c.Param("versionId"), 10, 64)
 	if err != nil {
 		BadRequest(c, "Invalid version ID", gin.H{"issue": "versionId must be an integer"})
@@ -412,12 +424,30 @@ func (h *PluginHandler) DeletePluginVersion(c *gin.Context) {
 		}
 	}
 
-	if err := h.service.DeleteVersion(c.Request.Context(), plugin.ID, versionID); err != nil {
+	if err := h.service.DeleteVersionWithRequest(c.Request.Context(), c.Param("id"), versionID, request, currentDeleteActor(c)); err != nil {
 		HandleError(c, err)
 		return
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func currentDeleteActor(c *gin.Context) models.DeleteActor {
+	login, _ := c.Get("login")
+	loginStr, _ := login.(string)
+	role := "user"
+	if claims, ok := c.Get("claims"); ok {
+		if typed, ok := claims.(*Claims); ok && typed.Role != "" {
+			role = typed.Role
+		}
+	}
+	isAdmin, _ := c.Get("isAdmin")
+	isAdminBool, _ := isAdmin.(bool)
+	return models.DeleteActor{
+		Login:   loginStr,
+		Role:    role,
+		IsAdmin: isAdminBool,
+	}
 }
 
 // SubmitPlugin handles community plugin submissions.
