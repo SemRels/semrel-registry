@@ -53,6 +53,9 @@ export default function Layout() {
           <NavLink to="/admin/plugins" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
             {isAdmin ? 'Plugins' : 'My Plugins'}
           </NavLink>
+          <NavLink to="/admin/account" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
+            Account
+          </NavLink>
           {!isAdmin && (
             <NavLink to="/admin/submit" className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}>
               + Submit Plugin

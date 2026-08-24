@@ -768,7 +768,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 			INSERT INTO plugin_aliases (plugin_id, alias)
 			VALUES ($1, 'reusable-alias'), ($1, '@example/reusable-alias')`, originalID)
 		require.NoError(t, err)
-		require.NoError(t, repo.Delete(ctx, originalID))
+		require.NoError(t, repo.Delete(ctx, models.PluginDeletionSpec{PluginID: originalID, CascadeVersions: true}))
 
 		var claims int
 		require.NoError(t, db.Pool().QueryRow(ctx,
@@ -795,7 +795,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 			Scan(&deleted))
 		assert.True(t, deleted)
 
-		require.NoError(t, repo.Delete(ctx, replacementID))
+		require.NoError(t, repo.Delete(ctx, models.PluginDeletionSpec{PluginID: replacementID, CascadeVersions: true}))
 		_, err = db.Pool().Exec(ctx,
 			`UPDATE plugins SET deleted_at = NULL WHERE id = $1`, originalID)
 		require.NoError(t, err)

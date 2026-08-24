@@ -17,22 +17,22 @@ import (
 )
 
 const (
-	defaultListLimit     = 20
-	defaultVersionLimit  = 20
-	maxListLimit         = 100
-	maxNameLength        = 255
-	maxAliasLength       = 356
-	maxNamespaceLength   = 100
-	maxDescriptionLength = 4000
-	maxAuthorLength      = 255
-	maxCategoryLength    = 50
-	maxRepositoryLength  = 2048
-	maxLicenseLength     = 50
-	maxTagLength         = 100
-	maxVersionLength     = 50
-	maxChecksumLength    = 255
-	maxSearchLength      = 255
-	maxChangelogLength   = 20000
+	defaultListLimit        = 20
+	defaultVersionLimit     = 20
+	maxListLimit            = 100
+	maxNameLength           = 255
+	maxAliasLength          = 356
+	maxNamespaceLength      = 100
+	maxDescriptionLength    = 4000
+	maxAuthorLength         = 255
+	maxCategoryLength       = 50
+	maxRepositoryLength     = 2048
+	maxLicenseLength        = 50
+	maxTagLength            = 100
+	maxVersionLength        = 50
+	maxChecksumLength       = 255
+	maxSearchLength         = 255
+	maxChangelogLength      = 20000
 	maxDeletionReasonLength = 1000
 )
 
@@ -464,13 +464,17 @@ func (s *PluginService) DeleteAccount(ctx context.Context, request models.Accoun
 	}
 
 	result := models.AccountDeletionResult{}
+	deletionReason := "account deletion"
+	if request.Reason != "" {
+		deletionReason += ": " + request.Reason
+	}
 	for _, plugin := range plugins {
 		result.PluginsDeleted++
 		result.VersionsDeleted += len(plugin.Versions)
 		if err := s.repo.Delete(ctx, models.PluginDeletionSpec{
 			PluginID:        plugin.ID,
 			DeletedBy:       actor.Login,
-			Reason:          "account deletion: " + request.Reason,
+			Reason:          deletionReason,
 			Confirmation:    request.Confirmation,
 			CascadeVersions: true,
 			AnonymizeAuthor: true,

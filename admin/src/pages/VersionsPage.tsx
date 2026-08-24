@@ -47,7 +47,9 @@ export default function VersionsPage() {
     setDeleteBusy(true);
     setDeleteError('');
     try {
-      await deleteVersion(id!, deleteTarget.id);
+      await deleteVersion(id!, deleteTarget.id, {
+        confirmation: `${plugin?.namespace ? `${plugin.namespace}/` : ''}${plugin?.name ?? id}@${deleteTarget.version}`,
+      });
       setVersions(prev => prev.filter(x => x.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (e: unknown) {
@@ -178,8 +180,10 @@ export default function VersionsPage() {
         message={deleteTarget && plugin
           ? `This removes version v${deleteTarget.version} from ${plugin.name} in the registry workspace.`
           : ''}
-        confirmationValue={deleteTarget ? `v${deleteTarget.version}` : ''}
-        confirmationLabel="Version tag"
+        confirmationValue={deleteTarget && plugin
+          ? `${plugin.namespace ? `${plugin.namespace}/` : ''}${plugin.name}@${deleteTarget.version}`
+          : ''}
+        confirmationLabel="Plugin version reference"
         confirmLabel="Retract version"
         busyLabel="Retracting…"
         acknowledgement="I understand this version will no longer be offered from the registry."

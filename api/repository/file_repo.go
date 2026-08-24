@@ -361,7 +361,7 @@ func (s *fileStore) DeleteVersion(_ context.Context, spec models.VersionDeletion
 		break
 	}
 	if !found {
-		return fmt.Errorf("version not found")
+		return appErrors.ErrPluginNotFound
 	}
 	return s.savePlugin(p)
 }

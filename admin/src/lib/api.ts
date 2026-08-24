@@ -176,15 +176,31 @@ export async function updatePlugin(
   });
 }
 
-export async function deletePlugin(id: string | number): Promise<void> {
-  return request<void>(`/plugins/${id}`, { method: 'DELETE' });
+export async function deletePlugin(
+  id: string | number,
+  data: { confirmation: string; deleteVersions: boolean; reason?: string },
+): Promise<void> {
+  return request<void>(`/plugins/${id}`, { method: 'DELETE', body: JSON.stringify(data) });
 }
 
 export async function deleteVersion(
   pluginId: string | number,
   versionId: number,
+  data: { confirmation: string; reason?: string },
 ): Promise<void> {
-  return request<void>(`/plugins/${pluginId}/versions/${versionId}`, { method: 'DELETE' });
+  return request<void>(`/plugins/${pluginId}/versions/${versionId}`, {
+    method: 'DELETE',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteAccount(data: {
+  confirmation: string;
+  reauthToken: string;
+  deleteOwnedPlugins: boolean;
+  reason?: string;
+}): Promise<{ data: { pluginsDeleted: number; versionsDeleted: number } }> {
+  return request('/auth/me', { method: 'DELETE', body: JSON.stringify(data) });
 }
 
 export async function listVersions(

@@ -212,8 +212,9 @@ func (h *AuthHandler) fetchGitHubUser(accessToken string) (*GitHubUser, error) {
 }
 
 // resolveRole determines the user's role:
-//   "admin" — org owner/maintainer or in ADMIN_GITHUB_USERS list
-//   "user"  — any other authenticated GitHub user
+//
+//	"admin" — org owner/maintainer or in ADMIN_GITHUB_USERS list
+//	"user"  — any other authenticated GitHub user
 func (h *AuthHandler) resolveRole(login, accessToken string) string {
 	// Explicit admin list always wins.
 	for _, u := range h.adminUsers {

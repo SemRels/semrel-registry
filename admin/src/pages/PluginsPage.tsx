@@ -97,7 +97,10 @@ export default function PluginsPage() {
     setDeleteBusy(true);
     setDeleteError('');
     try {
-      await deletePlugin(deleteTarget.id);
+      await deletePlugin(deleteTarget.id, {
+        confirmation: formatPluginName(deleteTarget),
+        deleteVersions: true,
+      });
       setPlugins((prev) => prev.filter((plugin) => plugin.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (e: unknown) {

@@ -122,7 +122,7 @@ func TestFileRepo_GetByID_DeletedReturnsNotFound(t *testing.T) {
 	id, err := repo.Create(context.Background(), p)
 	require.NoError(t, err)
 
-	require.NoError(t, repo.Delete(context.Background(), id))
+	require.NoError(t, repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: id}))
 
 	_, err = repo.GetByID(context.Background(), id)
 	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
@@ -196,7 +196,7 @@ func TestFileRepo_GetAll_ExcludesDeleted(t *testing.T) {
 	p2 := basePlugin("beta")
 	id1, _ := repo.Create(context.Background(), p1)
 	_, _ = repo.Create(context.Background(), p2)
-	_ = repo.Delete(context.Background(), id1)
+	_ = repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: id1})
 
 	plugins, err := repo.GetAll(context.Background(), 0, 0)
 	require.NoError(t, err)
@@ -447,26 +447,41 @@ func TestFileRepo_Delete_SoftDelete(t *testing.T) {
 	repo := newTestFileRepo(t)
 	id, err := repo.Create(context.Background(), basePlugin("plugin"))
 	require.NoError(t, err)
+	_, err = repo.AddVersion(context.Background(), &models.PluginVersion{
+		PluginID:    id,
+		Version:     "1.0.0",
+		DownloadURL: "https://example.com/dl/1.0.0",
+	})
+	require.NoError(t, err)
 
-	require.NoError(t, repo.Delete(context.Background(), id))
+	require.NoError(t, repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: id, DeletedBy: "owner", Reason: "cleanup", CascadeVersions: true}))
 
 	// Must not be returned by GetAll.
 	plugins, err := repo.GetAll(context.Background(), 0, 0)
 	require.NoError(t, err)
 	assert.Empty(t, plugins)
+
+	stored, err := repo.(*fileStore).loadPlugin(id)
+	require.NoError(t, err)
+	require.NotNil(t, stored.DeletedAt)
+	assert.Equal(t, "owner", stored.DeletedBy)
+	assert.Equal(t, "cleanup", stored.DeletionReason)
+	require.Len(t, stored.Versions, 1)
+	assert.NotNil(t, stored.Versions[0].DeletedAt)
+	assert.Equal(t, "owner", stored.Versions[0].DeletedBy)
 }
 
 func TestFileRepo_Delete_NotFound(t *testing.T) {
 	repo := newTestFileRepo(t)
-	err := repo.Delete(context.Background(), 999)
+	err := repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: 999})
 	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
 }
 
 func TestFileRepo_Delete_AlreadyDeletedReturnsNotFound(t *testing.T) {
 	repo := newTestFileRepo(t)
 	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
-	require.NoError(t, repo.Delete(context.Background(), id))
-	assert.ErrorIs(t, repo.Delete(context.Background(), id), appErrors.ErrPluginNotFound)
+	require.NoError(t, repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: id}))
+	assert.ErrorIs(t, repo.Delete(context.Background(), models.PluginDeletionSpec{PluginID: id}), appErrors.ErrPluginNotFound)
 }
 
 // -------------------------------------------------------------------------
