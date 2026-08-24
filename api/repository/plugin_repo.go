@@ -26,9 +26,10 @@ type PluginRepository interface {
 	Update(ctx context.Context, plugin *models.Plugin) error
 	UpdateStatus(ctx context.Context, id int64, status string) error
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, spec models.PluginDeletionSpec) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
-	DeleteVersion(ctx context.Context, pluginID, versionID int64) error
+	DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error
+	RecordAccountDeletion(ctx context.Context, audit models.AccountDeletionAudit) error
 	// IncrCounters atomically increments views/downloads for a plugin and optionally a version.
 	// Pass non-zero versionID to also update the version counters.
 	IncrCounters(ctx context.Context, pluginID, versionID int64, views, downloads int64) error
@@ -51,7 +52,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 	query.WriteString(`
 	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
-       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
+       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
 FROM plugins
 WHERE deleted_at IS NULL`)
 
@@ -194,9 +195,9 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, '')
 FROM plugin_versions
-WHERE plugin_id = $1
+WHERE plugin_id = $1 AND deleted_at IS NULL
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
 	if err != nil {
 		return nil, fmt.Errorf("query versions: %w", err)
@@ -363,20 +364,52 @@ WHERE id = $2 AND deleted_at IS NULL`, checksJSON, id)
 	return nil
 }
 
-func (r *pgRepository) Delete(ctx context.Context, id int64) error {
+func (r *pgRepository) Delete(ctx context.Context, spec models.PluginDeletionSpec) error {
 	if err := r.validate(); err != nil {
 		return err
 	}
 
-	result, err := r.execPluginWrite(ctx, `
+	tx, err := r.db.BeginTx()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return err
+	}
+
+	result, err := tx.Exec(ctx, `
 UPDATE plugins
-SET deleted_at = NOW(), updated_at = NOW()
-WHERE id = $1 AND deleted_at IS NULL`, id)
+SET deleted_at = NOW(),
+    updated_at = NOW(),
+    deleted_by = NULLIF($2, ''),
+    deletion_reason = NULLIF($3, ''),
+    deletion_confirmation = NULLIF($4, ''),
+    author = CASE WHEN $5 THEN '' ELSE author END
+WHERE id = $1 AND deleted_at IS NULL`,
+		spec.PluginID, spec.DeletedBy, spec.Reason, spec.Confirmation, spec.AnonymizeAuthor)
 	if err != nil {
 		return fmt.Errorf("delete plugin: %w", err)
 	}
 	if result.RowsAffected() == 0 {
 		return appErrors.ErrPluginNotFound
+	}
+
+	if spec.CascadeVersions {
+		if _, err := tx.Exec(ctx, `
+UPDATE plugin_versions
+SET deleted_at = NOW(),
+    deleted_by = NULLIF($2, ''),
+    deletion_reason = NULLIF($3, ''),
+    deletion_confirmation = NULLIF($4, '')
+WHERE plugin_id = $1 AND deleted_at IS NULL`,
+			spec.PluginID, spec.DeletedBy, spec.Reason, spec.Confirmation); err != nil {
+			return fmt.Errorf("delete plugin versions: %w", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit delete plugin: %w", err)
 	}
 
 	return nil
@@ -461,14 +494,37 @@ VALUES ($1, $2, $3, $4)`, version.ID, platform, sha256Algorithm, version.Checksu
 	return version.ID, nil
 }
 
-func (r *pgRepository) DeleteVersion(ctx context.Context, pluginID, versionID int64) error {
+func (r *pgRepository) DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET deleted_at = NOW(),
+    deleted_by = NULLIF($3, ''),
+    deletion_reason = NULLIF($4, ''),
+    deletion_confirmation = NULLIF($5, '')
+WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
+		spec.VersionID, spec.PluginID, spec.DeletedBy, spec.Reason, spec.Confirmation)
+	if err != nil {
+		return wrapWriteError("delete plugin version", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) RecordAccountDeletion(ctx context.Context, audit models.AccountDeletionAudit) error {
 	if err := r.validate(); err != nil {
 		return err
 	}
 	_, err := r.db.Pool().Exec(ctx, `
-DELETE FROM plugin_versions WHERE id = $1 AND plugin_id = $2`, versionID, pluginID)
+INSERT INTO account_deletions (login, deleted_by, reason, confirmation, plugins_deleted, versions_deleted, created_at)
+VALUES ($1, $2, NULLIF($3, ''), $4, $5, $6, $7)`,
+		audit.Login, audit.DeletedBy, audit.Reason, audit.Confirmation, audit.PluginsDeleted, audit.VersionsDeleted, audit.CreatedAt)
 	if err != nil {
-		return wrapWriteError("delete plugin version", err)
+		return fmt.Errorf("record account deletion: %w", err)
 	}
 	return nil
 }
@@ -486,7 +542,7 @@ WHERE id = $1`, pluginID, views, downloads)
 	if versionID > 0 {
 		_, err = r.db.Pool().Exec(ctx, `
 UPDATE plugin_versions SET views = views + $2, downloads = downloads + $3
-WHERE id = $1`, versionID, views, downloads)
+WHERE id = $1 AND deleted_at IS NULL`, versionID, views, downloads)
 		if err != nil {
 			return wrapWriteError("incr version counters", err)
 		}
@@ -652,6 +708,9 @@ func scanVersion(scanner interface {
 		&version.Views,
 		&version.Downloads,
 		&version.CreatedAt,
+		&version.DeletedAt,
+		&version.DeletedBy,
+		&version.DeletionReason,
 	); err != nil {
 		return nil, fmt.Errorf("scan version: %w", err)
 	}

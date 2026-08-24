@@ -33,21 +33,26 @@ type Plugin struct {
 	CreatedAt        time.Time       `json:"createdAt"`
 	UpdatedAt        time.Time       `json:"updatedAt"`
 	DeletedAt        *time.Time      `json:"deletedAt,omitempty"`
+	DeletedBy        string          `json:"deletedBy,omitempty"`
+	DeletionReason   string          `json:"deletionReason,omitempty"`
 }
 
 type PluginVersion struct {
-	ID          int64             `json:"id"`
-	PluginID    int64             `json:"pluginId"`
-	Version     string            `json:"version"`
-	ReleaseDate *time.Time        `json:"releaseDate,omitempty"`
-	Changelog   string            `json:"changelog"`
-	DownloadURL string            `json:"downloadUrl"`
-	Checksums   map[string]string `json:"checksums,omitempty"`
-	SemrelCore  string            `json:"semrelCore,omitempty"`
-	Prerelease  bool              `json:"prerelease"`
-	Views       int64             `json:"views"`
-	Downloads   int64             `json:"downloads"`
-	CreatedAt   time.Time         `json:"createdAt"`
+	ID             int64             `json:"id"`
+	PluginID       int64             `json:"pluginId"`
+	Version        string            `json:"version"`
+	ReleaseDate    *time.Time        `json:"releaseDate,omitempty"`
+	Changelog      string            `json:"changelog"`
+	DownloadURL    string            `json:"downloadUrl"`
+	Checksums      map[string]string `json:"checksums,omitempty"`
+	SemrelCore     string            `json:"semrelCore,omitempty"`
+	Prerelease     bool              `json:"prerelease"`
+	Views          int64             `json:"views"`
+	Downloads      int64             `json:"downloads"`
+	CreatedAt      time.Time         `json:"createdAt"`
+	DeletedAt      *time.Time        `json:"deletedAt,omitempty"`
+	DeletedBy      string            `json:"deletedBy,omitempty"`
+	DeletionReason string            `json:"deletionReason,omitempty"`
 }
 
 type PluginPatch struct {
@@ -60,6 +65,62 @@ type PluginPatch struct {
 	Repository  *string   `json:"repository"`
 	License     *string   `json:"license"`
 	Tags        *[]string `json:"tags"`
+}
+
+type DeleteActor struct {
+	Login   string
+	Role    string
+	IsAdmin bool
+}
+
+type PluginDeletionRequest struct {
+	Confirmation   string `json:"confirmation"`
+	Reason         string `json:"reason"`
+	DeleteVersions bool   `json:"deleteVersions"`
+}
+
+type PluginDeletionSpec struct {
+	PluginID        int64
+	DeletedBy       string
+	Reason          string
+	Confirmation    string
+	CascadeVersions bool
+	AnonymizeAuthor bool
+}
+
+type VersionDeletionRequest struct {
+	Confirmation string `json:"confirmation"`
+	Reason       string `json:"reason"`
+}
+
+type VersionDeletionSpec struct {
+	PluginID     int64
+	VersionID    int64
+	DeletedBy    string
+	Reason       string
+	Confirmation string
+}
+
+type AccountDeletionRequest struct {
+	Confirmation       string `json:"confirmation"`
+	Reason             string `json:"reason"`
+	ReauthToken        string `json:"reauthToken"`
+	DeleteOwnedPlugins bool   `json:"deleteOwnedPlugins"`
+}
+
+type AccountDeletionResult struct {
+	PluginsDeleted  int `json:"pluginsDeleted"`
+	VersionsDeleted int `json:"versionsDeleted"`
+}
+
+type AccountDeletionAudit struct {
+	Login           string    `json:"login"`
+	DeletedBy       string    `json:"deletedBy"`
+	Reason          string    `json:"reason,omitempty"`
+	Confirmation    string    `json:"confirmation"`
+	PluginsDeleted  int       `json:"pluginsDeleted"`
+	VersionsDeleted int       `json:"versionsDeleted"`
+	CreatedAt       time.Time `json:"createdAt"`
 }
 
 // Ref returns the canonical reference for the plugin: "@namespace/name" if a

@@ -176,9 +176,12 @@ func (s *fileStore) GetVersions(_ context.Context, pluginID int64) ([]models.Plu
 	if err != nil {
 		return nil, err
 	}
-	versions := p.Versions
-	if versions == nil {
-		versions = []models.PluginVersion{}
+	versions := make([]models.PluginVersion, 0, len(p.Versions))
+	for _, version := range p.Versions {
+		if version.DeletedAt != nil {
+			continue
+		}
+		versions = append(versions, version)
 	}
 	return versions, nil
 }
@@ -297,11 +300,11 @@ func (s *fileStore) UpdateValidationChecks(_ context.Context, id int64, checksJS
 	return s.savePlugin(p)
 }
 
-func (s *fileStore) Delete(_ context.Context, id int64) error {
+func (s *fileStore) Delete(_ context.Context, spec models.PluginDeletionSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	p, err := s.loadPlugin(id)
+	p, err := s.loadPlugin(spec.PluginID)
 	if err != nil {
 		return err
 	}
@@ -310,15 +313,30 @@ func (s *fileStore) Delete(_ context.Context, id int64) error {
 	}
 	now := time.Now().UTC()
 	p.DeletedAt = &now
+	p.DeletedBy = spec.DeletedBy
+	p.DeletionReason = spec.Reason
+	if spec.AnonymizeAuthor {
+		p.Author = ""
+	}
+	if spec.CascadeVersions {
+		for i := range p.Versions {
+			if p.Versions[i].DeletedAt != nil {
+				continue
+			}
+			p.Versions[i].DeletedAt = &now
+			p.Versions[i].DeletedBy = spec.DeletedBy
+			p.Versions[i].DeletionReason = spec.Reason
+		}
+	}
 	p.UpdatedAt = now
 	return s.savePlugin(p)
 }
 
-func (s *fileStore) DeleteVersion(_ context.Context, pluginID, versionID int64) error {
+func (s *fileStore) DeleteVersion(_ context.Context, spec models.VersionDeletionSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	p, err := s.loadPlugin(pluginID)
+	p, err := s.loadPlugin(spec.PluginID)
 	if err != nil {
 		return err
 	}
@@ -327,20 +345,63 @@ func (s *fileStore) DeleteVersion(_ context.Context, pluginID, versionID int64) 
 	}
 
 	found := false
-	updated := p.Versions[:0]
-	for _, v := range p.Versions {
-		if v.ID == versionID {
-			found = true
+	for i := range p.Versions {
+		if p.Versions[i].ID != spec.VersionID {
 			continue
 		}
-		updated = append(updated, v)
+		if p.Versions[i].DeletedAt != nil {
+			return appErrors.ErrPluginNotFound
+		}
+		found = true
+		now := time.Now().UTC()
+		p.Versions[i].DeletedAt = &now
+		p.Versions[i].DeletedBy = spec.DeletedBy
+		p.Versions[i].DeletionReason = spec.Reason
+		p.UpdatedAt = now
+		break
 	}
 	if !found {
 		return fmt.Errorf("version not found")
 	}
-	p.Versions = updated
-	p.UpdatedAt = time.Now().UTC()
 	return s.savePlugin(p)
+}
+
+func (s *fileStore) RecordAccountDeletion(_ context.Context, audit models.AccountDeletionAudit) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	events, err := s.loadAccountDeletionAudits()
+	if err != nil {
+		return err
+	}
+	events = append(events, audit)
+	data, err := json.MarshalIndent(events, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal account deletions: %w", err)
+	}
+	return writeFileAtomic(s.accountDeletionLogPath(), data)
+}
+
+func (s *fileStore) loadAccountDeletionAudits() ([]models.AccountDeletionAudit, error) {
+	data, err := os.ReadFile(s.accountDeletionLogPath())
+	if os.IsNotExist(err) {
+		return []models.AccountDeletionAudit{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read account deletions: %w", err)
+	}
+	var events []models.AccountDeletionAudit
+	if len(data) == 0 {
+		return []models.AccountDeletionAudit{}, nil
+	}
+	if err := json.Unmarshal(data, &events); err != nil {
+		return nil, fmt.Errorf("parse account deletions: %w", err)
+	}
+	return events, nil
+}
+
+func (s *fileStore) accountDeletionLogPath() string {
+	return filepath.Join(s.dataDir, "account_deletions.json")
 }
 
 func (s *fileStore) IncrCounters(_ context.Context, pluginID, versionID, views, downloads int64) error {

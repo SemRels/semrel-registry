@@ -15,13 +15,13 @@ describe('LoginPage', () => {
     vi.mocked(getAuthConfig).mockResolvedValue({ githubOAuthEnabled: true, loginURL: '/auth/github' });
 
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <LoginPage />
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/By signing in, you agree/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Terms' })).toHaveAttribute('href', 'https://semrel.io/legal/terms/');
+    expect(await screen.findByRole('link', { name: 'Terms' })).toHaveAttribute('href', 'https://semrel.io/legal/terms/');
+    expect(document.body).toHaveTextContent(/By signing in, you agree/i);
     expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', 'https://semrel.io/legal/privacy/');
     expect(screen.getByRole('link', { name: 'Imprint' })).toHaveAttribute('href', 'https://semrel.io/legal/imprint/');
   });

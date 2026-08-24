@@ -124,14 +124,16 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 	}
 
 	type semrelPluginVersion struct {
-		Version      string            `json:"version"`
-		ReleaseDate  string            `json:"releaseDate"`
-		Changelog    string            `json:"changelog,omitempty"`
-		DownloadURL  string            `json:"downloadUrl"`
-		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
-		Checksums    map[string]string `json:"checksums"`
-		Prerelease   bool              `json:"prerelease,omitempty"`
-		SemrelCore   string            `json:"semrelCore,omitempty"`
+		Version       string            `json:"version"`
+		ReleaseDate   string            `json:"releaseDate"`
+		Changelog     string            `json:"changelog,omitempty"`
+		DownloadURL   string            `json:"downloadUrl"`
+		DownloadURLs  map[string]string `json:"downloadUrls,omitempty"`
+		Checksums     map[string]string `json:"checksums"`
+		Prerelease    bool              `json:"prerelease,omitempty"`
+		Compatibility *struct {
+			SemrelCore string `json:"semrelCore,omitempty"`
+		} `json:"compatibility,omitempty"`
 	}
 	type semrelPlugin struct {
 		Namespace   string                `json:"namespace,omitempty"`
@@ -172,7 +174,16 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				DownloadURLs: deriveDownloadURLs(v.DownloadURL, v.Checksums),
 				Checksums:    v.Checksums,
 				Prerelease:   v.Prerelease,
-				SemrelCore:   v.SemrelCore,
+				Compatibility: func() *struct {
+					SemrelCore string `json:"semrelCore,omitempty"`
+				} {
+					if v.SemrelCore == "" {
+						return nil
+					}
+					return &struct {
+						SemrelCore string `json:"semrelCore,omitempty"`
+					}{SemrelCore: v.SemrelCore}
+				}(),
 			})
 		}
 		tags := p.Tags

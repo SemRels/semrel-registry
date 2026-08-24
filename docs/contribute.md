@@ -14,6 +14,21 @@ This document explains how plugins are added to the go-semrel registry.
 
 - release naming and asset structure
 - version and compatibility information
+
+Plugin releases may declare the supported semrel core range in their version
+metadata:
+
+```json
+{
+  "compatibility": {
+    "semrelCore": ">=0.25.0 <1.0.0"
+  }
+}
+```
+
+`semrelCore` is optional. It uses space-separated semver comparators (`>=`,
+`<`, `^`, `~`, or `=`); omitting it preserves compatibility with existing
+plugins and older clients.
 - checksum completeness and consistency
 - schema and automation changes proposed in pull requests
 

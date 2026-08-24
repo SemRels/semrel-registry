@@ -40,6 +40,10 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
 
+Version entries may optionally declare `compatibility.semrelCore` as a
+space-separated semver range (for example `>=0.25.0 <1.0.0`). Missing metadata
+remains valid for backward compatibility with existing plugins and clients.
+
 ## Quick start (no database)
 
 The simplest way to run the registry locally is with the **file storage backend** — no Postgres required.

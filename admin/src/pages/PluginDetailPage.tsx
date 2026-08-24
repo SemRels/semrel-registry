@@ -72,6 +72,7 @@ type Version = {
   downloadUrls?: Record<string, string>;
   checksums?: Record<string, string>;
   prerelease: boolean;
+  compatibility?: { semrelCore?: string };
   views?: number;
   downloads?: number;
 };
@@ -477,6 +478,7 @@ export default function PluginDetailPage() {
                       <tr style={{ borderBottom: '1px solid var(--border)' }}>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
+                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Core</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Stats</th>
                         <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
@@ -503,6 +505,9 @@ export default function PluginDetailPage() {
                             </td>
                             <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
                               {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
+                            </td>
+                            <td data-label="Core" style={{ padding: '.5rem', color: 'var(--muted)', fontFamily: 'monospace', fontSize: 'var(--fs-xs)' }}>
+                              {v.compatibility?.semrelCore || '—'}
                             </td>
                             <td data-label="Install" style={{ padding: '.5rem' }}>
                               <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
