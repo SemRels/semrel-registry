@@ -168,7 +168,7 @@ func TestCanonicalMigrationRecoversDirtyVersionNineWithHistoricalURL(t *testing.
 	var dirty bool
 	require.NoError(t, pool.QueryRow(context.Background(),
 		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-	assert.Equal(t, latestMigrationVersion(t), version)
+	assert.Equal(t, int(latestMigrationVersion(t)), version)
 	assert.False(t, dirty)
 
 	var count int
@@ -240,7 +240,7 @@ func TestCanonicalMigrationMergesDeletedCanonicalIdentityOccupant(t *testing.T) 
 	var dirty bool
 	require.NoError(t, pool.QueryRow(context.Background(),
 		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-	assert.Equal(t, latestMigrationVersion(t), version)
+	assert.Equal(t, int(latestMigrationVersion(t)), version)
 	assert.False(t, dirty)
 
 	var retainedID int64
