@@ -131,6 +131,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
 		Checksums    map[string]string `json:"checksums"`
 		Prerelease   bool              `json:"prerelease,omitempty"`
+		SemrelCore   string            `json:"semrelCore,omitempty"`
 	}
 	type semrelPlugin struct {
 		Namespace   string                `json:"namespace,omitempty"`
@@ -171,6 +172,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				DownloadURLs: deriveDownloadURLs(v.DownloadURL, v.Checksums),
 				Checksums:    v.Checksums,
 				Prerelease:   v.Prerelease,
+				SemrelCore:   v.SemrelCore,
 			})
 		}
 		tags := p.Tags

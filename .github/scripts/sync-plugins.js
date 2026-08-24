@@ -392,6 +392,9 @@ async function main() {
           gRPCVersion: defaultGRPCVersion
         }
       };
+      if (typeof spec.semrelCore === 'string' && spec.semrelCore.trim() !== '') {
+        versionEntry.compatibility.semrelCore = spec.semrelCore.trim();
+      }
 
       const changelog = String(release.body || '').trim();
       if (changelog) {

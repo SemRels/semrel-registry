@@ -35,7 +35,9 @@ type TopVersionStat struct {
 
 type RegistryStats struct {
 	TotalPlugins   int64                         `json:"totalPlugins"`
+	TotalUsers     int64                         `json:"totalUsers"`
 	Categories     map[string]int64              `json:"categories"`
+	StatusCounts   map[string]int64              `json:"statusCounts"`
 	TotalViews     int64                         `json:"totalViews"`
 	TotalDownloads int64                         `json:"totalDownloads"`
 	TopPlugins     []TopPluginStat               `json:"topPlugins"`
@@ -55,7 +57,7 @@ func NewNoopRegistryStatsProvider() RegistryStatsProvider {
 }
 
 func (NoopRegistryStatsProvider) GetRegistryStats(_ context.Context) (RegistryStats, error) {
-	return RegistryStats{Categories: map[string]int64{}, Series: map[string][]StatsSeriesPoint{}}, nil
+	return RegistryStats{Categories: map[string]int64{}, StatusCounts: map[string]int64{}, Series: map[string][]StatsSeriesPoint{}}, nil
 }
 
 type PostgresRegistryStatsProvider struct {
@@ -71,9 +73,10 @@ func NewPostgresRegistryStatsProvider(db *database.Database) RegistryStatsProvid
 
 func (p *PostgresRegistryStatsProvider) GetRegistryStats(ctx context.Context) (RegistryStats, error) {
 	stats := RegistryStats{
-		Categories: map[string]int64{},
-		Series:     map[string][]StatsSeriesPoint{},
-		Timestamp:  time.Now().UTC(),
+		Categories:   map[string]int64{},
+		StatusCounts: map[string]int64{},
+		Series:       map[string][]StatsSeriesPoint{},
+		Timestamp:    time.Now().UTC(),
 	}
 
 	if err := p.loadTotals(ctx, &stats); err != nil {
@@ -82,9 +85,13 @@ func (p *PostgresRegistryStatsProvider) GetRegistryStats(ctx context.Context) (R
 	if err := p.loadCategories(ctx, &stats); err != nil {
 		return RegistryStats{}, err
 	}
+	if err := p.loadStatuses(ctx, &stats); err != nil {
+		return RegistryStats{}, err
+	}
 	if err := p.loadTopPlugins(ctx, &stats); err != nil {
 		return RegistryStats{}, err
 	}
+
 	if err := p.loadTopVersions(ctx, &stats); err != nil {
 		return RegistryStats{}, err
 	}
@@ -113,12 +120,13 @@ func (p *PostgresRegistryStatsProvider) GetRegistryStats(ctx context.Context) (R
 func (p *PostgresRegistryStatsProvider) loadTotals(ctx context.Context, stats *RegistryStats) error {
 	row := p.db.Pool().QueryRow(ctx, `
 SELECT COUNT(*)::BIGINT,
+       COUNT(DISTINCT NULLIF(LOWER(author), ''))::BIGINT,
        COALESCE(SUM(views), 0)::BIGINT,
        COALESCE(SUM(downloads), 0)::BIGINT
 FROM plugins
 WHERE deleted_at IS NULL
 `)
-	if err := row.Scan(&stats.TotalPlugins, &stats.TotalViews, &stats.TotalDownloads); err != nil {
+	if err := row.Scan(&stats.TotalPlugins, &stats.TotalUsers, &stats.TotalViews, &stats.TotalDownloads); err != nil {
 		return fmt.Errorf("query totals: %w", err)
 	}
 	return nil
@@ -149,6 +157,29 @@ ORDER BY category ASC
 		return fmt.Errorf("iterate categories: %w", err)
 	}
 	return nil
+}
+
+func (p *PostgresRegistryStatsProvider) loadStatuses(ctx context.Context, stats *RegistryStats) error {
+	rows, err := p.db.Pool().Query(ctx, `
+SELECT COALESCE(status, 'active'), COUNT(*)::BIGINT
+FROM plugins
+WHERE deleted_at IS NULL
+GROUP BY COALESCE(status, 'active')
+ORDER BY 1
+`)
+	if err != nil {
+		return fmt.Errorf("query plugin statuses: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var status string
+		var count int64
+		if scanErr := rows.Scan(&status, &count); scanErr != nil {
+			return fmt.Errorf("scan plugin status: %w", scanErr)
+		}
+		stats.StatusCounts[status] = count
+	}
+	return rows.Err()
 }
 
 func (p *PostgresRegistryStatsProvider) loadTopPlugins(ctx context.Context, stats *RegistryStats) error {

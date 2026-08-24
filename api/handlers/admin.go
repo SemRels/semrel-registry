@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	appErrors "github.com/SemRels/semrel-registry/api/internal"
@@ -210,7 +211,9 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"totalPlugins":   stats.TotalPlugins,
+			"totalUsers":     stats.TotalUsers,
 			"categories":     stats.Categories,
+			"statusCounts":   stats.StatusCounts,
 			"totalViews":     stats.TotalViews,
 			"totalDownloads": stats.TotalDownloads,
 			"topPlugins":     stats.TopPlugins,
@@ -233,12 +236,22 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	}
 
 	categories := map[string]int64{}
+	statusCounts := map[string]int64{}
+	authors := map[string]struct{}{}
 	var totalViews int64
 	var totalDownloads int64
 
 	accumulate := func(plugins []models.Plugin) {
 		for _, p := range plugins {
 			categories[p.Category]++
+			status := p.Status
+			if status == "" {
+				status = "active"
+			}
+			statusCounts[status]++
+			if author := strings.TrimSpace(strings.ToLower(p.Author)); author != "" {
+				authors[author] = struct{}{}
+			}
 			totalViews += p.Views
 			totalDownloads += p.Downloads
 		}
@@ -260,7 +273,9 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"totalPlugins":   result.Pagination.Total,
+		"totalUsers":     len(authors),
 		"categories":     categories,
+		"statusCounts":   statusCounts,
 		"totalViews":     totalViews,
 		"totalDownloads": totalDownloads,
 		"timestamp":      time.Now().UTC(),

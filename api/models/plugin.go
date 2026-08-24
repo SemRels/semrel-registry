@@ -43,6 +43,7 @@ type PluginVersion struct {
 	Changelog   string            `json:"changelog"`
 	DownloadURL string            `json:"downloadUrl"`
 	Checksums   map[string]string `json:"checksums,omitempty"`
+	SemrelCore  string            `json:"semrelCore,omitempty"`
 	Prerelease  bool              `json:"prerelease"`
 	Views       int64             `json:"views"`
 	Downloads   int64             `json:"downloads"`

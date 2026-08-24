@@ -26,6 +26,7 @@ const HTTP_URL_PATTERN = /^https?:\/\//;
 const SPDX_PATTERN = /^[A-Za-z0-9.-]+(?:\+[A-Za-z0-9.-]+)?$/;
 const SHA256_PATTERN = /^[A-Fa-f0-9]{64}$/;
 const GRPC_VERSION_PATTERN = /^v[0-9]+(?:[A-Za-z0-9._-]*)?$/;
+const SEMVER_RANGE_PATTERN = /^(?:[<>=~^]*\s*\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?:\s+(?:[<>=~^]*\s*\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?))*$/;
 
 function deriveCategory(pluginName) {
   for (const category of VALID_CATEGORIES) {
@@ -206,6 +207,11 @@ function validateVersion(version, pluginName, index) {
     if (!compatibility || typeof compatibility !== 'object' || Array.isArray(compatibility)) {
       errors.push(`${prefix}.compatibility must be an object when present.`);
     } else {
+      if (compatibility.semrelCore !== undefined &&
+          (typeof compatibility.semrelCore !== 'string' ||
+            !SEMVER_RANGE_PATTERN.test(compatibility.semrelCore.trim()))) {
+        errors.push(`${prefix}.compatibility.semrelCore must be a valid space-separated semver constraint when present.`);
+      }
       if (!parseSemver(compatibility.minSemrelVersion)) {
         errors.push(`${prefix}.compatibility.minSemrelVersion must be a valid semver string.`);
       }
@@ -411,6 +417,7 @@ module.exports = {
   buildTags,
   parseSemver,
   sortVersionsDescending,
+  validateVersion,
   validatePlugin,
   validateRegistryDocument
 };

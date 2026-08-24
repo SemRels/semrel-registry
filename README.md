@@ -62,6 +62,17 @@ The `admin/` directory contains an nginx-served SPA that acts as the public entr
 - `/api/` → API container (REST endpoints)
 - Everything else → SPA (`index.html`)
 
+The admin login and authenticated plugin-management screens surface Terms, Privacy, and Imprint links. Destructive plugin and version removals are intentionally gated in the SPA with typed confirmations before the existing authenticated delete endpoints are called.
+
+### Targeted admin frontend checks
+
+```bash
+cd admin
+npm install
+npm run test
+npm run build
+```
+
 ### Building the admin container
 
 ```bash

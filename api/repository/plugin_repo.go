@@ -194,7 +194,7 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(views, 0), COALESCE(downloads, 0), created_at
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at
 FROM plugin_versions
 WHERE plugin_id = $1
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
@@ -425,8 +425,8 @@ func (r *pgRepository) AddVersion(ctx context.Context, version *models.PluginVer
 	}
 
 	err = tx.QueryRow(ctx, `
-INSERT INTO plugin_versions (plugin_id, version, release_date, changelog, download_url, prerelease)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO plugin_versions (plugin_id, version, release_date, changelog, download_url, prerelease, semrel_core)
+VALUES ($1, $2, $3, $4, $5, $6, NULLIF($7, ''))
 RETURNING id, created_at`,
 		version.PluginID,
 		version.Version,
@@ -434,6 +434,7 @@ RETURNING id, created_at`,
 		version.Changelog,
 		version.DownloadURL,
 		version.Prerelease,
+		version.SemrelCore,
 	).Scan(&version.ID, &version.CreatedAt)
 	if err != nil {
 		return 0, wrapWriteError("create plugin version", err)
@@ -647,6 +648,7 @@ func scanVersion(scanner interface {
 		&version.Changelog,
 		&version.DownloadURL,
 		&version.Prerelease,
+		&version.SemrelCore,
 		&version.Views,
 		&version.Downloads,
 		&version.CreatedAt,

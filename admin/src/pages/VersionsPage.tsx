@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getPlugin, listVersions, createVersion, deleteVersion } from '../lib/api';
 import type { Plugin, PluginVersion } from '../lib/api';
 import { marked } from 'marked';
+import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 
 export default function VersionsPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,9 @@ export default function VersionsPage() {
   const [form, setForm]       = useState({ version:'', releaseDate:'', downloadUrl:'', changelog:'', prerelease:false, checksums:'{}' });
   const [saving, setSaving]   = useState(false);
   const [formError, setFormError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<PluginVersion | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -38,12 +42,19 @@ export default function VersionsPage() {
     finally { setSaving(false); }
   }
 
-  async function handleDelete(v: PluginVersion) {
-    if (!globalThis.confirm(`Retract version v${v.version}? This cannot be undone.`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
+    setDeleteError('');
     try {
-      await deleteVersion(id!, v.id);
-      setVersions(prev => prev.filter(x => x.id !== v.id));
-    } catch (e: unknown) { alert(e instanceof Error ? e.message : 'Delete failed'); }
+      await deleteVersion(id!, deleteTarget.id);
+      setVersions(prev => prev.filter(x => x.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : 'Delete failed');
+    } finally {
+      setDeleteBusy(false);
+    }
   }
 
   if (loading) return <div className="page__body muted">Loading…</div>;
@@ -53,7 +64,7 @@ export default function VersionsPage() {
       <div className="page__header">
         <h1 className="page__title">Versions · <span style={{ color:'var(--accent)' }}>{plugin?.name}</span></h1>
         <div className="flex gap-sm">
-          <button type="button" className="btn btn--sm" onClick={() => navigate('/plugins')}>← Back</button>
+          <button type="button" className="btn btn--sm" onClick={() => navigate('/admin/plugins')}>← Back</button>
           <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
             {showForm ? 'Cancel' : '+ Add Version'}
           </button>
@@ -61,6 +72,9 @@ export default function VersionsPage() {
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
+        <p className="muted" style={{ fontSize:'var(--fs-xs)', marginBottom:'1rem' }}>
+          Version retractions now require typed confirmation using the visible release tag before the delete API call is made.
+        </p>
 
         {showForm && (
           <div className="card" style={{ maxWidth:600, marginBottom:'1rem' }}>
@@ -129,7 +143,7 @@ export default function VersionsPage() {
                         <button
                           type="button"
                           className="btn btn--sm btn--danger"
-                          onClick={() => { void handleDelete(v); }}
+                          onClick={() => { setDeleteError(''); setDeleteTarget(v); }}
                           title="Retract version"
                         >
                           Retract
@@ -158,6 +172,22 @@ export default function VersionsPage() {
           </div>
         )}
       </div>
+      <DeletionConfirmDialog
+        open={deleteTarget !== null}
+        title={deleteTarget ? `Retract v${deleteTarget.version}?` : 'Retract version?'}
+        message={deleteTarget && plugin
+          ? `This removes version v${deleteTarget.version} from ${plugin.name} in the registry workspace.`
+          : ''}
+        confirmationValue={deleteTarget ? `v${deleteTarget.version}` : ''}
+        confirmationLabel="Version tag"
+        confirmLabel="Retract version"
+        busyLabel="Retracting…"
+        acknowledgement="I understand this version will no longer be offered from the registry."
+        busy={deleteBusy}
+        error={deleteError}
+        onClose={() => { if (!deleteBusy) { setDeleteError(''); setDeleteTarget(null); } }}
+        onConfirm={() => { void handleDelete(); }}
+      />
     </>
   );
 }

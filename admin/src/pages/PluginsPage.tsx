@@ -4,6 +4,7 @@ import { listPlugins, deletePlugin, revalidateAllPlugins } from '../lib/api';
 import type { BatchRevalidationResponse } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 
 const CAT_CLASS: Record<string, string> = {
   provider: 'badge--provider', analyzer: 'badge--analyzer',
@@ -32,6 +33,9 @@ export default function PluginsPage() {
   const [revalidating, setRevalidating] = useState(false);
   const [revalidation, setRevalidation] = useState<BatchRevalidationResponse | null>(null);
   const [revalidationError, setRevalidationError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Plugin | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const navigate                      = useNavigate();
 
   useEffect(() => {
@@ -84,10 +88,23 @@ export default function PluginsPage() {
     }
   }
 
-  async function handleDelete(p: Plugin) {
-    if (!globalThis.confirm(`Delete "${p.name}"?`)) return;
-    try { await deletePlugin(p.id); setPlugins((prev) => prev.filter((x) => x.id !== p.id)); }
-    catch (e: unknown) { alert(e instanceof Error ? e.message : 'Delete failed'); }
+  function formatPluginName(plugin: Plugin) {
+    return plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name;
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
+    setDeleteError('');
+    try {
+      await deletePlugin(deleteTarget.id);
+      setPlugins((prev) => prev.filter((plugin) => plugin.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : 'Delete failed');
+    } finally {
+      setDeleteBusy(false);
+    }
   }
 
   // Non-admins can only edit/delete their own plugins.
@@ -110,11 +127,14 @@ export default function PluginsPage() {
         {!isAdmin && (
           <div className="alert" style={{ background:'rgba(56,139,253,.1)', border:'1px solid rgba(56,139,253,.3)', color:'#79c0ff', padding:'.5rem .75rem', borderRadius:'6px', fontSize:'var(--fs-sm)', marginBottom:'.75rem' }}>
             Community view — you can only manage plugins attributed to <strong>{user?.login}</strong>.{' '}
-            <a href="/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
+            <a href="/admin/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
               Submit a new plugin →
             </a>
           </div>
         )}
+        <p className="muted" style={{ fontSize:'var(--fs-xs)', marginBottom:'.75rem' }}>
+          Destructive plugin deletions require typed confirmation before the existing authenticated API delete request is sent.
+        </p>
         {error && <div className="alert alert--error">{error}</div>}
         {revalidationError && <div className="alert alert--error">{revalidationError}</div>}
         {revalidation && (
@@ -190,7 +210,7 @@ export default function PluginsPage() {
                         <>
                           <Link to={`/admin/plugins/${p.id}`} className="btn btn--sm">Edit</Link>
                           <Link to={`/admin/plugins/${p.id}/versions`} className="btn btn--sm">Versions</Link>
-                          <button type="button" className="btn btn--sm btn--danger" onClick={() => { void handleDelete(p); }}>Del</button>
+                          <button type="button" className="btn btn--sm btn--danger" onClick={() => { setDeleteError(''); setDeleteTarget(p); }}>Del</button>
                         </>
                       ) : (
                         <span className="muted" style={{ fontSize:'var(--fs-xs)' }}>read-only</span>
@@ -211,6 +231,22 @@ export default function PluginsPage() {
           </div>
         )}
       </div>
+      <DeletionConfirmDialog
+        open={deleteTarget !== null}
+        title={deleteTarget ? `Delete ${formatPluginName(deleteTarget)}?` : 'Delete plugin?'}
+        message={deleteTarget
+          ? 'This removes the plugin entry from the registry workspace and withdraws every managed version from this admin view.'
+          : ''}
+        confirmationValue={deleteTarget ? formatPluginName(deleteTarget) : ''}
+        confirmationLabel="Plugin name"
+        confirmLabel="Delete plugin"
+        busyLabel="Deleting plugin…"
+        acknowledgement="I understand this removes the plugin and all listed versions from the registry."
+        busy={deleteBusy}
+        error={deleteError}
+        onClose={() => { if (!deleteBusy) { setDeleteError(''); setDeleteTarget(null); } }}
+        onConfirm={() => { void handleDelete(); }}
+      />
     </>
   );
 }

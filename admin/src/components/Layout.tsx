@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { clearToken } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import LegalLinks from './LegalLinks';
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -81,12 +82,7 @@ export default function Layout() {
           </a>
 
           <div className="sidebar__section-label">Legal</div>
-          <a href="https://semrel.io/legal/imprint/" className="sidebar__link" target="_blank" rel="noopener">
-            Imprint
-          </a>
-          <a href="https://semrel.io/legal/privacy/" className="sidebar__link" target="_blank" rel="noopener">
-            Privacy
-          </a>
+          <LegalLinks linkClassName="sidebar__link" />
         </nav>
         <div className="sidebar__footer">
           {user && (
@@ -107,6 +103,10 @@ export default function Layout() {
           <button className="sidebar__logout" type="button" onClick={() => { clearToken(); navigate('/login'); }}>
             Sign out
           </button>
+          <p className="legal-note sidebar__legal-note">
+            Changes are attributed to your signed-in account. By using this workspace you agree to the semrel terms for maintainers and contributors.
+          </p>
+          <LegalLinks inline className="legal-note__links" linkClassName="muted" />
         </div>
       </aside>
       <main className="page">

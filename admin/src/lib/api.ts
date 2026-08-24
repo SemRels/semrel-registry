@@ -91,7 +91,9 @@ export interface PluginListResponse {
 
 export interface Stats {
   totalPlugins: number;
+  totalUsers?: number;
   categories: Record<string, number>;
+  statusCounts?: Record<string, number>;
   totalViews: number;
   totalDownloads: number;
   topPlugins?: Array<{
