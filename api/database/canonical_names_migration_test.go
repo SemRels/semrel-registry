@@ -4,7 +4,9 @@ package database
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -55,7 +57,7 @@ func TestCanonicalFirstPartyMigrationUpgradesExistingRows(t *testing.T) {
 	require.NoError(t, migrator.Up())
 	version, dirty, err := migrator.Version()
 	require.NoError(t, err)
-	assert.EqualValues(t, 9, version)
+	assert.EqualValues(t, latestMigrationVersion(t), version)
 	assert.False(t, dirty)
 	_, _ = migrator.Close()
 
@@ -166,7 +168,7 @@ func TestCanonicalMigrationRecoversDirtyVersionNineWithHistoricalURL(t *testing.
 	var dirty bool
 	require.NoError(t, pool.QueryRow(context.Background(),
 		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-	assert.Equal(t, 9, version)
+	assert.Equal(t, int(latestMigrationVersion(t)), version)
 	assert.False(t, dirty)
 
 	var count int
@@ -238,7 +240,7 @@ func TestCanonicalMigrationMergesDeletedCanonicalIdentityOccupant(t *testing.T) 
 	var dirty bool
 	require.NoError(t, pool.QueryRow(context.Background(),
 		`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-	assert.Equal(t, 9, version)
+	assert.Equal(t, int(latestMigrationVersion(t)), version)
 	assert.False(t, dirty)
 
 	var retainedID int64
@@ -303,7 +305,7 @@ func TestCanonicalFirstPartyMigrationDetectsIrreconcilableIdentityCollision(t *t
 	migrator = newMigrator(t, collisionDSN)
 	version, dirty, err = migrator.Version()
 	require.NoError(t, err)
-	assert.EqualValues(t, 9, version)
+	assert.EqualValues(t, latestMigrationVersion(t), version)
 	assert.False(t, dirty)
 	_, _ = migrator.Close()
 	pool.Close()
@@ -530,4 +532,27 @@ func migrateUp(t *testing.T, dsn string) {
 	migrator := newMigrator(t, dsn)
 	require.NoError(t, migrator.Up())
 	_, _ = migrator.Close()
+}
+
+func latestMigrationVersion(t *testing.T) uint {
+	t.Helper()
+	source, err := filepath.Abs("migrations")
+	require.NoError(t, err)
+	entries, err := os.ReadDir(source)
+	require.NoError(t, err)
+
+	var latest uint
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".up.sql") {
+			continue
+		}
+		prefix := strings.SplitN(entry.Name(), "_", 2)[0]
+		version, err := strconv.ParseUint(prefix, 10, 32)
+		require.NoError(t, err, entry.Name())
+		if uint(version) > latest {
+			latest = uint(version)
+		}
+	}
+	require.NotZero(t, latest)
+	return latest
 }
