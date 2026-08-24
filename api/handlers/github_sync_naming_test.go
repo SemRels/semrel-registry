@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/naming"
 	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
@@ -34,6 +36,15 @@ func TestPluginNameFromRepo(t *testing.T) {
 				t.Fatalf("pluginNameFromRepo(%q)=%q, want %q", tc.repoName, got, tc.want)
 			}
 		})
+	}
+}
+
+func TestPluginNameValidationAllowsCurrentFirstPartyCategories(t *testing.T) {
+	for _, repo := range []string{"publisher-crates", "packager-nfpm"} {
+		parts := strings.SplitN(repo, "-", 2)
+		if len(parts) != 2 || !naming.IsFirstPartyCategory(parts[0]) || !pluginNameRE.MatchString(parts[1]) {
+			t.Fatalf("expected %q to pass first-party naming validation", repo)
+		}
 	}
 }
 
