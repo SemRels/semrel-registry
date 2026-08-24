@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
@@ -35,7 +37,7 @@ type Claims struct {
 	Login     string `json:"login"`
 	Name      string `json:"name"`
 	AvatarURL string `json:"avatar_url"`
-	Role      string `json:"role"`    // "admin" | "user"
+	Role      string `json:"role"`     // "admin" | "user"
 	IsAdmin   bool   `json:"is_admin"` // true when Role == "admin" (kept for backwards compat)
 	jwt.RegisteredClaims
 }
@@ -47,15 +49,16 @@ type AuthHandler struct {
 	allowedOrgs []string // empty = allow any GitHub user as read; admin = org member
 	adminUsers  []string // individual logins that always get admin
 	frontendURL string
+	plugins     service.PluginManager
 }
 
-func NewAuthHandler() *AuthHandler {
-	clientID     := os.Getenv("GITHUB_CLIENT_ID")
+func NewAuthHandler(pluginManagers ...service.PluginManager) *AuthHandler {
+	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
-	jwtSecret    := strings.TrimSpace(os.Getenv("JWT_SECRET"))
-	frontendURL  := os.Getenv("FRONTEND_URL")
-	allowedOrgs  := splitEnv("ALLOWED_GITHUB_ORGS")
-	adminUsers   := splitEnv("ADMIN_GITHUB_USERS")
+	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
+	frontendURL := os.Getenv("FRONTEND_URL")
+	allowedOrgs := splitEnv("ALLOWED_GITHUB_ORGS")
+	adminUsers := splitEnv("ADMIN_GITHUB_USERS")
 
 	if frontendURL == "" {
 		frontendURL = "http://localhost:5173"
@@ -71,12 +74,18 @@ func NewAuthHandler() *AuthHandler {
 		Endpoint:     oauthgithub.Endpoint,
 	}
 
+	var pluginManager service.PluginManager
+	if len(pluginManagers) > 0 {
+		pluginManager = pluginManagers[0]
+	}
+
 	return &AuthHandler{
 		oauthConfig: cfg,
 		jwtSecret:   []byte(jwtSecret),
 		allowedOrgs: allowedOrgs,
 		adminUsers:  adminUsers,
 		frontendURL: frontendURL,
+		plugins:     pluginManager,
 	}
 }
 
@@ -150,6 +159,35 @@ func (h *AuthHandler) Config(c *gin.Context) {
 		"githubOAuthEnabled": configured,
 		"loginURL":           "/auth/github",
 	})
+}
+
+func (h *AuthHandler) DeleteAccount(c *gin.Context) {
+	if h.plugins == nil {
+		ServiceUnavailable(c, "Account deletion is not configured", nil)
+		return
+	}
+
+	var request models.AccountDeletionRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
+		return
+	}
+
+	login, _ := c.Get("login")
+	loginStr, _ := login.(string)
+	bearer := strings.TrimSpace(strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer "))
+	if err := h.validateReauthToken(loginStr, bearer, request.ReauthToken); err != nil {
+		Unauthorized(c, "Reauthentication failed", gin.H{"issue": err.Error()})
+		return
+	}
+
+	result, err := h.plugins.DeleteAccount(c.Request.Context(), request, currentDeleteActor(c))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -294,6 +332,7 @@ func splitEnv(key string) []string {
 	if val == "" {
 		return nil
 	}
+
 	parts := strings.Split(val, ",")
 	out := make([]string, 0, len(parts))
 	for _, p := range parts {
@@ -302,4 +341,26 @@ func splitEnv(key string) []string {
 		}
 	}
 	return out
+}
+
+func (h *AuthHandler) validateReauthToken(login, currentBearer, reauthToken string) error {
+	reauthToken = strings.TrimSpace(reauthToken)
+	if reauthToken == "" {
+		return fmt.Errorf("reauth token is required")
+	}
+	if currentBearer == "" {
+		return fmt.Errorf("current bearer token is required")
+	}
+
+	if claims, err := h.ValidateJWT(reauthToken); err == nil {
+		if !strings.EqualFold(claims.Login, login) {
+			return fmt.Errorf("reauthenticated user does not match current account")
+		}
+		return nil
+	}
+
+	if !hmac.Equal([]byte(currentBearer), []byte(reauthToken)) {
+		return fmt.Errorf("reauth token does not match current session")
+	}
+	return nil
 }
