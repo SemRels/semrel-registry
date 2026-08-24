@@ -467,24 +467,100 @@ func (h *PluginHandler) RevalidatePlugin(c *gin.Context) {
 		HandleError(c, err)
 		return
 	}
-
-	owner, repo := ownerRepoFromURL(plugin.Repository)
-	if owner == "" || repo == "" {
+	if owner, repo := ownerRepoFromURL(plugin.Repository); owner == "" || repo == "" {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "plugin has no valid GitHub repository URL"})
 		return
 	}
 
-	result := validatePluginStandards(owner, repo)
-	raw, err := json.Marshal(result)
+	result, err := h.revalidatePlugin(c.Request.Context(), plugin)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to marshal result"})
-		return
-	}
-	if err := h.service.UpdateValidationChecks(c.Request.Context(), plugin.ID, raw); err != nil {
 		HandleError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
+type batchRevalidationResult struct {
+	ID         int64             `json:"id"`
+	Name       string            `json:"name"`
+	Repository string            `json:"repository"`
+	Result     *ValidationResult `json:"result,omitempty"`
+	Error      string            `json:"error,omitempty"`
+}
+
+// RevalidateAllPlugins revalidates every non-deleted plugin sequentially.
+// POST /api/v1/admin/plugins/revalidate-all
+func (h *PluginHandler) RevalidateAllPlugins(c *gin.Context) {
+	const pageSize = 100
+	ctx := c.Request.Context()
+	first, err := h.service.ListPlugins(ctx, service.ListPluginsParams{
+		Page: 1, Limit: pageSize, Statuses: []string{"active", "pending", "rejected"},
+	})
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	results := make([]batchRevalidationResult, 0, int(minInt64(first.Pagination.Total, 10000)))
+	processed, succeeded, failed := 0, 0, 0
+	process := func(plugins []models.Plugin) {
+		for _, plugin := range plugins {
+			processed++
+			item := batchRevalidationResult{ID: plugin.ID, Name: plugin.Name, Repository: plugin.Repository}
+			result, validationErr := h.revalidatePlugin(ctx, plugin)
+			if validationErr != nil {
+				item.Error = validationErr.Error()
+				failed++
+			} else {
+				item.Result = &result
+				succeeded++
+			}
+			results = append(results, item)
+		}
+	}
+	process(first.Data)
+	for page := 2; page <= first.Pagination.Pages; page++ {
+		pageResult, listErr := h.service.ListPlugins(ctx, service.ListPluginsParams{
+			Page: page, Limit: pageSize, Statuses: []string{"active", "pending", "rejected"},
+		})
+		if listErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "failed to list plugins for revalidation",
+				"details": listErr.Error(),
+				"data":    results,
+				"summary": gin.H{"total": first.Pagination.Total, "processed": processed, "succeeded": succeeded, "failed": failed},
+			})
+			return
+		}
+		process(pageResult.Data)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data":    results,
+		"summary": gin.H{"total": first.Pagination.Total, "processed": processed, "succeeded": succeeded, "failed": failed},
+	})
+}
+
+func minInt64(a, b int64) int64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func (h *PluginHandler) revalidatePlugin(ctx context.Context, plugin models.Plugin) (ValidationResult, error) {
+	owner, repo := ownerRepoFromURL(plugin.Repository)
+	if owner == "" || repo == "" {
+		return ValidationResult{}, fmt.Errorf("plugin has no valid GitHub repository URL")
+	}
+	result := validatePluginStandards(owner, repo)
+	raw, err := json.Marshal(result)
+	if err != nil {
+		return ValidationResult{}, fmt.Errorf("failed to marshal result: %w", err)
+	}
+	if err := h.service.UpdateValidationChecks(ctx, plugin.ID, raw); err != nil {
+		return ValidationResult{}, err
+	}
+	return result, nil
 }
 
 // ApprovePlugin approves a pending plugin submission (admin only).

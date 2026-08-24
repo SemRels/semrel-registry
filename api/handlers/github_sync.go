@@ -620,7 +620,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 
 // ── Plugin Standards Validator ────────────────────────────────────────────────
 
-var pluginNameRE = regexp.MustCompile(`^(provider|analyzer|condition|hook|updater|generator)-[a-z0-9][a-z0-9-]*$`)
+var pluginNameRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 
 // POST /api/v1/plugins/validate
 // Body: {"repository":"https://github.com/SemRels/analyzer-conventional"}
@@ -726,7 +726,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 			"naming",
 			"Naming convention: {category}-{name}",
 			func() (bool, string) {
-				if pluginNameRE.MatchString(repo) {
+				parts := strings.SplitN(repo, "-", 2)
+				if len(parts) == 2 && naming.IsFirstPartyCategory(parts[0]) && pluginNameRE.MatchString(parts[1]) {
 					return true, ""
 				}
 				return false, fmt.Sprintf("%q must match {category}-{name}, e.g. updater-pypi", repo)

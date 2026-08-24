@@ -55,6 +55,22 @@ var legacyShortTargets = map[string]string{
 
 var firstPartyByRepository = buildFirstPartyIndex()
 var firstPartyByRef = buildFirstPartyRefIndex()
+var firstPartyCategories = buildFirstPartyCategories()
+
+func buildFirstPartyCategories() map[string]struct{} {
+	result := make(map[string]struct{})
+	for _, repository := range firstPartyRepositories {
+		category, _, _ := strings.Cut(repository, "-")
+		result[category] = struct{}{}
+	}
+	return result
+}
+
+// IsFirstPartyCategory reports whether category is used by a current first-party plugin.
+func IsFirstPartyCategory(category string) bool {
+	_, ok := firstPartyCategories[strings.ToLower(strings.TrimSpace(category))]
+	return ok
+}
 
 func buildFirstPartyIndex() map[string]FirstPartyPlugin {
 	result := make(map[string]FirstPartyPlugin, len(firstPartyRepositories))

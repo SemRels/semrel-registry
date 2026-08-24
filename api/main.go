@@ -209,6 +209,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	adminRoutes.PUT("/admin/plugins/:id/approve", pluginHandler.ApprovePlugin)
 	adminRoutes.PUT("/admin/plugins/:id/reject", pluginHandler.RejectPlugin)
 	adminRoutes.POST("/admin/plugins/:id/revalidate", pluginHandler.RevalidatePlugin)
+	adminRoutes.POST("/admin/plugins/revalidate-all", pluginHandler.RevalidateAllPlugins)
 
 	// JSON Schema serving — stable, versioned, publicly cached.
 	schemaHandler := handlers.NewSchemaHandler()

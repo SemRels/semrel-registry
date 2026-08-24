@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -477,6 +478,42 @@ func TestCreateVersionValidationError(t *testing.T) {
 	resp := performRequest(t, newPluginTestRouter(repo), http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{"downloadUrl": "https://example.test/plugin.tar.gz"}, "secret")
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 	assertErrorCode(t, resp, "VALIDATION_ERROR")
+}
+
+func TestRevalidateAllPluginsReportsPerPluginErrors(t *testing.T) {
+	fileRepo, err := repository.NewFileRepository(t.TempDir())
+	require.NoError(t, err)
+	for _, name := range []string{"publisher-crates", "packager-nfpm"} {
+		_, err := fileRepo.Create(context.Background(), &models.Plugin{
+			Name: name, Category: strings.SplitN(name, "-", 2)[0],
+			Repository: "not-a-github-url", Status: models.StatusActive,
+		})
+		require.NoError(t, err)
+	}
+
+	handler := NewPluginHandler(service.NewPluginService(fileRepo))
+	router := gin.New()
+	router.POST("/api/v1/admin/plugins/revalidate-all", handler.RevalidateAllPlugins)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/v1/admin/plugins/revalidate-all", nil))
+
+	require.Equal(t, http.StatusOK, response.Code)
+	var payload struct {
+		Data    []batchRevalidationResult `json:"data"`
+		Summary struct {
+			Total     int `json:"total"`
+			Processed int `json:"processed"`
+			Failed    int `json:"failed"`
+		} `json:"summary"`
+	}
+	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &payload))
+	assert.Len(t, payload.Data, 2)
+	assert.Equal(t, 2, payload.Summary.Total)
+	assert.Equal(t, 2, payload.Summary.Processed)
+	assert.Equal(t, 2, payload.Summary.Failed)
+	for _, result := range payload.Data {
+		assert.NotEmpty(t, result.Error)
+	}
 }
 
 func newPluginTestRouter(repo *mockPluginRepository) *gin.Engine {

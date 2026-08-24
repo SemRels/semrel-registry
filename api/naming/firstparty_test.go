@@ -23,6 +23,7 @@ func TestFirstPartyCanonicalMappings(t *testing.T) {
 		"updater-helm", "updater-homebrew", "updater-maven", "updater-npm", "updater-nuget",
 		"updater-pubspec", "updater-python", "updater-terraform",
 	}
+
 	actual := make([]string, 0, len(plugins))
 	for _, plugin := range plugins {
 		actual = append(actual, plugin.Name)
@@ -42,6 +43,14 @@ func TestFirstPartyCanonicalMappings(t *testing.T) {
 		assert.Equal(t, plugin, mapped)
 		assert.Contains(t, plugin.Aliases, plugin.Repository)
 	}
+}
+
+func TestFirstPartyCategoriesIncludeAllCurrentTypes(t *testing.T) {
+	for _, category := range []string{"analyzer", "condition", "generator", "hook", "packager", "provider", "publisher", "updater"} {
+		assert.True(t, IsFirstPartyCategory(category), category)
+	}
+	assert.True(t, IsFirstPartyCategory("PUBLISHER"))
+	assert.False(t, IsFirstPartyCategory("community"))
 }
 
 func TestAmbiguousNPMAliasHasHistoricalTarget(t *testing.T) {
