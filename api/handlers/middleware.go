@@ -64,6 +64,8 @@ func RequireAdminToken() gin.HandlerFunc {
 			return
 		}
 
+		c.Set("login", "admin-token")
+		c.Set("isAdmin", true)
 		c.Next()
 	}
 }

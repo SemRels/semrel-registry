@@ -7,6 +7,7 @@ var (
 	ErrDatabaseUnavailable = errors.New("database unavailable")
 	ErrPluginNotFound      = errors.New("plugin not found")
 	ErrDuplicatePlugin     = errors.New("plugin already exists")
+	ErrForbidden           = errors.New("forbidden")
 	ErrValidation          = errors.New("validation error")
 )
 

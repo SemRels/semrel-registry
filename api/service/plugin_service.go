@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	appErrors "github.com/SemRels/semrel-registry/api/internal"
 	"github.com/SemRels/semrel-registry/api/models"
@@ -16,22 +17,23 @@ import (
 )
 
 const (
-	defaultListLimit     = 20
-	defaultVersionLimit  = 20
-	maxListLimit         = 100
-	maxNameLength        = 255
-	maxAliasLength       = 356
-	maxNamespaceLength   = 100
-	maxDescriptionLength = 4000
-	maxAuthorLength      = 255
-	maxCategoryLength    = 50
-	maxRepositoryLength  = 2048
-	maxLicenseLength     = 50
-	maxTagLength         = 100
-	maxVersionLength     = 50
-	maxChecksumLength    = 255
-	maxSearchLength      = 255
-	maxChangelogLength   = 20000
+	defaultListLimit        = 20
+	defaultVersionLimit     = 20
+	maxListLimit            = 100
+	maxNameLength           = 255
+	maxAliasLength          = 356
+	maxNamespaceLength      = 100
+	maxDescriptionLength    = 4000
+	maxAuthorLength         = 255
+	maxCategoryLength       = 50
+	maxRepositoryLength     = 2048
+	maxLicenseLength        = 50
+	maxTagLength            = 100
+	maxVersionLength        = 50
+	maxChecksumLength       = 255
+	maxSearchLength         = 255
+	maxChangelogLength      = 20000
+	maxDeletionReasonLength = 1000
 )
 
 var pluginNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
@@ -80,8 +82,11 @@ type PluginManager interface {
 	SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
 	UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error)
 	DeletePlugin(ctx context.Context, ref string) error
+	DeletePluginWithRequest(ctx context.Context, ref string, request models.PluginDeletionRequest, actor models.DeleteActor) error
 	CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error)
 	DeleteVersion(ctx context.Context, pluginID, versionID int64) error
+	DeleteVersionWithRequest(ctx context.Context, ref string, versionID int64, request models.VersionDeletionRequest, actor models.DeleteActor) error
+	DeleteAccount(ctx context.Context, request models.AccountDeletionRequest, actor models.DeleteActor) (models.AccountDeletionResult, error)
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
@@ -323,7 +328,42 @@ func (s *PluginService) DeletePlugin(ctx context.Context, ref string) error {
 	if err != nil {
 		return err
 	}
-	return s.repo.Delete(ctx, plugin.ID)
+	return s.repo.Delete(ctx, models.PluginDeletionSpec{PluginID: plugin.ID})
+}
+
+func (s *PluginService) DeletePluginWithRequest(ctx context.Context, ref string, request models.PluginDeletionRequest, actor models.DeleteActor) error {
+	if err := validatePluginRef(ref); err != nil {
+		return err
+	}
+	request = normalizePluginDeletionRequest(request)
+	if err := validateDeleteActor(actor); err != nil {
+		return err
+	}
+	if err := validatePluginDeletionRequest(request); err != nil {
+		return err
+	}
+
+	plugin, err := s.lookupPlugin(ctx, ref)
+	if err != nil {
+		return err
+	}
+	if err := ensureDeleteOwnership(*plugin, actor); err != nil {
+		return err
+	}
+	if !strings.EqualFold(request.Confirmation, plugin.Ref()) {
+		return &appErrors.ValidationError{Field: "confirmation", Issue: fmt.Sprintf("must match %q", plugin.Ref())}
+	}
+	if len(plugin.Versions) > 0 && !request.DeleteVersions {
+		return &appErrors.ValidationError{Field: "deleteVersions", Issue: fmt.Sprintf("must be true to delete %d published version(s)", len(plugin.Versions))}
+	}
+
+	return s.repo.Delete(ctx, models.PluginDeletionSpec{
+		PluginID:        plugin.ID,
+		DeletedBy:       actor.Login,
+		Reason:          request.Reason,
+		Confirmation:    request.Confirmation,
+		CascadeVersions: true,
+	})
 }
 
 func (s *PluginService) CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error) {
@@ -360,7 +400,102 @@ func (s *PluginService) CreateVersion(ctx context.Context, ref string, version m
 }
 
 func (s *PluginService) DeleteVersion(ctx context.Context, pluginID, versionID int64) error {
-	return s.repo.DeleteVersion(ctx, pluginID, versionID)
+	return s.repo.DeleteVersion(ctx, models.VersionDeletionSpec{PluginID: pluginID, VersionID: versionID})
+}
+
+func (s *PluginService) DeleteVersionWithRequest(ctx context.Context, ref string, versionID int64, request models.VersionDeletionRequest, actor models.DeleteActor) error {
+	if err := validatePluginRef(ref); err != nil {
+		return err
+	}
+	request = normalizeVersionDeletionRequest(request)
+	if err := validateDeleteActor(actor); err != nil {
+		return err
+	}
+	if err := validateVersionDeletionRequest(request); err != nil {
+		return err
+	}
+
+	plugin, err := s.lookupPlugin(ctx, ref)
+	if err != nil {
+		return err
+	}
+	if err := ensureDeleteOwnership(*plugin, actor); err != nil {
+		return err
+	}
+
+	versions, err := s.repo.GetVersions(ctx, plugin.ID)
+	if err != nil {
+		return err
+	}
+	for _, version := range versions {
+		if version.ID != versionID {
+			continue
+		}
+		expected := plugin.Ref() + "@" + version.Version
+		if !strings.EqualFold(request.Confirmation, expected) {
+			return &appErrors.ValidationError{Field: "confirmation", Issue: fmt.Sprintf("must match %q", expected)}
+		}
+		return s.repo.DeleteVersion(ctx, models.VersionDeletionSpec{
+			PluginID:     plugin.ID,
+			VersionID:    versionID,
+			DeletedBy:    actor.Login,
+			Reason:       request.Reason,
+			Confirmation: request.Confirmation,
+		})
+	}
+	return appErrors.ErrPluginNotFound
+}
+
+func (s *PluginService) DeleteAccount(ctx context.Context, request models.AccountDeletionRequest, actor models.DeleteActor) (models.AccountDeletionResult, error) {
+	request = normalizeAccountDeletionRequest(request)
+	if err := validateDeleteActor(actor); err != nil {
+		return models.AccountDeletionResult{}, err
+	}
+	if err := validateAccountDeletionRequest(request, actor.Login); err != nil {
+		return models.AccountDeletionResult{}, err
+	}
+
+	plugins, err := s.repo.GetAll(ctx, 0, 0, repository.AuthorFilter{Author: actor.Login})
+	if err != nil {
+		return models.AccountDeletionResult{}, err
+	}
+	if len(plugins) > 0 && !request.DeleteOwnedPlugins {
+		return models.AccountDeletionResult{}, &appErrors.ValidationError{Field: "deleteOwnedPlugins", Issue: fmt.Sprintf("must be true to delete %d owned plugin(s)", len(plugins))}
+	}
+
+	result := models.AccountDeletionResult{}
+	deletionReason := "account deletion"
+	if request.Reason != "" {
+		deletionReason += ": " + request.Reason
+	}
+	for _, plugin := range plugins {
+		result.PluginsDeleted++
+		result.VersionsDeleted += len(plugin.Versions)
+		if err := s.repo.Delete(ctx, models.PluginDeletionSpec{
+			PluginID:        plugin.ID,
+			DeletedBy:       actor.Login,
+			Reason:          deletionReason,
+			Confirmation:    request.Confirmation,
+			CascadeVersions: true,
+			AnonymizeAuthor: true,
+		}); err != nil {
+			return models.AccountDeletionResult{}, err
+		}
+	}
+
+	if err := s.repo.RecordAccountDeletion(ctx, models.AccountDeletionAudit{
+		Login:           actor.Login,
+		DeletedBy:       actor.Login,
+		Reason:          request.Reason,
+		Confirmation:    request.Confirmation,
+		PluginsDeleted:  result.PluginsDeleted,
+		VersionsDeleted: result.VersionsDeleted,
+		CreatedAt:       nowUTC(),
+	}); err != nil {
+		return models.AccountDeletionResult{}, err
+	}
+
+	return result, nil
 }
 
 func (s *PluginService) countPlugins(ctx context.Context, params ListPluginsParams) (int64, error) {
@@ -454,6 +589,83 @@ func validatePluginRef(ref string) error {
 		return &appErrors.ValidationError{Field: "id", Issue: "is required"}
 	}
 	return nil
+}
+
+func validateDeleteActor(actor models.DeleteActor) error {
+	if strings.TrimSpace(actor.Login) == "" {
+		return appErrors.ErrForbidden
+	}
+	return nil
+}
+
+func ensureDeleteOwnership(plugin models.Plugin, actor models.DeleteActor) error {
+	if actor.IsAdmin {
+		return nil
+	}
+	if strings.EqualFold(plugin.Author, actor.Login) {
+		return nil
+	}
+	return appErrors.ErrForbidden
+}
+
+func normalizePluginDeletionRequest(request models.PluginDeletionRequest) models.PluginDeletionRequest {
+	request.Confirmation = strings.TrimSpace(request.Confirmation)
+	request.Reason = strings.TrimSpace(request.Reason)
+	return request
+}
+
+func validatePluginDeletionRequest(request models.PluginDeletionRequest) error {
+	if request.Confirmation == "" {
+		return &appErrors.ValidationError{Field: "confirmation", Issue: "is required"}
+	}
+	if len(request.Reason) > maxDeletionReasonLength {
+		return &appErrors.ValidationError{Field: "reason", Issue: fmt.Sprintf("must be at most %d characters", maxDeletionReasonLength)}
+	}
+	return nil
+}
+
+func normalizeVersionDeletionRequest(request models.VersionDeletionRequest) models.VersionDeletionRequest {
+	request.Confirmation = strings.TrimSpace(request.Confirmation)
+	request.Reason = strings.TrimSpace(request.Reason)
+	return request
+}
+
+func validateVersionDeletionRequest(request models.VersionDeletionRequest) error {
+	if request.Confirmation == "" {
+		return &appErrors.ValidationError{Field: "confirmation", Issue: "is required"}
+	}
+	if len(request.Reason) > maxDeletionReasonLength {
+		return &appErrors.ValidationError{Field: "reason", Issue: fmt.Sprintf("must be at most %d characters", maxDeletionReasonLength)}
+	}
+	return nil
+}
+
+func normalizeAccountDeletionRequest(request models.AccountDeletionRequest) models.AccountDeletionRequest {
+	request.Confirmation = strings.TrimSpace(request.Confirmation)
+	request.Reason = strings.TrimSpace(request.Reason)
+	request.ReauthToken = strings.TrimSpace(request.ReauthToken)
+	return request
+}
+
+func validateAccountDeletionRequest(request models.AccountDeletionRequest, login string) error {
+	expected := "DELETE " + strings.TrimSpace(login)
+	if request.Confirmation == "" {
+		return &appErrors.ValidationError{Field: "confirmation", Issue: fmt.Sprintf("must match %q", expected)}
+	}
+	if !strings.EqualFold(request.Confirmation, expected) {
+		return &appErrors.ValidationError{Field: "confirmation", Issue: fmt.Sprintf("must match %q", expected)}
+	}
+	if request.ReauthToken == "" {
+		return &appErrors.ValidationError{Field: "reauthToken", Issue: "is required"}
+	}
+	if len(request.Reason) > maxDeletionReasonLength {
+		return &appErrors.ValidationError{Field: "reason", Issue: fmt.Sprintf("must be at most %d characters", maxDeletionReasonLength)}
+	}
+	return nil
+}
+
+func nowUTC() time.Time {
+	return time.Now().UTC()
 }
 
 func normalizePlugin(plugin models.Plugin) models.Plugin {

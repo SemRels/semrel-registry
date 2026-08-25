@@ -109,12 +109,15 @@
     },
     "compatibility": {
       "type": "object",
-      "description": "Optional compatibility hints used by semrel to decide whether a plugin release can be installed. minSemrelVersion controls the minimum supported go-semrel version; gRPCVersion tracks the ADR-001 protobuf service generation, for example v1.",
+      "description": "Optional compatibility hints used by semrel to decide whether a plugin release can be installed. semrelCore is a space-separated semver constraint (for example >=0.25.0 <1.0.0); minSemrelVersion and gRPCVersion are retained for backward compatibility.",
       "additionalProperties": false,
-      "required": [
-        "minSemrelVersion"
-      ],
       "properties": {
+        "semrelCore": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?:[<>=~^]*\\s*\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?)(?:\\s+(?:[<>=~^]*\\s*\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?))*$",
+          "description": "Optional semver range supported by this plugin release, for example >=0.25.0 <1.0.0."
+        },
         "minSemrelVersion": {
           "$ref": "#/$defs/semver"
         },

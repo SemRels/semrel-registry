@@ -74,6 +74,11 @@ function SeriesLineChart({
   const pointY = (value: number) => pad + innerH - (value / max) * innerH;
   const viewPath = linePath(views, width, height, pad);
   const downloadPath = linePath(downloads, width, height, pad);
+  const areaPath = (values: number[]) => {
+    const line = linePath(values, width, height, pad);
+    if (!line) return '';
+    return `${line} L ${pointX(data.length - 1)} ${height - pad} L ${pad} ${height - pad} Z`;
+  };
   const hoverX = hoveredIndex === null ? null : pointX(hoveredIndex);
   const hoverViewsY = hoveredIndex === null ? null : pointY(views[hoveredIndex] ?? 0);
   const hoverDownloadsY = hoveredIndex === null ? null : pointY(downloads[hoveredIndex] ?? 0);
@@ -105,10 +110,30 @@ function SeriesLineChart({
           <stop offset="0%" stopColor="#10b981" />
           <stop offset="100%" stopColor="#059669" />
         </linearGradient>
+        <linearGradient id="viewFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity=".28" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity=".22" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+        </linearGradient>
       </defs>
       <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(3,7,18,.3)" stroke="var(--border)" strokeWidth="1" />
+      {[0, .25, .5, .75, 1].map((fraction) => (
+        <line key={fraction} x1={pad} x2={width - pad} y1={pad + innerH * fraction} y2={pad + innerH * fraction}
+          stroke="rgba(148,163,184,.14)" strokeDasharray="2 5" />
+      ))}
+      <path d={areaPath(views)} fill="url(#viewFill)" />
+      <path d={areaPath(downloads)} fill="url(#downloadFill)" />
       <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="3" strokeLinecap="round" />
       <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="3" strokeLinecap="round" />
+      {data.map((point, idx) => (
+        <g key={`points-${point.period}`}>
+          <circle cx={pointX(idx)} cy={pointY(views[idx] ?? 0)} r="2.5" fill="#3b82f6" />
+          <circle cx={pointX(idx)} cy={pointY(downloads[idx] ?? 0)} r="2.5" fill="#10b981" />
+        </g>
+      ))}
       {hoverX !== null && hoveredPoint && (
         <>
           <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.3)" strokeDasharray="3 3" />
@@ -134,7 +159,10 @@ function SeriesLineChart({
             width={hit}
             height={innerH}
             fill="transparent"
+            tabIndex={0}
+            aria-label={`${point.period}: ${Number(point.views ?? 0).toLocaleString()} views, ${Number(point.downloads ?? 0).toLocaleString()} downloads`}
             onMouseEnter={() => onHoverIndexChange(idx)}
+            onFocus={() => onHoverIndexChange(idx)}
           />
         );
       })}
@@ -261,10 +289,12 @@ export default function DashboardPage() {
   })();
   const categories = stats?.categories ?? {};
   const totalPlugins = Number(stats?.totalPlugins ?? 0);
+  const totalUsers = Number(stats?.totalUsers ?? 0);
   const totalViews = Number(stats?.totalViews ?? 0);
   const totalDownloads = Number(stats?.totalDownloads ?? 0);
   const topPlugins = stats?.topPlugins ?? [];
   const topVersions = stats?.topVersions ?? [];
+  const statusCounts = stats?.statusCounts ?? {};
   // hoveredSeriesIndex maps directly to activeSeries (oldest→newest)
   const activePoint = (() => {
     if (activeSeries.length === 0) return null;
@@ -327,11 +357,17 @@ export default function DashboardPage() {
         {!stats && !error && <p className="muted">Loading…</p>}
         {stats && (
           <>
-          <div className="stat-grid">
+          <div className="dashboard-metrics">
             <div className="stat-card">
-              <div className="stat-card__label">Total</div>
+              <div className="stat-card__label">Plugins</div>
               <div className="stat-card__value">{totalPlugins}</div>
             </div>
+            {isAdmin && (
+              <div className="stat-card stat-card--admin">
+                <div className="stat-card__label">Contributors</div>
+                <div className="stat-card__value">{totalUsers.toLocaleString()}</div>
+              </div>
+            )}
             <div className="stat-card">
               <div className="stat-card__label">Views</div>
               <div className="stat-card__value">{totalViews.toLocaleString()}</div>
@@ -341,8 +377,14 @@ export default function DashboardPage() {
               <div className="stat-card__value">{totalDownloads.toLocaleString()}</div>
             </div>
             {Object.entries(categories).map(([cat, count]) => (
-              <div key={cat} className="stat-card">
+              <div key={cat} className="stat-card stat-card--category">
                 <div className="stat-card__label">{cat}</div>
+                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
+              </div>
+            ))}
+            {isAdmin && Object.entries(statusCounts).map(([status, count]) => (
+              <div key={`status-${status}`} className={`stat-card stat-card--status stat-card--${status}`}>
+                <div className="stat-card__label">{status} status</div>
                 <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
               </div>
             ))}
@@ -387,7 +429,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
+          <div className="dashboard-panels">
             <div className="card">
               <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top plugins</h2>
               {topPlugins.length === 0 ? (

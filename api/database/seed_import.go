@@ -12,12 +12,15 @@ import (
 )
 
 type SeedPluginVersion struct {
-	Version     string            `json:"version"`
-	ReleaseDate string            `json:"releaseDate"`
-	DownloadURL string            `json:"downloadUrl"`
-	Changelog   string            `json:"changelog"`
-	Prerelease  bool              `json:"prerelease"`
-	Checksums   map[string]string `json:"checksums"`
+	Version       string            `json:"version"`
+	ReleaseDate   string            `json:"releaseDate"`
+	DownloadURL   string            `json:"downloadUrl"`
+	Changelog     string            `json:"changelog"`
+	Prerelease    bool              `json:"prerelease"`
+	Checksums     map[string]string `json:"checksums"`
+	Compatibility *struct {
+		SemrelCore string `json:"semrelCore,omitempty"`
+	} `json:"compatibility,omitempty"`
 }
 
 type SeedPlugin struct {
@@ -160,16 +163,23 @@ func UpsertSeedPlugin(ctx context.Context, pool *pgxpool.Pool, plugin SeedPlugin
 		var versionID int64
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO plugin_versions
-				(plugin_id, version, release_date, changelog, download_url, prerelease, created_at)
-			VALUES ($1, $2, $3, $4, $5, $6, NOW())
+				(plugin_id, version, release_date, changelog, download_url, prerelease, semrel_core, created_at)
+			VALUES ($1, $2, $3, $4, $5, $6, NULLIF($7, ''), NOW())
 			ON CONFLICT (plugin_id, version) DO UPDATE SET
 				release_date = EXCLUDED.release_date,
 				changelog    = EXCLUDED.changelog,
 				download_url = EXCLUDED.download_url,
-				prerelease   = EXCLUDED.prerelease
+				prerelease   = EXCLUDED.prerelease,
+				semrel_core  = EXCLUDED.semrel_core
 			RETURNING id`,
 			pluginID, version.Version, releaseDate, version.Changelog,
 			version.DownloadURL, version.Prerelease,
+			func() string {
+				if version.Compatibility != nil {
+					return version.Compatibility.SemrelCore
+				}
+				return ""
+			}(),
 		).Scan(&versionID); err != nil {
 			return 0, fmt.Errorf("upsert plugin %q version %q: %w",
 				plugin.Name, version.Version, err)

@@ -24,6 +24,10 @@ This file is designed to be reachable from GitHub Pages and later from `https://
 - `generatedAt` - timestamp written by automation when the index is generated
 - `plugins` - array of plugin records collected from validated metadata
 
+Each version may include an optional `compatibility.semrelCore` semver range,
+such as `>=0.25.0 <1.0.0`. Older entries without this field remain valid and
+continue to be installable; clients should treat an omitted range as unknown.
+
 ## Response characteristics
 
 - content type: `application/json`

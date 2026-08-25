@@ -12,6 +12,7 @@ import PluginEditPage from './pages/PluginEditPage';
 import VersionsPage from './pages/VersionsPage';
 import SubmitPage from './pages/SubmitPage';
 import SubmissionsPage from './pages/SubmissionsPage';
+import AccountPage from './pages/AccountPage';
 import CookieConsent from './components/CookieConsent';
 
 /** Handles ?token= injected by the GitHub OAuth callback redirect. */
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="plugins/:id" element={<PluginEditPage />} />
           <Route path="plugins/:id/versions" element={<VersionsPage />} />
           <Route path="submit" element={<SubmitPage />} />
+          <Route path="account" element={<AccountPage />} />
           <Route path="submissions" element={<AdminOnly><SubmissionsPage /></AdminOnly>} />
         </Route>
 

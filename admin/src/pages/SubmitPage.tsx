@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { validatePlugin, submitPlugin } from '../lib/api';
 import type { ValidationResult } from '../lib/api';
+import LegalLinks from '../components/LegalLinks';
 
 const CATEGORIES = ['analyzer', 'condition', 'generator', 'hook', 'provider', 'updater', 'packager', 'publisher'];
 
@@ -157,6 +158,10 @@ export default function SubmitPage() {
         >
           {submitting ? 'Submitting…' : 'Submit for review'}
         </button>
+        <p className="legal-note mt-1">
+          By submitting, you confirm that you are authorised to publish this metadata and agree to the semrel contributor terms.
+        </p>
+        <LegalLinks inline className="legal-note__links" linkClassName="muted" />
       </form>
     </div>
   );

@@ -91,7 +91,9 @@ export interface PluginListResponse {
 
 export interface Stats {
   totalPlugins: number;
+  totalUsers?: number;
   categories: Record<string, number>;
+  statusCounts?: Record<string, number>;
   totalViews: number;
   totalDownloads: number;
   topPlugins?: Array<{
@@ -174,15 +176,31 @@ export async function updatePlugin(
   });
 }
 
-export async function deletePlugin(id: string | number): Promise<void> {
-  return request<void>(`/plugins/${id}`, { method: 'DELETE' });
+export async function deletePlugin(
+  id: string | number,
+  data: { confirmation: string; deleteVersions: boolean; reason?: string },
+): Promise<void> {
+  return request<void>(`/plugins/${id}`, { method: 'DELETE', body: JSON.stringify(data) });
 }
 
 export async function deleteVersion(
   pluginId: string | number,
   versionId: number,
+  data: { confirmation: string; reason?: string },
 ): Promise<void> {
-  return request<void>(`/plugins/${pluginId}/versions/${versionId}`, { method: 'DELETE' });
+  return request<void>(`/plugins/${pluginId}/versions/${versionId}`, {
+    method: 'DELETE',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteAccount(data: {
+  confirmation: string;
+  reauthToken: string;
+  deleteOwnedPlugins: boolean;
+  reason?: string;
+}): Promise<{ data: { pluginsDeleted: number; versionsDeleted: number } }> {
+  return request('/auth/me', { method: 'DELETE', body: JSON.stringify(data) });
 }
 
 export async function listVersions(
@@ -310,6 +328,28 @@ export async function rejectPlugin(id: number | string): Promise<Plugin> {
 
 export async function revalidatePlugin(id: number | string): Promise<ValidationResult> {
   return request<{ data: ValidationResult }>(`/admin/plugins/${id}/revalidate`, { method: 'POST' }).then(r => r.data);
+}
+
+export interface BatchRevalidationResult {
+  id: number;
+  name: string;
+  repository: string;
+  result?: ValidationResult;
+  error?: string;
+}
+
+export interface BatchRevalidationResponse {
+  data: BatchRevalidationResult[];
+  summary: {
+    total: number;
+    processed: number;
+    succeeded: number;
+    failed: number;
+  };
+}
+
+export async function revalidateAllPlugins(): Promise<BatchRevalidationResponse> {
+  return request<BatchRevalidationResponse>('/admin/plugins/revalidate-all', { method: 'POST' });
 }
 
 // ---- Admin: sync GitHub org ----

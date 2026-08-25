@@ -392,6 +392,15 @@ async function main() {
           gRPCVersion: defaultGRPCVersion
         }
       };
+      if (typeof spec.semrelCore === 'string' && spec.semrelCore.trim() !== '') {
+        versionEntry.compatibility.semrelCore = spec.semrelCore.trim();
+      } else {
+        const previousVersion = versionsByNumber.get(version);
+        const previousConstraint = previousVersion?.compatibility?.semrelCore;
+        if (typeof previousConstraint === 'string' && previousConstraint.trim() !== '') {
+          versionEntry.compatibility.semrelCore = previousConstraint.trim();
+        }
+      }
 
       const changelog = String(release.body || '').trim();
       if (changelog) {

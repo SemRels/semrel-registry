@@ -129,7 +129,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	rlAuth := middleware.RateLimit(rlCfg, rlCfg.AuthRPM)
 
 	// GitHub OAuth routes (public) — rate limited.
-	authHandler := handlers.NewAuthHandler()
+	authHandler := handlers.NewAuthHandler(pluginService)
 	router.GET("/auth/github", rlAuth, authHandler.Redirect)
 	router.GET("/auth/github/callback", rlAuth, authHandler.Callback)
 	router.GET("/auth/callback", rlAuth, authHandler.Callback) // alias: GitHub App configured without /github
@@ -189,6 +189,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	authRoutes := api.Group("")
 	authRoutes.Use(requireAuth)
 	authRoutes.GET("/auth/me", authHandler.Me)
+	authRoutes.DELETE("/auth/me", authHandler.DeleteAccount)
 	// Community plugin submission (creates with status=pending for review).
 	authRoutes.POST("/plugins/submit", pluginHandler.SubmitPlugin)
 	// Plugin writes: any authenticated user, but non-admins may only touch their own plugins.

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -51,7 +52,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		var dirty bool
 		require.NoError(t, db.Pool().QueryRow(context.Background(),
 			`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-		assert.Equal(t, 9, version)
+		assert.EqualValues(t, latestMigrationVersion(t), version)
 		assert.False(t, dirty)
 	})
 
@@ -168,7 +169,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		var dirty bool
 		require.NoError(t, db.Pool().QueryRow(ctx,
 			`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-		assert.Equal(t, 9, version)
+		assert.EqualValues(t, latestMigrationVersion(t), version)
 		assert.False(t, dirty)
 
 		var retainedID, views, downloads int64
@@ -768,7 +769,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 			INSERT INTO plugin_aliases (plugin_id, alias)
 			VALUES ($1, 'reusable-alias'), ($1, '@example/reusable-alias')`, originalID)
 		require.NoError(t, err)
-		require.NoError(t, repo.Delete(ctx, originalID))
+		require.NoError(t, repo.Delete(ctx, models.PluginDeletionSpec{PluginID: originalID, CascadeVersions: true}))
 
 		var claims int
 		require.NoError(t, db.Pool().QueryRow(ctx,
@@ -795,7 +796,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 			Scan(&deleted))
 		assert.True(t, deleted)
 
-		require.NoError(t, repo.Delete(ctx, replacementID))
+		require.NoError(t, repo.Delete(ctx, models.PluginDeletionSpec{PluginID: replacementID, CascadeVersions: true}))
 		_, err = db.Pool().Exec(ctx,
 			`UPDATE plugins SET deleted_at = NULL WHERE id = $1`, originalID)
 		require.NoError(t, err)
@@ -1106,7 +1107,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		require.NoError(t, err)
 		version, dirty, versionErr = migrator.Version()
 		require.NoError(t, versionErr)
-		assert.EqualValues(t, 9, version)
+		assert.EqualValues(t, latestMigrationVersion(t), version)
 		assert.False(t, dirty)
 		_, _ = migrator.Close()
 	})
@@ -1146,4 +1147,25 @@ func migrateVersion(t *testing.T, dsn string, version uint) {
 	require.NoError(t, err)
 	defer migrator.Close()
 	require.NoError(t, migrator.Migrate(version), fmt.Sprintf("migrate to %d", version))
+}
+
+func latestMigrationVersion(t *testing.T) uint {
+	t.Helper()
+	entries, err := os.ReadDir("database/migrations")
+	require.NoError(t, err)
+
+	var latest uint
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".up.sql") {
+			continue
+		}
+		prefix := strings.SplitN(entry.Name(), "_", 2)[0]
+		version, err := strconv.ParseUint(prefix, 10, 32)
+		require.NoError(t, err, entry.Name())
+		if uint(version) > latest {
+			latest = uint(version)
+		}
+	}
+	require.NotZero(t, latest)
+	return latest
 }

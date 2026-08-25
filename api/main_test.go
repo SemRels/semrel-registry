@@ -42,6 +42,10 @@ func (stubPluginService) DeletePlugin(_ context.Context, _ string) error {
 	return nil
 }
 
+func (stubPluginService) DeletePluginWithRequest(_ context.Context, _ string, _ models.PluginDeletionRequest, _ models.DeleteActor) error {
+	return nil
+}
+
 func (stubPluginService) CreateVersion(_ context.Context, _ string, version models.PluginVersion) (models.PluginVersion, error) {
 	return version, nil
 }
@@ -64,6 +68,14 @@ func (stubPluginService) UpdateValidationChecks(_ context.Context, _ int64, _ []
 
 func (stubPluginService) DeleteVersion(_ context.Context, _ int64, _ int64) error {
 	return nil
+}
+
+func (stubPluginService) DeleteVersionWithRequest(_ context.Context, _ string, _ int64, _ models.VersionDeletionRequest, _ models.DeleteActor) error {
+	return nil
+}
+
+func (stubPluginService) DeleteAccount(_ context.Context, _ models.AccountDeletionRequest, _ models.DeleteActor) (models.AccountDeletionResult, error) {
+	return models.AccountDeletionResult{}, nil
 }
 
 func TestMain(m *testing.M) {
@@ -93,6 +105,7 @@ func TestNewRouterRegistersCoreRoutes(t *testing.T) {
 	assert.Contains(t, routePaths, "/api/v1/plugins")
 	assert.Contains(t, routePaths, "/api/v1/plugins/:id")
 	assert.Contains(t, routePaths, "/api/v1/plugins/:id/versions")
+	assert.Contains(t, routePaths, "/api/v1/auth/me")
 	assert.Contains(t, routePaths, "/schemas/core/:version")
 	assert.Contains(t, routePaths, "/schemas/plugins/:name/:version")
 	assert.Contains(t, routePaths, "/schemas/plugins/@:namespace/:name/:version")

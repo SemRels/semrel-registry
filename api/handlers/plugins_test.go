@@ -144,11 +144,11 @@ func (a *mockRepositoryAdapter) Update(ctx context.Context, plugin *models.Plugi
 	return err
 }
 
-func (a *mockRepositoryAdapter) Delete(ctx context.Context, id int64) error {
+func (a *mockRepositoryAdapter) Delete(ctx context.Context, spec models.PluginDeletionSpec) error {
 	if a.mock.deleteFunc == nil {
 		return nil
 	}
-	return a.mock.deleteFunc(ctx, strconv.FormatInt(id, 10))
+	return a.mock.deleteFunc(ctx, strconv.FormatInt(spec.PluginID, 10))
 }
 
 func (a *mockRepositoryAdapter) AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error) {
@@ -176,7 +176,11 @@ func (a *mockRepositoryAdapter) UpdateValidationChecks(_ context.Context, _ int6
 	return nil
 }
 
-func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ int64, _ int64) error {
+func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ models.VersionDeletionSpec) error {
+	return nil
+}
+
+func (a *mockRepositoryAdapter) RecordAccountDeletion(_ context.Context, _ models.AccountDeletionAudit) error {
 	return nil
 }
 
@@ -429,30 +433,64 @@ func TestUpdatePluginValidationError(t *testing.T) {
 
 func TestDeletePluginSuccess(t *testing.T) {
 	setAdminToken(t, "secret")
-	repo := &mockPluginRepository{deleteFunc: func(_ context.Context, ref string) error {
-		assert.Equal(t, "1", ref)
-		return nil
-	}}
+	repo := &mockPluginRepository{
+		getFunc: func(_ context.Context, ref string) (models.Plugin, error) {
+			assert.Equal(t, "1", ref)
+			return samplePlugin(), nil
+		},
+		deleteFunc: func(_ context.Context, ref string) error {
+			assert.Equal(t, "1", ref)
+			return nil
+		},
+	}
 
-	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", nil, "secret")
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", map[string]any{
+		"confirmation":   "provider-github",
+		"deleteVersions": true,
+	}, "secret")
 	assert.Equal(t, http.StatusNoContent, resp.Code)
 }
 
 func TestDeletePluginNotFound(t *testing.T) {
 	setAdminToken(t, "secret")
-	repo := &mockPluginRepository{deleteFunc: func(_ context.Context, _ string) error {
-		return appErrors.ErrPluginNotFound
-	}}
+	repo := &mockPluginRepository{
+		getFunc:    func(_ context.Context, _ string) (models.Plugin, error) { return samplePlugin(), nil },
+		deleteFunc: func(_ context.Context, _ string) error { return appErrors.ErrPluginNotFound },
+	}
 
-	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", nil, "secret")
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", map[string]any{
+		"confirmation":   "provider-github",
+		"deleteVersions": true,
+	}, "secret")
 	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestDeletePluginUnauthorized(t *testing.T) {
 	setAdminToken(t, "secret")
 	repo := &mockPluginRepository{}
-	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", nil, "")
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", map[string]any{
+		"confirmation": "provider-github",
+	}, "")
 	assert.Equal(t, http.StatusUnauthorized, resp.Code)
+}
+
+func TestDeletePluginRequiresConfirmationAndCascade(t *testing.T) {
+	setAdminToken(t, "secret")
+	repo := &mockPluginRepository{
+		getFunc: func(_ context.Context, _ string) (models.Plugin, error) { return samplePlugin(), nil },
+	}
+
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", map[string]any{
+		"confirmation": "wrong-ref",
+	}, "secret")
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+	assertErrorCode(t, resp, "VALIDATION_ERROR")
+
+	resp = performRequest(t, newPluginTestRouter(repo), http.MethodDelete, "/api/v1/plugins/1", map[string]any{
+		"confirmation": "provider-github",
+	}, "secret")
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+	assertErrorCode(t, resp, "VALIDATION_ERROR")
 }
 
 func TestCreateVersionSuccess(t *testing.T) {

@@ -37,6 +37,12 @@ Go-based backend skeleton for the SemRels registry. The current MVP still serves
 - Application startup runs embedded SQL migrations automatically via `golang-migrate`.
 - Schema covers plugins, plugin versions, and version checksums with PostgreSQL array tags and soft deletes.
 
+## Deletion Safety
+
+- `DELETE /api/v1/plugins/:id` now requires a JSON body with the canonical plugin ref in `confirmation` and `deleteVersions=true` when published versions exist.
+- `DELETE /api/v1/plugins/:id/versions/:versionId` now requires `confirmation` to match `<plugin-ref>@<version>`.
+- `DELETE /api/v1/auth/me` supports self-service account deletion with typed confirmation (`DELETE <login>`), reauthentication, owned-plugin cascade checks, and audit logging.
+
 ## Testing
 
 Run the API test suite:

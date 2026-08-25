@@ -35,6 +35,10 @@ func Unauthorized(c *gin.Context, message string, details any) {
 	writeError(c, http.StatusUnauthorized, "UNAUTHORIZED", message, details)
 }
 
+func Forbidden(c *gin.Context, message string, details any) {
+	writeError(c, http.StatusForbidden, "FORBIDDEN", message, details)
+}
+
 func ServiceUnavailable(c *gin.Context, message string, details any) {
 	writeError(c, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", message, details)
 }
@@ -53,6 +57,8 @@ func HandleError(c *gin.Context, err error) {
 		NotFound(c, "Plugin not found", nil)
 	case errors.Is(err, appErrors.ErrDuplicatePlugin):
 		Conflict(c, "Plugin name already exists", gin.H{"field": "name", "issue": "duplicate"})
+	case errors.Is(err, appErrors.ErrForbidden):
+		Forbidden(c, "Forbidden", nil)
 	case errors.Is(err, appErrors.ErrDatabaseUnavailable):
 		InternalServerError(c, "Database unavailable", nil)
 	default:

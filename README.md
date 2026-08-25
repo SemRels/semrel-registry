@@ -40,6 +40,10 @@ See the [contributing guide](CONTRIBUTING.md) for contribution rules and review 
 - `.github/workflows/` - automation for validation, synchronization, and web deployment
 - `plugins.json` - generated registry index served via GitHub Pages
 
+Version entries may optionally declare `compatibility.semrelCore` as a
+space-separated semver range (for example `>=0.25.0 <1.0.0`). Missing metadata
+remains valid for backward compatibility with existing plugins and clients.
+
 ## Quick start (no database)
 
 The simplest way to run the registry locally is with the **file storage backend** — no Postgres required.
@@ -61,6 +65,17 @@ The `admin/` directory contains an nginx-served SPA that acts as the public entr
 - `/schemas/` → API container (serves embedded JSON schemas)
 - `/api/` → API container (REST endpoints)
 - Everything else → SPA (`index.html`)
+
+The admin login and authenticated plugin-management screens surface Terms, Privacy, and Imprint links. Destructive plugin and version removals are intentionally gated in the SPA with typed confirmations before the existing authenticated delete endpoints are called.
+
+### Targeted admin frontend checks
+
+```bash
+cd admin
+npm install
+npm run test
+npm run build
+```
 
 ### Building the admin container
 
