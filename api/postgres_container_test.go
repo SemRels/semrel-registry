@@ -52,7 +52,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		var dirty bool
 		require.NoError(t, db.Pool().QueryRow(context.Background(),
 			`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-		assert.Equal(t, latestMigrationVersion(t), version)
+		assert.EqualValues(t, latestMigrationVersion(t), version)
 		assert.False(t, dirty)
 	})
 
@@ -169,7 +169,7 @@ func TestPostgresProductionBehavior(t *testing.T) {
 		var dirty bool
 		require.NoError(t, db.Pool().QueryRow(ctx,
 			`SELECT version, dirty FROM schema_migrations`).Scan(&version, &dirty))
-		assert.Equal(t, latestMigrationVersion(t), version)
+		assert.EqualValues(t, latestMigrationVersion(t), version)
 		assert.False(t, dirty)
 
 		var retainedID, views, downloads int64
