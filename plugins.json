@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-18T03:41:12.795Z",
+  "generatedAt": "2026-08-26T03:48:06.086Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -426,6 +426,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.5.3",
+          "releaseDate": "2026-08-25T07:08:22Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.5.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "94f1d93c0a6f23666ae535275642338e2f0f44ec84bf2d8e715ee4cd7f660e27",
+            "linux_arm64": "f5c5675597179dc7a871f9b9db23624b1f40fe2394e1566722dc165faf3ec02c",
+            "darwin_amd64": "8611921ce9bd9e2bd8ac164160197590eefccf05cc75557bcb4f07fafc250415",
+            "darwin_arm64": "9bc47923022232234f0e570c5f8d00587237243e92270c9e60d8da01f185b62b",
+            "windows_amd64": "66f2db1f2b7c15bee3b5b6a4b796cb830c24788a3f79e14076b9c3d80348f7b0",
+            "windows_arm64": "048a088e773925d848a6e18278392bdf77fc0c9306416bbd2bedbdce01076d93"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/provider-github/compare/v0.5.2...v0.5.3"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-07-06T08:58:38Z",
