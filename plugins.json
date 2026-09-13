@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-26T03:48:06.086Z",
+  "generatedAt": "2026-09-13T15:00:00.217Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -4431,6 +4431,46 @@
             "gRPCVersion": "v1"
           },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-terraform/pull/7\n* Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/6\n* Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/5\n* Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/4\n* Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/2\n* Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-terraform/pull/1\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-terraform/pull/7\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-terraform/pull/6\n\n**Full Changelog**: https://github.com/SemRels/updater-terraform/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "namespace": "@semrel",
+      "name": "updater-zig",
+      "aliases": [
+        "@semrel/zig",
+        "updater-zig",
+        "zig"
+      ],
+      "description": "Zig build.zig.zon updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-zig",
+      "tags": [
+        "zig",
+        "build.zig.zon",
+        "updater"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-09-13T14:53:12Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c76b2c8cb199f91a7dbc63294a99f8467762d0b8ee68bcf01216f41530be1dff",
+            "linux_arm64": "24bff82293794e0b96c75bafdaf218c51d93fbd01d41e8d4a0ebf178f6fd4be1",
+            "darwin_amd64": "34ac6032ec75e21c89512265691d670440ff46e2af543a8bc9b23a4bae895567",
+            "darwin_arm64": "0d7120d384abbfbcc700973fefafbe091c6a4cf715e6e04284dda41b0f8f8ae7",
+            "windows_amd64": "256b564794bbdb3e05ace2c4c976062f8d98ce736290d5ada4e278f1069fe12a",
+            "windows_arm64": "71a8f63ae02bac46166f8b7743faeafd7703772aeed434a2151f2634cf05bdb5"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-zig/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/updater-zig/commits/v0.1.0"
         }
       ]
     },
