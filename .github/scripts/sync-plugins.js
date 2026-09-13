@@ -38,6 +38,7 @@ const OFFICIAL_PLUGINS = [
   { repo: 'updater-python', name: 'python', category: 'updater', description: 'Python dependency updater', tags: ['python', 'dependencies', 'updater'] },
   { repo: 'updater-helm', name: 'helm', category: 'updater', description: 'Helm chart updater', tags: ['helm', 'charts', 'updater'] },
   { repo: 'updater-cargo', name: 'cargo', category: 'updater', description: 'Cargo dependency updater', tags: ['cargo', 'dependencies', 'updater'] },
+  { repo: 'updater-zig', name: 'zig', category: 'updater', description: 'Zig build.zig.zon updater', tags: ['zig', 'build.zig.zon', 'updater'] },
   { repo: 'updater-maven', name: 'maven', category: 'updater', description: 'Maven dependency updater', tags: ['dependencies', 'maven', 'updater'] },
   { repo: 'updater-nuget', name: 'nuget', category: 'updater', description: 'NuGet package updater', tags: ['nuget', 'packages', 'updater'] },
   { repo: 'updater-homebrew', name: 'homebrew', category: 'updater', description: 'Homebrew formula updater', tags: ['formula', 'homebrew', 'updater'] },
