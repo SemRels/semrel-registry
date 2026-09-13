@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-13T15:00:00.217Z",
+  "generatedAt": "2026-09-13T15:16:31.740Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -4453,6 +4453,63 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.1.3",
+          "releaseDate": "2026-09-13T15:09:26Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.1.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "5aa7f37056a5377e74947dd460da84fdec8f11fee42c1c1338074d9e6f7eb7e8",
+            "linux_arm64": "30289ad9f1165f6a9d57106960b340abdfdaec9b69aa34ca6954d455c2c90642",
+            "darwin_amd64": "faa3eb4b76b9f7f94907464c5b8df38537517bb1d987091dad5feac2af9ce897",
+            "darwin_arm64": "dc31c9935aa7fcd5415dafb76e68f95ce7b6d9aea5fbcfe759f59d0f542fd57d",
+            "windows_amd64": "c86160af01a82e2fc4a26bd9fb3661171e85d03252f75f7ca62ce007ee35254c",
+            "windows_arm64": "ff87a6ccc16d013adf888a43a6de2843de43e9c0637e633cb09a59b7d2e2c5ed"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-zig/compare/v0.1.2...v0.1.3"
+        },
+        {
+          "version": "0.1.2",
+          "releaseDate": "2026-09-13T15:05:50Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.1.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "4870161015eb2970c36172db038f1cfcdd7180b2901d85451d66d031e1b54cd1",
+            "linux_arm64": "fc065651e724724fac6a0c01e3709ccc0c8810050761dd7f81679879444d2ec9",
+            "darwin_amd64": "e286009d54226a4a9d109abd78d597ad3fa7c03ee9fda59ef8fa69ce4607dfd8",
+            "darwin_arm64": "66ffdf44fdb083f7e9ef0b757ebd71a3d1c30cde2380a0283d62d6fdb5434c16",
+            "windows_amd64": "16263d804992920bc6eb2157234db6475ca69f797abc8a284a0492707d8bb91f",
+            "windows_arm64": "4c5d46e4026c71e5888db8baf006f9c2fd3345a43e517efea63b318f386fa894"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-zig/compare/v0.1.1...v0.1.2"
+        },
+        {
+          "version": "0.1.1",
+          "releaseDate": "2026-09-13T15:02:43Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.1.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "fa1febc91ba6b741ec64643dfc87e95a3b9d6725288753c4842edbc66320cb39",
+            "linux_arm64": "39d0b6f243d6a2a8693d545a95bc8084922d715dd9b82e78def93b6c49fb6a15",
+            "darwin_amd64": "da7eb06ebbc5189b85642ce1170cc45edf06b83c6855be2dd563e1ce5d28a5cc",
+            "darwin_arm64": "254ad475f5a94047778e2e7db62bfe6f76ad4260b46edb0fd055702d0422e808",
+            "windows_amd64": "fbaa93de4e2992aa2ff8f460551bef4922ceadb40bfa570a36e9478439ac4c19",
+            "windows_arm64": "329642aa6cefa2f3502fa9007d712f7b2a8fb0f30a05e6433990f261cbb89b79"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-zig/compare/v0.1.0...v0.1.1"
+        },
         {
           "version": "0.1.0",
           "releaseDate": "2026-09-13T14:53:12Z",
