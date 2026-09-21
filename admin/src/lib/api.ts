@@ -141,6 +141,8 @@ export interface Plugin {
   tags: string[];
   versions?: PluginVersion[];
   latestVersion?: string;
+  /** The semrel core range the latest version declares compatibility with. */
+  latestSemrelCore?: string;
   views: number;
   downloads: number;
   validationChecks?: ValidationResult; // pre-analysis results stored by server
@@ -542,4 +544,30 @@ export interface OrgSyncResult {
 
 export async function syncGitHubOrg(): Promise<OrgSyncResult> {
   return request<OrgSyncResult>('/admin/sync-github-org', { method: 'POST' });
+}
+
+// ---- Plugin README ----
+
+export interface PluginReadme {
+  /** Untrusted author markdown — render it through the Markdown component. */
+  markdown: string;
+  /** Canonical URL of the README on GitHub. */
+  source: string;
+}
+
+/**
+ * Fetches a plugin's README through the registry.
+ *
+ * The registry proxies it rather than the browser calling GitHub directly: the
+ * browser has no API token and would hit the unauthenticated rate limit, and a
+ * direct fetch would disclose every visitor's address to GitHub.
+ */
+export async function getPluginReadme(id: string | number): Promise<PluginReadme | null> {
+  try {
+    const { data } = await request<{ data: PluginReadme }>(`/plugins/${id}/readme`);
+    return data;
+  } catch {
+    // A missing README is an ordinary state, not an error worth surfacing.
+    return null;
+  }
 }

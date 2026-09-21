@@ -128,7 +128,7 @@ export default function PluginsPage() {
       </div>
       <div className="page__body">
         {!isAdmin && (
-          <div className="alert" style={{ background:'rgba(56,139,253,.1)', border:'1px solid rgba(56,139,253,.3)', color:'#79c0ff', padding:'.5rem .75rem', borderRadius:'6px', fontSize:'var(--fs-sm)', marginBottom:'.75rem' }}>
+          <div className="alert" style={{ background:'var(--accent-soft)', border:'1px solid var(--accent)', color:'var(--accent-text)', padding:'.5rem .75rem', borderRadius:'6px', fontSize:'var(--fs-sm)', marginBottom:'.75rem' }}>
             Community view — you can only manage plugins attributed to <strong>{user?.login}</strong>.{' '}
             <a href="/admin/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
               Submit a new plugin →

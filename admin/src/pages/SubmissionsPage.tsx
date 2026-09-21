@@ -90,7 +90,7 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
             {checks && (
               <span style={{
                 fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '0.1rem 0.4rem', borderRadius: 4,
-                background: allPassed ? 'rgba(63,185,80,.15)' : 'rgba(248,81,73,.15)',
+                background: allPassed ? 'var(--success-soft)' : 'var(--danger-soft)',
                 color: allPassed ? 'var(--success)' : 'var(--danger)',
               }}>
                 {allPassed ? '✓ passes standards' : '✗ issues found'}
@@ -106,7 +106,7 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <span>👤 {plugin.author}</span>
             <span>📄 {plugin.license}</span>
-            <a href={plugin.repository} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
+            <a href={plugin.repository} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-text)' }}>
               ↗ {plugin.repository.replace('https://github.com/', '')}
             </a>
             <span>🕐 {new Date(plugin.createdAt).toLocaleDateString()}</span>
@@ -223,7 +223,7 @@ export default function SubmissionsPage() {
         <h1 className="page__title">
           Submissions
           {total > 0 && filter !== 'all' && (
-            <span style={{ background: 'var(--danger)', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '0.5rem', verticalAlign: 'middle' }}>
+            <span style={{ background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700, borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '0.5rem', verticalAlign: 'middle' }}>
               {total}
             </span>
           )}

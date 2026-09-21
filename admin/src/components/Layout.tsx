@@ -148,10 +148,20 @@ export default function Layout() {
           <button className="sidebar__logout" type="button" onClick={() => { void handleSignOut(); }}>
             Sign out
           </button>
-          <p className="legal-note sidebar__legal-note">
-            Changes are attributed to your signed-in account. By using this workspace you agree to the semrel terms for maintainers and contributors.
-          </p>
-          <LegalLinks inline className="legal-note__links" linkClassName="muted" />
+
+          {/* The terms notice used to be a full paragraph permanently taking up
+              the bottom of the navigation. It is reference text, not something
+              anyone reads twice, so it sits behind a disclosure — still one
+              keystroke away, and still in the DOM for screen readers. */}
+          <details className="sidebar__legal">
+            <summary>Terms &amp; attribution</summary>
+            <p className="legal-note">
+              Changes are attributed to your signed-in account. By using this
+              workspace you agree to the semrel terms for maintainers and
+              contributors.
+            </p>
+            <LegalLinks inline className="legal-note__links" linkClassName="muted" />
+          </details>
         </div>
       </aside>
       <main className="page" id="main-content" tabIndex={-1}>

@@ -223,7 +223,7 @@ export default function VersionsPage() {
                     </tr>
                     {expandedId === v.id && (
                       <tr key={`${v.id}-notes`}>
-                        <td colSpan={8} style={{ background:'rgba(255,255,255,.03)', padding:'1rem 1.25rem', borderTop:'1px solid var(--border)' }}>
+                        <td colSpan={8} style={{ background:'var(--surface-subtle)', padding:'1rem 1.25rem', borderTop:'1px solid var(--border)' }}>
                           {v.changelog ? (
                             <Markdown
                               source={v.changelog}

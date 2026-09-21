@@ -27,3 +27,6 @@ bin/
 
 # Go test binaries built in-tree (Windows app-control workaround)
 api/.gotmp/
+
+# Claude Code local preview config
+.claude/

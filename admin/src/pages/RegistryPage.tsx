@@ -146,12 +146,12 @@ export default function RegistryPage() {
             semrel Plugin Registry
           </h1>
           <p className="muted" style={{ fontSize: 'var(--fs-md)', marginBottom: '1.5rem' }}>
-            Discover and install plugins for <a href="https://semrel.io" target="_blank" rel="noopener" style={{ color: 'var(--accent)' }}>semrel</a> — semantic versioning made simple.
+            Discover and install plugins for <a href="https://semrel.io" target="_blank" rel="noopener" style={{ color: 'var(--accent-text)' }}>semrel</a> — semantic versioning made simple.
           </p>
           {pagination && (
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent)' }}>{pagination.total}</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent-text)' }}>{pagination.total}</div>
                 <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Plugins</div>
               </div>
             </div>
@@ -290,13 +290,13 @@ export default function RegistryPage() {
                     <span className="muted" style={{ fontSize: 'var(--fs-xs)', flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>by {p.author}</span>
                     <div style={{ display: 'flex', gap: '.3rem', alignItems: 'center', flexShrink: 0 }}>
                       <span
-                        style={{ fontSize: '11px', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
+                        style={{ fontSize: '11px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
                         title="Total downloads"
                       >
                         ↓ {Number(p.downloads ?? 0).toLocaleString()}
                       </span>
                       <span
-                        style={{ fontSize: '11px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
+                        style={{ fontSize: '11px', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
                         title="Total views"
                       >
                         👁 {Number(p.views ?? 0).toLocaleString()}

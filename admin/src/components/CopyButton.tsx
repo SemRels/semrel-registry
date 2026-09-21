@@ -4,6 +4,12 @@ interface CopyButtonProps {
   readonly text: string;
   /** What is being copied, for the accessible name: "Copy install command". */
   readonly label?: string;
+  /**
+   * Show the label next to the icon. Off by default: in a one-line command
+   * box, a spelled-out label squeezes the command itself down to an ellipsis,
+   * which defeats the point of showing it.
+   */
+  readonly showLabel?: boolean;
   readonly className?: string;
   readonly style?: React.CSSProperties;
 }
@@ -15,7 +21,7 @@ interface CopyButtonProps {
  * button whose label flicks to "Copied" for two seconds is invisible feedback
  * to anyone not looking at that exact spot.
  */
-export default function CopyButton({ text, label = 'Copy', className, style }: CopyButtonProps) {
+export default function CopyButton({ text, label = 'Copy', showLabel = false, className, style }: CopyButtonProps) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -46,9 +52,13 @@ export default function CopyButton({ text, label = 'Copy', className, style }: C
         className={className ?? 'copy-button'}
         style={style}
         onClick={(event) => { void copy(event); }}
+        // The accessible name always spells out what is copied, whether or not
+        // the label is drawn.
         aria-label={`${label}: ${text}`}
+        title={label}
       >
-        <span aria-hidden="true">{state === 'copied' ? '✓ Copied' : label}</span>
+        <span aria-hidden="true">{state === 'copied' ? '✓' : '⧉'}</span>
+        {showLabel && <span aria-hidden="true">{state === 'copied' ? 'Copied' : label}</span>}
       </button>
       <span className="sr-only" role="status" aria-live="polite">
         {state === 'idle' ? '' : message}

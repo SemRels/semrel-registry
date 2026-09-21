@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
 import CopyButton from '../components/CopyButton';
+import ReadmeSection from '../components/ReadmeSection';
 import { revalidatePlugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import type { ValidationResult } from '../lib/api';
@@ -129,7 +130,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
       {label && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)', marginBottom: '.25rem', fontWeight: 600 }}>{label}</div>}
       <div style={{ background: 'var(--surface2)', borderRadius: 8, padding: '.75rem 1rem', fontFamily: 'monospace', fontSize: 'var(--fs-sm)', overflowX: 'auto', border: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.5rem' }}>
         <pre style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{code}</pre>
-        <CopyButton text={code} label={label ? `Copy ${label.toLowerCase()}` : 'Copy'} />
+        <CopyButton text={code} label={label ? `Copy ${label.toLowerCase()}` : 'Copy'} showLabel />
       </div>
     </div>
   );
@@ -144,10 +145,10 @@ function MarkdownContent({ md }: { md: string }) {
 function VersionBadge({ version, isLatest }: { version: string; isLatest: boolean }) {
   const dev = isDevVersion(version);
   if (dev) {
-    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>dev</span>;
+    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--warning-soft)', color: 'var(--warning)', borderRadius: 4, padding: '1px 6px' }}>dev</span>;
   }
   if (isLatest) {
-    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(35,134,54,.2)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>latest</span>;
+    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>latest</span>;
   }
   return null;
 }
@@ -163,7 +164,7 @@ function DownloadLinks({ downloadUrls }: { downloadUrls?: Record<string, string>
     <div>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 'var(--fs-xs)', padding: 0, textDecoration: 'underline dotted' }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontSize: 'var(--fs-xs)', padding: 0, textDecoration: 'underline dotted' }}
       >
         {open ? '▾ Hide' : `▸ Download (${platforms.length} platforms)`}
       </button>
@@ -175,7 +176,7 @@ function DownloadLinks({ downloadUrls }: { downloadUrls?: Record<string, string>
               href={downloadUrls[key]}
               target="_blank"
               rel="noopener"
-              style={{ fontSize: '11px', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '.3rem' }}
+              style={{ fontSize: '11px', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', gap: '.3rem' }}
             >
               <span style={{ fontFamily: 'monospace', background: 'var(--surface2)', borderRadius: 3, padding: '1px 5px', fontSize: '10px', color: 'var(--muted)' }}>{key}</span>
               {PLATFORM_LABELS[key] ?? key}
@@ -279,7 +280,7 @@ export default function PluginDetailPage() {
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         {/* Breadcrumb */}
         <nav style={{ fontSize: 'var(--fs-sm)', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-          <Link to="/" style={{ color: 'var(--accent)' }}>Registry</Link>
+          <Link to="/" style={{ color: 'var(--accent-text)' }}>Registry</Link>
           {' / '}
           <span>{name}</span>
         </nav>
@@ -301,8 +302,8 @@ export default function PluginDetailPage() {
                   {latest && (
                     <span style={{
                       fontSize: 'var(--fs-xs)',
-                      background: isDevVersion(latest.version) ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)',
-                      color: isDevVersion(latest.version) ? '#d7a22a' : 'var(--accent)',
+                      background: isDevVersion(latest.version) ? 'var(--warning-soft)' : 'var(--accent-soft)',
+                      color: isDevVersion(latest.version) ? 'var(--warning)' : 'var(--accent-text)',
                       borderRadius: 6, padding: '2px 8px', fontFamily: 'monospace', fontWeight: 600,
                     }}>
                       v{latest.version}
@@ -313,7 +314,7 @@ export default function PluginDetailPage() {
                     style={{
                       fontSize: '11px',
                       fontFamily: 'monospace',
-                      background: 'rgba(63,185,80,.12)',
+                      background: 'var(--success-soft)',
                       color: 'var(--success)',
                       borderRadius: 5,
                       padding: '1px 7px',
@@ -327,8 +328,8 @@ export default function PluginDetailPage() {
                     style={{
                       fontSize: '11px',
                       fontFamily: 'monospace',
-                      background: 'rgba(56,139,253,.12)',
-                      color: 'var(--accent)',
+                      background: 'var(--accent-soft)',
+                      color: 'var(--accent-text)',
                       borderRadius: 5,
                       padding: '1px 7px',
                       fontWeight: 600,
@@ -345,7 +346,7 @@ export default function PluginDetailPage() {
                   <span>by <strong>{plugin.author}</strong></span>
                   <span>License: <strong>{plugin.license || 'unknown'}</strong></span>
                   {plugin.repository && (
-                    <a href={plugin.repository} target="_blank" rel="noopener" style={{ color: 'var(--accent)' }}>
+                    <a href={plugin.repository} target="_blank" rel="noopener" style={{ color: 'var(--accent-text)' }}>
                       GitHub ↗
                     </a>
                   )}
@@ -375,9 +376,9 @@ export default function PluginDetailPage() {
                     <span style={{
                       marginLeft: '.5rem', fontSize: 'var(--fs-xs)', fontWeight: 700,
                       padding: '1px 8px', borderRadius: 5,
-                      background: checks.valid ? 'rgba(63,185,80,.12)' : 'rgba(248,81,73,.12)',
+                      background: checks.valid ? 'var(--success-soft)' : 'var(--danger-soft)',
                       color: checks.valid ? 'var(--success)' : 'var(--danger)',
-                      border: `1px solid ${checks.valid ? 'rgba(63,185,80,.3)' : 'rgba(248,81,73,.3)'}`,
+                      border: `1px solid ${checks.valid ? 'var(--success)' : 'var(--danger)'}`,
                     }}>
                       {checks.valid ? '✓ MVP' : '✗ MVP'}
                     </span>
@@ -402,6 +403,10 @@ export default function PluginDetailPage() {
                   </p>
               }
             </section>
+
+            {/* README — the plugin's own documentation. Until now the only
+                description on this page was the one-line catalogue summary. */}
+            <ReadmeSection pluginId={plugin.id} repository={plugin.repository} />
 
             {/* Configuration */}
             <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
@@ -468,7 +473,7 @@ export default function PluginDetailPage() {
                     <tbody>
                       {versions.map((v, i) => (
                         <>
-                          <tr key={v.id} style={{ borderBottom: expandedVersionId === v.id ? undefined : '1px solid var(--border)', background: i === 0 ? 'rgba(56,139,253,.04)' : undefined }}>
+                          <tr key={v.id} style={{ borderBottom: expandedVersionId === v.id ? undefined : '1px solid var(--border)', background: i === 0 ? 'var(--accent-soft)' : undefined }}>
                             <td data-label="Version" style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
                               <button
                                 type="button"
@@ -507,10 +512,10 @@ export default function PluginDetailPage() {
                             </td>
                             <td data-label="Stats" style={{ padding: '.5rem' }}>
                               <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
-                                <span title="Downloads" style={{ fontSize: '10px', background: 'rgba(63,185,80,.12)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                <span title="Downloads" style={{ fontSize: '10px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
                                   ↓ {Number(v.downloads ?? 0).toLocaleString()}
                                 </span>
-                                <span title="Views" style={{ fontSize: '10px', background: 'rgba(56,139,253,.12)', color: 'var(--accent)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                <span title="Views" style={{ fontSize: '10px', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
                                   👁 {Number(v.views ?? 0).toLocaleString()}
                                 </span>
                               </div>
@@ -521,7 +526,7 @@ export default function PluginDetailPage() {
                           </tr>
                           {expandedVersionId === v.id && v.changelog && (
                             <tr key={`${v.id}-notes`} style={{ borderBottom: '1px solid var(--border)' }}>
-                              <td colSpan={5} style={{ padding: '1rem 1.25rem', background: 'rgba(255,255,255,.03)' }}>
+                              <td colSpan={5} style={{ padding: '1rem 1.25rem', background: 'var(--surface-subtle)' }}>
                                 <MarkdownContent md={v.changelog} />
                               </td>
                             </tr>
@@ -548,7 +553,7 @@ export default function PluginDetailPage() {
             {plugin.tags?.length > 0 && (
               <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
                 {plugin.tags.map(t => (
-                  <span key={t} style={{ fontSize: 'var(--fs-xs)', background: 'rgba(56,139,253,.1)', color: 'var(--accent)', borderRadius: 5, padding: '2px 8px' }}>{t}</span>
+                  <span key={t} style={{ fontSize: 'var(--fs-xs)', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 5, padding: '2px 8px' }}>{t}</span>
                 ))}
               </div>
             )}

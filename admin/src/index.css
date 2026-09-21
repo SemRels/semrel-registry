@@ -16,8 +16,8 @@
   /* Modern Accents */
   --accent:      #6366f1; /* Indigo */
   --accent-secondary: #06b6d4; /* Cyan */
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
   --accent-secondary-gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
   --accent-soft: rgba(99, 102, 241, 0.12);
   --accent-glow: 0 0 20px rgba(99, 102, 241, 0.25);
@@ -32,6 +32,27 @@
   --focus-ring:  #a5b4fc;
   --surface-subtle: rgba(255, 255, 255, 0.03);
   --surface-raised: rgba(255, 255, 255, 0.05);
+  /* Surfaces that used to be hard-coded dark. A sticky header painted
+     rgba(3,7,18,.6) puts dark text on a dark bar as soon as the palette
+     flips, which is exactly what a theme token exists to prevent. */
+  --surface-header: #0b0f19;
+  --surface-sunken: rgba(0, 0, 0, 0.15);
+  --surface-scrim:  rgba(3, 7, 18, 0.78);
+  --accent-text:    #c7d2fe;
+
+  /* Chart palette. Kept as tokens so the plot is legible on both grounds —
+     the same blue that reads well on near-black is washed out on white. */
+  --chart-views:      #60a5fa;
+  --chart-downloads:  #34d399;
+  --chart-surface:    rgba(3, 7, 18, 0.3);
+  --chart-tooltip-bg: rgba(13, 17, 23, 0.95);
+  --chart-tooltip-fg: #e5e7eb;
+  --chart-grid:       rgba(255, 255, 255, 0.08);
+  --chart-point-ring: #0b0f19;
+  --code-bg:          #02040a;
+  --code-fg:          #67e8f9;
+  --code-inline-fg:   #e5e7eb;
+  --link-hover:       #22d3ee;
 
   --radius:      10px;
   --radius-lg:   14px;
@@ -39,7 +60,7 @@
   --fs-sm:       0.8125rem;
   --fs-xs:       0.75rem;
   --shadow:      0 8px 30px rgba(0, 0, 0, 0.3);
-  --glass:       rgba(11, 15, 25, 0.65);
+  --glass:       #0b0f19;
 }
 
 body {
@@ -80,7 +101,7 @@ a {
   transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 a:hover { 
-  color: #22d3ee; 
+  color: var(--link-hover); 
   text-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
   text-decoration: none; 
 }
@@ -112,7 +133,6 @@ code, pre {
   width: 240px;
   flex-shrink: 0;
   background: var(--glass);
-  backdrop-filter: blur(16px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -175,7 +195,7 @@ code, pre {
   text-decoration: none;
 }
 .sidebar__link:hover { 
-  background: rgba(255, 255, 255, 0.04); 
+  background: var(--surface-raised); 
   color: var(--text); 
   text-decoration: none; 
 }
@@ -189,7 +209,7 @@ code, pre {
 .sidebar__footer {
   padding: 1.25rem;
   border-top: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--surface-sunken);
 }
 
 .sidebar__logout {
@@ -222,8 +242,7 @@ code, pre {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  background: rgba(3, 7, 18, 0.6);
-  backdrop-filter: blur(12px);
+  background: var(--surface-header);
   position: sticky; top: 0; z-index: 9;
 }
 .page__title { font-size: 1.35rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
@@ -294,12 +313,12 @@ code, pre {
   border-color: transparent;
 }
 .btn--secondary {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-subtle);
   border-color: var(--border);
 }
 .btn--secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--surface-raised);
+  border-color: var(--border-hover);
   box-shadow: none;
 }
 .btn--danger { 
@@ -351,14 +370,31 @@ code, pre {
 .table-wrap {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  /* overflow-x, not hidden: the version and plugin tables are wider than the
+     content column on a laptop, and "hidden" clipped the last columns with no
+     way to reach them — not even by keyboard. */
+  overflow-x: auto;
+  overflow-y: hidden;
   background: var(--bg-2);
   box-shadow: var(--shadow);
+  /* Tell the browser this is the scroll container for touch and trackpads, and
+     give focus somewhere to land so it is keyboard-scrollable too. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
+}
+.table-wrap:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* A table narrower than its container must not force a scrollbar. */
+.table-wrap > table {
+  min-width: max-content;
 }
 
 table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 thead th {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-subtle);
   font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
@@ -376,7 +412,7 @@ tbody td {
   transition: background-color 0.15s ease;
 }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
+tbody tr:hover td { background: var(--surface-subtle); }
 
 /* ── Stat grid ──────────────────────────────────────── */
 .dashboard-metrics {
@@ -385,12 +421,11 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   margin-bottom: 1.5rem;
   padding: .25rem;
-  background: rgba(255,255,255,.018);
+  background: var(--surface-subtle);
   border-radius: var(--radius-lg);
 }
 .stat-card {
   background: var(--glass);
-  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
@@ -439,7 +474,6 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 /* ── Card ─────────────────────────────────────────────── */
 .card {
   background: var(--glass);
-  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
@@ -491,7 +525,6 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 }
 .login-card {
   background: var(--glass);
-  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.25rem 2rem;
@@ -553,13 +586,13 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 }
 .alert--error   { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .alert--success { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.25); color: #a7f3d0; }
-.alert--info    { background: var(--accent-soft); border-color: rgba(99, 102, 241, 0.25); color: #c7d2fe; }
+.alert--info    { background: var(--accent-soft); border-color: rgba(99, 102, 241, 0.25); color: var(--accent-text); }
 
 /* ── Dialogs & legal notes ───────────────────────────── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 7, 18, 0.78);
+  background: var(--surface-scrim);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -664,15 +697,15 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .markdown-body ul, .markdown-body ol { padding-left: 1.5rem; margin: .5rem 0 1rem; }
 .markdown-body li { margin: .25rem 0; color: var(--text-muted); }
 .markdown-body a  { color: var(--accent-secondary); text-decoration: underline dotted; }
-.markdown-body a:hover { text-decoration: underline; color: #22d3ee; }
+.markdown-body a:hover { text-decoration: underline; color: var(--link-hover); }
 .markdown-body code {
-  background: var(--bg-3); border-radius: 4px;
+  background: var(--code-bg); border-radius: 4px;
   padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: .875em;
   border: 1px solid var(--border);
-  color: #e5e7eb;
+  color: var(--code-inline-fg);
 }
 .markdown-body pre {
-  background: #030712; border-radius: var(--radius);
+  background: var(--code-bg); border-radius: var(--radius);
   padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0 1.25rem;
   border: 1px solid var(--border);
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
@@ -706,7 +739,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   transition: background 0.2s;
 }
 .sidebar__toggle:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-raised);
 }
 
 /* ── Mobile overlay backdrop ─────────────────────────── */
@@ -714,7 +747,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(3, 7, 18, 0.65);
+  background: var(--surface-scrim);
   backdrop-filter: blur(4px);
   border: 0;
   padding: 0;
@@ -758,8 +791,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
     align-items: center;
     gap: .75rem;
     padding: .5rem 1rem;
-    background: rgba(11, 15, 25, 0.85);
-    backdrop-filter: blur(12px);
+    background: var(--surface-header);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -801,8 +833,11 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
     min-height: 2.5rem;
   }
 
-  /* Scrollable tables on mobile */
-  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Rows stack into cards below, so the table no longer needs to be wider
+     than the viewport — and forcing max-content here would reintroduce a
+     horizontal scrollbar on a layout that does not need one. */
+  .table-wrap > table { min-width: 0; }
+  .table-wrap { overflow-x: hidden; }
 
   /* Stack table rows into card-like blocks for touch-friendly reading */
   table.table--stack thead {
@@ -889,18 +924,16 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 /* CLI Command styling in registry list */
 .registry-cli-cmd {
   position: relative;
-  background: #02040a !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 8px !important;
-  padding: 6px 10px 6px 2rem !important;
-  color: var(--accent-secondary) !important;
+  /* Was #02040a: a black slab on a white card. A terminal look is fine in the
+     dark theme but reads as a rendering fault in the light one. */
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px 6px 1.75rem;
+  color: var(--code-fg);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px !important;
-  display: block;
+  font-size: 11px;
   margin: 0.5rem 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .registry-cli-cmd::before {
   content: "$";
@@ -909,11 +942,17 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   color: var(--text-muted);
   font-weight: bold;
 }
+/* The command is the point of the card; the copy control must not crowd it
+   out. It was previously reduced to "semrel …" by a full-text button label. */
+.registry-cli-cmd code {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* Code block frame with macOS window dots */
 .code-block-frame {
   position: relative;
-  background: #02040a !important;
+  background: var(--code-bg);
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
   padding: 1.75rem 1.25rem 0.75rem 1.25rem !important; /* more padding at top for dots */
@@ -997,7 +1036,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   top: 0;
   z-index: 100;
   padding: .625rem 1rem;
-  background: var(--accent);
+  background: #4f46e5;
   color: #fff;
   font-weight: 600;
   border-radius: 0 0 var(--radius) 0;
@@ -1084,9 +1123,30 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
     --danger-soft:  rgba(185, 28, 28, 0.1);
 
     --shadow:         0 8px 30px rgba(15, 23, 42, 0.08);
-    --glass:          rgba(255, 255, 255, 0.75);
     --surface-subtle: rgba(15, 23, 42, 0.03);
     --surface-raised: rgba(15, 23, 42, 0.05);
+    --surface-header: #ffffff;
+    --surface-sunken: rgba(15, 23, 42, 0.04);
+    --surface-scrim:  rgba(15, 23, 42, 0.45);
+    --accent-text:    #3730a3;
+
+    /* Chart colours tuned for a light ground: the blue that reads well on
+       near-black washes out on white. */
+    --chart-views:      #1d4ed8;
+    --chart-downloads:  #047857;
+    --chart-surface:    rgba(15, 23, 42, 0.03);
+    --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
+    --chart-tooltip-fg: #0f172a;
+    --chart-grid:       rgba(15, 23, 42, 0.12);
+    --chart-point-ring: #ffffff;
+    --code-bg:          #f1f5f9;
+    --glass:            #ffffff;
+    --code-fg:          #0e7490;
+    --code-inline-fg:   #0f172a;
+    --link-hover:       #155e75;
+    --accent-secondary: #0e7490;
+    --warning:          #92400e;
+    --warning-soft:     rgba(146, 64, 14, 0.12);
   }
 
   /* Category badges carry light text intended for a dark surface; on a light
@@ -1147,9 +1207,30 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   --danger-soft:  rgba(185, 28, 28, 0.1);
 
   --shadow:         0 8px 30px rgba(15, 23, 42, 0.08);
-  --glass:          rgba(255, 255, 255, 0.75);
   --surface-subtle: rgba(15, 23, 42, 0.03);
   --surface-raised: rgba(15, 23, 42, 0.05);
+  --surface-header: #ffffff;
+  --surface-sunken: rgba(15, 23, 42, 0.04);
+  --surface-scrim:  rgba(15, 23, 42, 0.45);
+  --accent-text:    #3730a3;
+
+  /* Chart colours tuned for a light ground: the blue that reads well on
+     near-black washes out on white. */
+  --chart-views:      #1d4ed8;
+  --chart-downloads:  #047857;
+  --chart-surface:    rgba(15, 23, 42, 0.03);
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
+  --chart-tooltip-fg: #0f172a;
+  --chart-grid:       rgba(15, 23, 42, 0.12);
+  --chart-point-ring: #ffffff;
+  --code-bg:          #f1f5f9;
+  --glass:            #ffffff;
+  --code-fg:          #0e7490;
+  --code-inline-fg:   #0f172a;
+  --link-hover:       #155e75;
+  --accent-secondary: #0e7490;
+  --warning:          #92400e;
+  --warning-soft:     rgba(146, 64, 14, 0.12);
 }
 
 :root[data-theme='light'] .badge--provider  { color: #3730a3; border-color: rgba(67, 56, 202, .35); }
@@ -1342,4 +1423,48 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Sidebar legal disclosure ─────────────────────────────────────────────── */
+.sidebar__legal {
+  margin-top: .75rem;
+  font-size: var(--fs-xs);
+}
+.sidebar__legal > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .25rem 0;
+  min-height: 1.75rem;
+}
+.sidebar__legal > summary::-webkit-details-marker { display: none; }
+.sidebar__legal > summary::before {
+  content: 'ⓘ';
+  font-size: .9em;
+}
+.sidebar__legal > summary:hover { color: var(--text); }
+.sidebar__legal > summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.sidebar__legal[open] > summary { color: var(--text); margin-bottom: .25rem; }
+.sidebar__legal .legal-note { margin: 0 0 .35rem; }
+
+/* ── Table scroll affordance ──────────────────────────────────────────────── */
+/* A fade at the right edge signals that the table continues; without it a
+   clipped-looking table reads as a finished one. */
+.table-wrap {
+  background-image:
+    linear-gradient(to right, var(--bg-2) 30%, rgba(0, 0, 0, 0)),
+    linear-gradient(to right, rgba(0, 0, 0, 0), var(--bg-2) 70%),
+    linear-gradient(to right, var(--surface-raised), rgba(0, 0, 0, 0)),
+    linear-gradient(to left, var(--surface-raised), rgba(0, 0, 0, 0));
+  background-position: left center, right center, left center, right center;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
 }

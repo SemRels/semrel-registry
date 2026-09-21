@@ -101,51 +101,57 @@ function SeriesLineChart({
       aria-label="Trend chart for views and downloads"
       onMouseLeave={() => onHoverIndexChange(null)}
     >
+      {/* Every colour here is a theme token. The chart used to be painted in
+          fixed dark values — a near-black plot area, a near-black tooltip and
+          #c9d1d9 text — which became an unreadable dark rectangle the moment
+          the palette flipped to light. */}
       <defs>
         <linearGradient id="viewGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#3b82f6" />
+          <stop offset="0%" stopColor="var(--chart-views)" stopOpacity=".75" />
+          <stop offset="100%" stopColor="var(--chart-views)" />
         </linearGradient>
         <linearGradient id="downloadGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#059669" />
+          <stop offset="0%" stopColor="var(--chart-downloads)" stopOpacity=".75" />
+          <stop offset="100%" stopColor="var(--chart-downloads)" />
         </linearGradient>
         <linearGradient id="viewFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity=".28" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--chart-views)" stopOpacity=".28" />
+          <stop offset="100%" stopColor="var(--chart-views)" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity=".22" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--chart-downloads)" stopOpacity=".22" />
+          <stop offset="100%" stopColor="var(--chart-downloads)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(3,7,18,.3)" stroke="var(--border)" strokeWidth="1" />
+      <rect x="0" y="0" width={width} height={height} rx="10" fill="var(--chart-surface)" stroke="var(--border)" strokeWidth="1" />
       {[0, .25, .5, .75, 1].map((fraction) => (
         <line key={fraction} x1={pad} x2={width - pad} y1={pad + innerH * fraction} y2={pad + innerH * fraction}
-          stroke="rgba(148,163,184,.14)" strokeDasharray="2 5" />
+          stroke="var(--chart-grid)" strokeDasharray="2 5" />
       ))}
       <path d={areaPath(views)} fill="url(#viewFill)" />
       <path d={areaPath(downloads)} fill="url(#downloadFill)" />
-      <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="3" strokeLinecap="round" />
-      <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="3" strokeLinecap="round" />
+      {/* Dashed versus solid, so the two series stay distinguishable without
+          relying on colour alone. */}
+      <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" />
       {data.map((point, idx) => (
         <g key={`points-${point.period}`}>
-          <circle cx={pointX(idx)} cy={pointY(views[idx] ?? 0)} r="2.5" fill="#3b82f6" />
-          <circle cx={pointX(idx)} cy={pointY(downloads[idx] ?? 0)} r="2.5" fill="#10b981" />
+          <circle cx={pointX(idx)} cy={pointY(views[idx] ?? 0)} r="2.5" fill="var(--chart-views)" />
+          <circle cx={pointX(idx)} cy={pointY(downloads[idx] ?? 0)} r="2.5" fill="var(--chart-downloads)" />
         </g>
       ))}
       {hoverX !== null && hoveredPoint && (
         <>
-          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.3)" strokeDasharray="3 3" />
-          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="1.5" />
-          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
+          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="var(--chart-grid)" strokeDasharray="3 3" />
+          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="var(--chart-views)" stroke="var(--chart-point-ring)" strokeWidth="1.5" />
+          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="var(--chart-downloads)" stroke="var(--chart-point-ring)" strokeWidth="1.5" />
           {/* Tooltip box directly on the chart */}
-          <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="6" fill="rgba(13,17,23,.92)" stroke="rgba(201,209,217,.2)" strokeWidth="1" />
-          <text x={tooltipX + 8} y={tooltipY + 14} fontSize="10" fill="rgba(201,209,217,.7)">{hoveredPoint.period}</text>
-          <circle cx={tooltipX + 12} cy={tooltipY + 27} r="4" fill="#3b82f6" />
-          <text x={tooltipX + 20} y={tooltipY + 31} fontSize="11" fill="#c9d1d9">Views: <tspan fontWeight="bold">{Number(hoveredPoint.views ?? 0).toLocaleString()}</tspan></text>
-          <circle cx={tooltipX + 12} cy={tooltipY + 44} r="4" fill="#10b981" />
-          <text x={tooltipX + 20} y={tooltipY + 48} fontSize="11" fill="#c9d1d9">Downloads: <tspan fontWeight="bold">{Number(hoveredPoint.downloads ?? 0).toLocaleString()}</tspan></text>
+          <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="6" fill="var(--chart-tooltip-bg)" stroke="var(--border)" strokeWidth="1" />
+          <text x={tooltipX + 8} y={tooltipY + 14} fontSize="10" fill="var(--text-muted)">{hoveredPoint.period}</text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 27} r="4" fill="var(--chart-views)" />
+          <text x={tooltipX + 20} y={tooltipY + 31} fontSize="11" fill="var(--chart-tooltip-fg)">Views: <tspan fontWeight="bold">{Number(hoveredPoint.views ?? 0).toLocaleString()}</tspan></text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 44} r="4" fill="var(--chart-downloads)" />
+          <text x={tooltipX + 20} y={tooltipY + 48} fontSize="11" fill="var(--chart-tooltip-fg)">Downloads: <tspan fontWeight="bold">{Number(hoveredPoint.downloads ?? 0).toLocaleString()}</tspan></text>
         </>
       )}
       {data.map((point, idx) => {
@@ -187,8 +193,8 @@ function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlu
               <span className="muted">V {views.toLocaleString()} · D {downloads.toLocaleString()}</span>
             </div>
             <div style={{ display: 'grid', gap: '.2rem' }}>
-              <div style={{ width: `${v}%`, height: 6, borderRadius: 999, background: 'rgba(56,139,253,.7)' }} />
-              <div style={{ width: `${d}%`, height: 6, borderRadius: 999, background: 'rgba(63,185,80,.75)' }} />
+              <div style={{ width: `${v}%`, height: 6, borderRadius: 999, background: 'var(--chart-views)' }} />
+              <div style={{ width: `${d}%`, height: 6, borderRadius: 999, background: 'var(--chart-downloads)' }} />
             </div>
           </div>
         );
@@ -412,9 +418,17 @@ export default function DashboardPage() {
                 hoveredIndex={hoveredSeriesIndex}
                 onHoverIndexChange={setHoveredSeriesIndex}
               />
+              {/* The legend repeats the line style, not just the colour, so
+                  the two series stay tellable apart without colour vision. */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '.4rem', fontSize: 'var(--fs-xs)' }}>
-                <span style={{ color: 'rgba(56,139,253,.95)' }}>Views</span>
-                <span style={{ color: 'rgba(63,185,80,.95)' }}>Downloads</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', color: 'var(--text-muted)' }}>
+                  <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-views)" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                  Views
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', color: 'var(--text-muted)' }}>
+                  <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-downloads)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" /></svg>
+                  Downloads
+                </span>
               </div>
               {rawSeries.length === 0 && (
                 <div style={{ marginTop: '.4rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
@@ -489,7 +503,7 @@ export default function DashboardPage() {
               <h2 style={{ fontSize: 'var(--fs-md)', margin: 0 }}>
                 Pending submissions
                 {pending.length > 0 && (
-                  <span style={{ background: '#f85149', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>
+                  <span style={{ background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700, borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>
                     {pending.length}
                   </span>
                 )}
