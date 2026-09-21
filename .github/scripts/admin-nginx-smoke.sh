@@ -11,6 +11,10 @@ repo_root="$(CDPATH= cd -- "$script_dir/../.." && pwd)"
 cd "$repo_root"
 
 image="${ADMIN_SMOKE_IMAGE:-semrel-registry-admin:smoke}"
+# The unprivileged nginx image listens on 8080; /api/, /schemas/ and /auth/ are
+# proxied to the API.
+admin_port=8080
+proxy_locations=3
 build_image=1
 
 usage() {
@@ -142,8 +146,8 @@ grep -Fq "resolver $resolvers valid=5s;" <<<"$generated_config" ||
   fail "generated nginx configuration does not use the discovered resolver"
 grep -Fq 'set $api_url http://api:8080;' <<<"$generated_config" ||
   fail "API_URL was not substituted into the runtime upstream variable"
-[[ "$(grep -Fc 'proxy_pass $api_url;' <<<"$generated_config")" -eq 2 ]] ||
-  fail "both API proxy locations must use the runtime upstream variable"
+[[ "$(grep -Fc 'proxy_pass $api_url;' <<<"$generated_config")" -eq "$proxy_locations" ]] ||
+  fail "all $proxy_locations API proxy locations must use the runtime upstream variable"
 
 for directive in \
   'proxy_set_header Host $host;' \
@@ -151,13 +155,40 @@ for directive in \
   'proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' \
   'proxy_set_header X-Forwarded-Proto $scheme;'
 do
-  [[ "$(grep -Fc "$directive" <<<"$generated_config")" -eq 2 ]] ||
+  [[ "$(grep -Fc "$directive" <<<"$generated_config")" -eq "$proxy_locations" ]] ||
     fail "nginx runtime variable was altered: $directive"
 done
 
+# The security headers live in an included snippet, because nginx replaces
+# rather than merges add_header across nested locations. Assert they survive
+# both on the SPA shell and on a cached asset response.
+security_snippet="$(container exec "$admin" cat /etc/nginx/snippets/security-headers.conf)" ||
+  fail "security header snippet is missing from the image"
+for header in \
+  'X-Content-Type-Options' \
+  'X-Frame-Options' \
+  'Referrer-Policy' \
+  'Content-Security-Policy' \
+  'Strict-Transport-Security'
+do
+  grep -Fq "$header" <<<"$security_snippet" ||
+    fail "security header snippet does not set $header"
+done
+
+shell_headers="$(container exec "$admin" wget -S -T 5 -O /dev/null "http://127.0.0.1:$admin_port/index.html" 2>&1)" ||
+  fail "could not fetch the SPA shell"
+for header in 'X-Content-Type-Options: nosniff' 'Content-Security-Policy:' 'Cache-Control: no-store'
+do
+  grep -Fq "$header" <<<"$shell_headers" ||
+    fail "index.html response is missing '$header': $shell_headers"
+done
+
+container exec "$admin" id -u | grep -qv '^0$' ||
+  fail "admin container must not run as root"
+
 set +e
 before_output="$(container exec "$admin" wget -S -T 5 -O /dev/null \
-  'http://127.0.0.1/api/before-backend?probe=missing' 2>&1)"
+  "http://127.0.0.1:$admin_port/api/before-backend?probe=missing" 2>&1)"
 before_status=$?
 set -e
 ((before_status != 0)) || fail "request unexpectedly succeeded without an API hostname"
@@ -181,7 +212,10 @@ BACKEND_COMMAND
 
 echo "Registering a minimal backend with the api network alias"
 backend_created=1
-container run --detach --name "$backend" --network "$network" \
+# --user 0: the stub rewrites nginx's config at start-up, which the image's
+# unprivileged runtime user is not meant to be able to do. Only the throwaway
+# backend runs this way; the admin container under test does not.
+container run --detach --name "$backend" --network "$network" --user 0 \
   --network-alias api --entrypoint /bin/sh "$image" -c "$backend_command" >/dev/null
 
 sleep 6
@@ -194,7 +228,7 @@ request_through_admin() {
 
   for attempt in {1..15}; do
     if response="$(container exec "$admin" wget -q -T 5 -O - \
-      "http://127.0.0.1$path" 2>/dev/null)"; then
+      "http://127.0.0.1:$admin_port$path" 2>/dev/null)"; then
       printf '%s' "$response"
       return 0
     fi
@@ -204,7 +238,8 @@ request_through_admin() {
   fail "admin did not recover after API DNS registration for $path"
 }
 
-forwarded='host=127.0.0.1|real=127.0.0.1|forwarded=127.0.0.1|proto=http'
+# wget includes the non-default port in the Host header it sends.
+forwarded="host=127.0.0.1:$admin_port|real=127.0.0.1|forwarded=127.0.0.1|proto=http"
 api_response="$(request_through_admin '/api/runtime-dns?probe=api')"
 [[ "$api_response" == "uri=/api/runtime-dns?probe=api|$forwarded" ]] ||
   fail "/api/ URI or forwarding headers changed: $api_response"

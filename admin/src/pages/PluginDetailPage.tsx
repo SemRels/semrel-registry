@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { marked } from 'marked';
+import Markdown from '../components/Markdown';
 import { hasToken, revalidatePlugin } from '../lib/api';
 import type { ValidationResult } from '../lib/api';
 
@@ -144,20 +144,9 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
   );
 }
 
-/** Renders markdown using `marked`. Links open in new tab. */
+/** Renders registry-supplied markdown through the sanitising renderer. */
 function MarkdownContent({ md }: { md: string }) {
-  const html = marked.parse(md, { async: false }) as string;
-  return (
-    <div
-      className="markdown-body"
-      dangerouslySetInnerHTML={{ __html: html }}
-      style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.7 }}
-      onClick={e => {
-        const a = (e.target as HTMLElement).closest('a');
-        if (a) { a.target = '_blank'; a.rel = 'noopener'; }
-      }}
-    />
-  );
+  return <Markdown source={md} style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.7 }} />;
 }
 
 /** Version badge reflecting semver semantics. */

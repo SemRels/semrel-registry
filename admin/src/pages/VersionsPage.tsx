@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getPlugin, listVersions, createVersion, deleteVersion } from '../lib/api';
 import type { Plugin, PluginVersion } from '../lib/api';
-import { marked } from 'marked';
+import Markdown from '../components/Markdown';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 
 export default function VersionsPage() {
@@ -156,10 +156,10 @@ export default function VersionsPage() {
                       <tr key={`${v.id}-notes`}>
                         <td colSpan={8} style={{ background:'rgba(255,255,255,.03)', padding:'1rem 1.25rem', borderTop:'1px solid var(--border)' }}>
                           {v.changelog ? (
-                            <div
+                            <Markdown
+                              source={v.changelog}
                               className="prose"
                               style={{ fontSize:'var(--fs-sm)', color:'var(--fg)', maxWidth:'64rem' }}
-                              dangerouslySetInnerHTML={{ __html: marked.parse(v.changelog) as string }}
                             />
                           ) : (
                             <span className="muted" style={{ fontSize:'var(--fs-sm)' }}>No release notes for this version.</span>

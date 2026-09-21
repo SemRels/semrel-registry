@@ -63,6 +63,7 @@ This is ideal for self-hosting with small to medium plugin catalogues.
 The `admin/` directory contains an nginx-served SPA that acts as the public entry point for `registry.semrel.io`. It proxies:
 
 - `/schemas/` → API container (serves embedded JSON schemas)
+- `/auth/` → API container (GitHub OAuth entry point and callback)
 - `/api/` → API container (REST endpoints)
 - Everything else → SPA (`index.html`)
 
@@ -89,6 +90,10 @@ docker build -f admin/Dockerfile -t semrel-registry-admin .
 |---|---|---|
 | `API_URL` | `http://api:8080` | Origin URL of the Go API as reachable from the admin container. |
 
+> **The admin container listens on port 8080, not 80.** It runs as an
+> unprivileged user (uid 101), which cannot bind a privileged port. Publish it
+> with `-p 80:8080` (or point your ingress at 8080).
+
 The default works only when the admin and API containers share a network where the API has the DNS name `api`. For a separate deployment, set `API_URL` to a reachable internal or public API origin (without a path) and either attach both services to a shared network or provide working DNS and routing. For example, if the API service is named `registry`, set `API_URL=http://registry:8080`. A permanently incorrect hostname continues to return `502`; there is no fallback backend.
 
 The image uses the official nginx entrypoint's local resolver discovery and resolves the API hostname at request time. This lets nginx start before the API DNS record exists and recover after it appears. Only `API_URL` and the discovered resolver list are substituted into the template; nginx request variables remain intact. The image health check verifies that nginx can serve the SPA, not that the API backend is ready.
@@ -102,3 +107,40 @@ npm run dev
 ```
 
 The Astro site runs on `http://localhost:3000`, builds static files into `web/dist`, and mirrors the repository root `plugins.json` into `web/public/plugins.json` during install/build.
+
+## Production configuration
+
+The API refuses to start in `ENVIRONMENT=prod` unless it can authenticate
+callers properly. Each check exists because failing it silently downgrades
+authentication to something forgeable:
+
+| Requirement | Why |
+|---|---|
+| `JWT_SECRET` set, ≥ 32 characters | The development fallback is published in this repository; with it, anyone can mint an admin session. |
+| `WEBHOOK_SECRET` set, ≥ 32 characters | Without it `POST /api/v1/webhooks/release` accepts unauthenticated calls that can trigger an organisation-wide sync. |
+| `ADMIN_TOKEN` unused | A static, non-expiring, identity-less admin credential. It is ignored in production even if set. |
+| `ALLOWED_ORIGINS` without `*` | Credentialed endpoints would otherwise be readable cross-origin by any site. |
+
+Generate secrets with `openssl rand -base64 48`. See `.env.example` for the
+complete list, including session-cookie, trusted-proxy and rate-limit settings.
+
+### Sessions
+
+The OAuth callback sets an `HttpOnly`, `SameSite=Lax` session cookie rather than
+returning the token in the redirect URL. Browser clients therefore send no
+`Authorization` header; API clients (the `semrel` CLI, CI jobs) continue to use
+`Authorization: Bearer <token>`. Signing out revokes the session server-side, and
+deleting an account requires an interactive GitHub sign-in within the last five
+minutes.
+
+### Release webhook
+
+Plugin repositories authenticate release notifications by signing the request
+body:
+
+```
+X-Hub-Signature-256: sha256=<hmac-sha256 of the raw body, keyed with WEBHOOK_SECRET>
+```
+
+The older `X-Webhook-Secret: <secret>` header still works and is compared in
+constant time, but it transmits the secret on every call and is deprecated.
