@@ -846,6 +846,9 @@ func validateVersion(version models.PluginVersion) error {
 	if version.DownloadURL == "" {
 		return &appErrors.ValidationError{Field: "downloadUrl", Issue: "is required"}
 	}
+	if err := validateArtifactURL("downloadUrl", version.DownloadURL); err != nil {
+		return err
+	}
 	if len(version.Changelog) > maxChangelogLength {
 		return &appErrors.ValidationError{Field: "changelog", Issue: fmt.Sprintf("must be at most %d characters", maxChangelogLength)}
 	}
@@ -861,6 +864,9 @@ func validateVersion(version models.PluginVersion) error {
 		}
 		if len(value) > maxChecksumLength {
 			return &appErrors.ValidationError{Field: "checksums", Issue: fmt.Sprintf("checksum hash must be at most %d characters", maxChecksumLength)}
+		}
+		if err := validateChecksum(value); err != nil {
+			return err
 		}
 	}
 	return nil

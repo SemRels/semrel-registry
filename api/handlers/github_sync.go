@@ -2,7 +2,11 @@ package handlers
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -41,11 +45,18 @@ type ghAsset struct {
 // ── SyncHandler ───────────────────────────────────────────────────────────────
 
 type SyncHandler struct {
-	svc service.PluginManager
+	svc           service.PluginManager
+	webhookSecret string
 }
 
 func NewSyncHandler(s service.PluginManager) *SyncHandler {
-	return &SyncHandler{svc: s}
+	return &SyncHandler{svc: s, webhookSecret: strings.TrimSpace(os.Getenv("WEBHOOK_SECRET"))}
+}
+
+// NewSyncHandlerWithSecret builds a sync handler with an explicit webhook
+// secret rather than reading the environment.
+func NewSyncHandlerWithSecret(s service.PluginManager, secret string) *SyncHandler {
+	return &SyncHandler{svc: s, webhookSecret: strings.TrimSpace(secret)}
 }
 
 // POST /api/v1/admin/sync-versions
@@ -219,9 +230,14 @@ type syncResult struct {
 }
 
 func (h *SyncHandler) WebhookRelease(c *gin.Context) {
-	secret := os.Getenv("WEBHOOK_SECRET")
-	if secret != "" && c.GetHeader("X-Webhook-Secret") != secret {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid webhook secret"})
+	body, err := io.ReadAll(io.LimitReader(c.Request.Body, maxWebhookBodyBytes))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "could not read request body"})
+		return
+	}
+
+	if authErr := h.authenticateWebhook(c, body); authErr != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": authErr.Error()})
 		return
 	}
 
@@ -242,7 +258,7 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 			Repository string `json:"repository"`
 		} `json:"plugin"`
 	}
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := json.Unmarshal(body, &payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
 		return
 	}
@@ -529,7 +545,7 @@ func fetchOrgRepos(org string) ([]ghRepo, error) {
 		}
 		req.Header.Set("Accept", "application/vnd.github+json")
 
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := githubHTTPClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -821,7 +837,7 @@ func ghRequest(url string) ([]byte, int, error) {
 	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
 		req.Header.Set("Authorization", "Bearer "+tok)
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -985,3 +1001,49 @@ func pickDownloadURL(assets []ghAsset) string {
 }
 
 // deriveDownloadURLs is defined in download_urls.go (shared with the versions handler).
+
+// maxWebhookBodyBytes bounds how much of a webhook body the registry will read.
+// The payloads are a handful of fields; anything larger is either a mistake or
+// an attempt to make the server allocate on demand.
+const maxWebhookBodyBytes = 64 << 10
+
+// authenticateWebhook verifies that a release webhook really came from a holder
+// of the shared secret.
+//
+// The preferred proof is an HMAC over the exact request body
+// (X-Hub-Signature-256, the scheme GitHub itself uses): it authenticates the
+// payload, not just the caller, so a captured request cannot be edited in
+// flight. The older X-Webhook-Secret header — which sends the secret itself on
+// every call, where any intermediary can read and replay it — stays supported
+// for plugin repositories that have not migrated yet, but is compared in
+// constant time and logged as deprecated.
+//
+// With no secret configured the endpoint is open. Config.Validate refuses to
+// start a production server in that state; in development it only warns,
+// because a webhook that cannot be exercised locally never gets tested.
+func (h *SyncHandler) authenticateWebhook(c *gin.Context, body []byte) error {
+	if h.webhookSecret == "" {
+		log.Printf("warning: release webhook accepted without authentication — set WEBHOOK_SECRET")
+		return nil
+	}
+
+	if signature := strings.TrimSpace(c.GetHeader("X-Hub-Signature-256")); signature != "" {
+		mac := hmac.New(sha256.New, []byte(h.webhookSecret))
+		mac.Write(body)
+		expected := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+		if hmac.Equal([]byte(expected), []byte(signature)) {
+			return nil
+		}
+		return errors.New("invalid webhook signature")
+	}
+
+	if presented := strings.TrimSpace(c.GetHeader("X-Webhook-Secret")); presented != "" {
+		if subtle.ConstantTimeCompare([]byte(h.webhookSecret), []byte(presented)) == 1 {
+			log.Printf("warning: release webhook used the deprecated X-Webhook-Secret header; switch to X-Hub-Signature-256")
+			return nil
+		}
+		return errors.New("invalid webhook secret")
+	}
+
+	return errors.New("webhook authentication required: send X-Hub-Signature-256")
+}

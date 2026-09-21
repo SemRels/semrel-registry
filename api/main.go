@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/SemRels/semrel-registry/api/config"
 	"github.com/SemRels/semrel-registry/api/database"
@@ -17,9 +22,22 @@ import (
 
 func main() {
 	cfg := config.Load()
-	if cfg.Environment == "prod" {
+	if cfg.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// Fail fast on an insecure configuration rather than starting a server that
+	// looks healthy while accepting forged admin tokens or unauthenticated
+	// webhooks. In development the same problems are surfaced as warnings.
+	warnings, err := cfg.Validate()
+	for _, warning := range warnings {
+		log.Printf("config warning: %s", warning)
+	}
+	if err != nil {
+		log.Fatalf("invalid configuration: %v", err)
+	}
+
+	service.SetAllowedArtifactHosts(cfg.AllowedDownloadHosts)
 
 	var pluginRepo repository.PluginRepository
 	var postgresDB *database.Database
@@ -90,13 +108,52 @@ func main() {
 			PublicRPM:  cfg.RateLimitPublicRPM,
 			PluginsRPM: cfg.RateLimitPluginsRPM,
 			AuthRPM:    cfg.RateLimitAuthRPM,
+			WriteRPM:   cfg.RateLimitWriteRPM,
 			TrustProxy: cfg.RateLimitTrustProxy,
 		},
+		cfg: cfg,
 	})
 
-	log.Printf("server listening on %s", cfg.Port)
-	if err := router.Run(cfg.Port); err != nil {
-		log.Fatalf("server failed: %v", err)
+	// Only peers inside the configured proxy ranges may set X-Forwarded-For.
+	// Without this, any client can choose the IP every per-IP control keys on.
+	trustedProxies := cfg.TrustedProxies
+	if !cfg.RateLimitTrustProxy {
+		trustedProxies = nil
+	}
+	if proxyErr := router.SetTrustedProxies(trustedProxies); proxyErr != nil {
+		log.Fatalf("invalid TRUSTED_PROXIES: %v", proxyErr)
+	}
+
+	server := &http.Server{
+		Addr:    cfg.Port,
+		Handler: router,
+		// Bound every phase of a request: an idle or slow-loris connection must
+		// not be able to hold a server slot open indefinitely.
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+
+	go func() {
+		log.Printf("server listening on %s", cfg.Port)
+		if serveErr := server.ListenAndServe(); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+			log.Fatalf("server failed: %v", serveErr)
+		}
+	}()
+
+	// Drain in-flight requests on SIGTERM so a deploy does not cut off a write
+	// midway through.
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+	log.Printf("shutdown signal received; draining connections")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	if shutdownErr := server.Shutdown(shutdownCtx); shutdownErr != nil {
+		log.Printf("graceful shutdown failed: %v", shutdownErr)
 	}
 }
 
@@ -104,15 +161,14 @@ type routerDependencies struct {
 	metrics    service.MetricsRecorder
 	stats      service.RegistryStatsProvider
 	rateLimCfg middleware.RateLimitConfig
+	cfg        *config.Config
 }
 
 func newRouter(pluginService service.PluginManager, deps ...routerDependencies) *gin.Engine {
-	router := gin.New()
-	router.Use(handlers.ErrorHandler(), handlers.RequestLogger(), handlers.CORSMiddleware())
-
 	metricsRecorder := service.NewNoopMetricsRecorder()
 	statsProvider := service.NewNoopRegistryStatsProvider()
 	var rlCfg middleware.RateLimitConfig
+	cfg := &config.Config{}
 	if len(deps) > 0 {
 		if deps[0].metrics != nil {
 			metricsRecorder = deps[0].metrics
@@ -121,15 +177,37 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 			statsProvider = deps[0].stats
 		}
 		rlCfg = deps[0].rateLimCfg
+		if deps[0].cfg != nil {
+			cfg = deps[0].cfg
+		}
 	}
+
+	router := gin.New()
+	router.Use(
+		handlers.ErrorHandler(),
+		handlers.RequestLogger(),
+		handlers.SecurityHeaders(),
+		handlers.CORS(handlers.CORSOptions{AllowedOrigins: cfg.AllowedOrigins}),
+		handlers.LimitRequestBody(cfg.MaxRequestKiB),
+		middleware.VerifyOrigin(cfg.AllowedOrigins),
+	)
 
 	// Rate limiting middleware instances (no-ops when Enabled=false).
 	rlPublic := middleware.RateLimit(rlCfg, rlCfg.PublicRPM)
 	rlPluginsJSON := middleware.RateLimit(rlCfg, rlCfg.PluginsRPM)
 	rlAuth := middleware.RateLimit(rlCfg, rlCfg.AuthRPM)
+	rlWrite := middleware.RateLimit(rlCfg, rlCfg.WriteRPM)
 
 	// GitHub OAuth routes (public) — rate limited.
-	authHandler := handlers.NewAuthHandler(pluginService)
+	authHandler := handlers.NewAuthHandlerWithOptions(handlers.AuthOptions{
+		JWTSecret:    cfg.JWTSecret,
+		AdminToken:   cfg.AdminToken,
+		FrontendURL:  cfg.FrontendURL,
+		SessionTTL:   cfg.SessionTTL,
+		CookieName:   cfg.CookieName,
+		CookieDomain: cfg.CookieDomain,
+		CookieSecure: cfg.CookieSecure,
+	}, pluginService)
 	router.GET("/auth/github", rlAuth, authHandler.Redirect)
 	router.GET("/auth/github/callback", rlAuth, authHandler.Callback)
 	router.GET("/auth/callback", rlAuth, authHandler.Callback) // alias: GitHub App configured without /github
@@ -166,10 +244,12 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
 	api.GET("/stats", requireAdmin, adminHandler.GetStats)
 
-	// Plugin standards validation (public — no auth needed to check).
-	api.POST("/plugins/validate", handlers.ValidatePlugin)
+	// Plugin standards validation. Each call fans out into several GitHub API
+	// requests against the registry's shared token budget, so it is throttled
+	// harder than an ordinary read even though it needs no authentication.
+	api.POST("/plugins/validate", rlWrite, handlers.ValidatePlugin)
 
-	syncHandler := handlers.NewSyncHandler(pluginService)
+	syncHandler := handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret)
 
 	// Sitemap for SEO — lists all active plugin pages.
 	sitemapHandler := handlers.NewSitemapHandler(pluginService)
@@ -180,15 +260,16 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	router.GET("/plugins.json", rlPluginsJSON, syncHandler.PluginsJSON)
 
 	// Webhook endpoint: receives repository_dispatch from plugin release workflows.
-	// Protected by WEBHOOK_SECRET env var (optional but recommended in prod).
-	api.POST("/webhooks/release", syncHandler.WebhookRelease)
+	// Authenticated with WEBHOOK_SECRET (HMAC signature); required in production.
+	api.POST("/webhooks/release", rlWrite, syncHandler.WebhookRelease)
 
 	// Protected endpoints — any authenticated user.
 	requireAuth := middleware.RequireAuth(authHandler)
 
 	authRoutes := api.Group("")
-	authRoutes.Use(requireAuth)
+	authRoutes.Use(requireAuth, rlWrite)
 	authRoutes.GET("/auth/me", authHandler.Me)
+	authRoutes.POST("/auth/logout", authHandler.Logout)
 	authRoutes.DELETE("/auth/me", authHandler.DeleteAccount)
 	// Community plugin submission (creates with status=pending for review).
 	authRoutes.POST("/plugins/submit", pluginHandler.SubmitPlugin)

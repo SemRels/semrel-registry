@@ -24,3 +24,6 @@ web/dist/
 
 # Build output
 bin/
+
+# Go test binaries built in-tree (Windows app-control workaround)
+api/.gotmp/

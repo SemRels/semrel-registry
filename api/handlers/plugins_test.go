@@ -502,12 +502,64 @@ func TestCreateVersionSuccess(t *testing.T) {
 		return version, nil
 	}}
 
-	resp := performRequest(t, newPluginTestRouter(repo), http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{"version": "1.2.3", "downloadUrl": "https://example.test/plugin.tar.gz", "checksums": map[string]string{"linux-amd64:sha256": "abc123"}}, "secret")
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{
+		"version":     "1.2.3",
+		"downloadUrl": validDownloadURL,
+		"checksums":   map[string]string{"linux_amd64": validChecksum},
+	}, "secret")
 	assert.Equal(t, http.StatusCreated, resp.Code)
 
 	var payload versionResponse
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &payload))
 	assert.Equal(t, int64(7), payload.Data.ID)
+}
+
+// validDownloadURL and validChecksum are a well-formed artifact reference:
+// an HTTPS GitHub release asset and a hex SHA-256 digest.
+const (
+	validDownloadURL = "https://github.com/SemRels/provider-github/releases/download/v1.2.3/plugin-linux-amd64"
+	validChecksum    = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+)
+
+// TestCreateVersionRejectsUntrustedArtifactHost guards the download redirect:
+// the endpoint forwards callers to whatever URL a version carries, so a host
+// outside the allowlist would let a publisher serve arbitrary binaries from a
+// registry URL.
+func TestCreateVersionRejectsUntrustedArtifactHost(t *testing.T) {
+	setAdminToken(t, "secret")
+	repo := &mockPluginRepository{}
+
+	for name, downloadURL := range map[string]string{
+		"foreign host":       "https://evil.example/plugin-linux-amd64",
+		"plaintext http":     "http://github.com/SemRels/p/releases/download/v1/plugin-linux-amd64",
+		"suffix lookalike":   "https://github.com.evil.example/plugin-linux-amd64",
+		"embedded credentia": "https://user:pass@github.com/SemRels/p/releases/download/v1/plugin",
+	} {
+		t.Run(name, func(t *testing.T) {
+			resp := performRequest(t, newPluginTestRouter(repo), http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{
+				"version":     "1.2.3",
+				"downloadUrl": downloadURL,
+				"checksums":   map[string]string{"linux_amd64": validChecksum},
+			}, "secret")
+			assert.Equal(t, http.StatusBadRequest, resp.Code)
+			assertErrorCode(t, resp, "VALIDATION_ERROR")
+		})
+	}
+}
+
+// TestCreateVersionRejectsMalformedChecksum keeps clients from being handed a
+// digest that cannot verify anything.
+func TestCreateVersionRejectsMalformedChecksum(t *testing.T) {
+	setAdminToken(t, "secret")
+	repo := &mockPluginRepository{}
+
+	resp := performRequest(t, newPluginTestRouter(repo), http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{
+		"version":     "1.2.3",
+		"downloadUrl": validDownloadURL,
+		"checksums":   map[string]string{"linux_amd64": "abc123"},
+	}, "secret")
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+	assertErrorCode(t, resp, "VALIDATION_ERROR")
 }
 
 func TestCreateVersionValidationError(t *testing.T) {

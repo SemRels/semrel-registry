@@ -5,6 +5,8 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -14,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SemRels/semrel-registry/api/config"
 	"github.com/SemRels/semrel-registry/api/models"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
@@ -39,32 +42,98 @@ type Claims struct {
 	AvatarURL string `json:"avatar_url"`
 	Role      string `json:"role"`     // "admin" | "user"
 	IsAdmin   bool   `json:"is_admin"` // true when Role == "admin" (kept for backwards compat)
+	// AuthTime is the Unix timestamp of the last interactive GitHub sign-in.
+	// Destructive operations require it to be recent, so an attacker holding a
+	// stolen session cannot delete an account without passing GitHub first.
+	AuthTime int64 `json:"auth_time,omitempty"`
 	jwt.RegisteredClaims
+}
+
+// reauthWindow is how long an interactive GitHub sign-in counts as "fresh"
+// for destructive operations such as account deletion.
+const reauthWindow = 5 * time.Minute
+
+// FreshlyAuthenticated reports whether the interactive sign-in behind these
+// claims happened within the re-authentication window.
+func (c *Claims) FreshlyAuthenticated() bool {
+	if c == nil || c.AuthTime == 0 {
+		return false
+	}
+	return time.Since(time.Unix(c.AuthTime, 0)) <= reauthWindow
+}
+
+// AuthOptions carries the authentication settings resolved from configuration.
+// Zero values fall back to the corresponding environment variable, so tests and
+// local tooling can keep constructing an AuthHandler without wiring a Config.
+type AuthOptions struct {
+	ClientID     string
+	ClientSecret string
+	JWTSecret    string
+	AdminToken   string
+	AllowedOrgs  []string
+	AdminUsers   []string
+	FrontendURL  string
+	SessionTTL   time.Duration
+	CookieName   string
+	CookieDomain string
+	CookieSecure bool
 }
 
 // AuthHandler handles GitHub OAuth2 and JWT issuance.
 type AuthHandler struct {
 	oauthConfig *oauth2.Config
 	jwtSecret   []byte
+	adminToken  string   // static break-glass credential; empty disables it
 	allowedOrgs []string // empty = allow any GitHub user as read; admin = org member
 	adminUsers  []string // individual logins that always get admin
 	frontendURL string
-	plugins     service.PluginManager
+
+	sessionTTL   time.Duration
+	cookieName   string
+	cookieDomain string
+	cookieSecure bool
+	revoked      *revocationList
+
+	plugins service.PluginManager
 }
 
+// NewAuthHandler builds a handler from the process environment.
 func NewAuthHandler(pluginManagers ...service.PluginManager) *AuthHandler {
-	clientID := os.Getenv("GITHUB_CLIENT_ID")
-	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
-	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
-	frontendURL := os.Getenv("FRONTEND_URL")
-	allowedOrgs := splitEnv("ALLOWED_GITHUB_ORGS")
-	adminUsers := splitEnv("ADMIN_GITHUB_USERS")
+	return NewAuthHandlerWithOptions(AuthOptions{}, pluginManagers...)
+}
 
-	if frontendURL == "" {
-		frontendURL = "http://localhost:5173"
+// NewAuthHandlerWithOptions builds a handler from explicit options, falling
+// back to the environment for anything left unset.
+func NewAuthHandlerWithOptions(opts AuthOptions, pluginManagers ...service.PluginManager) *AuthHandler {
+	firstNonEmpty := func(value, envKey, fallback string) string {
+		if v := strings.TrimSpace(value); v != "" {
+			return v
+		}
+		if v := strings.TrimSpace(os.Getenv(envKey)); v != "" {
+			return v
+		}
+		return fallback
 	}
-	if jwtSecret == "" {
-		jwtSecret = "dev-jwt-secret-change-in-production"
+
+	clientID := firstNonEmpty(opts.ClientID, "GITHUB_CLIENT_ID", "")
+	clientSecret := firstNonEmpty(opts.ClientSecret, "GITHUB_CLIENT_SECRET", "")
+	jwtSecret := firstNonEmpty(opts.JWTSecret, "JWT_SECRET", config.DevJWTSecret)
+	adminToken := firstNonEmpty(opts.AdminToken, "ADMIN_TOKEN", "")
+	frontendURL := firstNonEmpty(opts.FrontendURL, "FRONTEND_URL", "http://localhost:5173")
+	cookieName := firstNonEmpty(opts.CookieName, "SESSION_COOKIE_NAME", "semrel_session")
+	cookieDomain := firstNonEmpty(opts.CookieDomain, "COOKIE_DOMAIN", "")
+
+	allowedOrgs := opts.AllowedOrgs
+	if len(allowedOrgs) == 0 {
+		allowedOrgs = splitEnv("ALLOWED_GITHUB_ORGS")
+	}
+	adminUsers := opts.AdminUsers
+	if len(adminUsers) == 0 {
+		adminUsers = splitEnv("ADMIN_GITHUB_USERS")
+	}
+	sessionTTL := opts.SessionTTL
+	if sessionTTL <= 0 {
+		sessionTTL = 24 * time.Hour
 	}
 
 	cfg := &oauth2.Config{
@@ -80,27 +149,64 @@ func NewAuthHandler(pluginManagers ...service.PluginManager) *AuthHandler {
 	}
 
 	return &AuthHandler{
-		oauthConfig: cfg,
-		jwtSecret:   []byte(jwtSecret),
-		allowedOrgs: allowedOrgs,
-		adminUsers:  adminUsers,
-		frontendURL: frontendURL,
-		plugins:     pluginManager,
+		oauthConfig:  cfg,
+		jwtSecret:    []byte(jwtSecret),
+		adminToken:   adminToken,
+		allowedOrgs:  allowedOrgs,
+		adminUsers:   adminUsers,
+		frontendURL:  frontendURL,
+		sessionTTL:   sessionTTL,
+		cookieName:   cookieName,
+		cookieDomain: cookieDomain,
+		cookieSecure: opts.CookieSecure,
+		revoked:      newRevocationList(),
+		plugins:      pluginManager,
 	}
 }
 
+// IsStaticAdminToken reports whether tok matches the configured break-glass
+// ADMIN_TOKEN. The comparison is constant-time so that a caller cannot recover
+// the token byte by byte from response timings, and an unset token never
+// matches — not even an empty Authorization header.
+func (h *AuthHandler) IsStaticAdminToken(tok string) bool {
+	if h.adminToken == "" || tok == "" {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(h.adminToken), []byte(tok)) == 1
+}
+
 // GET /auth/github — redirect to GitHub OAuth consent page.
+// An optional ?next= carries a path inside the admin app to return to; it is
+// signed into the OAuth state and re-validated on the way back, so it cannot
+// be used to bounce a signed-in user to an attacker's site.
 func (h *AuthHandler) Redirect(c *gin.Context) {
-	state := h.signedState()
+	state := h.signedState(safeReturnPath(c.Query("next")))
 	url := h.oauthConfig.AuthCodeURL(state, oauth2.AccessTypeOnline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+// safeReturnPath accepts only same-site absolute paths. Anything else — an
+// absolute URL, a scheme-relative "//evil.example" or a traversal attempt —
+// collapses to the empty string, which means "use the configured frontend".
+func safeReturnPath(next string) string {
+	next = strings.TrimSpace(next)
+	if next == "" || !strings.HasPrefix(next, "/") || strings.HasPrefix(next, "//") {
+		return ""
+	}
+	if strings.Contains(next, "\\") || strings.Contains(next, "..") {
+		return ""
+	}
+	if len(next) > 512 {
+		return ""
+	}
+	return next
 }
 
 // GET /auth/github/callback — exchange code for token, issue JWT, redirect to frontend.
 // Also registered as GET /oauth/callback to match common GitHub App callback URL patterns.
 func (h *AuthHandler) Callback(c *gin.Context) {
-	state := c.Query("state")
-	if !h.verifySignedState(state) {
+	next, stateOK := h.verifySignedState(c.Query("state"))
+	if !stateOK {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid OAuth state"})
 		return
 	}
@@ -131,9 +237,36 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	// Redirect to admin frontend with token in query param.
-	// The frontend will store it in localStorage and strip it from the URL.
-	c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s?token=%s", h.frontendURL, jwtToken))
+	// The session travels in an HttpOnly cookie, never in the redirect URL:
+	// a token in a query string is copied into browser history, proxy logs and
+	// outgoing Referer headers, where it stays readable long after sign-out.
+	h.setSessionCookie(c, jwtToken)
+	c.Redirect(http.StatusTemporaryRedirect, h.returnTarget(next))
+}
+
+// returnTarget resolves the post-login destination. next is already known to be
+// a same-site path (or empty), so joining it onto the configured frontend
+// origin cannot leave that origin.
+func (h *AuthHandler) returnTarget(next string) string {
+	if next == "" {
+		return h.frontendURL
+	}
+	return strings.TrimSuffix(h.frontendURL, "/") + next
+}
+
+// POST /api/v1/auth/logout — revoke the current session and clear the cookie.
+func (h *AuthHandler) Logout(c *gin.Context) {
+	if claims, ok := c.Get("claims"); ok {
+		if typed, isClaims := claims.(*Claims); isClaims && typed.ID != "" {
+			expiry := time.Now().Add(h.sessionTTL)
+			if typed.ExpiresAt != nil {
+				expiry = typed.ExpiresAt.Time
+			}
+			h.revoked.Revoke(typed.ID, expiry)
+		}
+	}
+	h.clearSessionCookie(c)
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"status": "signed out"}})
 }
 
 // GET /auth/me — return the current user from JWT (or dev-token fallback).
@@ -175,9 +308,17 @@ func (h *AuthHandler) DeleteAccount(c *gin.Context) {
 
 	login, _ := c.Get("login")
 	loginStr, _ := login.(string)
-	bearer := strings.TrimSpace(strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer "))
-	if err := h.validateReauthToken(loginStr, bearer, request.ReauthToken); err != nil {
-		Unauthorized(c, "Reauthentication failed", gin.H{"issue": err.Error()})
+	if err := h.requireRecentAuth(c, loginStr, request.ReauthToken); err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": gin.H{
+				"code":    "REAUTH_REQUIRED",
+				"message": "Reauthentication required",
+				"details": gin.H{
+					"issue":     err.Error(),
+					"signInURL": "/auth/github?next=/admin/account",
+				},
+			},
+		})
 		return
 	}
 
@@ -187,7 +328,54 @@ func (h *AuthHandler) DeleteAccount(c *gin.Context) {
 		return
 	}
 
+	// The account is gone; the session that deleted it must not outlive it.
+	if claims, ok := c.Get("claims"); ok {
+		if typed, isClaims := claims.(*Claims); isClaims && typed.ExpiresAt != nil {
+			h.revoked.Revoke(typed.ID, typed.ExpiresAt.Time)
+		}
+	}
+	h.clearSessionCookie(c)
+
 	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
+// requireRecentAuth enforces step-up authentication before a destructive,
+// irreversible account action.
+//
+// The browser path is a fresh GitHub sign-in: the session cookie is HttpOnly,
+// so there is no token for the user to copy into a form even if we asked. API
+// clients that authenticate with a bearer token instead may present a matching
+// token explicitly, which proves possession the same way.
+func (h *AuthHandler) requireRecentAuth(c *gin.Context, login, reauthToken string) error {
+	if claimsValue, ok := c.Get("claims"); ok {
+		if claims, isClaims := claimsValue.(*Claims); isClaims {
+			if claims.FreshlyAuthenticated() {
+				return nil
+			}
+			if reauthToken == "" {
+				return fmt.Errorf("sign in with GitHub again to confirm this action")
+			}
+		}
+	}
+
+	reauthToken = strings.TrimSpace(reauthToken)
+	if reauthToken == "" {
+		return fmt.Errorf("sign in with GitHub again to confirm this action")
+	}
+	if h.IsStaticAdminToken(reauthToken) {
+		return nil
+	}
+	claims, err := h.ValidateJWT(reauthToken)
+	if err != nil {
+		return fmt.Errorf("reauthentication token is not valid")
+	}
+	if !strings.EqualFold(claims.Login, login) {
+		return fmt.Errorf("reauthenticated user does not match current account")
+	}
+	if !claims.FreshlyAuthenticated() {
+		return fmt.Errorf("reauthentication token is older than %s", reauthWindow)
+	}
+	return nil
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -197,7 +385,7 @@ func (h *AuthHandler) fetchGitHubUser(accessToken string) (*GitHubUser, error) {
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +432,7 @@ func (h *AuthHandler) isOrgOwnerOrMaintainer(org, login, accessToken string) boo
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
 		return false
 	}
@@ -269,30 +457,46 @@ func (h *AuthHandler) isOrgOwnerOrMaintainer(org, login, accessToken string) boo
 }
 
 func (h *AuthHandler) issueJWT(user *GitHubUser, role string) (string, error) {
+	now := time.Now()
 	claims := Claims{
 		Login:     user.Login,
 		Name:      user.Name,
 		AvatarURL: user.AvatarURL,
 		Role:      role,
 		IsAdmin:   role == "admin",
+		AuthTime:  now.Unix(),
 		RegisteredClaims: jwt.RegisteredClaims{
+			// A unique ID per session is what makes sign-out effective: without
+			// it there is nothing to put on the revocation list.
+			ID:        newTokenID(),
 			Subject:   user.Login,
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(h.sessionTTL)),
 		},
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return t.SignedString(h.jwtSecret)
 }
 
+func newTokenID() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// A collision-prone ID is still better than an unrevocable session.
+		return fmt.Sprintf("t%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(b)
+}
+
 // ValidateJWT parses and validates a JWT, returning claims on success.
+// It rejects tokens without an expiry and tokens whose session was signed out.
 func (h *AuthHandler) ValidateJWT(tokenStr string) (*Claims, error) {
 	t, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 		return h.jwtSecret, nil
-	})
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithExpirationRequired())
 	if err != nil {
 		return nil, err
 	}
@@ -300,32 +504,45 @@ func (h *AuthHandler) ValidateJWT(tokenStr string) (*Claims, error) {
 	if !ok || !t.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
+	if h.revoked.IsRevoked(claims.ID) {
+		return nil, fmt.Errorf("session has been signed out")
+	}
 	return claims, nil
 }
 
-// signedState generates an HMAC-signed OAuth state parameter.
-// Format: <16-byte-random-hex>.<hmac-sha256-hex>
+// signedState generates an HMAC-signed OAuth state parameter carrying a random
+// nonce and the post-login return path.
+// Format: base64url(<16-byte-random-hex>:<return-path>).<hmac-sha256-hex>
 // This is stateless — no cookie or server-side session needed.
-func (h *AuthHandler) signedState() string {
+func (h *AuthHandler) signedState(next string) string {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b)
-	nonce := hex.EncodeToString(b)
-	mac := hmac.New(sha256.New, h.jwtSecret)
-	mac.Write([]byte(nonce))
-	sig := hex.EncodeToString(mac.Sum(nil))
-	return nonce + "." + sig
+	payload := base64.RawURLEncoding.EncodeToString([]byte(hex.EncodeToString(b) + ":" + next))
+	return payload + "." + h.stateSignature(payload)
 }
 
-// verifySignedState validates an HMAC-signed state parameter.
-func (h *AuthHandler) verifySignedState(state string) bool {
-	parts := strings.SplitN(state, ".", 2)
-	if len(parts) != 2 {
-		return false
-	}
+func (h *AuthHandler) stateSignature(payload string) string {
 	mac := hmac.New(sha256.New, h.jwtSecret)
-	mac.Write([]byte(parts[0]))
-	expected := hex.EncodeToString(mac.Sum(nil))
-	return hmac.Equal([]byte(expected), []byte(parts[1]))
+	mac.Write([]byte(payload))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+// verifySignedState validates an HMAC-signed state parameter and returns the
+// return path it carries.
+func (h *AuthHandler) verifySignedState(state string) (next string, ok bool) {
+	payload, sig, found := strings.Cut(state, ".")
+	if !found || payload == "" {
+		return "", false
+	}
+	if !hmac.Equal([]byte(h.stateSignature(payload)), []byte(sig)) {
+		return "", false
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(payload)
+	if err != nil {
+		return "", false
+	}
+	_, next, _ = strings.Cut(string(decoded), ":")
+	return safeReturnPath(next), true
 }
 
 func splitEnv(key string) []string {
@@ -342,26 +559,4 @@ func splitEnv(key string) []string {
 		}
 	}
 	return out
-}
-
-func (h *AuthHandler) validateReauthToken(login, currentBearer, reauthToken string) error {
-	reauthToken = strings.TrimSpace(reauthToken)
-	if reauthToken == "" {
-		return fmt.Errorf("reauth token is required")
-	}
-	if currentBearer == "" {
-		return fmt.Errorf("current bearer token is required")
-	}
-
-	if claims, err := h.ValidateJWT(reauthToken); err == nil {
-		if !strings.EqualFold(claims.Login, login) {
-			return fmt.Errorf("reauthenticated user does not match current account")
-		}
-		return nil
-	}
-
-	if !hmac.Equal([]byte(currentBearer), []byte(reauthToken)) {
-		return fmt.Errorf("reauth token does not match current session")
-	}
-	return nil
 }
