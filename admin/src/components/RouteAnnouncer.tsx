@@ -30,8 +30,14 @@ function titleFor(pathname: string): string {
  * Keeps assistive technology informed about client-side navigation.
  *
  * Updates the document title and announces the new page through a polite live
- * region. Focus is not moved on the first render — that would steal it from
- * whatever the browser focused on load — only on subsequent navigations.
+ * region, skipping the announcement on first render so the initial page load
+ * is not narrated twice.
+ *
+ * It deliberately does not move focus. Doing so on every navigation interrupts
+ * whatever the user was doing, and the skip link plus the main landmark
+ * already give a one-keystroke route into the content. If it turns out that
+ * users are losing their place, focusing `#main-content` here is the change to
+ * make.
  */
 export default function RouteAnnouncer() {
   const location = useLocation();
