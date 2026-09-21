@@ -132,29 +132,30 @@ func loadDotEnv() {
 		return
 	}
 
-	// Collect .env files from root → CWD (root loads first = lowest precedence).
-	var files []string
-	for _, rel := range []string{"../.env", "../../.env"} {
-		path := filepath.Join(cwd, rel)
-		if _, err := os.Stat(path); err == nil {
-			files = append([]string{path}, files...) // prepend (root first)
-		}
-	}
-	// CWD .env overrides root (appended last = highest precedence for Overload).
-	if local := filepath.Join(cwd, ".env"); func() bool {
-		_, err := os.Stat(local)
-		return err == nil
-	}() {
-		files = append(files, local)
+	// Highest precedence first: godotenv.Load keeps the first value it sees for
+	// a key and never replaces one already in the environment.
+	//
+	// This used to call Overload, which meant a .env file beat the real process
+	// environment — so a stale file baked into an image or left in a working
+	// copy silently overrode the variables the deployment actually set, and
+	// setting PORT or DATABASE_URL on the command line did nothing.
+	candidates := []string{
+		filepath.Join(cwd, ".env"),       // closest to the process
+		filepath.Join(cwd, "../.env"),    // project root when run from api/
+		filepath.Join(cwd, "../../.env"), // one level further out
 	}
 
+	var files []string
+	for _, path := range candidates {
+		if _, err := os.Stat(path); err == nil {
+			files = append(files, path)
+		}
+	}
 	if len(files) == 0 {
 		return
 	}
-	// Load in order: root first (sets defaults), local last (overrides).
-	// godotenv.Load does NOT override already-set env vars; use Overload so
-	// later files in the list take precedence over earlier ones.
-	_ = godotenv.Overload(files...)
+
+	_ = godotenv.Load(files...)
 }
 
 // defaultTrustedProxies covers loopback plus the RFC1918 ranges Docker and

@@ -233,6 +233,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	api.GET("/plugins", rlPublic, optionalAuth, pluginHandler.ListPlugins)
 	api.GET("/plugins/:id", rlPublic, optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", rlPublic, pluginHandler.ListPluginVersions)
+	// Proxied from GitHub and cached: the browser has no API token, and a direct
+	// fetch would disclose every visitor's address to GitHub.
+	api.GET("/plugins/:id/readme", rlWrite, pluginHandler.PluginReadme)
 	api.GET("/plugins/:id/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersion)
 	api.POST("/plugins/:id/versions/:version/downloads", rlPublic, pluginHandler.TrackDownload)
 	// Namespaced plugin lookup: GET /api/v1/plugins/@semrel/provider-github
@@ -259,6 +262,10 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// without polling and diffing the catalogue themselves.
 	feedHandler := handlers.NewFeedHandler(pluginService)
 	router.GET("/feed.atom", rlPublic, feedHandler.Releases)
+
+	// Machine-readable API description, plus a rendered reference.
+	router.GET("/openapi.json", handlers.OpenAPISpec())
+	router.GET("/docs", handlers.APIDocs())
 
 	// plugins.json — semrel registry metadata endpoint consumed by `semrel` CLI.
 	// SEMREL_REGISTRY_URL=http://localhost:8080 and semrel fetches /plugins.json.

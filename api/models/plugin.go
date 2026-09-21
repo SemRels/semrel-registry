@@ -13,19 +13,22 @@ const (
 )
 
 type Plugin struct {
-	ID               int64           `json:"id"`
-	Namespace        string          `json:"namespace,omitempty"`
-	Name             string          `json:"name"`
-	Aliases          []string        `json:"aliases,omitempty"`
-	Description      string          `json:"description"`
-	Author           string          `json:"author"`
-	Category         string          `json:"category"`
-	Repository       string          `json:"repository"`
-	License          string          `json:"license"`
-	Status           string          `json:"status"`
-	Tags             []string        `json:"tags,omitempty"`
-	Versions         []PluginVersion `json:"versions,omitempty"`
-	LatestVersion    string          `json:"latestVersion,omitempty"`
+	ID            int64           `json:"id"`
+	Namespace     string          `json:"namespace,omitempty"`
+	Name          string          `json:"name"`
+	Aliases       []string        `json:"aliases,omitempty"`
+	Description   string          `json:"description"`
+	Author        string          `json:"author"`
+	Category      string          `json:"category"`
+	Repository    string          `json:"repository"`
+	License       string          `json:"license"`
+	Status        string          `json:"status"`
+	Tags          []string        `json:"tags,omitempty"`
+	Versions      []PluginVersion `json:"versions,omitempty"`
+	LatestVersion string          `json:"latestVersion,omitempty"`
+	// LatestSemrelCore is the core compatibility range of LatestVersion, so a
+	// listing can show compatibility without fetching every plugin's versions.
+	LatestSemrelCore string          `json:"latestSemrelCore,omitempty"`
 	Views            int64           `json:"views"`
 	Downloads        int64           `json:"downloads"`
 	ValidationChecks json.RawMessage `json:"validationChecks,omitempty"`

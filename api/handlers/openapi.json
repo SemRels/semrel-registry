@@ -1,0 +1,2297 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "semrel registry API",
+    "version": "1.0.0",
+    "description": "The semrel plugin registry. The public catalogue is readable without authentication; publishing and review require a GitHub session.\n\nBrowsers authenticate with an HttpOnly `semrel_session` cookie set by the OAuth callback. API clients (the semrel CLI, CI jobs) send `Authorization: Bearer <token>`.",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://registry.semrel.io",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "catalogue",
+      "description": "Public, anonymous reads."
+    },
+    {
+      "name": "publishing",
+      "description": "Managing your own plugins and versions."
+    },
+    {
+      "name": "review",
+      "description": "Admin-only submission review and synchronisation."
+    },
+    {
+      "name": "auth",
+      "description": "GitHub OAuth and session management."
+    },
+    {
+      "name": "schemas",
+      "description": "Configuration JSON Schemas."
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Service discovery document",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Links to the catalogue, health check and docs."
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Liveness probe",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "The service is up."
+          }
+        }
+      }
+    },
+    "/plugins.json": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "The full plugin catalogue",
+        "description": "The index the semrel CLI consumes. Carries a strong ETag; send If-None-Match to get a 304 instead of the whole document.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A previously returned ETag."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The catalogue.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong validator over the response body."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogue"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The client's cached copy is current."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/feed.atom": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Atom feed of recent releases",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "The 50 most recent plugin releases.",
+            "content": {
+              "application/atom+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sitemap.xml": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Sitemap of active plugin pages",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "XML sitemap."
+          }
+        }
+      }
+    },
+    "/api/v1/plugins": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List plugins",
+        "description": "Anonymous callers see active plugins. An authenticated non-admin additionally sees their own plugins in every state; an admin may filter by status.",
+        "security": [
+          {},
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": "Full-text and partial-identifier search. Results are ranked by relevance unless an explicit sort is given."
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Status"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "category",
+                "created_at",
+                "updated_at",
+                "downloads",
+                "views"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of plugins.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Create a plugin",
+        "description": "Non-admin callers have the author forced to their own GitHub login.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Get one plugin",
+        "security": [
+          {},
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The plugin.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Update a plugin",
+        "description": "Non-admins may only update plugins they author, and may not reassign the author.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Soft-delete a plugin",
+        "description": "Requires a typed confirmation matching the plugin reference.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginDeletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/versions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List versions of a plugin",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Versions, newest first. Yanked versions are included and flagged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionList"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Publish a version",
+        "description": "downloadUrl must be an HTTPS URL on an allowed artifact host, and every checksum a hex SHA-256 digest.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Published.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/versions/{version}/download": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "$ref": "#/components/parameters/Version"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Redirect to the release artifact",
+        "security": [],
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "linux_amd64"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to the artifact on an allowed host.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/versions/{version}/downloads": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "$ref": "#/components/parameters/Version"
+        }
+      ],
+      "post": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Record a download",
+        "description": "For clients that fetch the artifact directly. Counted once per client per version per hour.",
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Recorded, or deduplicated."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/versions/{versionId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "$ref": "#/components/parameters/VersionID"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Delete a version",
+        "description": "Breaks installs that pin this version. Prefer yanking.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionDeletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/versions/{versionId}/yank": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "$ref": "#/components/parameters/VersionID"
+        }
+      ],
+      "put": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Yank a version",
+        "description": "Retracts the release without breaking installs that pin it: it stays resolvable but is never chosen as latest or as an update target. The reason is shown to consumers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YankRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Yanked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Lift a yank",
+        "responses": {
+          "200": {
+            "description": "The version is installable again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/@{namespace}/{name}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Namespace"
+        },
+        {
+          "$ref": "#/components/parameters/Name"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Get a namespaced plugin",
+        "security": [
+          {},
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The plugin.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/@{namespace}/{name}/versions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Namespace"
+        },
+        {
+          "$ref": "#/components/parameters/Name"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "List versions of a namespaced plugin",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Versions, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionList"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/@{namespace}/{name}/versions/{version}/download": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Namespace"
+        },
+        {
+          "$ref": "#/components/parameters/Name"
+        },
+        {
+          "$ref": "#/components/parameters/Version"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Redirect to the release artifact",
+        "security": [],
+        "responses": {
+          "307": {
+            "description": "Redirect to the artifact."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/@{namespace}/{name}/versions/{version}/downloads": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Namespace"
+        },
+        {
+          "$ref": "#/components/parameters/Name"
+        },
+        {
+          "$ref": "#/components/parameters/Version"
+        }
+      ],
+      "post": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Record a download",
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Recorded, or deduplicated."
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/submit": {
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Submit a community plugin for review",
+        "description": "Creates the plugin with status=pending. The author is forced to the submitter's GitHub login.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Submitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/validate": {
+      "post": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Check a repository against the plugin standards",
+        "description": "Unauthenticated but throttled: each call fans out into several GitHub API requests.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All checks passed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Some checks failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResult"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/release": {
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Release notification from a plugin repository",
+        "description": "Authenticated with an HMAC over the raw request body: `X-Hub-Signature-256: sha256=<hex>`, keyed with WEBHOOK_SECRET. The legacy `X-Webhook-Secret` header is still accepted but deprecated.",
+        "security": [
+          {
+            "webhookSignature": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The release was imported or already known."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Missing or invalid signature."
+          },
+          "404": {
+            "description": "The repository is not a registered plugin."
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "The signed-in user",
+        "responses": {
+          "200": {
+            "description": "The current identity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete the signed-in account",
+        "description": "Requires an interactive GitHub sign-in within the last five minutes. Responds 401 with code REAUTH_REQUIRED when the session is older.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDeletionEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Re-authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "End the session",
+        "description": "Revokes the session server-side and clears the cookie, so the token cannot be replayed until it expires.",
+        "responses": {
+          "200": {
+            "description": "Signed out."
+          }
+        }
+      }
+    },
+    "/auth/github": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Start GitHub OAuth",
+        "security": [],
+        "parameters": [
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A same-site path to return to. Absolute URLs are rejected."
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to GitHub."
+          }
+        }
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "OAuth callback",
+        "description": "Sets the HttpOnly session cookie and redirects to the admin app. The token never appears in the URL.",
+        "security": [],
+        "responses": {
+          "307": {
+            "description": "Redirect to the frontend, with Set-Cookie."
+          },
+          "400": {
+            "description": "Invalid OAuth state."
+          }
+        }
+      }
+    },
+    "/auth/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "OAuth callback (alias)",
+        "description": "For GitHub Apps configured without the /github path segment.",
+        "security": [],
+        "responses": {
+          "307": {
+            "description": "Redirect to the frontend."
+          }
+        }
+      }
+    },
+    "/auth/config": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Public auth configuration",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Whether GitHub OAuth is configured, and where to start it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Registry statistics",
+        "responses": {
+          "200": {
+            "description": "Totals, per-category counts and top plugins."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/status": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Admin health and configuration summary",
+        "responses": {
+          "200": {
+            "description": "Status."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plugins/{id}/approve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "put": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Approve a submission",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Approved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plugins/{id}/reject": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "put": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Reject a submission",
+        "description": "The reason is required and shown to the author.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plugins/{id}/revalidate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Re-run the standards checks for one plugin",
+        "responses": {
+          "200": {
+            "description": "Validation result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plugins/revalidate-all": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Re-run the standards checks for every plugin",
+        "responses": {
+          "200": {
+            "description": "Per-plugin results and a summary."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sync": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Synchronise the catalogue from the configured source",
+        "responses": {
+          "200": {
+            "description": "Sync result."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sync-file": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Synchronise the catalogue from the bundled plugins.json",
+        "responses": {
+          "200": {
+            "description": "Sync result."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sync-versions": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Import versions from GitHub releases",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plugin": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-plugin import results."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "description": "GitHub API rate limit exceeded."
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sync-github-org": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Discover and import plugins from the configured GitHub organisation",
+        "responses": {
+          "200": {
+            "description": "Per-repository results."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/schemas/core/{version}": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Core configuration schema",
+        "security": [],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "v1.json",
+                "latest.json"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON Schema.",
+            "content": {
+              "application/schema+json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/schemas/plugins/{name}/{version}": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Plugin configuration schema",
+        "security": [],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON Schema."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/schemas/plugins/@{namespace}/{name}/{version}": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Namespaced plugin configuration schema",
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/Name"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON Schema."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/{id}/readme": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "The plugin repository's README",
+        "description": "Relayed from GitHub and cached for 30 minutes. The body is author-supplied markdown and must be sanitised before rendering.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "The README source.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadmeEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No GitHub repository on record, or no README.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "semrel_session",
+        "description": "HttpOnly, SameSite=Lax session cookie set by the OAuth callback. Browser clients use this; mutating requests are additionally checked against the Origin header."
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "For non-browser clients. The static ADMIN_TOKEN is accepted outside production only."
+      },
+      "webhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Hub-Signature-256",
+        "description": "HMAC-SHA256 over the raw request body, keyed with WEBHOOK_SECRET, formatted as sha256=<hex>."
+      }
+    },
+    "parameters": {
+      "PluginRef": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Numeric id, plugin name, or alias.",
+        "examples": {
+          "byName": {
+            "value": "provider-github"
+          },
+          "byId": {
+            "value": "42"
+          }
+        }
+      },
+      "Namespace": {
+        "name": "namespace",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$"
+        },
+        "description": "Namespace without the leading @, which is part of the path.",
+        "examples": {
+          "semrel": {
+            "value": "semrel"
+          }
+        }
+      },
+      "Name": {
+        "name": "name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Version": {
+        "name": "version",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The release version string, without a leading v.",
+        "examples": {
+          "stable": {
+            "value": "1.2.3"
+          }
+        }
+      },
+      "VersionID": {
+        "name": "versionId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "The request was rejected by validation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication is required, or the session has expired.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Authenticated, but not permitted. Publishers may only touch their own plugins.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No such plugin or version.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests. X-RateLimit-Limit and X-RateLimit-Remaining describe the budget.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "string"
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Category": {
+        "type": "string",
+        "enum": [
+          "analyzer",
+          "condition",
+          "generator",
+          "hook",
+          "provider",
+          "updater",
+          "packager",
+          "publisher"
+        ]
+      },
+      "Status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "pending",
+          "rejected"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "examples": [
+                  "VALIDATION_ERROR",
+                  "REAUTH_REQUIRED",
+                  "ORIGIN_NOT_ALLOWED"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "Plugin": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "namespace": {
+            "type": "string",
+            "examples": [
+              "@semrel"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "repository": {
+            "type": "string",
+            "format": "uri"
+          },
+          "license": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latestVersion": {
+            "type": "string",
+            "description": "The newest stable, non-yanked version."
+          },
+          "views": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "downloads": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "description": "Why a submission was rejected. Shown to the author."
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedBy": {
+            "type": "string"
+          },
+          "validatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latestSemrelCore": {
+            "type": "string",
+            "description": "The semrel core compatibility range of latestVersion."
+          }
+        }
+      },
+      "PluginInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "category"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "repository": {
+            "type": "string",
+            "format": "uri"
+          },
+          "license": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PluginPatch": {
+        "type": "object",
+        "description": "Only the supplied fields are changed.",
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "repository": {
+            "type": "string",
+            "format": "uri"
+          },
+          "license": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PluginVersion": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "downloadUrl"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pluginId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "string"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changelog": {
+            "type": "string"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "checksums": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^(sha256:)?[a-fA-F0-9]{64}$"
+            },
+            "description": "Hex SHA-256 digests keyed by GOOS_GOARCH."
+          },
+          "semrelCore": {
+            "type": "string",
+            "description": "Compatible semrel core range."
+          },
+          "prerelease": {
+            "type": "boolean"
+          },
+          "yankedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "yankedBy": {
+            "type": "string"
+          },
+          "yankedReason": {
+            "type": "string"
+          },
+          "views": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "downloads": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VersionInput": {
+        "type": "object",
+        "required": [
+          "version",
+          "downloadUrl",
+          "checksums"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changelog": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "HTTPS, on an allowed artifact host."
+          },
+          "checksums": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "semrelCore": {
+            "type": "string"
+          },
+          "prerelease": {
+            "type": "boolean"
+          }
+        }
+      },
+      "YankRequest": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "description": "Shown to everyone who has this version pinned."
+          }
+        }
+      },
+      "ReviewDecision": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      },
+      "PluginDeletionRequest": {
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "description": "Must equal the plugin reference."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "deleteVersions": {
+            "type": "boolean"
+          }
+        }
+      },
+      "VersionDeletionRequest": {
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "description": "Must equal <plugin ref>@<version>."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      },
+      "AccountDeletionRequest": {
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "description": "Must equal DELETE <login>."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "deleteOwnedPlugins": {
+            "type": "boolean"
+          },
+          "reauthToken": {
+            "type": "string",
+            "description": "Bearer-authenticated API clients only; browsers re-authenticate with GitHub instead."
+          }
+        }
+      },
+      "AccountDeletionEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "pluginsDeleted": {
+                "type": "integer"
+              },
+              "versionsDeleted": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "ValidateRequest": {
+        "type": "object",
+        "properties": {
+          "repository": {
+            "type": "string",
+            "format": "uri"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationResult": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "plugin": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReleaseWebhook": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repository": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "client_payload": {
+            "type": "object",
+            "properties": {
+              "source_owner": {
+                "type": "string"
+              },
+              "source_repo": {
+                "type": "string"
+              },
+              "tag": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "AuthConfig": {
+        "type": "object",
+        "properties": {
+          "githubOAuthEnabled": {
+            "type": "boolean"
+          },
+          "loginURL": {
+            "type": "string"
+          }
+        }
+      },
+      "SessionEnvelope": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "avatar_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "user"
+                ]
+              },
+              "is_admin": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer"
+          }
+        }
+      },
+      "PluginList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Plugin"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "PluginEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Plugin"
+          }
+        }
+      },
+      "VersionList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginVersion"
+            }
+          }
+        }
+      },
+      "VersionEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PluginVersion"
+          }
+        }
+      },
+      "Catalogue": {
+        "type": "object",
+        "description": "The registry index. Its authoritative schema is schemas/plugin-metadata.json.",
+        "properties": {
+          "schemaVersion": {
+            "type": "integer"
+          },
+          "plugins": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "ReadmeEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "markdown": {
+                "type": "string",
+                "description": "Untrusted markdown. Sanitise before rendering as HTML."
+              },
+              "source": {
+                "type": "string",
+                "format": "uri",
+                "description": "Canonical URL of the README on GitHub."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "sessionCookie": []
+    },
+    {
+      "bearerAuth": []
+    }
+  ]
+}

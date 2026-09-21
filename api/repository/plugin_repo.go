@@ -61,24 +61,38 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
        -- yanked_at IS NULL: a retracted release must never be advertised as
        -- the latest version, which is the whole point of yanking it.
-       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
+       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version,
+       -- The core-version range of that same release, so a listing can tell
+       -- the reader whether a plugin works with the semrel they are running
+       -- without a round trip per plugin.
+       COALESCE((SELECT semrel_core FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_semrel_core
 FROM plugins
 WHERE deleted_at IS NULL`)
 
 	args := make([]interface{}, 0)
 	hasSort := false
+	searchTerm := ""
 	for _, filter := range filters {
 		if filter == nil {
 			continue
 		}
-		if _, ok := filter.(SortFilter); ok {
+		switch typed := filter.(type) {
+		case SortFilter:
 			hasSort = true
+		case SearchFilter:
+			searchTerm = typed.Query
 		}
 		filter.ApplyTo(&query, &args)
 	}
 
 	if !hasSort {
-		query.WriteString(" ORDER BY name ASC")
+		// An unsorted search is ordered by relevance; an unsorted listing by
+		// name. Ranking a search alphabetically buries the best match.
+		if order := RelevanceOrder(searchTerm, &args); order != "" {
+			query.WriteString(order)
+		} else {
+			query.WriteString(" ORDER BY name ASC")
+		}
 	}
 	if limit > 0 {
 		args = append(args, limit)
@@ -685,6 +699,7 @@ func scanPluginWithLatest(scanner interface {
 		&plugin.DeletedAt,
 		&plugin.Aliases,
 		&plugin.LatestVersion,
+		&plugin.LatestSemrelCore,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, appErrors.ErrPluginNotFound

@@ -43,3 +43,67 @@ func TestSortFilterMapsPopularityColumns(t *testing.T) {
 		})
 	}
 }
+
+// Search must be index-backed on both halves: the tsvector for whole words and
+// trigrams for the partial identifiers a search box sees while typing.
+func TestSearchFilterUsesFullTextAndTrigrams(t *testing.T) {
+	var builder strings.Builder
+	var args []interface{}
+
+	SearchFilter{Query: "github"}.ApplyTo(&builder, &args)
+
+	clause := builder.String()
+	if !strings.Contains(clause, "search_vector @@ websearch_to_tsquery") {
+		t.Fatalf("expected a full-text predicate, got %q", clause)
+	}
+	if !strings.Contains(clause, "name ILIKE") {
+		t.Fatalf("expected a trigram fallback on name, got %q", clause)
+	}
+	if len(args) != 2 || args[0] != "github" || args[1] != "%github%" {
+		t.Fatalf("unexpected arguments: %#v", args)
+	}
+}
+
+func TestSearchFilterIgnoresBlankQuery(t *testing.T) {
+	var builder strings.Builder
+	var args []interface{}
+
+	SearchFilter{Query: "   "}.ApplyTo(&builder, &args)
+
+	if builder.String() != "" || len(args) != 0 {
+		t.Fatalf("a blank search must add no predicate, got %q / %#v", builder.String(), args)
+	}
+}
+
+// The search term is always a bound parameter, never interpolated.
+func TestSearchFilterBindsTheTerm(t *testing.T) {
+	var builder strings.Builder
+	var args []interface{}
+
+	SearchFilter{Query: "'; DROP TABLE plugins--"}.ApplyTo(&builder, &args)
+
+	if strings.Contains(builder.String(), "DROP TABLE") {
+		t.Fatalf("search term was interpolated into the query: %q", builder.String())
+	}
+}
+
+func TestRelevanceOrderRanksMatchesFirst(t *testing.T) {
+	var args []interface{}
+
+	order := RelevanceOrder("github", &args)
+
+	if !strings.Contains(order, "ts_rank") {
+		t.Fatalf("expected relevance ranking, got %q", order)
+	}
+	if len(args) != 1 || args[0] != "github" {
+		t.Fatalf("unexpected arguments: %#v", args)
+	}
+}
+
+func TestRelevanceOrderIsEmptyWithoutASearch(t *testing.T) {
+	var args []interface{}
+
+	if order := RelevanceOrder("", &args); order != "" {
+		t.Fatalf("expected no ordering clause, got %q", order)
+	}
+}

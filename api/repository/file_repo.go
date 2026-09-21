@@ -625,7 +625,13 @@ func applySeedPlugin(all *[]models.Plugin, meta *fileMeta, seed database.SeedPlu
 	}
 	sortPluginVersions(versions)
 	candidate.Versions = versions
-	candidate.LatestVersion = latestStableVersion(versions)
+	if latest, ok := latestStable(versions); ok {
+		candidate.LatestVersion = latest.Version
+		candidate.LatestSemrelCore = latest.SemrelCore
+	} else {
+		candidate.LatestVersion = ""
+		candidate.LatestSemrelCore = ""
+	}
 
 	if existingIndex >= 0 && !reflect.DeepEqual(candidate, (*all)[existingIndex]) {
 		candidate.UpdatedAt = now
@@ -906,13 +912,19 @@ func sortPluginVersions(versions []models.PluginVersion) {
 	})
 }
 
-func latestStableVersion(versions []models.PluginVersion) string {
+// latestStable returns the newest release a client should install by default.
+//
+// It skips prereleases, deleted versions and — the reason yanking exists —
+// retracted ones: advertising a yanked release as "latest" would defeat the
+// retraction entirely.
+func latestStable(versions []models.PluginVersion) (models.PluginVersion, bool) {
 	for _, version := range versions {
-		if !version.Prerelease {
-			return version.Version
+		if version.Prerelease || version.DeletedAt != nil || version.YankedAt != nil {
+			continue
 		}
+		return version, true
 	}
-	return ""
+	return models.PluginVersion{}, false
 }
 
 func ensureUniqueIdentity(all []models.Plugin, candidate models.Plugin, excludeID int64) error {
