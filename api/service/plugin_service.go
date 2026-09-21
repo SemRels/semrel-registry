@@ -90,6 +90,10 @@ type PluginManager interface {
 	DeleteAccount(ctx context.Context, request models.AccountDeletionRequest, actor models.DeleteActor) (models.AccountDeletionResult, error)
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
+	// ReviewPlugin records an approval or rejection with its reason and reviewer.
+	ReviewPlugin(ctx context.Context, ref, status string, decision models.ReviewDecision, reviewer string) (models.Plugin, error)
+	// YankVersion retracts a published version, or lifts the retraction.
+	YankVersion(ctx context.Context, ref string, versionID int64, yanked bool, request models.VersionYankRequest, actor models.DeleteActor) (models.PluginVersion, error)
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
 }
 

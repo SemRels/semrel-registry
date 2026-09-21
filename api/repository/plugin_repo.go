@@ -29,6 +29,13 @@ type PluginRepository interface {
 	Delete(ctx context.Context, spec models.PluginDeletionSpec) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
 	DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error
+	// SetVersionYank retracts a published version, or lifts the retraction.
+	// Unlike deletion it leaves the version resolvable, so builds that already
+	// pin it keep working while new installs are steered away.
+	SetVersionYank(ctx context.Context, spec models.VersionYankSpec) error
+	// SetReviewOutcome records an approval or rejection together with its
+	// reason and reviewer.
+	SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error
 	RecordAccountDeletion(ctx context.Context, audit models.AccountDeletionAudit) error
 	// IncrCounters atomically increments views/downloads for a plugin and optionally a version.
 	// Pass non-zero versionID to also update the version counters.
@@ -52,7 +59,9 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 	query.WriteString(`
 	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
-       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
+       -- yanked_at IS NULL: a retracted release must never be advertised as
+       -- the latest version, which is the whole point of yanking it.
+       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
 FROM plugins
 WHERE deleted_at IS NULL`)
 
@@ -195,7 +204,7 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, '')
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, ''), yanked_at, COALESCE(yanked_by, ''), COALESCE(yanked_reason, '')
 FROM plugin_versions
 WHERE plugin_id = $1 AND deleted_at IS NULL
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
@@ -711,6 +720,9 @@ func scanVersion(scanner interface {
 		&version.DeletedAt,
 		&version.DeletedBy,
 		&version.DeletionReason,
+		&version.YankedAt,
+		&version.YankedBy,
+		&version.YankedReason,
 	); err != nil {
 		return nil, fmt.Errorf("scan version: %w", err)
 	}
@@ -738,4 +750,64 @@ func nullableString(s string) interface{} {
 		return nil
 	}
 	return s
+}
+
+func (r *pgRepository) SetVersionYank(ctx context.Context, spec models.VersionYankSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	// Yanking is idempotent by design: re-yanking refreshes the reason rather
+	// than failing, and un-yanking a version that was never yanked is a no-op
+	// at the data level but still has to report "not found" for a bad id.
+	var (
+		result pgconn.CommandTag
+		err    error
+	)
+	if spec.Yanked {
+		result, err = r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET yanked_at = COALESCE(yanked_at, NOW()),
+    yanked_by = NULLIF($3, ''),
+    yanked_reason = NULLIF($4, '')
+WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
+			spec.VersionID, spec.PluginID, spec.Actor, spec.Reason)
+	} else {
+		result, err = r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET yanked_at = NULL,
+    yanked_by = NULL,
+    yanked_reason = NULL
+WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
+			spec.VersionID, spec.PluginID)
+	}
+	if err != nil {
+		return wrapWriteError("set version yank", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins
+SET status = $1,
+    rejection_reason = NULLIF($2, ''),
+    reviewed_at = NOW(),
+    reviewed_by = NULLIF($3, ''),
+    updated_at = NOW()
+WHERE id = $4 AND deleted_at IS NULL`,
+		spec.Status, spec.Reason, spec.Reviewer, spec.PluginID)
+	if err != nil {
+		return fmt.Errorf("record review outcome: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
 }

@@ -17,6 +17,7 @@ import (
 type PluginHandler struct {
 	service service.PluginManager
 	metrics service.MetricsRecorder
+	dedup   *service.DownloadDeduplicator
 }
 
 func NewPluginHandler(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *PluginHandler {
@@ -24,7 +25,11 @@ func NewPluginHandler(pluginService service.PluginManager, metrics ...service.Me
 	if len(metrics) > 0 && metrics[0] != nil {
 		recorder = metrics[0]
 	}
-	return &PluginHandler{service: pluginService, metrics: recorder}
+	return &PluginHandler{
+		service: pluginService,
+		metrics: recorder,
+		dedup:   service.NewDownloadDeduplicator(service.DownloadDedupWindow),
+	}
 }
 
 func Health() gin.HandlerFunc {
@@ -234,6 +239,15 @@ func (h *PluginHandler) trackDownloadByRef(c *gin.Context, ref string) {
 	}
 	if !found {
 		c.JSON(http.StatusNotFound, gin.H{"error": "version not found"})
+		return
+	}
+
+	// This endpoint is unauthenticated, so anyone can call it in a loop. Counting
+	// one download per client per version per window keeps the number a measure
+	// of adoption rather than of how often someone pressed the button — and
+	// keeps CI pipelines from drowning out real users.
+	if !h.dedup.ShouldCount(c.ClientIP(), c.Request.UserAgent(), version.ID) {
+		c.Status(http.StatusNoContent)
 		return
 	}
 
@@ -596,18 +610,28 @@ func (h *PluginHandler) revalidatePlugin(ctx context.Context, plugin models.Plug
 // ApprovePlugin approves a pending plugin submission (admin only).
 // PUT /api/v1/admin/plugins/:id/approve
 func (h *PluginHandler) ApprovePlugin(c *gin.Context) {
-	updated, err := h.service.ApprovePlugin(c.Request.Context(), c.Param("id"))
-	if err != nil {
-		HandleError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": updated})
+	h.reviewPlugin(c, models.StatusActive)
 }
 
 // RejectPlugin rejects a pending plugin submission (admin only).
 // PUT /api/v1/admin/plugins/:id/reject
+//
+// A rejection must carry a reason. Without one the author is left with a
+// "rejected" badge and nothing to act on, which is where the review loop
+// used to end.
 func (h *PluginHandler) RejectPlugin(c *gin.Context) {
-	updated, err := h.service.RejectPlugin(c.Request.Context(), c.Param("id"))
+	h.reviewPlugin(c, models.StatusRejected)
+}
+
+func (h *PluginHandler) reviewPlugin(c *gin.Context, status string) {
+	var decision models.ReviewDecision
+	// Approvals may arrive with no body at all.
+	_ = c.ShouldBindJSON(&decision)
+
+	reviewer, _ := c.Get("login")
+	reviewerLogin, _ := reviewer.(string)
+
+	updated, err := h.service.ReviewPlugin(c.Request.Context(), c.Param("id"), status, decision, reviewerLogin)
 	if err != nil {
 		HandleError(c, err)
 		return

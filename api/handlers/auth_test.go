@@ -65,6 +65,12 @@ func (s *stubAccountManager) RejectPlugin(context.Context, string) (models.Plugi
 	return models.Plugin{}, nil
 }
 func (s *stubAccountManager) UpdateValidationChecks(context.Context, int64, []byte) error { return nil }
+func (s *stubAccountManager) ReviewPlugin(context.Context, string, string, models.ReviewDecision, string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+func (s *stubAccountManager) YankVersion(context.Context, string, int64, bool, models.VersionYankRequest, models.DeleteActor) (models.PluginVersion, error) {
+	return models.PluginVersion{}, nil
+}
 
 // accountDeletionRouter wires DeleteAccount behind a stub session whose last
 // interactive sign-in happened authAge ago.

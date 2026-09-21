@@ -66,6 +66,14 @@ func (stubPluginService) UpdateValidationChecks(_ context.Context, _ int64, _ []
 	return nil
 }
 
+func (stubPluginService) ReviewPlugin(_ context.Context, _, _ string, _ models.ReviewDecision, _ string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+
+func (stubPluginService) YankVersion(_ context.Context, _ string, _ int64, _ bool, _ models.VersionYankRequest, _ models.DeleteActor) (models.PluginVersion, error) {
+	return models.PluginVersion{}, nil
+}
+
 func (stubPluginService) DeleteVersion(_ context.Context, _ int64, _ int64) error {
 	return nil
 }

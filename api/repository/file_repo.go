@@ -967,3 +967,60 @@ func sortPlugins(plugins []models.Plugin, field string, desc bool) {
 		return less
 	})
 }
+
+func (s *fileStore) SetVersionYank(_ context.Context, spec models.VersionYankSpec) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(spec.PluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	for i := range p.Versions {
+		if p.Versions[i].ID != spec.VersionID || p.Versions[i].DeletedAt != nil {
+			continue
+		}
+		now := time.Now().UTC()
+		if spec.Yanked {
+			// Re-yanking refreshes the reason without moving the timestamp, so
+			// "yanked since" stays accurate.
+			if p.Versions[i].YankedAt == nil {
+				p.Versions[i].YankedAt = &now
+			}
+			p.Versions[i].YankedBy = spec.Actor
+			p.Versions[i].YankedReason = spec.Reason
+		} else {
+			p.Versions[i].YankedAt = nil
+			p.Versions[i].YankedBy = ""
+			p.Versions[i].YankedReason = ""
+		}
+		p.UpdatedAt = now
+		return s.savePlugin(p)
+	}
+	return appErrors.ErrPluginNotFound
+}
+
+func (s *fileStore) SetReviewOutcome(_ context.Context, spec models.ReviewOutcomeSpec) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(spec.PluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	now := time.Now().UTC()
+	p.Status = spec.Status
+	p.RejectionReason = spec.Reason
+	p.ReviewedAt = &now
+	p.ReviewedBy = spec.Reviewer
+	p.UpdatedAt = now
+	return s.savePlugin(p)
+}

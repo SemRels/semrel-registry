@@ -180,6 +180,14 @@ func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ models.Versio
 	return nil
 }
 
+func (a *mockRepositoryAdapter) SetVersionYank(_ context.Context, _ models.VersionYankSpec) error {
+	return nil
+}
+
+func (a *mockRepositoryAdapter) SetReviewOutcome(_ context.Context, _ models.ReviewOutcomeSpec) error {
+	return nil
+}
+
 func (a *mockRepositoryAdapter) RecordAccountDeletion(_ context.Context, _ models.AccountDeletionAudit) error {
 	return nil
 }

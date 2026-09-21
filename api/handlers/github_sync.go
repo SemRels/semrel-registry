@@ -135,13 +135,17 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 	}
 
 	type semrelPluginVersion struct {
-		Version       string            `json:"version"`
-		ReleaseDate   string            `json:"releaseDate"`
-		Changelog     string            `json:"changelog,omitempty"`
-		DownloadURL   string            `json:"downloadUrl"`
-		DownloadURLs  map[string]string `json:"downloadUrls,omitempty"`
-		Checksums     map[string]string `json:"checksums"`
-		Prerelease    bool              `json:"prerelease,omitempty"`
+		Version      string            `json:"version"`
+		ReleaseDate  string            `json:"releaseDate"`
+		Changelog    string            `json:"changelog,omitempty"`
+		DownloadURL  string            `json:"downloadUrl"`
+		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
+		Checksums    map[string]string `json:"checksums"`
+		Prerelease   bool              `json:"prerelease,omitempty"`
+		// Yanked marks a retracted release. Clients must keep resolving it for
+		// pinned installs but must not choose it as an update target.
+		Yanked        bool   `json:"yanked,omitempty"`
+		YankedReason  string `json:"yankedReason,omitempty"`
 		Compatibility *struct {
 			SemrelCore string `json:"semrelCore,omitempty"`
 		} `json:"compatibility,omitempty"`
@@ -185,6 +189,8 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				DownloadURLs: deriveDownloadURLs(v.DownloadURL, v.Checksums),
 				Checksums:    v.Checksums,
 				Prerelease:   v.Prerelease,
+				Yanked:       v.Yanked(),
+				YankedReason: v.YankedReason,
 				Compatibility: func() *struct {
 					SemrelCore string `json:"semrelCore,omitempty"`
 				} {
@@ -216,7 +222,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, registry)
+	writeCacheableJSON(c, registry, pluginsJSONMaxAge)
 }
 
 // POST /api/v1/webhooks/release

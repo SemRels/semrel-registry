@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { listPlugins, approvePlugin, rejectPlugin, revalidatePlugin } from '../lib/api';
 import type { Plugin, ValidationResult } from '../lib/api';
+import ReasonDialog from '../components/ReasonDialog';
 
 function CheckIcon({ passed }: { passed: boolean }) {
   return (
@@ -142,6 +143,15 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
 
       {revalError && <div className="alert alert--error" style={{ marginTop: '0.5rem', padding: '0.3rem 0.5rem' }}>{revalError}</div>}
 
+      {/* A rejected submission carries the reviewer's explanation, so a
+          maintainer revisiting the list can see why it was turned down. */}
+      {plugin.status === 'rejected' && plugin.rejectionReason && (
+        <div className="alert alert--error" style={{ marginTop: '0.5rem' }}>
+          <strong>Rejected{plugin.reviewedBy ? ` by ${plugin.reviewedBy}` : ''}:</strong>{' '}
+          {plugin.rejectionReason}
+        </div>
+      )}
+
       {/* Validation panel — shows stored results from DB automatically */}
       {checks && <ValidationPanel {...checks} validatedAt={plugin.validatedAt} />}
     </div>
@@ -158,6 +168,10 @@ export default function SubmissionsPage() {
   const [page, setPage]         = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal]       = useState(0);
+  // The submission being rejected, held while its reason is collected.
+  const [rejecting, setRejecting] = useState<Plugin | null>(null);
+  const [rejectBusy, setRejectBusy] = useState(false);
+  const [rejectError, setRejectError] = useState('');
 
   useEffect(() => { setPage(1); }, [filter]);
   useEffect(() => { void load(); }, [filter, page]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -185,12 +199,17 @@ export default function SubmissionsPage() {
     }
   }
 
-  async function handleReject(id: number) {
+  async function handleReject(id: number, reason: string) {
+    setRejectBusy(true);
+    setRejectError('');
     try {
-      await rejectPlugin(id);
-      setPlugins(prev => prev.map(p => p.id === id ? { ...p, status: 'rejected' } : p));
+      const updated = await rejectPlugin(id, reason);
+      setPlugins(prev => prev.map(p => p.id === id ? { ...p, status: 'rejected', rejectionReason: updated.rejectionReason } : p));
+      setRejecting(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Reject failed');
+      setRejectError(e instanceof Error ? e.message : 'Reject failed');
+    } finally {
+      setRejectBusy(false);
     }
   }
 
@@ -236,10 +255,26 @@ export default function SubmissionsPage() {
             key={p.id}
             plugin={p}
             onApprove={() => { void handleApprove(p.id); }}
-            onReject={() => { void handleReject(p.id); }}
+            onReject={() => { setRejectError(''); setRejecting(p); }}
             onRevalidate={(result) => handleRevalidated(p.id, result)}
           />
         ))}
+
+        {/* Rejecting asks for a reason first: the author sees it on their
+            plugin list, and "rejected" alone tells them nothing to fix. */}
+        <ReasonDialog
+          open={rejecting !== null}
+          title={`Reject ${rejecting?.name ?? ''}?`}
+          message="The submission stays visible to its author with this explanation attached. They can address it and submit again."
+          label="Reason for rejection"
+          placeholder="e.g. The repository has no release workflow, so the registry cannot discover versions."
+          confirmLabel="Reject submission"
+          busyLabel="Rejecting…"
+          busy={rejectBusy}
+          error={rejectError}
+          onClose={() => { if (!rejectBusy) setRejecting(null); }}
+          onConfirm={(reason) => { if (rejecting) void handleReject(rejecting.id, reason); }}
+        />
 
         {/* Pagination */}
         {!loading && totalPages > 1 && (

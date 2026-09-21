@@ -35,6 +35,17 @@ type Plugin struct {
 	DeletedAt        *time.Time      `json:"deletedAt,omitempty"`
 	DeletedBy        string          `json:"deletedBy,omitempty"`
 	DeletionReason   string          `json:"deletionReason,omitempty"`
+
+	// Review outcome. A rejected submission used to carry no explanation, so
+	// the author saw a "rejected" badge with nothing to act on.
+	RejectionReason string     `json:"rejectionReason,omitempty"`
+	ReviewedAt      *time.Time `json:"reviewedAt,omitempty"`
+	ReviewedBy      string     `json:"reviewedBy,omitempty"`
+}
+
+// ReviewDecision is the body for approving or rejecting a submission.
+type ReviewDecision struct {
+	Reason string `json:"reason"`
 }
 
 type PluginVersion struct {
@@ -53,6 +64,24 @@ type PluginVersion struct {
 	DeletedAt      *time.Time        `json:"deletedAt,omitempty"`
 	DeletedBy      string            `json:"deletedBy,omitempty"`
 	DeletionReason string            `json:"deletionReason,omitempty"`
+
+	// Yank marks a version as unfit for new installs without removing it.
+	// Existing pins keep resolving; `latest` skips it.
+	YankedAt     *time.Time `json:"yankedAt,omitempty"`
+	YankedBy     string     `json:"yankedBy,omitempty"`
+	YankedReason string     `json:"yankedReason,omitempty"`
+}
+
+// Yanked reports whether this version has been retracted.
+func (v PluginVersion) Yanked() bool {
+	return v.YankedAt != nil
+}
+
+// VersionYankRequest is the body for yanking or un-yanking a version.
+type VersionYankRequest struct {
+	// Reason is shown to anyone who has the version pinned, so it is required:
+	// "yanked" without a cause leaves consumers unable to judge the urgency.
+	Reason string `json:"reason"`
 }
 
 type PluginPatch struct {
@@ -143,4 +172,22 @@ func (p PluginPatch) Empty() bool {
 		p.Repository == nil &&
 		p.License == nil &&
 		p.Tags == nil
+}
+
+// VersionYankSpec describes a yank or un-yank of a published version.
+type VersionYankSpec struct {
+	PluginID  int64
+	VersionID int64
+	// Yanked false lifts a previous yank.
+	Yanked bool
+	Actor  string
+	Reason string
+}
+
+// ReviewOutcomeSpec records the result of reviewing a submitted plugin.
+type ReviewOutcomeSpec struct {
+	PluginID int64
+	Status   string
+	Reviewer string
+	Reason   string
 }

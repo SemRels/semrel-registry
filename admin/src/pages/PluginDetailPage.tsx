@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
+import CopyButton from '../components/CopyButton';
 import { revalidatePlugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import type { ValidationResult } from '../lib/api';
@@ -74,6 +75,8 @@ type Version = {
   checksums?: Record<string, string>;
   prerelease: boolean;
   compatibility?: { semrelCore?: string };
+  yanked?: boolean;
+  yankedReason?: string;
   views?: number;
   downloads?: number;
 };
@@ -120,26 +123,13 @@ function configSnippet(namespace: string | undefined, name: string, category: st
     phase: ${phase}`;
 }
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      onClick={() => navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); })}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? 'var(--success)' : 'var(--muted)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, transition: 'color .15s' }}
-      title="Copy"
-    >
-      {copied ? '✓ Copied' : 'Copy'}
-    </button>
-  );
-}
-
 function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
     <div style={{ position: 'relative', marginTop: label ? '.5rem' : 0 }}>
       {label && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)', marginBottom: '.25rem', fontWeight: 600 }}>{label}</div>}
       <div style={{ background: 'var(--surface2)', borderRadius: 8, padding: '.75rem 1rem', fontFamily: 'monospace', fontSize: 'var(--fs-sm)', overflowX: 'auto', border: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.5rem' }}>
         <pre style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{code}</pre>
-        <CopyButton text={code} />
+        <CopyButton text={code} label={label ? `Copy ${label.toLowerCase()}` : 'Copy'} />
       </div>
     </div>
   );
@@ -489,10 +479,20 @@ export default function PluginDetailPage() {
                                 {v.changelog ? (expandedVersionId === v.id ? '▾' : '▸') : <span style={{ opacity: 0.3 }}>—</span>}
                                 {' '}v{v.version}
                               </button>
-                              {v.prerelease
-                                ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'rgba(210,153,34,.2)', color: '#d7a22a', borderRadius: 4, padding: '1px 6px' }}>pre</span>
-                                : <VersionBadge version={v.version} isLatest={i === 0} />
+                              {v.yanked
+                                ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--danger-soft)', color: 'var(--danger)', borderRadius: 4, padding: '1px 6px', fontWeight: 700 }}>yanked</span>
+                                : v.prerelease
+                                  ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--warning-soft)', color: 'var(--warning)', borderRadius: 4, padding: '1px 6px' }}>pre</span>
+                                  : <VersionBadge version={v.version} isLatest={i === 0} />
                               }
+                              {/* The reason matters more than the badge: it is
+                                  what tells someone on this version whether to
+                                  move urgently or at leisure. */}
+                              {v.yanked && v.yankedReason && (
+                                <p className="field__error" style={{ margin: '.25rem 0 0', whiteSpace: 'normal', maxWidth: '20rem' }}>
+                                  {v.yankedReason}
+                                </p>
+                              )}
                             </td>
                             <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
                               {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}

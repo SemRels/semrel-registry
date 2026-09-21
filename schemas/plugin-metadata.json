@@ -158,6 +158,13 @@
         "downloadUrl": {
           "$ref": "#/$defs/httpUrl"
         },
+        "downloadUrls": {
+          "type": "object",
+          "description": "Per-platform download URLs keyed by GOOS_GOARCH, for example linux_amd64. Derived from downloadUrl when the release follows the standard asset naming.",
+          "additionalProperties": {
+            "$ref": "#/$defs/httpUrl"
+          }
+        },
         "checksums": {
           "$ref": "#/$defs/checksums"
         },
@@ -167,6 +174,15 @@
         "prerelease": {
           "type": "boolean",
           "description": "Marks the release as prerelease so clients can opt in or out of unstable versions."
+        },
+        "yanked": {
+          "type": "boolean",
+          "description": "Marks a retracted release. Clients must keep resolving it for installs that pin this exact version, but must never select it as an update target or as the default latest version."
+        },
+        "yankedReason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Why the release was retracted. Shown to anyone who has this version pinned so they can judge how urgently to move."
         }
       }
     },

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPlugin, listVersions, createVersion, deleteVersion } from '../lib/api';
+import { getPlugin, listVersions, createVersion, deleteVersion, yankVersion, unyankVersion } from '../lib/api';
 import type { Plugin, PluginVersion } from '../lib/api';
 import Markdown from '../components/Markdown';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
+import ReasonDialog from '../components/ReasonDialog';
 
 export default function VersionsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,10 @@ export default function VersionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<PluginVersion | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [yankTarget, setYankTarget] = useState<PluginVersion | null>(null);
+  const [yankBusy, setYankBusy] = useState(false);
+  const [yankError, setYankError] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -40,6 +45,36 @@ export default function VersionsPage() {
       setForm({ version:'', releaseDate:'', downloadUrl:'', changelog:'', prerelease:false, checksums:'{}' });
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Failed'); }
     finally { setSaving(false); }
+  }
+
+  async function handleYank(reason: string) {
+    if (!yankTarget) return;
+    setYankBusy(true);
+    setYankError('');
+    try {
+      const updated = await yankVersion(id!, yankTarget.id, reason);
+      setVersions(prev => prev.map(v => v.id === updated.id ? updated : v));
+      setNotice(`v${yankTarget.version} is yanked. Existing pinned installs still resolve it.`);
+      setYankTarget(null);
+    } catch (e: unknown) {
+      setYankError(e instanceof Error ? e.message : 'Yank failed');
+    } finally {
+      setYankBusy(false);
+    }
+  }
+
+  async function handleUnyank(version: PluginVersion) {
+    setYankBusy(true);
+    setError('');
+    try {
+      const updated = await unyankVersion(id!, version.id);
+      setVersions(prev => prev.map(v => v.id === updated.id ? updated : v));
+      setNotice(`v${version.version} is installable again.`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Un-yank failed');
+    } finally {
+      setYankBusy(false);
+    }
   }
 
   async function handleDelete() {
@@ -73,9 +108,13 @@ export default function VersionsPage() {
         </div>
       </div>
       <div className="page__body">
-        {error && <div className="alert alert--error">{error}</div>}
+        {error && <div className="alert alert--error" role="alert">{error}</div>}
+        {notice && <div className="alert alert--info" role="status">{notice}</div>}
         <p className="muted" style={{ fontSize:'var(--fs-xs)', marginBottom:'1rem' }}>
-          Version retractions now require typed confirmation using the visible release tag before the delete API call is made.
+          <strong>Yank</strong> retracts a release without breaking builds that pin it — it stops
+          being offered for new installs and the reason is shown to anyone using it.
+          <strong> Delete</strong> removes it outright and does break those builds; it requires
+          typing the release tag to confirm.
         </p>
 
         {showForm && (
@@ -125,10 +164,14 @@ export default function VersionsPage() {
                         </button>
                       </td>
                       <td data-label="Released" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.releaseDate ? new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(new Date(v.releaseDate)) : '—'}</td>
-                      <td data-label="Channel">{v.prerelease
-                        ? <span className="badge" style={{ background:'rgba(210,153,34,.15)',color:'var(--warning)',borderColor:'rgba(210,153,34,.3)' }}>pre</span>
-                        : <span className="badge" style={{ background:'rgba(63,185,80,.12)',color:'var(--success)',borderColor:'rgba(63,185,80,.25)' }}>stable</span>
-                      }</td>
+                      <td data-label="Channel">
+                        {v.yankedAt
+                          ? <span className="badge" style={{ background:'var(--danger-soft)',color:'var(--danger)',borderColor:'var(--danger)' }} title={v.yankedReason}>yanked</span>
+                          : v.prerelease
+                            ? <span className="badge" style={{ background:'var(--warning-soft)',color:'var(--warning)',borderColor:'var(--warning)' }}>pre</span>
+                            : <span className="badge" style={{ background:'var(--success-soft)',color:'var(--success)',borderColor:'var(--success)' }}>stable</span>
+                        }
+                      </td>
                       <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.views ?? 0).toLocaleString()}</td>
                       <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.downloads ?? 0).toLocaleString()}</td>
                       <td data-label="Download" style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
@@ -142,14 +185,40 @@ export default function VersionsPage() {
                       </td>
                       <td data-label="Platforms" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.checksums ? Object.keys(v.checksums).length : 0}</td>
                       <td data-label="Actions">
-                        <button
-                          type="button"
-                          className="btn btn--sm btn--danger"
-                          onClick={() => { setDeleteError(''); setDeleteTarget(v); }}
-                          title="Retract version"
-                        >
-                          Retract
-                        </button>
+                        <div style={{ display: 'flex', gap: '.3rem', flexWrap: 'wrap' }}>
+                          {/* Yank is the safe retraction: consumers who already
+                              pin this version keep resolving it, they just stop
+                              being offered it. Delete breaks those builds, so it
+                              is the secondary action, not the primary one. */}
+                          {v.yankedAt ? (
+                            <button
+                              type="button"
+                              className="btn btn--sm"
+                              onClick={() => { void handleUnyank(v); }}
+                              disabled={yankBusy}
+                              title="Make this version installable again"
+                            >
+                              Un-yank
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn--sm"
+                              onClick={() => { setYankError(''); setYankTarget(v); }}
+                              title="Retract this version without breaking pinned installs"
+                            >
+                              Yank
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn btn--sm btn--danger"
+                            onClick={() => { setDeleteError(''); setDeleteTarget(v); }}
+                            title="Permanently remove this version — breaks builds that pin it"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                     {expandedId === v.id && (
@@ -174,19 +243,34 @@ export default function VersionsPage() {
           </div>
         )}
       </div>
+      <ReasonDialog
+        open={yankTarget !== null}
+        title={yankTarget ? `Yank v${yankTarget.version}?` : 'Yank version?'}
+        message="The version stays resolvable, so builds that already pin it keep working. It simply stops being offered for new installs, and the reason is shown to anyone using it."
+        label="Why is this version being yanked?"
+        hint="Shown to everyone who has this version pinned."
+        placeholder="e.g. The linux-amd64 binary was built from the wrong commit."
+        confirmLabel="Yank version"
+        busyLabel="Yanking…"
+        busy={yankBusy}
+        error={yankError}
+        onClose={() => { if (!yankBusy) { setYankError(''); setYankTarget(null); } }}
+        onConfirm={(reason) => { void handleYank(reason); }}
+      />
+
       <DeletionConfirmDialog
         open={deleteTarget !== null}
-        title={deleteTarget ? `Retract v${deleteTarget.version}?` : 'Retract version?'}
+        title={deleteTarget ? `Delete v${deleteTarget.version}?` : 'Delete version?'}
         message={deleteTarget && plugin
-          ? `This removes version v${deleteTarget.version} from ${plugin.name} in the registry workspace.`
+          ? `This removes version v${deleteTarget.version} of ${plugin.name} from the registry. Anyone who pins this version will no longer be able to install it. If you only want to stop recommending it, yank it instead.`
           : ''}
         confirmationValue={deleteTarget && plugin
           ? `${plugin.namespace ? `${plugin.namespace}/` : ''}${plugin.name}@${deleteTarget.version}`
           : ''}
         confirmationLabel="Plugin version reference"
-        confirmLabel="Retract version"
-        busyLabel="Retracting…"
-        acknowledgement="I understand this version will no longer be offered from the registry."
+        confirmLabel="Delete version"
+        busyLabel="Deleting…"
+        acknowledgement="I understand this breaks installs that pin this version."
         busy={deleteBusy}
         error={deleteError}
         onClose={() => { if (!deleteBusy) { setDeleteError(''); setDeleteTarget(null); } }}

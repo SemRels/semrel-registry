@@ -255,6 +255,11 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	sitemapHandler := handlers.NewSitemapHandler(pluginService)
 	router.GET("/sitemap.xml", sitemapHandler.Sitemap)
 
+	// Atom feed of recent releases, so consumers can follow the registry
+	// without polling and diffing the catalogue themselves.
+	feedHandler := handlers.NewFeedHandler(pluginService)
+	router.GET("/feed.atom", rlPublic, feedHandler.Releases)
+
 	// plugins.json — semrel registry metadata endpoint consumed by `semrel` CLI.
 	// SEMREL_REGISTRY_URL=http://localhost:8080 and semrel fetches /plugins.json.
 	router.GET("/plugins.json", rlPluginsJSON, syncHandler.PluginsJSON)
@@ -279,6 +284,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	authRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
 	authRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
 	authRoutes.DELETE("/plugins/:id/versions/:versionId", pluginHandler.DeletePluginVersion)
+	// Yank retracts a release without breaking builds that already pin it.
+	authRoutes.PUT("/plugins/:id/versions/:versionId/yank", pluginHandler.YankVersion)
+	authRoutes.DELETE("/plugins/:id/versions/:versionId/yank", pluginHandler.UnyankVersion)
 
 	// Admin-only endpoints.
 	adminRoutes := api.Group("")

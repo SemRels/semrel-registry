@@ -117,6 +117,10 @@ export interface PluginVersion {
   views: number;
   downloads: number;
   createdAt: string;
+  /** Set when the version is retracted; it stays resolvable for pinned installs. */
+  yankedAt?: string;
+  yankedBy?: string;
+  yankedReason?: string;
 }
 
 export interface Plugin {
@@ -130,6 +134,10 @@ export interface Plugin {
   repository: string;
   license: string;
   status: string; // "active" | "pending" | "rejected"
+  /** Why a submission was rejected. Shown to the author on their plugin list. */
+  rejectionReason?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
   tags: string[];
   versions?: PluginVersion[];
   latestVersion?: string;
@@ -452,12 +460,50 @@ export async function submitPlugin(plugin: Partial<Plugin>): Promise<Plugin> {
 
 // ---- Admin: approve/reject submissions ----
 
-export async function approvePlugin(id: number | string): Promise<Plugin> {
-  return request<{ data: Plugin }>(`/admin/plugins/${id}/approve`, { method: 'PUT' }).then(r => r.data);
+export async function approvePlugin(id: number | string, reason?: string): Promise<Plugin> {
+  return request<{ data: Plugin }>(`/admin/plugins/${id}/approve`, {
+    method: 'PUT',
+    body: JSON.stringify({ reason: reason ?? '' }),
+  }).then(r => r.data);
 }
 
-export async function rejectPlugin(id: number | string): Promise<Plugin> {
-  return request<{ data: Plugin }>(`/admin/plugins/${id}/reject`, { method: 'PUT' }).then(r => r.data);
+/**
+ * Rejects a submission. The reason is required by the API and shown to the
+ * author — a "rejected" badge on its own gives them nothing to act on.
+ */
+export async function rejectPlugin(id: number | string, reason: string): Promise<Plugin> {
+  return request<{ data: Plugin }>(`/admin/plugins/${id}/reject`, {
+    method: 'PUT',
+    body: JSON.stringify({ reason }),
+  }).then(r => r.data);
+}
+
+// ---- Yank ----
+
+/**
+ * Retracts a published version.
+ *
+ * Unlike deleting it, the version stays resolvable, so builds that already pin
+ * it keep working — they simply stop being offered it as an update.
+ */
+export async function yankVersion(
+  pluginId: string | number,
+  versionId: number,
+  reason: string,
+): Promise<PluginVersion> {
+  return request<{ data: PluginVersion }>(`/plugins/${pluginId}/versions/${versionId}/yank`, {
+    method: 'PUT',
+    body: JSON.stringify({ reason }),
+  }).then(r => r.data);
+}
+
+export async function unyankVersion(
+  pluginId: string | number,
+  versionId: number,
+): Promise<PluginVersion> {
+  return request<{ data: PluginVersion }>(`/plugins/${pluginId}/versions/${versionId}/yank`, {
+    method: 'DELETE',
+  }).then(r => r.data);
 }
 
 export async function revalidatePlugin(id: number | string): Promise<ValidationResult> {

@@ -144,3 +144,34 @@ X-Hub-Signature-256: sha256=<hmac-sha256 of the raw body, keyed with WEBHOOK_SEC
 
 The older `X-Webhook-Secret: <secret>` header still works and is compared in
 constant time, but it transmits the secret on every call and is deprecated.
+
+## Retracting a release
+
+Deleting a version breaks every build that pins it. **Yanking** is the safe
+retraction:
+
+```bash
+curl -X PUT https://registry.semrel.io/api/v1/plugins/@semrel/provider-github/versions/42/yank \
+  -H 'Content-Type: application/json' \
+  --cookie 'semrel_session=…' \
+  -d '{"reason":"The linux-amd64 binary was built from the wrong commit."}'
+```
+
+A yanked version:
+
+- stays resolvable, so `semrel plugin install name@1.2.3` keeps working;
+- is never returned as `latestVersion` and never chosen as an update target;
+- carries `"yanked": true` and `"yankedReason"` in `plugins.json`, so clients
+  can warn the people already using it.
+
+`DELETE` on the same path lifts the yank. Publishers may yank their own
+plugins' versions; admins may yank any.
+
+## Feeds and caching
+
+- `GET /feed.atom` — the 50 most recent releases across the registry.
+- `GET /plugins.json` carries a strong `ETag` and `Cache-Control`. Clients that
+  send `If-None-Match` get a `304` instead of the whole catalogue.
+- `POST /api/v1/plugins/:id/versions/:version/downloads` counts one download per
+  client per version per hour, so the figure reflects adoption rather than how
+  often a CI pipeline ran.

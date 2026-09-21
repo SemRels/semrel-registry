@@ -204,9 +204,16 @@ export default function PluginsPage() {
                       <span style={{
                         display:'inline-block', padding:'1px 7px', borderRadius:4,
                         fontSize:'var(--fs-xs)', fontWeight:600,
-                        background: p.status === 'pending' ? 'rgba(210,153,34,.2)' : p.status === 'rejected' ? 'rgba(248,81,73,.15)' : 'rgba(63,185,80,.12)',
-                        color: p.status === 'pending' ? '#d29922' : p.status === 'rejected' ? '#f85149' : 'var(--success)',
+                        background: p.status === 'pending' ? 'var(--warning-soft)' : p.status === 'rejected' ? 'var(--danger-soft)' : 'var(--success-soft)',
+                        color: p.status === 'pending' ? 'var(--warning)' : p.status === 'rejected' ? 'var(--danger)' : 'var(--success)',
                       }}>{p.status ?? 'active'}</span>
+                      {/* The reason a submission was turned down, where its
+                          author will actually see it. */}
+                      {p.status === 'rejected' && p.rejectionReason && (
+                        <p className="field__error" style={{ marginTop: '.25rem', maxWidth: '22rem', whiteSpace: 'normal' }}>
+                          {p.rejectionReason}
+                        </p>
+                      )}
                     </td>
                     <td data-label="Actions"><div className="flex gap-sm">
                       {canEdit(p) ? (
