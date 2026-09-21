@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { hasToken } from '../lib/api';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useCurrentUser } from '../hooks/useCurrentUser';
+import ThemeToggle from '../components/ThemeToggle';
+import CopyButton from '../components/CopyButton';
 
 type Plugin = {
   id: number;
@@ -38,14 +40,34 @@ const SORTS = [
 ];
 
 export default function RegistryPage() {
-  const [plugins, setPlugins]         = useState<Plugin[]>([]);
-  const [pagination, setPagination]   = useState<Pagination | null>(null);
-  const [search, setSearch]           = useState('');
-  const [category, setCategory]       = useState('');
-  const [sort, setSort]               = useState('');
-  const [page, setPage]               = useState(1);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState('');
+  // Filters live in the URL, not in component state. Previously a search, a
+  // category and a page number existed only in memory: the result could not be
+  // linked to or bookmarked, and the browser's back button left the list
+  // instead of stepping back through it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search   = searchParams.get('search')   ?? '';
+  const category = searchParams.get('category') ?? '';
+  const sort     = searchParams.get('sort')     ?? '';
+  const page     = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1);
+
+  const [plugins, setPlugins]       = useState<Plugin[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
+  const [reloadToken, setReloadToken] = useState(0);
+
+  /** Writes a filter change to the URL, resetting to page 1 unless paging. */
+  const updateParams = useCallback((changes: Record<string, string>, keepPage = false) => {
+    setSearchParams(current => {
+      const next = new URLSearchParams(current);
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      }
+      if (!keepPage) next.delete('page');
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +84,9 @@ export default function RegistryPage() {
 
     async function load() {
       try {
-        const d = await fetch(`/api/v1/plugins?${params}`).then(r => r.json());
+        const resp = await fetch(`/api/v1/plugins?${params}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const d = await resp.json();
         if (cancelled) return;
         setPlugins(d.data ?? []);
         setPagination(d.pagination ?? null);
@@ -70,36 +94,43 @@ export default function RegistryPage() {
         setLoading(false);
       } catch {
         if (!cancelled) {
-          setError('Failed to load plugins.');
+          setError('Could not load plugins. The registry API may be unavailable.');
           setLoading(false);
         }
       }
     }
 
-    load();
+    void load();
     return () => { cancelled = true; };
-  }, [page, search, category, sort]);
+  }, [page, search, category, sort, reloadToken]);
 
-  // debounce search
-  const [searchInput, setSearchInput] = useState('');
+  // Debounced search input, seeded from the URL so a shared link shows its
+  // own search term in the box.
+  const [searchInput, setSearchInput] = useState(search);
   useEffect(() => {
-    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
+    if (searchInput === search) return;
+    const t = setTimeout(() => updateParams({ search: searchInput }), 300);
     return () => clearTimeout(t);
-  }, [searchInput]);
+  }, [searchInput, search, updateParams]);
 
-  const isLoggedIn = hasToken();
+  const { user } = useCurrentUser();
+  const isLoggedIn = user !== null;
+  const hasFilters = Boolean(search || category);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+
       {/* Top bar */}
       <header style={{ borderBottom: '1px solid var(--border)', padding: '0 1.5rem', height: '3.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 10 }}>
         <a style={{ display: 'flex', alignItems: 'center', gap: '.5rem', textDecoration: 'none', color: 'var(--fg)', fontWeight: 700 }} href="/">
-          <img src="/semrel.svg" alt="semrel" style={{ width: '1.4rem', height: '1.4rem' }} />
+          <img src="/semrel.svg" alt="" aria-hidden="true" style={{ width: '1.4rem', height: '1.4rem' }} />
           semrel Registry
         </a>
         <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-          <a href="/api/v1/plugins" target="_blank" rel="noopener" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
-            API ↗
+          <ThemeToggle />
+          <a href="/api/v1/plugins" target="_blank" rel="noopener noreferrer" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
+            API <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
           </a>
           {isLoggedIn
             ? <Link to="/admin" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Admin Panel</Link>
@@ -108,7 +139,7 @@ export default function RegistryPage() {
         </div>
       </header>
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <main id="main-content" tabIndex={-1} style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         {/* Hero */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <h1 style={{ fontSize: 'clamp(1.5rem,4vw,2.25rem)', fontWeight: 800, marginBottom: '.5rem' }}>
@@ -127,60 +158,116 @@ export default function RegistryPage() {
           )}
         </div>
 
-        {/* Search + filter + sort */}
-        <div style={{ display: 'flex', gap: '.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-          <input
-            className="input"
-            style={{ flex: 1, minWidth: '200px' }}
-            placeholder="Search plugins…"
-            value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
-          />
-          <select
-            className="input"
-            style={{ width: 'auto' }}
-            value={category}
-            onChange={e => { setCategory(e.target.value); setPage(1); }}
-          >
-            <option value="">All categories</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select
-            className="input"
-            style={{ width: 'auto' }}
-            value={sort}
-            onChange={e => { setSort(e.target.value); setPage(1); }}
-          >
-            {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-          </select>
-        </div>
+        {/* Search + filter + sort. Every control is labelled: a placeholder is
+            not a label — it disappears on typing and several screen readers
+            never announce it. */}
+        <search>
+          <div style={{ display: 'flex', gap: '.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <label className="sr-only" htmlFor="registry-search">Search plugins</label>
+              <input
+                id="registry-search"
+                type="search"
+                className="input"
+                style={{ width: '100%' }}
+                placeholder="Search plugins…"
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="sr-only" htmlFor="registry-category">Filter by category</label>
+              <select
+                id="registry-category"
+                className="input"
+                style={{ width: 'auto' }}
+                value={category}
+                onChange={e => updateParams({ category: e.target.value })}
+              >
+                <option value="">All categories</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="sr-only" htmlFor="registry-sort">Sort by</label>
+              <select
+                id="registry-sort"
+                className="input"
+                style={{ width: 'auto' }}
+                value={sort}
+                onChange={e => updateParams({ sort: e.target.value })}
+              >
+                {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+          </div>
+        </search>
 
-        {/* Error */}
-        {error && <div className="alert alert--error">{error}</div>}
+        {/* Error — with a way out, rather than a dead end. */}
+        {error && (
+          <div className="alert alert--error" role="alert">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm"
+              style={{ marginLeft: '.75rem' }}
+              onClick={() => setReloadToken(t => t + 1)}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {/* Result count, announced when it changes. */}
+        <div className="sr-only" role="status" aria-live="polite">
+          {loading ? 'Loading plugins' : `${pagination?.total ?? plugins.length} plugins found`}
+        </div>
 
         {/* Plugin grid */}
         {loading ? (
-          <p className="muted" style={{ textAlign: 'center', padding: '3rem 0' }}>Loading…</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }} aria-hidden="true">
+            {Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton skeleton-card" />)}
+          </div>
         ) : plugins.length === 0 ? (
-          <p className="muted" style={{ textAlign: 'center', padding: '3rem 0' }}>No plugins found.</p>
+          <div className="empty-state">
+            <span className="empty-state__title">
+              {hasFilters ? 'No plugins match these filters' : 'No plugins published yet'}
+            </span>
+            <p style={{ margin: 0, maxWidth: '32rem' }}>
+              {hasFilters
+                ? 'Try a broader search term or a different category.'
+                : 'Once a plugin is published and approved it appears here.'}
+            </p>
+            {hasFilters && (
+              <button type="button" className="btn btn--secondary" onClick={() => setSearchParams(new URLSearchParams(), { replace: true })}>
+                Clear filters
+              </button>
+            )}
+          </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {plugins.map(p => {
               const pluginKey = p.namespace ? `${p.namespace}/${p.name}` : p.name;
+              // The card is a container with a stretched link over the title
+              // rather than a link wrapping everything: an interactive control
+              // (the copy button) nested inside an anchor is invalid markup and
+              // unreachable by keyboard in some browsers.
               return (
-              <Link
+              <div
                 key={p.id}
-                to={`/plugins/${encodeURIComponent(pluginKey)}`}
-                style={{ textDecoration: 'none', color: 'inherit', display: 'flex' }}
+                className="card plugin-card"
+                style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem', width: '100%' }}
               >
-                <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem', width: '100%', cursor: 'pointer', transition: 'border-color .15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = '')}
-                >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
                     <div style={{ overflow: 'hidden' }}>
                       {p.namespace && <span className="muted" style={{ fontSize: 'var(--fs-xs)', display: 'block' }}>{p.namespace}</span>}
-                      <span style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{p.name}</span>
+                      <Link
+                        to={`/plugins/${encodeURIComponent(pluginKey)}`}
+                        className="plugin-card__link"
+                        style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', color: 'inherit' }}
+                      >
+                        {p.name}
+                      </Link>
                     </div>
                     <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
                   </div>
@@ -188,9 +275,15 @@ export default function RegistryPage() {
                     {p.description || 'No description.'}
                   </p>
 
-                  {/* Install hint */}
+                  {/* Install command — the reason most visitors open this page,
+                      so it is copyable without a detour through the detail view. */}
                   <div className="registry-cli-cmd">
-                    semrel plugin install {pluginKey}
+                    <code>semrel plugin install {pluginKey}</code>
+                    <CopyButton
+                      text={`semrel plugin install ${pluginKey}`}
+                      label="Copy install command"
+                      className="copy-button copy-button--inline"
+                    />
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '.35rem', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '.25rem' }}>
@@ -212,15 +305,14 @@ export default function RegistryPage() {
                         const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');
                         return (
-                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'rgba(210,153,34,.15)' : 'rgba(56,139,253,.12)', color: isDev ? '#d7a22a' : 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                            v{ver}
+                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'var(--warning-soft)' : 'var(--accent-soft)', color: isDev ? 'var(--warning)' : 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            <span className="sr-only">{isDev ? 'Development version ' : 'Latest version '}</span>v{ver}
                           </span>
                         );
                       })()}
                     </div>
                   </div>
                 </div>
-              </Link>
               );
             })}
           </div>
@@ -228,11 +320,27 @@ export default function RegistryPage() {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '.5rem' }}>
-            <button className="btn btn--secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span className="muted" style={{ lineHeight: '2rem', fontSize: 'var(--fs-sm)' }}>Page {page} / {pagination.pages}</span>
-            <button className="btn btn--secondary" disabled={page >= pagination.pages} onClick={() => setPage(p => p + 1)}>Next →</button>
-          </div>
+          <nav aria-label="Pagination" style={{ display: 'flex', justifyContent: 'center', gap: '.5rem' }}>
+            <button
+              type="button"
+              className="btn btn--secondary"
+              disabled={page <= 1}
+              onClick={() => updateParams({ page: String(page - 1) }, true)}
+            >
+              <span aria-hidden="true">←</span> Previous
+            </button>
+            <span className="muted" style={{ lineHeight: '2rem', fontSize: 'var(--fs-sm)' }}>
+              Page {page} of {pagination.pages}
+            </span>
+            <button
+              type="button"
+              className="btn btn--secondary"
+              disabled={page >= pagination.pages}
+              onClick={() => updateParams({ page: String(page + 1) }, true)}
+            >
+              Next <span aria-hidden="true">→</span>
+            </button>
+          </nav>
         )}
 
         {/* Footer */}
@@ -247,7 +355,7 @@ export default function RegistryPage() {
             {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
           </div>
         </footer>
-      </div>
+      </main>
     </div>
   );
 }

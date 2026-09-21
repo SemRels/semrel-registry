@@ -29,6 +29,10 @@
   --danger:      #ef4444;
   --danger-soft: rgba(239, 68, 68, 0.1);
   
+  --focus-ring:  #a5b4fc;
+  --surface-subtle: rgba(255, 255, 255, 0.03);
+  --surface-raised: rgba(255, 255, 255, 0.05);
+
   --radius:      10px;
   --radius-lg:   14px;
   --fs:          0.875rem;
@@ -86,7 +90,7 @@ h1, h2, h3, h4 {
   font-weight: 700; 
   line-height: 1.2; 
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--text);
 }
 h1 { font-size: 1.5rem; }
 h2 { font-size: 1.2rem; }
@@ -126,10 +130,10 @@ code, pre {
   font-weight: 800;
   font-size: 1.1rem;
   letter-spacing: -0.03em;
-  color: #fff;
+  color: var(--text);
   text-decoration: none;
 }
-.sidebar__brand:hover { text-shadow: none; color: #fff; }
+.sidebar__brand:hover { text-shadow: none; color: var(--text); }
 .sidebar__brand img {
   filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
   transition: transform 0.3s ease;
@@ -172,11 +176,11 @@ code, pre {
 }
 .sidebar__link:hover { 
   background: rgba(255, 255, 255, 0.04); 
-  color: #fff; 
+  color: var(--text); 
   text-decoration: none; 
 }
 .sidebar__link.active { 
-  color: #fff; 
+  color: var(--text); 
   background: var(--accent-soft); 
   border-left: 3px solid var(--accent);
   box-shadow: inset 5px 0 10px rgba(99, 102, 241, 0.05);
@@ -203,7 +207,7 @@ code, pre {
 }
 .sidebar__logout:hover { 
   border-color: var(--danger); 
-  color: #fff; 
+  color: var(--text); 
   background: var(--danger-soft);
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
 }
@@ -300,7 +304,7 @@ code, pre {
 }
 .btn--danger { 
   border-color: var(--danger); 
-  color: #fff; 
+  color: var(--danger); 
   background: transparent; 
 }
 .btn--danger:hover { 
@@ -428,7 +432,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   font-size: 1.75rem; 
   font-weight: 800; 
   line-height: 1.1; 
-  color: #fff;
+  color: var(--text);
   letter-spacing: -0.03em;
 }
 
@@ -681,7 +685,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   border-radius: 0 6px 6px 0;
 }
 .markdown-body hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-.markdown-body strong { font-weight: 700; color: #fff; }
+.markdown-body strong { font-weight: 700; color: var(--text); }
 .markdown-body em { font-style: italic; }
 
 /* ── Hamburger button (mobile only) ──────────────────── */
@@ -767,7 +771,7 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
     gap: .5rem;
     font-weight: 800;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text);
     text-decoration: none;
     flex: 1;
     letter-spacing: -0.02em;
@@ -936,4 +940,406 @@ tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
   left: 0.85rem;
   z-index: 2;
   pointer-events: none;
+}
+
+/* ══ Accessibility ══════════════════════════════════════════════════════════
+   Appended last so these rules win over the component styles above at equal
+   specificity. */
+
+/* ── Focus ────────────────────────────────────────────────────────────────
+   Previously only text inputs had a focus style, and they replaced the outline
+   with a box-shadow. Keyboard users had no visible focus anywhere else, and
+   box-shadow is dropped entirely in forced-colors mode — so the indicator
+   disappeared exactly where it was needed most.
+
+   :focus-visible rather than :focus keeps the ring off mouse clicks. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Elements that draw their own ring still need a real outline in forced
+   colours, where custom colours are discarded. */
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* Remove the ring for pointer interaction only — never unconditionally. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+  .btn,
+  .badge,
+  .card,
+  .stat-card {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* ── Skip link ────────────────────────────────────────────────────────────
+   The first tab stop on every page: without it, keyboard and screen-reader
+   users traverse the whole sidebar before reaching content, on every
+   navigation. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: .625rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0 0 var(--radius) 0;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* ── Screen-reader-only text ──────────────────────────────────────────────
+   For labels that must be announced but not shown, and for the text
+   equivalent of icon-only status markers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────────
+   Respect the operating-system setting. Vestibular disorders make the
+   page-entrance and card animations actively unpleasant, and "all 0.25s ease"
+   transitions are applied liberally throughout this stylesheet. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Target size ──────────────────────────────────────────────────────────
+   WCAG 2.5.8: interactive controls need at least 24×24 CSS pixels. */
+.btn,
+.sidebar__link,
+.sidebar__toggle,
+.sidebar__logout {
+  min-height: 2rem;
+}
+
+/* ── Colour scheme ────────────────────────────────────────────────────────
+   The registry was dark-only and hard-wired, which leaves people who need a
+   light or high-contrast surface no option at all. The palette lives in
+   tokens, so light mode is a matter of redefining them.
+
+   Order matters: the system preference applies unless the visitor has chosen
+   a theme explicitly, and the explicit choice wins in both directions. */
+:root {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+
+    --bg:           #f8fafc;
+    --bg-2:         #ffffff;
+    --bg-3:         #f1f5f9;
+    --border:       rgba(15, 23, 42, 0.12);
+    --border-hover: rgba(79, 70, 229, 0.45);
+    --text:         #0f172a;
+    --text-muted:   #475569;
+
+    --accent:        #4f46e5;
+    --accent-soft:   rgba(79, 70, 229, 0.1);
+    --accent-glow:   0 0 20px rgba(79, 70, 229, 0.15);
+    --focus-ring:    #4338ca;
+
+    /* Darker than the dark-theme values: these are read as text on a light
+       surface, where the brighter variants fall below 4.5:1. */
+    --success:      #047857;
+    --success-soft: rgba(4, 120, 87, 0.1);
+    --warning:      #b45309;
+    --warning-soft: rgba(180, 83, 9, 0.1);
+    --danger:       #b91c1c;
+    --danger-soft:  rgba(185, 28, 28, 0.1);
+
+    --shadow:         0 8px 30px rgba(15, 23, 42, 0.08);
+    --glass:          rgba(255, 255, 255, 0.75);
+    --surface-subtle: rgba(15, 23, 42, 0.03);
+    --surface-raised: rgba(15, 23, 42, 0.05);
+  }
+
+  /* Category badges carry light text intended for a dark surface; on a light
+     background that text is unreadable. */
+  :root:not([data-theme='dark']) .badge--provider  { color: #3730a3; border-color: rgba(67, 56, 202, .35); }
+  :root:not([data-theme='dark']) .badge--analyzer  { color: #065f46; border-color: rgba(6, 95, 70, .35); }
+  :root:not([data-theme='dark']) .badge--condition { color: #92400e; border-color: rgba(146, 64, 14, .35); }
+  :root:not([data-theme='dark']) .badge--hook      { color: #991b1b; border-color: rgba(153, 27, 27, .35); }
+  :root:not([data-theme='dark']) .badge--updater   { color: #155e75; border-color: rgba(21, 94, 117, .35); }
+  :root:not([data-theme='dark']) .badge--generator { color: #6b21a8; border-color: rgba(107, 33, 168, .35); }
+  :root:not([data-theme='dark']) .badge--packager  { color: #075985; border-color: rgba(7, 89, 133, .35); }
+  :root:not([data-theme='dark']) .badge--publisher { color: #115e59; border-color: rgba(17, 94, 89, .35); }
+  :root:not([data-theme='dark']) .badge--active    { color: #047857; }
+  :root:not([data-theme='dark']) .badge--pending   { color: #b45309; }
+  :root:not([data-theme='dark']) .badge--rejected  { color: #b91c1c; }
+
+  :root:not([data-theme='dark']) body {
+    background-image:
+      radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
+  }
+
+  :root:not([data-theme='dark']) .sidebar,
+  :root:not([data-theme='dark']) .card,
+  :root:not([data-theme='dark']) .stat-card,
+  :root:not([data-theme='dark']) .login-card {
+    background: var(--bg-2);
+  }
+
+  :root:not([data-theme='dark']) .sidebar__brand,
+  :root:not([data-theme='dark']) .sidebar__brand:hover {
+    color: var(--text);
+  }
+}
+
+/* An explicit light choice must win even when the system prefers dark. */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg:           #f8fafc;
+  --bg-2:         #ffffff;
+  --bg-3:         #f1f5f9;
+  --border:       rgba(15, 23, 42, 0.12);
+  --border-hover: rgba(79, 70, 229, 0.45);
+  --text:         #0f172a;
+  --text-muted:   #475569;
+
+  --accent:        #4f46e5;
+  --accent-soft:   rgba(79, 70, 229, 0.1);
+  --accent-glow:   0 0 20px rgba(79, 70, 229, 0.15);
+  --focus-ring:    #4338ca;
+
+  --success:      #047857;
+  --success-soft: rgba(4, 120, 87, 0.1);
+  --warning:      #b45309;
+  --warning-soft: rgba(180, 83, 9, 0.1);
+  --danger:       #b91c1c;
+  --danger-soft:  rgba(185, 28, 28, 0.1);
+
+  --shadow:         0 8px 30px rgba(15, 23, 42, 0.08);
+  --glass:          rgba(255, 255, 255, 0.75);
+  --surface-subtle: rgba(15, 23, 42, 0.03);
+  --surface-raised: rgba(15, 23, 42, 0.05);
+}
+
+:root[data-theme='light'] .badge--provider  { color: #3730a3; border-color: rgba(67, 56, 202, .35); }
+:root[data-theme='light'] .badge--analyzer  { color: #065f46; border-color: rgba(6, 95, 70, .35); }
+:root[data-theme='light'] .badge--condition { color: #92400e; border-color: rgba(146, 64, 14, .35); }
+:root[data-theme='light'] .badge--hook      { color: #991b1b; border-color: rgba(153, 27, 27, .35); }
+:root[data-theme='light'] .badge--updater   { color: #155e75; border-color: rgba(21, 94, 117, .35); }
+:root[data-theme='light'] .badge--generator { color: #6b21a8; border-color: rgba(107, 33, 168, .35); }
+:root[data-theme='light'] .badge--packager  { color: #075985; border-color: rgba(7, 89, 133, .35); }
+:root[data-theme='light'] .badge--publisher { color: #115e59; border-color: rgba(17, 94, 89, .35); }
+:root[data-theme='light'] .badge--active    { color: #047857; }
+:root[data-theme='light'] .badge--pending   { color: #b45309; }
+:root[data-theme='light'] .badge--rejected  { color: #b91c1c; }
+
+:root[data-theme='light'] body {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.06) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
+}
+
+:root[data-theme='light'] .sidebar,
+:root[data-theme='light'] .card,
+:root[data-theme='light'] .stat-card,
+:root[data-theme='light'] .login-card {
+  background: var(--bg-2);
+}
+
+:root[data-theme='light'] .sidebar__brand,
+:root[data-theme='light'] .sidebar__brand:hover {
+  color: var(--text);
+}
+
+/* ── Theme toggle ─────────────────────────────────────────────────────────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  min-height: 2rem;
+  padding: .3rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease;
+}
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+/* ── Status and loading ───────────────────────────────────────────────────── */
+.centered-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.centered-status--page {
+  min-height: 100vh;
+}
+
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* Reduced motion: a pulsing dot conveys "working" without rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+    border-top-color: var(--accent);
+    opacity: .6;
+  }
+}
+
+/* ── Empty states ─────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-subtle);
+}
+.empty-state__title {
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--fs);
+}
+
+/* ── Skeletons ────────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-subtle) 25%, var(--surface-raised) 37%, var(--surface-subtle) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: var(--radius);
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--surface-raised); }
+}
+.skeleton-card {
+  height: 8.5rem;
+}
+
+/* ── Form field errors ────────────────────────────────────────────────────── */
+.field__error {
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.field__hint {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* ── Plugin cards ─────────────────────────────────────────────────────────── */
+.plugin-card {
+  position: relative;
+  transition: border-color .15s ease;
+}
+.plugin-card:hover,
+.plugin-card:focus-within {
+  border-color: var(--accent);
+}
+/* Stretched link: the whole card is clickable, but only the title is a link in
+   the accessibility tree and the tab order. */
+.plugin-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.plugin-card__link:hover {
+  text-decoration: underline;
+}
+
+/* ── Copy buttons ─────────────────────────────────────────────────────────── */
+.copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-xs);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color .15s ease, background-color .15s ease;
+}
+.copy-button:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+/* Above the stretched link, so it copies instead of navigating. */
+.copy-button--inline {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.registry-cli-cmd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.registry-cli-cmd code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

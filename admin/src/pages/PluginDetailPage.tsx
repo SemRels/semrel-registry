@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
-import { hasToken, revalidatePlugin } from '../lib/api';
+import { revalidatePlugin } from '../lib/api';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import type { ValidationResult } from '../lib/api';
 
 /** Creates or updates a <meta> tag in the document head. */
@@ -207,7 +208,8 @@ export default function PluginDetailPage() {
   const [expandedVersionId, setExpandedVersionId] = useState<number | null>(null);
   const [checks, setChecks] = useState<ValidationResult | null>(null);
   const [revalidating, setRevalidating] = useState(false);
-  const isLoggedIn = hasToken();
+  const { user } = useCurrentUser();
+  const isLoggedIn = user !== null;
 
   useEffect(() => {
     if (!name) return;

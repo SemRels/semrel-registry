@@ -120,9 +120,15 @@ func (f SortFilter) ApplyTo(builder *strings.Builder, _ *[]interface{}) {
 		direction = "ASC"
 	}
 
-	builder.WriteString(fmt.Sprintf(" ORDER BY %s %s", field, direction))
+	builder.WriteString(fmt.Sprintf(" ORDER BY %s %s", sortColumnExpr(field), direction))
 }
 
+// normalizeSortField maps a caller-supplied sort field onto the canonical
+// logical name, or "" when the field is not sortable.
+//
+// It returns a logical name rather than a SQL fragment because both backends
+// consume it: the file backend matched the result against plain field names and
+// silently fell back to sorting by name when handed SQL.
 func normalizeSortField(field string) string {
 	switch strings.ToLower(strings.TrimSpace(field)) {
 	case "name":
@@ -134,8 +140,24 @@ func normalizeSortField(field string) string {
 	case "updated_at", "updatedat":
 		return "updated_at"
 	case "downloads":
-		return "COALESCE(downloads, 0)"
+		return "downloads"
+	case "views":
+		return "views"
 	default:
 		return ""
+	}
+}
+
+// sortColumnExpr renders a logical sort field as a SQL expression. Only fields
+// that survived normalizeSortField reach this, so no caller input is
+// interpolated into the query.
+func sortColumnExpr(field string) string {
+	switch field {
+	case "downloads":
+		return "COALESCE(downloads, 0)"
+	case "views":
+		return "COALESCE(views, 0)"
+	default:
+		return field
 	}
 }

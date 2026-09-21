@@ -78,7 +78,18 @@
     }
     </script>
 
-    <!-- GA Consent Mode v2: deny by default until user consents -->
+    <!--
+      Analytics is NOT loaded here.
+
+      gtag.js used to be fetched on every page load, before the visitor had
+      answered the cookie banner. Consent Mode v2 stops Google from writing
+      cookies, but the request itself still discloses the visitor's IP address
+      and the page they are on — which is the part GDPR treats as processing.
+
+      The tag is injected from CookieConsent.tsx only after analytics consent is
+      given, and the queue below exists so any gtag() call made before that is
+      buffered rather than thrown.
+    -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
@@ -87,13 +98,6 @@
         ad_storage: 'denied',
         wait_for_update: 500,
       });
-    </script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0RD0CMG2RV"></script>
-    <script>
-      gtag('js', new Date());
-      gtag('config', 'G-0RD0CMG2RV');
     </script>
   </head>
   <body>

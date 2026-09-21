@@ -198,7 +198,7 @@ function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlu
 }
 
 export default function DashboardPage() {
-  const user    = useCurrentUser();
+  const { user } = useCurrentUser();
   const navigate = useNavigate();
   const isAdmin = user?.isAdmin === true;
   const [stats, setStats]                     = useState<Stats | null>(null);

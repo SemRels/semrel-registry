@@ -48,6 +48,7 @@ var allowedSorts = map[string]struct{}{
 	"created_at": {},
 	"updated_at": {},
 	"downloads":  {},
+	"views":      {},
 }
 
 type ListPluginsParams struct {
@@ -579,7 +580,7 @@ func validateListParams(params ListPluginsParams) error {
 		return &appErrors.ValidationError{Field: "search", Issue: fmt.Sprintf("must be at most %d characters", maxSearchLength)}
 	}
 	if _, ok := allowedSorts[params.Sort]; !ok {
-		return &appErrors.ValidationError{Field: "sort", Issue: "must be one of: name, category, created_at, updated_at"}
+		return &appErrors.ValidationError{Field: "sort", Issue: "must be one of: name, category, created_at, updated_at, downloads, views"}
 	}
 	return nil
 }

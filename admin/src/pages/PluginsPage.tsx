@@ -14,7 +14,7 @@ const CAT_CLASS: Record<string, string> = {
 };
 
 export default function PluginsPage() {
-  const user                          = useCurrentUser();
+  const { user } = useCurrentUser();
   const isAdmin                       = user?.isAdmin ?? false;
   const [searchParams, setSearchParams] = useSearchParams();
   const initialPage = Number.parseInt(searchParams.get('page') ?? '1', 10);

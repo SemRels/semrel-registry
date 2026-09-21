@@ -2,8 +2,70 @@
 
 const API_BASE = '/api/v1';
 
+/**
+ * Key for the development-only static admin token.
+ *
+ * GitHub sign-in no longer produces a token the browser can see: the session
+ * lives in an HttpOnly cookie the API sets. This remains only for the
+ * ADMIN_TOKEN login form, which is the fallback when OAuth is not configured
+ * locally.
+ */
+const DEV_TOKEN_KEY = 'admin_token';
+
 export function getToken(): string {
-  return localStorage.getItem('admin_token') ?? '';
+  try {
+    return localStorage.getItem(DEV_TOKEN_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Raised when the session is gone, so callers can prompt instead of failing. */
+export class SessionExpiredError extends Error {
+  constructor() {
+    super('Your session has expired. Please sign in again.');
+    this.name = 'SessionExpiredError';
+  }
+}
+
+/** Raised when the server asks for a fresh interactive sign-in. */
+export class ReauthRequiredError extends Error {
+  readonly signInURL: string;
+  constructor(signInURL: string) {
+    super('Please sign in with GitHub again to confirm this action.');
+    this.name = 'ReauthRequiredError';
+    this.signInURL = signInURL;
+  }
+}
+
+type SessionListener = () => void;
+const sessionListeners = new Set<SessionListener>();
+
+/**
+ * Subscribes to session loss.
+ *
+ * The client used to respond to a 401 with `location.href = '/login'`, which
+ * reloads the app and discards whatever the user had typed, with no
+ * explanation. Instead the app is notified and can say what happened and
+ * return the user to the page they were on.
+ */
+export function onSessionExpired(listener: SessionListener): () => void {
+  sessionListeners.add(listener);
+  return () => sessionListeners.delete(listener);
+}
+
+function notifySessionExpired() {
+  try {
+    localStorage.removeItem(DEV_TOKEN_KEY);
+  } catch {
+    // Nothing to clean up if storage is unavailable.
+  }
+  sessionListeners.forEach(listener => listener());
+}
+
+interface ApiErrorBody {
+  message?: string;
+  error?: { message?: string; code?: string; details?: { signInURL?: string } };
 }
 
 async function request<T>(
@@ -15,24 +77,26 @@ async function request<T>(
     ...(options.headers as Record<string, string>),
   };
 
+  // Only the development token still travels in a header; the GitHub session
+  // rides along as a cookie, which is why credentials must be included.
   const token = getToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const resp = await fetch(`${API_BASE}${path}`, { ...options, headers });
-
-  if (resp.status === 401) {
-    localStorage.removeItem('admin_token');
-    globalThis.location.href = '/login';
-    throw new Error('Unauthorized');
-  }
+  const resp = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
 
   if (!resp.ok) {
-    const body = await resp.json().catch(() => ({})) as {
-      message?: string;
-      error?: { message?: string };
-    };
+    const body = await resp.json().catch(() => ({})) as ApiErrorBody;
+
+    if (resp.status === 401) {
+      if (body.error?.code === 'REAUTH_REQUIRED') {
+        throw new ReauthRequiredError(body.error.details?.signInURL ?? '/auth/github');
+      }
+      notifySessionExpired();
+      throw new SessionExpiredError();
+    }
+
     const message = body.message ?? body.error?.message;
     throw new Error(message ?? `HTTP ${resp.status}`);
   }
@@ -194,11 +258,18 @@ export async function deleteVersion(
   });
 }
 
+/**
+ * Deletes the signed-in account.
+ *
+ * `reauthToken` is only for API clients that authenticate with a bearer token.
+ * Browsers prove freshness by having signed in with GitHub recently; the server
+ * answers with ReauthRequiredError when they have not.
+ */
 export async function deleteAccount(data: {
   confirmation: string;
-  reauthToken: string;
   deleteOwnedPlugins: boolean;
   reason?: string;
+  reauthToken?: string;
 }): Promise<{ data: { pluginsDeleted: number; versionsDeleted: number } }> {
   return request('/auth/me', { method: 'DELETE', body: JSON.stringify(data) });
 }
@@ -234,20 +305,83 @@ export async function verifyToken(token: string): Promise<boolean> {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   };
-  const resp = await fetch(`${API_BASE}/admin/status`, { headers });
+  const resp = await fetch(`${API_BASE}/admin/status`, { headers, credentials: 'include' });
   return resp.ok;
 }
 
 export function saveToken(token: string): void {
-  localStorage.setItem('admin_token', token);
+  try {
+    localStorage.setItem(DEV_TOKEN_KEY, token);
+  } catch {
+    // Non-fatal: the caller still holds a working session for this page load.
+  }
 }
 
 export function clearToken(): void {
-  localStorage.removeItem('admin_token');
+  try {
+    localStorage.removeItem(DEV_TOKEN_KEY);
+  } catch {
+    // Nothing to clean up if storage is unavailable.
+  }
 }
 
-export function hasToken(): boolean {
-  return Boolean(localStorage.getItem('admin_token'));
+// ---- Session ----
+
+export interface SessionUser {
+  login: string;
+  name: string;
+  avatarUrl: string;
+  role: string;    // "admin" | "user"
+  isAdmin: boolean;
+}
+
+interface RawSessionUser {
+  login?: string;
+  name?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+  role?: string;
+  is_admin?: boolean;
+  isAdmin?: boolean;
+}
+
+/**
+ * Returns the signed-in user, or null when there is no session.
+ *
+ * The identity comes from the API rather than from decoding a JWT in the
+ * browser: with an HttpOnly cookie there is no token to decode, and a token the
+ * page can read is a token an injected script can steal.
+ */
+export async function getCurrentUser(): Promise<SessionUser | null> {
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const resp = await fetch(`${API_BASE}/auth/me`, { headers, credentials: 'include' });
+  if (!resp.ok) return null;
+
+  const body = await resp.json().catch(() => null) as { user?: RawSessionUser } | null;
+  const user = body?.user;
+  if (!user?.login) return null;
+
+  const isAdmin = user.is_admin === true || user.isAdmin === true || user.role === 'admin';
+  return {
+    login: user.login,
+    name: user.name ?? '',
+    avatarUrl: user.avatar_url ?? user.avatarUrl ?? '',
+    role: user.role ?? (isAdmin ? 'admin' : 'user'),
+    isAdmin,
+  };
+}
+
+/** Ends the session server-side, then clears any local development token. */
+export async function signOut(): Promise<void> {
+  try {
+    await request<void>('/auth/logout', { method: 'POST' });
+  } catch {
+    // An already-invalid session is still a successful sign-out.
+  }
+  clearToken();
 }
 
 // ---- Auth config ----

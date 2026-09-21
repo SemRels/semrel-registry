@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { validatePlugin, submitPlugin } from '../lib/api';
 import type { ValidationResult } from '../lib/api';
 import LegalLinks from '../components/LegalLinks';
+import StatusIcon from '../components/StatusIcon';
 
 const CATEGORIES = ['analyzer', 'condition', 'generator', 'hook', 'provider', 'updater', 'packager', 'publisher'];
 
@@ -66,11 +68,19 @@ export default function SubmitPage() {
   if (submitted) {
     return (
       <div className="page__body page__body--form">
-        <div className="alert" style={{ background: 'var(--success-subtle, #1a3a2a)', borderColor: 'var(--success, #3fb950)', color: 'var(--success, #3fb950)', padding: '1.25rem', borderRadius: 8 }}>
-          <strong>Plugin submitted for review!</strong>
-          <p style={{ marginTop: '.5rem', marginBottom: 0 }}>
-            Your plugin is now <em>pending review</em> by the SemRels maintainers.
-            You'll be able to see it in <a href="/plugins" style={{ color: 'inherit' }}>My Plugins</a> with status "pending".
+        {/* role="status": submission succeeds without a navigation, so this is
+            the only signal that anything happened. */}
+        <div
+          className="alert"
+          role="status"
+          style={{ background: 'var(--success-soft)', borderColor: 'var(--success)', color: 'var(--success)', padding: '1.25rem', borderRadius: 8 }}
+        >
+          <strong>Plugin submitted for review</strong>
+          <p style={{ marginTop: '.5rem', marginBottom: 0, color: 'inherit' }}>
+            Your plugin is now <em>pending review</em> by the SemRels maintainers. It appears
+            in <Link to="/admin/plugins" style={{ color: 'inherit', textDecoration: 'underline' }}>My Plugins</Link> with
+            status &ldquo;pending&rdquo; until a maintainer approves or rejects it. If it is
+            rejected you will see the reason there.
           </p>
         </div>
       </div>
@@ -89,39 +99,54 @@ export default function SubmitPage() {
       {/* Step 1: Validate */}
       <div className="card" style={{ marginBottom: '1rem' }}>
         <h2 style={{ fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>1. Validate repository</h2>
-        <div style={{ display: 'flex', gap: '.5rem' }}>
-          <input
-            className="input"
-            style={{ flex: 1 }}
-            placeholder="https://github.com/your-org/analyzer-myanalyzer"
-            value={repoUrl}
-            onChange={e => { setRepoUrl(e.target.value); setValidation(null); }}
-          />
-          <button className="btn btn--primary" onClick={() => { void handleValidate(); }} disabled={!repoUrl || validating}>
-            {validating ? 'Checking…' : 'Validate'}
-          </button>
+        <div className="field">
+          <label htmlFor="repo-url">Repository URL</label>
+          <div style={{ display: 'flex', gap: '.5rem' }}>
+            <input
+              id="repo-url"
+              className="input"
+              style={{ flex: 1 }}
+              type="url"
+              placeholder="https://github.com/your-org/analyzer-myanalyzer"
+              value={repoUrl}
+              aria-describedby="repo-url-hint"
+              onChange={e => { setRepoUrl(e.target.value); setValidation(null); }}
+            />
+            <button type="button" className="btn btn--primary" onClick={() => { void handleValidate(); }} disabled={!repoUrl || validating}>
+              {validating ? 'Checking…' : 'Validate'}
+            </button>
+          </div>
+          <span id="repo-url-hint" className="field__hint">
+            A public GitHub repository named <code>&lt;category&gt;-&lt;name&gt;</code>, for example <code>analyzer-myanalyzer</code>.
+          </span>
         </div>
 
-        {validation && (
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.25rem .6rem',
-              borderRadius: 4, fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: '.75rem',
-              background: validation.valid ? 'rgba(63,185,80,.15)' : 'rgba(248,81,73,.15)',
-              color: validation.valid ? '#3fb950' : '#f85149',
-            }}>
-              {validation.valid ? '✓ Passes all checks' : '✗ Some checks failed'}
+        {/* aria-live: the result arrives asynchronously, so without a live
+            region a screen-reader user is given no indication it appeared. */}
+        <div aria-live="polite" aria-busy={validating}>
+          {validating && <p className="muted">Checking the repository against the plugin standards…</p>}
+          {validation && (
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.25rem .6rem',
+                borderRadius: 4, fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: '.75rem',
+                background: validation.valid ? 'var(--success-soft)' : 'var(--danger-soft)',
+                color: validation.valid ? 'var(--success)' : 'var(--danger)',
+              }}>
+                <span aria-hidden="true">{validation.valid ? '✓' : '✗'}</span>
+                {validation.valid ? 'Passes all checks' : 'Some checks failed'}
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
+                {validation.checks.map(ch => (
+                  <li key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '.4rem', fontSize: 'var(--fs-sm)' }}>
+                    <StatusIcon passed={ch.passed} />
+                    <span>{ch.label}{ch.message ? ` — ${ch.message}` : ''}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
-              {validation.checks.map(ch => (
-                <li key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '.4rem', fontSize: 'var(--fs-sm)' }}>
-                  <span style={{ color: ch.passed ? '#3fb950' : '#f85149', flexShrink: 0 }}>{ch.passed ? '✓' : '✗'}</span>
-                  <span>{ch.label}{ch.message ? ` — ${ch.message}` : ''}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Step 2: Fill details and submit */}
@@ -129,26 +154,26 @@ export default function SubmitPage() {
         <h2 style={{ fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>2. Plugin details</h2>
 
         <div className="field">
-          <label>Description</label>
-          <input className="input" placeholder="Short description of what this plugin does"
+          <label htmlFor="plugin-description">Description</label>
+          <input id="plugin-description" className="input" placeholder="Short description of what this plugin does"
             value={description} onChange={e => setDescription(e.target.value)} required />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="field">
-            <label>Category</label>
-            <select className="input" value={category} onChange={e => setCategory(e.target.value)} required>
+            <label htmlFor="plugin-category">Category</label>
+            <select id="plugin-category" className="input" value={category} onChange={e => setCategory(e.target.value)} required>
               <option value="">Select…</option>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="field">
-            <label>License</label>
-            <input className="input" value={license} onChange={e => setLicense(e.target.value)} required />
+            <label htmlFor="plugin-license">License</label>
+            <input id="plugin-license" className="input" value={license} onChange={e => setLicense(e.target.value)} required />
           </div>
         </div>
 
-        {error && <div className="alert alert--error" style={{ marginTop: '.75rem' }}>{error}</div>}
+        {error && <div className="alert alert--error" role="alert" style={{ marginTop: '.75rem' }}>{error}</div>}
 
         <button
           type="submit"

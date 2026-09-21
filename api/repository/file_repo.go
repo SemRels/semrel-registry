@@ -951,6 +951,13 @@ func sortPlugins(plugins []models.Plugin, field string, desc bool) {
 			less = plugins[i].CreatedAt.Before(plugins[j].CreatedAt)
 		case "updated_at":
 			less = plugins[i].UpdatedAt.Before(plugins[j].UpdatedAt)
+		case "downloads":
+			// Missing here, these fell through to the name comparison, so the
+			// file backend answered "most downloaded" with an alphabetical
+			// list and no indication that the sort had been ignored.
+			less = plugins[i].Downloads < plugins[j].Downloads
+		case "views":
+			less = plugins[i].Views < plugins[j].Views
 		default: // "name"
 			less = strings.ToLower(plugins[i].Name) < strings.ToLower(plugins[j].Name)
 		}
