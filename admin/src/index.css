@@ -49,6 +49,8 @@
   --chart-tooltip-fg: #e5e7eb;
   --chart-grid:       rgba(255, 255, 255, 0.08);
   --chart-point-ring: #0b0f19;
+  --viz-seq:          #3987e5;
+  --viz-seq-soft:     rgba(57, 135, 229, 0.18);
   --code-bg:          #02040a;
   --code-fg:          #67e8f9;
   --code-inline-fg:   #e5e7eb;
@@ -1140,6 +1142,8 @@ tbody tr:hover td { background: var(--surface-subtle); }
     --chart-grid:       rgba(15, 23, 42, 0.12);
     --chart-point-ring: #ffffff;
     --code-bg:          #f1f5f9;
+    --viz-seq:          #2a78d6;
+    --viz-seq-soft:     rgba(42, 120, 214, 0.14);
     --glass:            #ffffff;
     --code-fg:          #0e7490;
     --code-inline-fg:   #0f172a;
@@ -1224,6 +1228,8 @@ tbody tr:hover td { background: var(--surface-subtle); }
   --chart-grid:       rgba(15, 23, 42, 0.12);
   --chart-point-ring: #ffffff;
   --code-bg:          #f1f5f9;
+  --viz-seq:          #2a78d6;
+  --viz-seq-soft:     rgba(42, 120, 214, 0.14);
   --glass:            #ffffff;
   --code-fg:          #0e7490;
   --code-inline-fg:   #0f172a;
@@ -1519,4 +1525,151 @@ tbody tr:hover td { background: var(--surface-subtle); }
 }
 .skeleton-tile {
   height: 6rem;
+}
+
+/* ══ Charts ═════════════════════════════════════════════════════════════════
+   Colours are validated, not chosen: the sequential blue clears every check on
+   both surfaces, and the status trio is the reserved status palette, which is
+   fixed rather than themed. Its warning step sits below 3:1 on a light surface,
+   so the status chart carries visible labels and counts — colour alone never
+   identifies a segment. */
+:root {
+  /* The sequential hue lives with the other theme tokens at the top of this
+     file, so its light step is overridden where every other one is. Only the
+     status palette belongs here: it is fixed, so it has no light counterpart. */
+
+  /* Status (state). Never themed. */
+  --status-good:     #0ca30c;
+  --status-warning:  #fab219;
+  --status-critical: #d03b3b;
+}
+
+.viz {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.viz__title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── Horizontal bars ──────────────────────────────────────────────────────── */
+.viz-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+.viz-bars__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7.5rem 1fr 3.5rem;
+  align-items: center;
+  gap: .6rem;
+  /* The row, not the bar, is the hit target: a 8px bar is too small to aim at. */
+  padding: .25rem 0;
+  border-radius: 6px;
+}
+.viz-bars__row:hover,
+.viz-bars__row:focus-visible {
+  background: var(--surface-subtle);
+}
+.viz-bars__label {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.viz-bars__track {
+  display: block;
+  height: 8px;
+  background: var(--viz-seq-soft);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.viz-bars__fill {
+  display: block;
+  height: 100%;
+  background: var(--viz-seq);
+  /* 4px rounded data-end, anchored to the baseline at the left. */
+  border-radius: 0 4px 4px 0;
+  transition: width .3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-bars__fill { transition: none; }
+}
+/* Values wear text ink, never the series colour. */
+.viz-bars__value {
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text);
+}
+
+/* ── Stacked composition ──────────────────────────────────────────────────── */
+.viz-stack {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  /* 2px surface gap between adjacent fills, so segments stay separable even
+     where two of them sit close in lightness. */
+  gap: 2px;
+  background: var(--surface-subtle);
+}
+.viz-stack__segment {
+  min-width: 4px;
+  border-radius: 3px;
+}
+
+.viz-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem 1.25rem;
+}
+.viz-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: .15rem .25rem;
+  border-radius: 4px;
+}
+.viz-legend__item.is-hovered {
+  background: var(--surface-subtle);
+}
+.viz-legend__swatch {
+  width: .7rem;
+  height: .7rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.viz-legend__label { color: var(--text); font-weight: 600; }
+.viz-legend__value { font-variant-numeric: tabular-nums; }
+
+/* ── Tooltip ──────────────────────────────────────────────────────────────── */
+.viz-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  z-index: 2;
+  background: var(--chart-tooltip-bg);
+  color: var(--chart-tooltip-fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: .2rem .5rem;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow);
 }

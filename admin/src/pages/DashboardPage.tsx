@@ -4,6 +4,7 @@ import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { TileSkeleton, TableSkeleton, EmptyState } from '../components/LoadingState';
+import { CategoryBars, StatusComposition } from '../components/StatCharts';
 
 type TrendPoint = { period: string; views: number; downloads: number };
 
@@ -302,6 +303,10 @@ export default function DashboardPage() {
   const topPlugins = stats?.topPlugins ?? [];
   const topVersions = stats?.topVersions ?? [];
   const statusCounts = stats?.statusCounts ?? {};
+  const categoryData = Object.entries(categories)
+    .map(([label, value]) => ({ label, value: Number(value ?? 0) }))
+    .filter(entry => entry.value > 0);
+  const hasStatusCounts = Object.values(statusCounts).some(value => Number(value ?? 0) > 0);
   // hoveredSeriesIndex maps directly to activeSeries (oldest→newest)
   const activePoint = (() => {
     if (activeSeries.length === 0) return null;
@@ -383,19 +388,28 @@ export default function DashboardPage() {
               <div className="stat-card__label">Downloads</div>
               <div className="stat-card__value">{totalDownloads.toLocaleString()}</div>
             </div>
-            {Object.entries(categories).map(([cat, count]) => (
-              <div key={cat} className="stat-card stat-card--category">
-                <div className="stat-card__label">{cat}</div>
-                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
-              </div>
-            ))}
-            {isAdmin && Object.entries(statusCounts).map(([status, count]) => (
-              <div key={`status-${status}`} className={`stat-card stat-card--status stat-card--${status}`}>
-                <div className="stat-card__label">{status} status</div>
-                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
-              </div>
-            ))}
           </div>
+
+          {/* The four totals above stay numbers: a single current value has no
+              shape, and a one-bar chart says less than the figure does. These
+              two carry structure — a magnitude comparison and a part-to-whole
+              split — which is what a chart is for. */}
+          {(categoryData.length > 0 || hasStatusCounts) && (
+            <div className="dashboard-panels" style={{ marginTop: '1rem' }}>
+              {/* A card is only drawn when its chart has something to draw —
+                  an empty bordered box reads as a broken panel. */}
+              {categoryData.length > 0 && (
+                <div className="card">
+                  <CategoryBars total={totalPlugins} data={categoryData} />
+                </div>
+              )}
+              {isAdmin && hasStatusCounts && (
+                <div className="card">
+                  <StatusComposition counts={statusCounts} />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="card" style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
