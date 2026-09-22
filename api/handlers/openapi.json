@@ -39,6 +39,10 @@
     {
       "name": "schemas",
       "description": "Configuration JSON Schemas."
+    },
+    {
+      "name": "webhooks",
+      "description": "Consumer subscriptions for outbound plugin event notifications."
     }
   ],
   "paths": {
@@ -737,6 +741,132 @@
         }
       }
     },
+    "/api/v1/plugins/{id}/advisories/refresh": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Re-import security advisories",
+        "description": "Re-imports the plugin repository's published GitHub security advisories, synchronously, replacing what was previously stored.",
+        "responses": {
+          "200": {
+            "description": "The imported advisories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SecurityAdvisory"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "Plugin has no valid GitHub repository URL."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/audit": {
+      "post": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Audit installed plugins for known advisories",
+        "description": "Checks a set of installed plugin@version pairs against each plugin's imported security advisories. This is what `semrel plugin audit` calls. Unknown plugin refs are silently skipped, and only pairs with at least one affecting advisory are returned.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["plugins"],
+                "properties": {
+                  "plugins": {
+                    "type": "array",
+                    "maxItems": 200,
+                    "items": {
+                      "type": "object",
+                      "required": ["ref", "version"],
+                      "properties": {
+                        "ref": {
+                          "type": "string",
+                          "description": "Plugin name, or \"@namespace/name\"."
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plugins with at least one affecting advisory.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ref": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "advisories": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/SecurityAdvisory"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
     "/api/v1/plugins/@{namespace}/{name}": {
       "parameters": [
         {
@@ -991,6 +1121,144 @@
           },
           "404": {
             "description": "The repository is not a registered plugin."
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/subscriptions": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Subscribe to a plugin's events",
+        "description": "Registers an outbound webhook for one plugin's events, so a consumer learns about a new release, a yank, or a new security advisory without polling plugins.json. The URL must be https and must not resolve to a private or internal address. The response's `secret` is shown once and never again — deliveries are signed the same way the registry's own inbound release webhook is: `X-Hub-Signature-256: sha256=<hmac-sha256 of the raw body>`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url", "pluginRef", "events"],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Must use https and resolve to a public address."
+                  },
+                  "pluginRef": {
+                    "type": "string",
+                    "description": "Plugin name, or \"@namespace/name\"."
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["version.published", "version.yanked", "version.unyanked", "advisory.published"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created. The only response that ever carries the signing secret.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "allOf": [
+                        { "$ref": "#/components/schemas/WebhookSubscription" },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "secret": {
+                              "type": "string",
+                              "description": "Shown only in this response."
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "pluginRef does not match a known plugin."
+          },
+          "422": {
+            "description": "The account has reached its subscription limit (20)."
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "List your webhook subscriptions",
+        "responses": {
+          "200": {
+            "description": "The caller's own subscriptions. Never includes the signing secret.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookSubscription"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/subscriptions/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "delete": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Remove a webhook subscription",
+        "description": "Removes one of the caller's own subscriptions. Admins may remove any.",
+        "responses": {
+          "204": {
+            "description": "Removed."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1901,6 +2169,17 @@
             "type": "string",
             "format": "date-time"
           },
+          "securityAdvisories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityAdvisory"
+            }
+          },
+          "advisoriesCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When security advisories were last imported. Absent means never attempted."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -2482,6 +2761,98 @@
           "issue": {
             "type": "string",
             "description": "Explains a negative result: no attestation published, a repository mismatch, or GitHub being unreachable."
+          }
+        }
+      },
+      "SecurityAdvisory": {
+        "type": "object",
+        "description": "A known vulnerability affecting a plugin, imported from the GitHub security advisories published on the plugin's own repository.",
+        "properties": {
+          "ghsaId": {
+            "type": "string",
+            "examples": [
+              "GHSA-xxxx-xxxx-xxxx"
+            ]
+          },
+          "cveId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "vulnerableRange": {
+            "type": "string",
+            "description": "Affected versions, in this registry's own range syntax (see the version schema's compatibility.semrelCore)."
+          },
+          "patchedVersion": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set when GitHub itself retracted the advisory, e.g. a false positive."
+          }
+        }
+      },
+      "WebhookSubscription": {
+        "type": "object",
+        "description": "An outbound notification a consumer registered for one plugin's events.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "pluginRef": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["version.published", "version.yanked", "version.unyanked", "advisory.published"]
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Automatically set to false after 10 consecutive delivery failures."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastStatusCode": {
+            "type": "integer"
+          },
+          "consecutiveFailures": {
+            "type": "integer"
           }
         }
       }

@@ -61,5 +61,11 @@ func (h *PluginHandler) setVersionYank(c *gin.Context, yanked bool) {
 		return
 	}
 
+	event := models.WebhookEventVersionYanked
+	if !yanked {
+		event = models.WebhookEventVersionUnyanked
+	}
+	DeliverWebhookEvent(h.webhooks, plugin.Ref(), event, version)
+
 	c.JSON(http.StatusOK, gin.H{"data": version})
 }

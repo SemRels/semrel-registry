@@ -103,6 +103,9 @@ type PluginManager interface {
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
 	// SetProvenance records a build-attestation lookup for a version.
 	SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error
+	// SetSecurityAdvisories records the imported GitHub security advisories
+	// for a plugin's repository.
+	SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error
 }
 
 type PluginService struct {
@@ -1004,6 +1007,10 @@ func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, ch
 
 func (s *PluginService) SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error {
 	return s.repo.SetProvenance(ctx, versionID, provenance)
+}
+
+func (s *PluginService) SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	return s.repo.SetSecurityAdvisories(ctx, pluginID, advisories)
 }
 
 func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {

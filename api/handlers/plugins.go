@@ -10,14 +10,16 @@ import (
 	"strings"
 
 	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 )
 
 type PluginHandler struct {
-	service service.PluginManager
-	metrics service.MetricsRecorder
-	dedup   *service.DownloadDeduplicator
+	service  service.PluginManager
+	metrics  service.MetricsRecorder
+	dedup    *service.DownloadDeduplicator
+	webhooks repository.WebhookRepository
 }
 
 func NewPluginHandler(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *PluginHandler {
@@ -30,6 +32,14 @@ func NewPluginHandler(pluginService service.PluginManager, metrics ...service.Me
 		metrics: recorder,
 		dedup:   service.NewDownloadDeduplicator(service.DownloadDedupWindow),
 	}
+}
+
+// WithWebhooks wires consumer webhook delivery into the handler. Left unset,
+// every trigger point becomes a no-op — existing callers and tests that build
+// a PluginHandler without a webhook repository keep working unchanged.
+func (h *PluginHandler) WithWebhooks(webhooks repository.WebhookRepository) *PluginHandler {
+	h.webhooks = webhooks
+	return h
 }
 
 func Health() gin.HandlerFunc {
@@ -324,6 +334,7 @@ func (h *PluginHandler) CreatePlugin(c *gin.Context) {
 		HandleError(c, err)
 		return
 	}
+	triggerAdvisoryRefresh(h.service, h.webhooks, created.ID, created.Repository)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
@@ -410,6 +421,7 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 
 	if plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id")); err == nil {
 		triggerProvenanceCheck(h.service, created.ID, plugin.Repository, created.Checksums)
+		DeliverWebhookEvent(h.webhooks, plugin.Ref(), models.WebhookEventVersionPublished, created)
 	}
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%s/versions/%d", c.Param("id"), created.ID))
@@ -529,6 +541,7 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 		}
 		_ = h.service.UpdateValidationChecks(context.Background(), id, raw)
 	}(created.ID, created.Repository)
+	triggerAdvisoryRefresh(h.service, h.webhooks, created.ID, created.Repository)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})

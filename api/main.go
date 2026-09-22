@@ -40,6 +40,7 @@ func main() {
 	service.SetAllowedArtifactHosts(cfg.AllowedDownloadHosts)
 
 	var pluginRepo repository.PluginRepository
+	var webhookRepo repository.WebhookRepository
 	var postgresDB *database.Database
 	metricsRecorder := service.NewNoopMetricsRecorder()
 	statsProvider := service.NewNoopRegistryStatsProvider()
@@ -53,6 +54,11 @@ func main() {
 		}
 		pluginRepo = repo
 		metricsRecorder = service.NewFileMetricsRecorder(repo, cfg.MetricsFlushInterval)
+		webhooks, err := repository.NewFileWebhookRepository(cfg.StorageDir)
+		if err != nil {
+			log.Fatalf("webhook repository init failed: %v", err)
+		}
+		webhookRepo = webhooks
 
 	default: // "postgres"
 		db, err := database.Connect(cfg.DatabaseURL)
@@ -76,6 +82,7 @@ func main() {
 		}
 
 		pluginRepo = repository.NewPluginRepository(db)
+		webhookRepo = repository.NewWebhookRepository(db)
 		metricsRecorder = service.NewAsyncMetricsRecorder(db, service.MetricsConfig{
 			BufferSize:    cfg.MetricsQueueSize,
 			BatchSize:     cfg.MetricsBatchSize,
@@ -118,8 +125,9 @@ func main() {
 	}
 
 	router := newRouter(pluginService, routerDependencies{
-		metrics: metricsRecorder,
-		stats:   statsProvider,
+		metrics:  metricsRecorder,
+		stats:    statsProvider,
+		webhooks: webhookRepo,
 		rateLimCfg: middleware.RateLimitConfig{
 			Enabled:    cfg.RateLimitEnabled,
 			PublicRPM:  cfg.RateLimitPublicRPM,
@@ -177,6 +185,7 @@ func main() {
 type routerDependencies struct {
 	metrics    service.MetricsRecorder
 	stats      service.RegistryStatsProvider
+	webhooks   repository.WebhookRepository
 	rateLimCfg middleware.RateLimitConfig
 	cfg        *config.Config
 }
@@ -184,6 +193,7 @@ type routerDependencies struct {
 func newRouter(pluginService service.PluginManager, deps ...routerDependencies) *gin.Engine {
 	metricsRecorder := service.NewNoopMetricsRecorder()
 	statsProvider := service.NewNoopRegistryStatsProvider()
+	var webhookRepo repository.WebhookRepository
 	var rlCfg middleware.RateLimitConfig
 	cfg := &config.Config{}
 	if len(deps) > 0 {
@@ -193,6 +203,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 		if deps[0].stats != nil {
 			statsProvider = deps[0].stats
 		}
+		webhookRepo = deps[0].webhooks
 		rlCfg = deps[0].rateLimCfg
 		if deps[0].cfg != nil {
 			cfg = deps[0].cfg
@@ -246,7 +257,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 
 	// Public read endpoints — with OptionalAuth so admins can filter by status.
 	optionalAuth := middleware.OptionalAuth(authHandler)
-	pluginHandler := handlers.NewPluginHandler(pluginService, metricsRecorder)
+	pluginHandler := handlers.NewPluginHandler(pluginService, metricsRecorder).WithWebhooks(webhookRepo)
 	api.GET("/plugins", rlPublic, optionalAuth, pluginHandler.ListPlugins)
 	api.GET("/plugins/:id", rlPublic, optionalAuth, pluginHandler.GetPlugin)
 	api.GET("/plugins/:id/versions", rlPublic, pluginHandler.ListPluginVersions)
@@ -260,6 +271,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	api.GET("/plugins/@:namespace/:name/versions", rlPublic, pluginHandler.ListPluginVersionsByNamespace)
 	api.GET("/plugins/@:namespace/:name/versions/:version/download", rlPublic, pluginHandler.DownloadPluginVersionByNamespace)
 	api.POST("/plugins/@:namespace/:name/versions/:version/downloads", rlPublic, pluginHandler.TrackDownloadByNamespace)
+	// Checks installed plugin@version pairs against known security advisories
+	// — what `semrel plugin audit` calls. Read-only, so no authentication.
+	api.POST("/audit", rlPublic, pluginHandler.AuditPlugins)
 
 	adminHandler := handlers.NewAdminHandler(pluginService, statsProvider)
 	api.GET("/stats", requireAdmin, adminHandler.GetStats)
@@ -269,7 +283,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// harder than an ordinary read even though it needs no authentication.
 	api.POST("/plugins/validate", rlWrite, handlers.ValidatePlugin)
 
-	syncHandler := handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret)
+	syncHandler := handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret).WithWebhooks(webhookRepo)
 
 	// Sitemap for SEO — lists all active plugin pages.
 	sitemapHandler := handlers.NewSitemapHandler(pluginService)
@@ -318,6 +332,14 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// path slot across all methods, and the public downloads-counter route
 	// already registered ":version" as a POST at this same position.
 	authRoutes.POST("/plugins/:id/versions/:version/reverify-provenance", pluginHandler.ReverifyProvenance)
+	authRoutes.POST("/plugins/:id/advisories/refresh", pluginHandler.RefreshSecurityAdvisories)
+
+	// Consumer webhook subscriptions: any authenticated account, not just a
+	// plugin's own publisher, can ask to be notified about a plugin's events.
+	webhookHandler := handlers.NewWebhookHandler(webhookRepo, pluginService)
+	authRoutes.POST("/webhooks/subscriptions", webhookHandler.CreateSubscription)
+	authRoutes.GET("/webhooks/subscriptions", webhookHandler.ListSubscriptions)
+	authRoutes.DELETE("/webhooks/subscriptions/:id", webhookHandler.DeleteSubscription)
 
 	// Admin-only endpoints.
 	adminRoutes := api.Group("")

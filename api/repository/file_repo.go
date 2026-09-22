@@ -301,6 +301,26 @@ func (s *fileStore) UpdateValidationChecks(_ context.Context, id int64, checksJS
 	return s.savePlugin(p)
 }
 
+func (s *fileStore) SetSecurityAdvisories(_ context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(pluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	now := time.Now().UTC()
+	p.SecurityAdvisories = advisories
+	p.AdvisoriesCheckedAt = &now
+	return s.savePlugin(p)
+}
+
 func (s *fileStore) Delete(_ context.Context, spec models.PluginDeletionSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

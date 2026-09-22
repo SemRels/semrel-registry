@@ -180,6 +180,10 @@ func (a *mockRepositoryAdapter) SetProvenance(_ context.Context, _ int64, _ *mod
 	return nil
 }
 
+func (a *mockRepositoryAdapter) SetSecurityAdvisories(_ context.Context, _ int64, _ []models.SecurityAdvisory) error {
+	return nil
+}
+
 func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ models.VersionDeletionSpec) error {
 	return nil
 }

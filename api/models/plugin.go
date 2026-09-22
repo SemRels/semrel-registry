@@ -33,6 +33,13 @@ type Plugin struct {
 	Downloads        int64           `json:"downloads"`
 	ValidationChecks json.RawMessage `json:"validationChecks,omitempty"`
 	ValidatedAt      *time.Time      `json:"validatedAt,omitempty"`
+
+	// SecurityAdvisories is imported from GitHub's own security advisories for
+	// the plugin's repository. Nil means it has never been looked up; an empty
+	// (non-nil) slice means it was checked and nothing was found.
+	SecurityAdvisories  []SecurityAdvisory `json:"securityAdvisories,omitempty"`
+	AdvisoriesCheckedAt *time.Time         `json:"advisoriesCheckedAt,omitempty"`
+
 	CreatedAt        time.Time       `json:"createdAt"`
 	UpdatedAt        time.Time       `json:"updatedAt"`
 	DeletedAt        *time.Time      `json:"deletedAt,omitempty"`
@@ -247,4 +254,27 @@ type Provenance struct {
 	PredicateType string `json:"predicateType,omitempty"`
 	// Issue explains a negative result, so "unverified" is never mute.
 	Issue string `json:"issue,omitempty"`
+}
+
+// SecurityAdvisory is a known vulnerability affecting a plugin, imported from
+// the GitHub Security Advisories published on the plugin's own repository.
+type SecurityAdvisory struct {
+	GHSAID   string `json:"ghsaId"`
+	CVEID    string `json:"cveId,omitempty"`
+	Summary  string `json:"summary"`
+	Severity string `json:"severity,omitempty"`
+	URL      string `json:"url,omitempty"`
+	// VulnerableRange is the affected versions, converted to the range syntax
+	// this registry's own semver package understands (see ParseRange).
+	VulnerableRange string     `json:"vulnerableRange,omitempty"`
+	PatchedVersion  string     `json:"patchedVersion,omitempty"`
+	PublishedAt     *time.Time `json:"publishedAt,omitempty"`
+	// WithdrawnAt marks an advisory GitHub itself retracted, e.g. a false
+	// positive. It is imported but excluded from audit results.
+	WithdrawnAt *time.Time `json:"withdrawnAt,omitempty"`
+}
+
+// Withdrawn reports whether GitHub itself retracted this advisory.
+func (a SecurityAdvisory) Withdrawn() bool {
+	return a.WithdrawnAt != nil
 }

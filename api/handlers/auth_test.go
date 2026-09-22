@@ -71,6 +71,9 @@ func (s *stubAccountManager) UpdateValidationChecks(context.Context, int64, []by
 func (s *stubAccountManager) SetProvenance(context.Context, int64, *models.Provenance) error {
 	return nil
 }
+func (s *stubAccountManager) SetSecurityAdvisories(context.Context, int64, []models.SecurityAdvisory) error {
+	return nil
+}
 func (s *stubAccountManager) ReviewPlugin(context.Context, string, string, models.ReviewDecision, string) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }

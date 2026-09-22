@@ -241,3 +241,78 @@ and names the expected repository — not the Sigstore signature bundle itself,
 which needs the full transparency-log client. What it rules out is the case
 that matters most in a registry: an artifact whose bytes no build in the
 claimed repository ever produced.
+
+## Security advisories
+
+A checksum and a build attestation both describe an artifact as published;
+neither says anything about vulnerabilities discovered in it afterwards.
+GitHub already collects those, as
+[Security Advisories](https://docs.github.com/en/code-security/security-advisories)
+published against a plugin's own repository, so the registry imports them —
+a consumer sees known vulnerabilities without leaving the registry, and
+`semrel plugin audit` has something to check installed versions against.
+
+Advisories are re-imported whenever a plugin is created, submitted, or synced
+from GitHub, and can be refreshed on demand:
+
+```bash
+curl -X POST https://registry.semrel.io/api/v1/plugins/analyzer-conventional/advisories/refresh \
+  --cookie 'semrel_session=…'
+```
+
+Each advisory carries a `vulnerableRange` in the registry's own semver range
+syntax. A range that cannot be parsed, or was never recorded, is treated as
+affecting every version — the conservative direction for a security check. A
+withdrawn GitHub advisory (a false positive, retracted) is imported but never
+reported as affecting anything.
+
+```bash
+curl -X POST https://registry.semrel.io/api/v1/audit \
+  -H 'Content-Type: application/json' \
+  -d '{"plugins":[{"ref":"analyzer-conventional","version":"1.1.0"}]}'
+```
+
+returns the subset of the given `plugin@version` pairs that have at least one
+affecting advisory, each with the advisories that apply. Unknown plugin refs
+are silently skipped rather than erroring, since this endpoint is meant to be
+called with a whole lockfile at once.
+
+## Consumer webhooks
+
+The registry already accepts an inbound webhook — a plugin repository telling
+the registry about a new release. This is the other direction: a registry
+consumer, not necessarily the plugin's own publisher, can ask to be notified
+about a plugin they depend on instead of polling `plugins.json` on a timer.
+
+```bash
+curl -X POST https://registry.semrel.io/api/v1/webhooks/subscriptions \
+  -H 'Content-Type: application/json' \
+  --cookie 'semrel_session=…' \
+  -d '{
+    "url": "https://example.com/hooks/semrel",
+    "pluginRef": "analyzer-conventional",
+    "events": ["version.published", "advisory.published"]
+  }'
+```
+
+The response's `secret` is shown once and never again; it signs every
+delivery the same way the registry's own inbound release webhook is signed:
+
+```
+X-Hub-Signature-256: sha256=<hmac-sha256 of the raw body, keyed with the subscription's secret>
+```
+
+Available events: `version.published`, `version.yanked`, `version.unyanked`,
+`advisory.published` (only for advisories not seen on a previous import, so a
+periodic refresh does not re-notify about the same advisory every time it
+runs). A subscription's URL must be `https://` and must not resolve to a
+loopback, private, or link-local address — a webhook URL is arbitrary, unlike
+an artifact URL, so it cannot be allowlisted by host and is checked by address
+class instead, both when the subscription is created and again immediately
+before every delivery. A subscription disables itself automatically after 10
+consecutive delivery failures, so a dead endpoint is not retried forever.
+
+`GET /api/v1/webhooks/subscriptions` lists the caller's own subscriptions
+(never including the secret); `DELETE /api/v1/webhooks/subscriptions/:id`
+removes one. Publishers may manage their own subscriptions; admins may remove
+any.

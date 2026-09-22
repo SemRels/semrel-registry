@@ -20,6 +20,7 @@ import (
 
 	"github.com/SemRels/semrel-registry/api/models"
 	"github.com/SemRels/semrel-registry/api/naming"
+	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 )
@@ -47,6 +48,11 @@ type ghAsset struct {
 type SyncHandler struct {
 	svc           service.PluginManager
 	webhookSecret string
+	// consumerWebhooks delivers outbound notifications to registry consumers
+	// who subscribed to a plugin's events — distinct from webhookSecret, which
+	// authenticates the *inbound* release notification a plugin repository
+	// sends this handler. Nil makes delivery a no-op.
+	consumerWebhooks repository.WebhookRepository
 }
 
 func NewSyncHandler(s service.PluginManager) *SyncHandler {
@@ -57,6 +63,12 @@ func NewSyncHandler(s service.PluginManager) *SyncHandler {
 // secret rather than reading the environment.
 func NewSyncHandlerWithSecret(s service.PluginManager, secret string) *SyncHandler {
 	return &SyncHandler{svc: s, webhookSecret: strings.TrimSpace(secret)}
+}
+
+// WithWebhooks wires consumer webhook delivery into the handler.
+func (h *SyncHandler) WithWebhooks(webhooks repository.WebhookRepository) *SyncHandler {
+	h.consumerWebhooks = webhooks
+	return h
 }
 
 // POST /api/v1/admin/sync-versions
@@ -166,6 +178,10 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Tags        []string              `json:"tags,omitempty"`
 		Downloads   int64                 `json:"downloads"`
 		Versions    []semrelPluginVersion `json:"versions"`
+		// SecurityAdvisories is omitted until import has actually been
+		// attempted; an empty (non-nil) slice means it was checked and none
+		// were found, which is a different, worth-distinguishing state.
+		SecurityAdvisories []models.SecurityAdvisory `json:"securityAdvisories,omitempty"`
 	}
 	type semrelRegistry struct {
 		SchemaVersion int            `json:"schemaVersion"`
@@ -221,9 +237,10 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 			License:     p.License,
 			Category:    p.Category,
 			Repository:  p.Repository,
-			Tags:        tags,
-			Downloads:   p.Downloads,
-			Versions:    svs,
+			Tags:               tags,
+			Downloads:          p.Downloads,
+			Versions:           svs,
+			SecurityAdvisories: p.SecurityAdvisories,
 		})
 	}
 
@@ -610,6 +627,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 			skipped++
 		}
 	}
+	triggerAdvisoryRefresh(h.svc, h.consumerWebhooks, p.ID, p.Repository)
 	return created, skipped, firstErr
 }
 
@@ -658,6 +676,7 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 	created, createErr := h.svc.CreateVersion(ctx, ref, ver)
 	if createErr == nil {
 		triggerProvenanceCheck(h.svc, created.ID, p.Repository, checksums)
+		DeliverWebhookEvent(h.consumerWebhooks, ref, models.WebhookEventVersionPublished, created)
 	}
 	return createErr == nil, createErr
 }

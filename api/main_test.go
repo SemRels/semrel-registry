@@ -74,6 +74,10 @@ func (stubPluginService) SetProvenance(_ context.Context, _ int64, _ *models.Pro
 	return nil
 }
 
+func (stubPluginService) SetSecurityAdvisories(_ context.Context, _ int64, _ []models.SecurityAdvisory) error {
+	return nil
+}
+
 func (stubPluginService) ReviewPlugin(_ context.Context, _, _ string, _ models.ReviewDecision, _ string) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }

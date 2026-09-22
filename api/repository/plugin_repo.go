@@ -27,6 +27,9 @@ type PluginRepository interface {
 	Update(ctx context.Context, plugin *models.Plugin) error
 	UpdateStatus(ctx context.Context, id int64, status string) error
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
+	// SetSecurityAdvisories records the imported GitHub security advisories for
+	// a plugin's repository.
+	SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error
 	Delete(ctx context.Context, spec models.PluginDeletionSpec) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
 	DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error
@@ -67,7 +70,7 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
        -- yanked_at IS NULL: a retracted release must never be advertised as
        -- the latest version, which is the whole point of yanking it.
@@ -141,7 +144,7 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
@@ -165,7 +168,7 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE deleted_at IS NULL
@@ -195,7 +198,7 @@ func (r *pgRepository) GetByNamespacedName(ctx context.Context, namespace, name 
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE deleted_at IS NULL
@@ -390,6 +393,29 @@ UPDATE plugins SET validation_checks = $1, validated_at = NOW(), updated_at = NO
 WHERE id = $2 AND deleted_at IS NULL`, checksJSON, id)
 	if err != nil {
 		return fmt.Errorf("update validation checks: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	encoded, err := json.Marshal(advisories)
+	if err != nil {
+		return fmt.Errorf("encode security advisories: %w", err)
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins SET security_advisories = $1, advisories_checked_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, encoded, pluginID)
+	if err != nil {
+		return fmt.Errorf("set security advisories: %w", err)
 	}
 	if result.RowsAffected() == 0 {
 		return appErrors.ErrPluginNotFound
@@ -647,6 +673,7 @@ func scanPlugin(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Plugin, error) {
 	var plugin models.Plugin
+	var advisoriesJSON []byte
 	if err := scanner.Scan(
 		&plugin.ID,
 		&plugin.Namespace,
@@ -662,6 +689,8 @@ func scanPlugin(scanner interface {
 		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
+		&advisoriesJSON,
+		&plugin.AdvisoriesCheckedAt,
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
@@ -681,7 +710,29 @@ func scanPlugin(scanner interface {
 	if plugin.Aliases == nil {
 		plugin.Aliases = []string{}
 	}
+	advisories, err := decodeSecurityAdvisories(advisoriesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("scan plugin: %w", err)
+	}
+	plugin.SecurityAdvisories = advisories
 	return &plugin, nil
+}
+
+// decodeSecurityAdvisories unmarshals the plugins.security_advisories JSONB
+// column. Absent that column-level nil vs. empty distinction, an empty result
+// still decodes to a non-nil empty slice, matching "checked, found nothing".
+func decodeSecurityAdvisories(raw []byte) ([]models.SecurityAdvisory, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	var advisories []models.SecurityAdvisory
+	if err := json.Unmarshal(raw, &advisories); err != nil {
+		return nil, fmt.Errorf("decode security advisories: %w", err)
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	return advisories, nil
 }
 
 // scanPluginWithLatest scans the extended list SELECT that includes a latest_version subquery column.
@@ -689,6 +740,7 @@ func scanPluginWithLatest(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Plugin, error) {
 	var plugin models.Plugin
+	var advisoriesJSON []byte
 	if err := scanner.Scan(
 		&plugin.ID,
 		&plugin.Namespace,
@@ -704,6 +756,8 @@ func scanPluginWithLatest(scanner interface {
 		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
+		&advisoriesJSON,
+		&plugin.AdvisoriesCheckedAt,
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
@@ -722,6 +776,11 @@ func scanPluginWithLatest(scanner interface {
 	if plugin.Aliases == nil {
 		plugin.Aliases = []string{}
 	}
+	advisories, err := decodeSecurityAdvisories(advisoriesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("scan plugin: %w", err)
+	}
+	plugin.SecurityAdvisories = advisories
 	plugin.Versions = []models.PluginVersion{}
 	return &plugin, nil
 }

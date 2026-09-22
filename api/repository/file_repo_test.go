@@ -580,6 +580,50 @@ func TestFileRepo_SetProvenance_UnknownVersionReturnsNotFound(t *testing.T) {
 	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
 }
 
+// -------------------------------------------------------------------------
+// SetSecurityAdvisories
+// -------------------------------------------------------------------------
+
+func TestFileRepo_SetSecurityAdvisories_RecordsResultAndTimestamp(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, err := repo.Create(context.Background(), basePlugin("plugin"))
+	require.NoError(t, err)
+
+	advisories := []models.SecurityAdvisory{
+		{GHSAID: "GHSA-aaaa-bbbb-cccc", Summary: "Arbitrary file write", VulnerableRange: "<1.2.3"},
+	}
+	require.NoError(t, repo.SetSecurityAdvisories(context.Background(), id, advisories))
+
+	stored, err := repo.GetByID(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, stored.SecurityAdvisories, 1)
+	assert.Equal(t, "GHSA-aaaa-bbbb-cccc", stored.SecurityAdvisories[0].GHSAID)
+	require.NotNil(t, stored.AdvisoriesCheckedAt)
+}
+
+// A nil result and "found nothing" are still distinguishable — via
+// AdvisoriesCheckedAt, not via whether the slice round-trips as nil or empty.
+// JSON's omitempty erases that distinction for a slice once it goes through
+// the file backend's marshal/unmarshal round trip, so this only asserts what
+// the feature actually depends on.
+func TestFileRepo_SetSecurityAdvisories_NilMeansCheckedAndEmpty(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
+
+	require.NoError(t, repo.SetSecurityAdvisories(context.Background(), id, nil))
+
+	stored, err := repo.GetByID(context.Background(), id)
+	require.NoError(t, err)
+	assert.Empty(t, stored.SecurityAdvisories)
+	require.NotNil(t, stored.AdvisoriesCheckedAt)
+}
+
+func TestFileRepo_SetSecurityAdvisories_UnknownPluginReturnsNotFound(t *testing.T) {
+	repo := newTestFileRepo(t)
+	err := repo.SetSecurityAdvisories(context.Background(), 999, nil)
+	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
+}
+
 func TestFileRepo_AddVersion_SortsByReleaseDateDesc(t *testing.T) {
 	repo := newTestFileRepo(t)
 	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
