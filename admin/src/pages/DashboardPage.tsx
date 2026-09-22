@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from '../lib/api';
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { TileSkeleton, TableSkeleton, EmptyState } from '../components/LoadingState';
 
 type TrendPoint = { period: string; views: number; downloads: number };
 
@@ -360,7 +361,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {!stats && !error && <p className="muted">Loading…</p>}
+        {!stats && !error && <TileSkeleton label="Loading registry statistics" />}
         {stats && (
           <>
           <div className="dashboard-metrics">
@@ -516,8 +517,14 @@ export default function DashboardPage() {
                 Review submissions →
               </button>
             </div>
-            {pendingLoading && <p className="muted">Loading…</p>}
-            {!pendingLoading && pending.length === 0 && <p className="muted">No pending submissions. 🎉</p>}
+            {pendingLoading && <TableSkeleton label="Loading pending submissions" count={3} />}
+            {!pendingLoading && pending.length === 0 && (
+              <EmptyState title="Nothing waiting for review">
+                Community submissions appear here. Approving one publishes it to
+                the catalogue; rejecting one asks you for a reason the author
+                will see.
+              </EmptyState>
+            )}
             {!pendingLoading && pending.length > 0 && pending.map(p => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ flex: 1 }}>

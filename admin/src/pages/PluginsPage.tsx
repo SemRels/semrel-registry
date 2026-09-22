@@ -4,6 +4,7 @@ import { listPlugins, deletePlugin, revalidateAllPlugins } from '../lib/api';
 import type { BatchRevalidationResponse } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { TableSkeleton, EmptyState } from '../components/LoadingState';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 
 const CAT_CLASS: Record<string, string> = {
@@ -177,18 +178,24 @@ export default function PluginsPage() {
           </select>
         </div>
 
-        {loading ? <p className="muted">Loading…</p> : (
+        {loading ? <TableSkeleton label="Loading plugins" count={6} /> : plugins.length === 0 ? (
+          <EmptyState
+            title={isAdmin ? 'No plugins in the registry yet' : 'No plugins attributed to your account'}
+            action={isAdmin
+              ? <Link to="/admin/plugins/new" className="btn btn--primary">Add the first plugin</Link>
+              : <Link to="/admin/submit" className="btn btn--primary">Submit a plugin</Link>}
+          >
+            {isAdmin
+              ? 'Plugins appear here once they are published or imported from GitHub.'
+              : 'Plugins you submit are listed here, including while they wait for review.'}
+          </EmptyState>
+        ) : (
           <div className="table-wrap">
             <table className="table--stack">
               <thead><tr>
                 <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Views</th><th>Downloads</th><th>Status</th><th></th>
               </tr></thead>
               <tbody>
-                {plugins.length === 0 && (
-                  <tr><td colSpan={9} style={{ textAlign:'center', padding:'2rem' }} className="muted">
-                    {isAdmin ? <Link to="/admin/plugins/new">Add the first plugin</Link> : 'No plugins attributed to your account yet.'}
-                  </td></tr>
-                )}
                 {plugins.map((p) => (
                   <tr key={p.id}>
                     <td data-label="Name"><strong style={{ fontSize:'var(--fs-sm)' }}>{p.namespace ? <span className="muted" style={{ fontWeight:400 }}>{p.namespace}/</span> : null}{p.name}</strong>

@@ -1502,3 +1502,21 @@ tbody tr:hover td { background: var(--surface-subtle); }
   padding: 1px 6px;
   white-space: nowrap;
 }
+
+/* ── Skeleton shapes ──────────────────────────────────────────────────────── */
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.skeleton-row {
+  height: 2.75rem;
+}
+.skeleton-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.skeleton-tile {
+  height: 6rem;
+}

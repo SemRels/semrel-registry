@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { listPlugins, approvePlugin, rejectPlugin, revalidatePlugin } from '../lib/api';
 import type { Plugin, ValidationResult } from '../lib/api';
 import ReasonDialog from '../components/ReasonDialog';
+import { TableSkeleton, EmptyState } from '../components/LoadingState';
 
 function CheckIcon({ passed }: { passed: boolean }) {
   return (
@@ -239,16 +240,15 @@ export default function SubmissionsPage() {
 
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
-        {loading && <p className="muted">Loading…</p>}
+        {loading && <TableSkeleton label="Loading submissions" count={3} />}
         {!loading && plugins.length === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 0', gap: '.75rem', textAlign: 'center' }}>
-            <span style={{ fontSize: '3.5rem', lineHeight: 1 }}>
-              {filter === 'pending' ? '🎉' : '📭'}
-            </span>
-            <p className="muted" style={{ margin: 0, fontSize: 'var(--fs-md)' }}>
-              {filter === 'pending' ? 'No pending submissions.' : `No ${filter} submissions.`}
-            </p>
-          </div>
+          <EmptyState
+            title={filter === 'pending' ? 'Nothing waiting for review' : `No ${filter} submissions`}
+          >
+            {filter === 'pending'
+              ? 'Community submissions land here. Approving one publishes it to the catalogue; rejecting one asks for a reason the author will see.'
+              : 'Nothing matches this filter. Switch to another to see the rest.'}
+          </EmptyState>
         )}
         {!loading && plugins.map(p => (
           <SubmissionCard

@@ -5,6 +5,7 @@ import type { Plugin, PluginVersion } from '../lib/api';
 import Markdown from '../components/Markdown';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 import ReasonDialog from '../components/ReasonDialog';
+import { TableSkeleton, EmptyState } from '../components/LoadingState';
 
 export default function VersionsPage() {
   const { id } = useParams<{ id: string }>();
@@ -94,7 +95,13 @@ export default function VersionsPage() {
     }
   }
 
-  if (loading) return <div className="page__body muted">Loading…</div>;
+  if (loading) {
+    return (
+      <div className="page__body">
+        <TableSkeleton label="Loading versions" count={4} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -144,7 +151,14 @@ export default function VersionsPage() {
         )}
 
         {versions.length === 0 ? (
-          <div className="muted" style={{ padding:'2rem 0', textAlign:'center' }}>No versions yet.</div>
+          <EmptyState
+            title="No versions published yet"
+            action={<button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>Publish the first version</button>}
+          >
+            A plugin without a published version cannot be installed. Versions
+            usually arrive automatically from GitHub releases; you can also add
+            one by hand.
+          </EmptyState>
         ) : (
           <div className="table-wrap">
             <table className="table--stack">
