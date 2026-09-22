@@ -120,9 +120,6 @@ export default function Layout() {
           <a href="https://github.com/SemRels" className="sidebar__link" target="_blank" rel="noopener noreferrer">
             GitHub <ExternalHint />
           </a>
-
-          <div className="sidebar__section-label">Legal</div>
-          <LegalLinks linkClassName="sidebar__link" />
         </nav>
         <div className="sidebar__footer">
           {user && (
