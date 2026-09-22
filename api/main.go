@@ -314,6 +314,10 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// Yank retracts a release without breaking builds that already pin it.
 	authRoutes.PUT("/plugins/:id/versions/:versionId/yank", pluginHandler.YankVersion)
 	authRoutes.DELETE("/plugins/:id/versions/:versionId/yank", pluginHandler.UnyankVersion)
+	// Uses :version (not :versionId) because gin shares one wildcard name per
+	// path slot across all methods, and the public downloads-counter route
+	// already registered ":version" as a POST at this same position.
+	authRoutes.POST("/plugins/:id/versions/:version/reverify-provenance", pluginHandler.ReverifyProvenance)
 
 	// Admin-only endpoints.
 	adminRoutes := api.Group("")

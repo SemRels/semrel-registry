@@ -176,6 +176,10 @@ func (a *mockRepositoryAdapter) UpdateValidationChecks(_ context.Context, _ int6
 	return nil
 }
 
+func (a *mockRepositoryAdapter) SetProvenance(_ context.Context, _ int64, _ *models.Provenance) error {
+	return nil
+}
+
 func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ models.VersionDeletionSpec) error {
 	return nil
 }

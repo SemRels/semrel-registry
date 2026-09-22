@@ -101,6 +101,8 @@ type PluginManager interface {
 	// YankVersion retracts a published version, or lifts the retraction.
 	YankVersion(ctx context.Context, ref string, versionID int64, yanked bool, request models.VersionYankRequest, actor models.DeleteActor) (models.PluginVersion, error)
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
+	// SetProvenance records a build-attestation lookup for a version.
+	SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error
 }
 
 type PluginService struct {
@@ -998,6 +1000,10 @@ func enrichPlugin(plugin models.Plugin, includeVersions bool) models.Plugin {
 
 func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error {
 	return s.repo.UpdateValidationChecks(ctx, id, checksJSON)
+}
+
+func (s *PluginService) SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error {
+	return s.repo.SetProvenance(ctx, versionID, provenance)
 }
 
 func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {

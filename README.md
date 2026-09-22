@@ -207,3 +207,37 @@ they import first-party plugins on the organisation's behalf.
 
 `POST /api/v1/plugins/verify-ownership` runs the same check on demand, which is
 what the submission form calls before asking for the rest of the details.
+
+## Build provenance
+
+A checksum proves an artifact's bytes were not altered in transit; it proves
+nothing about who produced them. A publisher whose token has been stolen can
+compute a perfectly correct checksum for a malicious binary, and the registry
+would serve it happily.
+
+When a version is published, the registry looks up GitHub's
+[artifact attestation](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
+for its artifact digest, in the background, and records:
+
+- whether an attestation exists at all for these exact bytes;
+- which repository and workflow the attestation says built them;
+- whether that repository matches the one the plugin claims to come from.
+
+A repository mismatch is the result that matters most — it means the artifact
+was built somewhere other than where the plugin says it comes from — so it is
+recorded as `verified: false` with an `issue`, not silently dropped. Provenance
+is included in a version's API representation and in `plugins.json` once a
+lookup has actually been attempted; a version that predates this feature, or
+whose repository publishes no attestations, simply omits it.
+
+`POST /api/v1/plugins/:id/versions/:version/reverify-provenance` re-runs the
+check on demand — the automatic lookup on publish can run before GitHub has
+finished generating the attestation, so a manual recheck shortly after often
+succeeds where the first one didn't. Publishers may reverify their own
+plugins' versions; admins may reverify any.
+
+This verifies the attestation's *subject* — that one exists for this digest
+and names the expected repository — not the Sigstore signature bundle itself,
+which needs the full transparency-log client. What it rules out is the case
+that matters most in a registry: an artifact whose bytes no build in the
+claimed repository ever produced.

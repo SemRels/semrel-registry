@@ -408,6 +408,10 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 		return
 	}
 
+	if plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id")); err == nil {
+		triggerProvenanceCheck(h.service, created.ID, plugin.Repository, created.Checksums)
+	}
+
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%s/versions/%d", c.Param("id"), created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
 }

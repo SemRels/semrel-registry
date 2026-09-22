@@ -1035,6 +1035,28 @@ func (s *fileStore) SetVersionYank(_ context.Context, spec models.VersionYankSpe
 	return appErrors.ErrPluginNotFound
 }
 
+func (s *fileStore) SetProvenance(_ context.Context, versionID int64, provenance *models.Provenance) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	plugins, err := s.loadAll()
+	if err != nil {
+		return err
+	}
+	for _, p := range plugins {
+		for i := range p.Versions {
+			if p.Versions[i].ID != versionID || p.Versions[i].DeletedAt != nil {
+				continue
+			}
+			now := time.Now().UTC()
+			p.Versions[i].Provenance = provenance
+			p.Versions[i].ProvenanceCheckedAt = &now
+			return s.savePlugin(&p)
+		}
+	}
+	return appErrors.ErrPluginNotFound
+}
+
 func (s *fileStore) SetReviewOutcome(_ context.Context, spec models.ReviewOutcomeSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

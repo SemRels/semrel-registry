@@ -68,6 +68,12 @@ type PluginVersion struct {
 	DeletedBy      string            `json:"deletedBy,omitempty"`
 	DeletionReason string            `json:"deletionReason,omitempty"`
 
+	// Provenance is recorded when the artifact digest can be matched to a build
+	// attestation. Nil means it has not been looked up yet, which is different
+	// from having been looked up and not found.
+	Provenance          *Provenance `json:"provenance,omitempty"`
+	ProvenanceCheckedAt *time.Time  `json:"provenanceCheckedAt,omitempty"`
+
 	// Yank marks a version as unfit for new installs without removing it.
 	// Existing pins keep resolving; `latest` skips it.
 	YankedAt     *time.Time `json:"yankedAt,omitempty"`
@@ -218,4 +224,27 @@ type ReviewNotification struct {
 	Approved   bool
 	Reason     string
 	Reviewer   string
+}
+
+// Provenance records where a published artifact was built.
+//
+// A checksum proves the bytes are intact; it cannot prove who produced them.
+// This is the answer to the second question, taken from the attestation GitHub
+// records when a workflow builds a release artifact.
+type Provenance struct {
+	// Verified is true when an attestation was found for the artifact digest
+	// and it names the repository the plugin claims to come from.
+	Verified bool `json:"verified"`
+	// SourceRepository is the repository the attestation says built it, in
+	// owner/name form. A mismatch with the plugin's own repository is the
+	// interesting case: it means the artifact came from somewhere else.
+	SourceRepository string `json:"sourceRepository,omitempty"`
+	// Workflow is the build definition that produced the artifact.
+	Workflow string `json:"workflow,omitempty"`
+	// Digest is the artifact digest the attestation covers, "sha256:…".
+	Digest string `json:"digest,omitempty"`
+	// PredicateType names the attestation format, e.g. the SLSA provenance URI.
+	PredicateType string `json:"predicateType,omitempty"`
+	// Issue explains a negative result, so "unverified" is never mute.
+	Issue string `json:"issue,omitempty"`
 }

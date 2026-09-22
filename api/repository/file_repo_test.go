@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -526,6 +527,57 @@ func TestFileRepo_AddVersion_NilReturnsError(t *testing.T) {
 	repo := newTestFileRepo(t)
 	_, err := repo.AddVersion(context.Background(), nil)
 	assert.Error(t, err)
+}
+
+// -------------------------------------------------------------------------
+// SetProvenance
+// -------------------------------------------------------------------------
+
+func TestFileRepo_SetProvenance_RecordsResultAndTimestamp(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, err := repo.Create(context.Background(), basePlugin("plugin"))
+	require.NoError(t, err)
+	vid, err := repo.AddVersion(context.Background(), &models.PluginVersion{
+		PluginID:    id,
+		Version:     "1.0.0",
+		DownloadURL: "https://example.com/dl/1.0.0",
+	})
+	require.NoError(t, err)
+
+	provenance := &models.Provenance{
+		Verified:         true,
+		SourceRepository: "acme/plugin",
+		Digest:           "sha256:" + strings.Repeat("a", 64),
+	}
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, provenance))
+
+	versions, err := repo.GetVersions(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, versions, 1)
+	require.NotNil(t, versions[0].Provenance)
+	assert.True(t, versions[0].Provenance.Verified)
+	assert.Equal(t, "acme/plugin", versions[0].Provenance.SourceRepository)
+	require.NotNil(t, versions[0].ProvenanceCheckedAt)
+}
+
+func TestFileRepo_SetProvenance_NilClearsIt(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
+	vid, _ := repo.AddVersion(context.Background(), &models.PluginVersion{PluginID: id, Version: "1.0.0"})
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, &models.Provenance{Verified: true}))
+
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, nil))
+
+	versions, err := repo.GetVersions(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, versions, 1)
+	assert.Nil(t, versions[0].Provenance)
+}
+
+func TestFileRepo_SetProvenance_UnknownVersionReturnsNotFound(t *testing.T) {
+	repo := newTestFileRepo(t)
+	err := repo.SetProvenance(context.Background(), 999, &models.Provenance{})
+	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
 }
 
 func TestFileRepo_AddVersion_SortsByReleaseDateDesc(t *testing.T) {

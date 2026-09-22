@@ -68,6 +68,9 @@ func (s *stubAccountManager) RejectPlugin(context.Context, string) (models.Plugi
 	return models.Plugin{}, nil
 }
 func (s *stubAccountManager) UpdateValidationChecks(context.Context, int64, []byte) error { return nil }
+func (s *stubAccountManager) SetProvenance(context.Context, int64, *models.Provenance) error {
+	return nil
+}
 func (s *stubAccountManager) ReviewPlugin(context.Context, string, string, models.ReviewDecision, string) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }

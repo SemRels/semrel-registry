@@ -684,6 +684,59 @@
         }
       }
     },
+    "/api/v1/plugins/{id}/versions/{version}/reverify-provenance": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "name": "version",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "description": "The version's numeric id, despite the path segment name matching the string-version download routes."
+        }
+      ],
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Re-check build provenance",
+        "description": "Looks up the GitHub build attestation for the version's artifact digest again, synchronously, and records the result. Useful when the automatic check on publish ran before the attestation existed yet.",
+        "responses": {
+          "200": {
+            "description": "The provenance lookup result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Provenance"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "The version has no checksum to look up an attestation for."
+          }
+        }
+      }
+    },
     "/api/v1/plugins/@{namespace}/{name}": {
       "parameters": [
         {
@@ -1992,6 +2045,14 @@
           "yankedReason": {
             "type": "string"
           },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "provenanceCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the build attestation was last looked up. Absent means never attempted."
+          },
           "views": {
             "type": "integer",
             "format": "int64"
@@ -2392,6 +2453,35 @@
           },
           "howToFix": {
             "type": "string"
+          }
+        }
+      },
+      "Provenance": {
+        "type": "object",
+        "description": "Where a published artifact was built, taken from GitHub's build attestation for its digest. A checksum proves the bytes are intact; this is the answer to who produced them.",
+        "properties": {
+          "verified": {
+            "type": "boolean",
+            "description": "True when an attestation was found and it names the repository the plugin claims to come from."
+          },
+          "sourceRepository": {
+            "type": "string",
+            "description": "The repository the attestation says built the artifact, owner/name form. A mismatch with the plugin's own repository is the interesting case."
+          },
+          "workflow": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string",
+            "description": "The artifact digest the attestation covers, \"sha256:…\"."
+          },
+          "predicateType": {
+            "type": "string",
+            "description": "The attestation format, e.g. the SLSA provenance predicate URI."
+          },
+          "issue": {
+            "type": "string",
+            "description": "Explains a negative result: no attestation published, a repository mismatch, or GitHub being unreachable."
           }
         }
       }

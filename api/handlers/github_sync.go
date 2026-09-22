@@ -146,6 +146,10 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		// pinned installs but must not choose it as an update target.
 		Yanked        bool   `json:"yanked,omitempty"`
 		YankedReason  string `json:"yankedReason,omitempty"`
+		// Provenance is omitted until a lookup has actually been attempted.
+		// Once present it carries verified:false and Issue for a mismatch too
+		// — that negative result is the one clients most need to see.
+		Provenance    *models.Provenance `json:"provenance,omitempty"`
 		Compatibility *struct {
 			SemrelCore string `json:"semrelCore,omitempty"`
 		} `json:"compatibility,omitempty"`
@@ -191,6 +195,7 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				Prerelease:   v.Prerelease,
 				Yanked:       v.Yanked(),
 				YankedReason: v.YankedReason,
+				Provenance:   v.Provenance,
 				Compatibility: func() *struct {
 					SemrelCore string `json:"semrelCore,omitempty"`
 				} {
@@ -640,16 +645,20 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		}
 	}
 
+	checksums := pickChecksums(rel.Assets)
 	ver := models.PluginVersion{
 		PluginID:    p.ID,
 		Version:     tag,
 		ReleaseDate: releaseDate,
 		Changelog:   rel.Body,
 		DownloadURL: downloadURL,
-		Checksums:   pickChecksums(rel.Assets),
+		Checksums:   checksums,
 		Prerelease:  rel.Prerelease,
 	}
-	_, createErr := h.svc.CreateVersion(ctx, ref, ver)
+	created, createErr := h.svc.CreateVersion(ctx, ref, ver)
+	if createErr == nil {
+		triggerProvenanceCheck(h.svc, created.ID, p.Repository, checksums)
+	}
 	return createErr == nil, createErr
 }
 

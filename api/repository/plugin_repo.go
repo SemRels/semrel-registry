@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -33,6 +34,9 @@ type PluginRepository interface {
 	// Unlike deletion it leaves the version resolvable, so builds that already
 	// pin it keep working while new installs are steered away.
 	SetVersionYank(ctx context.Context, spec models.VersionYankSpec) error
+	// SetProvenance records the build-attestation lookup for a version, or
+	// clears it when provenance is nil.
+	SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error
 	// SetReviewOutcome records an approval or rejection together with its
 	// reason and reviewer.
 	SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error
@@ -224,7 +228,7 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, ''), yanked_at, COALESCE(yanked_by, ''), COALESCE(yanked_reason, '')
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, ''), yanked_at, COALESCE(yanked_by, ''), COALESCE(yanked_reason, ''), provenance, provenance_checked_at
 FROM plugin_versions
 WHERE plugin_id = $1 AND deleted_at IS NULL
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
@@ -726,6 +730,7 @@ func scanVersion(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.PluginVersion, error) {
 	var version models.PluginVersion
+	var provenanceJSON []byte
 	if err := scanner.Scan(
 		&version.ID,
 		&version.PluginID,
@@ -744,11 +749,20 @@ func scanVersion(scanner interface {
 		&version.YankedAt,
 		&version.YankedBy,
 		&version.YankedReason,
+		&provenanceJSON,
+		&version.ProvenanceCheckedAt,
 	); err != nil {
 		return nil, fmt.Errorf("scan version: %w", err)
 	}
 	if version.Checksums == nil {
 		version.Checksums = make(map[string]string)
+	}
+	if len(provenanceJSON) > 0 {
+		var provenance models.Provenance
+		if err := json.Unmarshal(provenanceJSON, &provenance); err != nil {
+			return nil, fmt.Errorf("scan version: decode provenance: %w", err)
+		}
+		version.Provenance = &provenance
 	}
 	return &version, nil
 }
@@ -866,4 +880,31 @@ SELECT notify_email FROM plugins WHERE id = $1 AND deleted_at IS NULL`, pluginID
 		return "", nil
 	}
 	return *address, nil
+}
+
+func (r *pgRepository) SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	var encoded []byte
+	if provenance != nil {
+		var err error
+		encoded, err = json.Marshal(provenance)
+		if err != nil {
+			return fmt.Errorf("encode provenance: %w", err)
+		}
+	}
+
+	result, err := r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET provenance = $1, provenance_checked_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, encoded, versionID)
+	if err != nil {
+		return fmt.Errorf("set provenance: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
 }
