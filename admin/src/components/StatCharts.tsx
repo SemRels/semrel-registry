@@ -1,154 +1,206 @@
 import { useId, useState } from 'react';
 
 /**
- * Charts for the dashboard's structured numbers.
+ * Donut charts for the dashboard's structured numbers.
  *
- * The four headline totals stay stat tiles on purpose: a single current value
- * has no shape, and a one-bar bar chart says less than the number does. What
- * gets a chart here is the data that carries structure — a magnitude comparison
- * across categories, and a part-to-whole split of review status.
+ * The four headline totals stay stat tiles: a single current value has no
+ * shape. What gets a chart is the data that splits into parts — plugins per
+ * category, and the review status of the catalogue.
  */
 
-interface CategoryDatum {
+export interface Slice {
+  readonly key: string;
   readonly label: string;
   readonly value: number;
 }
 
+interface DonutProps {
+  readonly title: string;
+  readonly slices: Slice[];
+  /** Fill per slice key. */
+  readonly colorOf: (slice: Slice, index: number) => string;
+  /** What the centre counts, e.g. "plugins". */
+  readonly unit: string;
+}
+
+const SIZE = 168;
+const STROKE = 26;
+const RADIUS = (SIZE - STROKE) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+/** Surface gap between neighbouring segments, in path units. */
+const GAP = 3;
+
 /**
- * Magnitude across plugin categories.
+ * A donut with a legend that names, counts and shares out every slice.
  *
- * A bar chart, not a donut: there are eight categories with word-length names,
- * and eight wedges means eight hues to tell apart plus labels that do not fit.
- * A bar puts them on a shared baseline where the comparison is the length, and
- * the whole set needs one colour rather than eight.
+ * The legend is not decoration: several palette steps sit below 3:1 against a
+ * light surface, so identity has to be carried by text as well as by fill. It
+ * doubles as the table view for anyone who cannot read the arcs.
  */
-export function CategoryBars({ data, total }: Readonly<{ data: CategoryDatum[]; total: number }>) {
+function Donut({ title, slices, colorOf, unit }: DonutProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const headingId = useId();
 
-  if (data.length === 0) return null;
+  const positive = slices.filter(slice => slice.value > 0);
+  const total = positive.reduce((sum, slice) => sum + slice.value, 0);
+  if (total === 0) return null;
 
-  const sorted = [...data].sort((a, b) => b.value - a.value);
-  const max = Math.max(1, ...sorted.map(d => d.value));
+  // Walk the circle once, converting each value into an arc length and the
+  // offset it starts at.
+  let cursor = 0;
+  const arcs = positive.map((slice, index) => {
+    const fraction = slice.value / total;
+    const length = fraction * CIRCUMFERENCE;
+    // A single slice would otherwise be a full ring with a notch cut out of it.
+    const drawn = positive.length === 1 ? length : Math.max(1, length - GAP);
+    const arc = {
+      slice,
+      color: colorOf(slice, index),
+      dash: `${drawn} ${CIRCUMFERENCE - drawn}`,
+      // Negative offset winds clockwise from twelve o'clock.
+      offset: -cursor,
+      share: Math.round(fraction * 100),
+    };
+    cursor += length;
+    return arc;
+  });
+
+  const active = arcs.find(arc => arc.slice.key === hovered);
+  const centreValue = active ? active.slice.value : total;
+  const centreLabel = active ? active.slice.label : `total ${unit}`;
 
   return (
     <figure className="viz" aria-labelledby={headingId}>
-      <figcaption id={headingId} className="viz__title">Plugins per category</figcaption>
+      <figcaption id={headingId} className="viz__title">{title}</figcaption>
 
-      <ul className="viz-bars">
-        {sorted.map(({ label, value }) => {
-          const share = total > 0 ? Math.round((value / total) * 100) : 0;
-          return (
+      <div className="viz-donut">
+        <svg
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          width={SIZE}
+          height={SIZE}
+          className="viz-donut__svg"
+          role="img"
+          aria-label={`${title}: ${arcs.map(a => `${a.slice.label} ${a.slice.value}`).join(', ')}`}
+        >
+          {/* Track, so a mostly-empty donut still reads as a ring. */}
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS}
+            fill="none"
+            stroke="var(--surface-subtle)"
+            strokeWidth={STROKE}
+          />
+          <g transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}>
+            {arcs.map(arc => (
+              <circle
+                key={arc.slice.key}
+                cx={SIZE / 2}
+                cy={SIZE / 2}
+                r={RADIUS}
+                fill="none"
+                stroke={arc.color}
+                strokeWidth={hovered === arc.slice.key ? STROKE + 5 : STROKE}
+                strokeDasharray={arc.dash}
+                strokeDashoffset={arc.offset}
+                className="viz-donut__arc"
+                onMouseEnter={() => setHovered(arc.slice.key)}
+                onMouseLeave={() => setHovered(null)}
+              />
+            ))}
+          </g>
+
+          {/* The hole is the donut's one advantage over a pie: it carries the
+              total, and the hovered slice while one is hovered. */}
+          <text
+            x={SIZE / 2}
+            y={SIZE / 2 - 2}
+            textAnchor="middle"
+            className="viz-donut__value"
+          >
+            {centreValue.toLocaleString()}
+          </text>
+          <text
+            x={SIZE / 2}
+            y={SIZE / 2 + 15}
+            textAnchor="middle"
+            className="viz-donut__caption"
+          >
+            {centreLabel}
+          </text>
+        </svg>
+
+        <ul className="viz-legend viz-legend--column">
+          {arcs.map(arc => (
             <li
-              key={label}
-              className="viz-bars__row"
-              onMouseEnter={() => setHovered(label)}
+              key={arc.slice.key}
+              className={hovered === arc.slice.key ? 'viz-legend__item is-hovered' : 'viz-legend__item'}
+              onMouseEnter={() => setHovered(arc.slice.key)}
               onMouseLeave={() => setHovered(null)}
-              onFocus={() => setHovered(label)}
+              onFocus={() => setHovered(arc.slice.key)}
               onBlur={() => setHovered(null)}
               tabIndex={0}
-              // The row is the hit target, which is taller than the bar itself.
-              aria-label={`${label}: ${value} plugins, ${share} percent of the catalogue`}
+              aria-label={`${arc.slice.label}: ${arc.slice.value} ${unit}, ${arc.share} percent`}
             >
-              <span className="viz-bars__label">{label}</span>
-              <span className="viz-bars__track">
-                <span
-                  className="viz-bars__fill"
-                  style={{ width: `${Math.max(1, (value / max) * 100)}%` }}
-                />
-              </span>
-              {/* Direct label in text ink, not the series colour. */}
-              <span className="viz-bars__value">{value.toLocaleString()}</span>
-
-              {hovered === label && (
-                <span className="viz-tooltip" role="presentation">
-                  {value.toLocaleString()} of {total.toLocaleString()} · {share}%
-                </span>
-              )}
+              <span className="viz-legend__swatch" style={{ background: arc.color }} aria-hidden="true" />
+              <span className="viz-legend__label">{arc.slice.label}</span>
+              <span className="viz-legend__value">{arc.slice.value.toLocaleString()} · {arc.share}%</span>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
     </figure>
   );
 }
 
 /**
- * Status colours are reserved and never themed: good, warning and critical mean
- * the same thing on every surface. The warning step sits below 3:1 against a
- * light surface, which is a documented property of that palette — so every
- * segment carries a visible label and count, and identity is never colour alone.
+ * The categorical order is fixed and never cycled: slot 1 is always the first
+ * category, so a filter that removes one does not repaint the rest. A ninth
+ * category would fold into the tail rather than inventing a hue — under CVD a
+ * generated ninth is indistinguishable from one already on screen.
  */
-const STATUS_STYLE: Record<string, { fill: string; label: string; description: string }> = {
-  active:   { fill: 'var(--status-good)',     label: 'Active',   description: 'published in the catalogue' },
-  pending:  { fill: 'var(--status-warning)',  label: 'Pending',  description: 'waiting for review' },
-  rejected: { fill: 'var(--status-critical)', label: 'Rejected', description: 'turned down, with a reason' },
+const CATEGORY_SLOTS = [
+  'var(--viz-cat-1)', 'var(--viz-cat-2)', 'var(--viz-cat-3)', 'var(--viz-cat-4)',
+  'var(--viz-cat-5)', 'var(--viz-cat-6)', 'var(--viz-cat-7)', 'var(--viz-cat-8)',
+];
+
+export function CategoryDonut({ data }: Readonly<{ data: Slice[] }>) {
+  return (
+    <Donut
+      title="Plugins per category"
+      slices={data}
+      unit="plugins"
+      colorOf={(_, index) => CATEGORY_SLOTS[index % CATEGORY_SLOTS.length]}
+    />
+  );
+}
+
+/** Status colours are reserved and never themed: they mean the same everywhere. */
+const STATUS_FILL: Record<string, string> = {
+  active: 'var(--status-good)',
+  pending: 'var(--status-warning)',
+  rejected: 'var(--status-critical)',
 };
 
-/**
- * Review status as a part-to-whole split.
- *
- * A single stacked bar rather than a donut: the three parts sum to the whole
- * catalogue, and a bar compares segment lengths on one axis instead of asking
- * the reader to judge angles.
- */
-export function StatusComposition({ counts }: Readonly<{ counts: Record<string, number> }>) {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const headingId = useId();
+const STATUS_LABEL: Record<string, string> = {
+  active: 'Active',
+  pending: 'Pending',
+  rejected: 'Rejected',
+};
 
-  const entries = Object.entries(counts)
-    .map(([status, value]) => ({ status, value: Number(value ?? 0) }))
-    .filter(entry => entry.value > 0);
-
-  const total = entries.reduce((sum, entry) => sum + entry.value, 0);
-  if (total === 0) return null;
+export function StatusDonut({ counts }: Readonly<{ counts: Record<string, number> }>) {
+  const slices: Slice[] = Object.entries(counts).map(([key, value]) => ({
+    key,
+    label: STATUS_LABEL[key] ?? key,
+    value: Number(value ?? 0),
+  }));
 
   return (
-    <figure className="viz" aria-labelledby={headingId}>
-      <figcaption id={headingId} className="viz__title">Review status</figcaption>
-
-      <div className="viz-stack" role="img" aria-label={
-        entries.map(e => `${STATUS_STYLE[e.status]?.label ?? e.status}: ${e.value}`).join(', ')
-      }>
-        {entries.map(({ status, value }) => (
-          <span
-            key={status}
-            className="viz-stack__segment"
-            style={{
-              flexGrow: value,
-              background: STATUS_STYLE[status]?.fill ?? 'var(--text-muted)',
-            }}
-            onMouseEnter={() => setHovered(status)}
-            onMouseLeave={() => setHovered(null)}
-          />
-        ))}
-      </div>
-
-      {/* The legend is the relief the contrast warning requires: every segment
-          is named and counted in text, so nothing depends on the fill alone. */}
-      <ul className="viz-legend">
-        {entries.map(({ status, value }) => {
-          const style = STATUS_STYLE[status];
-          const share = Math.round((value / total) * 100);
-          return (
-            <li
-              key={status}
-              className={hovered === status ? 'viz-legend__item is-hovered' : 'viz-legend__item'}
-              onMouseEnter={() => setHovered(status)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <span
-                className="viz-legend__swatch"
-                style={{ background: style?.fill ?? 'var(--text-muted)' }}
-                aria-hidden="true"
-              />
-              <span className="viz-legend__label">{style?.label ?? status}</span>
-              <span className="viz-legend__value">{value.toLocaleString()} · {share}%</span>
-              <span className="sr-only">{style?.description}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </figure>
+    <Donut
+      title="Review status"
+      slices={slices}
+      unit="plugins"
+      colorOf={slice => STATUS_FILL[slice.key] ?? 'var(--text-muted)'}
+    />
   );
 }

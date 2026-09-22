@@ -4,7 +4,7 @@ import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { TileSkeleton, TableSkeleton, EmptyState } from '../components/LoadingState';
-import { CategoryBars, StatusComposition } from '../components/StatCharts';
+import { CategoryDonut, StatusDonut } from '../components/StatCharts';
 
 type TrendPoint = { period: string; views: number; downloads: number };
 
@@ -304,7 +304,7 @@ export default function DashboardPage() {
   const topVersions = stats?.topVersions ?? [];
   const statusCounts = stats?.statusCounts ?? {};
   const categoryData = Object.entries(categories)
-    .map(([label, value]) => ({ label, value: Number(value ?? 0) }))
+    .map(([key, value]) => ({ key, label: key, value: Number(value ?? 0) }))
     .filter(entry => entry.value > 0);
   const hasStatusCounts = Object.values(statusCounts).some(value => Number(value ?? 0) > 0);
   // hoveredSeriesIndex maps directly to activeSeries (oldest→newest)
@@ -400,12 +400,12 @@ export default function DashboardPage() {
                   an empty bordered box reads as a broken panel. */}
               {categoryData.length > 0 && (
                 <div className="card">
-                  <CategoryBars total={totalPlugins} data={categoryData} />
+                  <CategoryDonut data={categoryData} />
                 </div>
               )}
               {isAdmin && hasStatusCounts && (
                 <div className="card">
-                  <StatusComposition counts={statusCounts} />
+                  <StatusDonut counts={statusCounts} />
                 </div>
               )}
             </div>
