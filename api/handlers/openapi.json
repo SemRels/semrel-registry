@@ -210,6 +210,17 @@
             "description": "Full-text and partial-identifier search. Results are ranked by relevance unless an explicit sort is given."
           },
           {
+            "name": "compatibleWith",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "0.27.1"
+              ]
+            },
+            "description": "A concrete semrel core version. Returns only plugins whose latest installable release declares a compatibility range admitting it. Plugins that declare no range are included: the metadata is optional and most of the catalogue predates it."
+          },
+          {
             "name": "author",
             "in": "query",
             "schema": {

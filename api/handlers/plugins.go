@@ -89,6 +89,9 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Namespace: strings.TrimSpace(c.Query("namespace")),
 		Author:    author,
 		Statuses:  statuses,
+		// "Which plugins work with the semrel I am running?" — the question a
+		// visitor actually has, which the catalogue could not answer before.
+		CompatibleWith: strings.TrimSpace(c.Query("compatibleWith")),
 	})
 	if err != nil {
 		HandleError(c, err)

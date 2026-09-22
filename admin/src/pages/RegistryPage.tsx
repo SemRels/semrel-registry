@@ -15,6 +15,8 @@ type Plugin = {
   license: string;
   tags: string[];
   latestVersion?: string;
+  /** Core range declared by the latest installable release. */
+  latestSemrelCore?: string;
   views?: number;
   downloads?: number;
 };
@@ -48,6 +50,7 @@ export default function RegistryPage() {
   const search   = searchParams.get('search')   ?? '';
   const category = searchParams.get('category') ?? '';
   const sort     = searchParams.get('sort')     ?? '';
+  const compatibleWith = searchParams.get('compatibleWith') ?? '';
   const page     = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1);
 
   const [plugins, setPlugins]       = useState<Plugin[]>([]);
@@ -76,6 +79,7 @@ export default function RegistryPage() {
     const params = new URLSearchParams({ limit: '24', page: String(page) });
     if (search)   params.set('search', search);
     if (category) params.set('category', category);
+    if (compatibleWith) params.set('compatibleWith', compatibleWith);
     if (sort) {
       const [field, dir] = sort.split(':');
       params.set('sort', field);
@@ -102,7 +106,7 @@ export default function RegistryPage() {
 
     void load();
     return () => { cancelled = true; };
-  }, [page, search, category, sort, reloadToken]);
+  }, [page, search, category, sort, compatibleWith, reloadToken]);
 
   // Debounced search input, seeded from the URL so a shared link shows its
   // own search term in the box.
@@ -115,7 +119,7 @@ export default function RegistryPage() {
 
   const { user } = useCurrentUser();
   const isLoggedIn = user !== null;
-  const hasFilters = Boolean(search || category);
+  const hasFilters = Boolean(search || category || compatibleWith);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
@@ -200,6 +204,38 @@ export default function RegistryPage() {
                 {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
+          </div>
+
+          {/* "Does this work with the semrel I am running?" — the question a
+              visitor actually arrives with. The catalogue carries the range per
+              release; this turns it into a filter. */}
+          <div className="compat-filter">
+            <label htmlFor="registry-compat">Works with semrel version</label>
+            <input
+              id="registry-compat"
+              className="input"
+              type="text"
+              inputMode="decimal"
+              placeholder="e.g. 0.27.1"
+              defaultValue={compatibleWith}
+              aria-describedby="registry-compat-hint"
+              onBlur={e => updateParams({ compatibleWith: e.target.value.trim() })}
+              onKeyDown={e => {
+                if (e.key === 'Enter') updateParams({ compatibleWith: e.currentTarget.value.trim() });
+              }}
+            />
+            <span id="registry-compat-hint" className="field__hint">
+              Plugins that declare no compatibility range are always shown.
+            </span>
+            {compatibleWith && (
+              <button
+                type="button"
+                className="btn btn--secondary btn--sm"
+                onClick={() => updateParams({ compatibleWith: '' })}
+              >
+                Clear
+              </button>
+            )}
           </div>
         </search>
 
@@ -305,11 +341,19 @@ export default function RegistryPage() {
                         const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');
                         return (
-                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'var(--warning-soft)' : 'var(--accent-soft)', color: isDev ? 'var(--warning)' : 'var(--accent)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'var(--warning-soft)' : 'var(--accent-soft)', color: isDev ? 'var(--warning)' : 'var(--accent-text)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             <span className="sr-only">{isDev ? 'Development version ' : 'Latest version '}</span>v{ver}
                           </span>
                         );
                       })()}
+                      {/* The core range the latest release declares, so the
+                          answer is visible without opening the plugin. */}
+                      {p.latestSemrelCore && (
+                        <span className="compat-badge" title={`Requires semrel core ${p.latestSemrelCore}`}>
+                          <span className="sr-only">Requires semrel core </span>
+                          <span aria-hidden="true">core </span>{p.latestSemrelCore}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

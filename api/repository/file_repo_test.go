@@ -594,3 +594,43 @@ func TestFileRepo_PersistsAcrossInstances(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "provider-github", got.Name)
 }
+
+// A version published through the API is appended to the file, not inserted in
+// order. latestStable takes the first eligible entry, so without a sort the
+// plugin kept advertising its oldest release as the latest one — and with it
+// that release's compatibility range.
+func TestLatestReflectsVersionsAddedAfterCreation(t *testing.T) {
+	repo, err := NewFileRepository(t.TempDir())
+	require.NoError(t, err)
+	ctx := context.Background()
+
+	plugin := &models.Plugin{Name: "analyzer-example", Category: "analyzer"}
+	id, err := repo.Create(ctx, plugin)
+	require.NoError(t, err)
+
+	older := time.Now().Add(-48 * time.Hour)
+	newer := time.Now()
+
+	for _, v := range []models.PluginVersion{
+		{PluginID: id, Version: "1.0.0", ReleaseDate: &older, SemrelCore: ">=0.1.0 <0.2.0",
+			DownloadURL: "https://github.com/a/b/releases/download/v1.0.0/plugin-linux-amd64"},
+		{PluginID: id, Version: "2.0.0", ReleaseDate: &newer, SemrelCore: ">=0.25.0 <1.0.0",
+			DownloadURL: "https://github.com/a/b/releases/download/v2.0.0/plugin-linux-amd64"},
+	} {
+		version := v
+		_, addErr := repo.AddVersion(ctx, &version)
+		require.NoError(t, addErr)
+	}
+
+	loaded, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, "2.0.0", loaded.LatestVersion)
+	require.Equal(t, ">=0.25.0 <1.0.0", loaded.LatestSemrelCore)
+
+	// The listing path loads plugins separately and must agree.
+	all, err := repo.GetAll(ctx, 10, 0)
+	require.NoError(t, err)
+	require.Len(t, all, 1)
+	require.Equal(t, "2.0.0", all[0].LatestVersion)
+	require.Equal(t, ">=0.25.0 <1.0.0", all[0].LatestSemrelCore)
+}

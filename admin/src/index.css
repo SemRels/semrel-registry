@@ -1468,3 +1468,37 @@ tbody tr:hover td { background: var(--surface-subtle); }
   background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
   background-attachment: local, local, scroll, scroll;
 }
+
+/* ── Compatibility filter ─────────────────────────────────────────────────── */
+.compat-filter {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  font-size: var(--fs-sm);
+}
+.compat-filter > label {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.compat-filter > .input {
+  width: 9rem;
+  flex: 0 0 auto;
+}
+.compat-filter > .field__hint {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+/* ── Compatibility badge on plugin cards ──────────────────────────────────── */
+.compat-badge {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}

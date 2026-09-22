@@ -61,6 +61,9 @@ type ListPluginsParams struct {
 	Namespace string   // when set, filter by namespace (e.g. "@semrel")
 	Author    string   // when set, only return plugins by this author (exact, case-insensitive)
 	Statuses  []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
+	// CompatibleWith is a concrete semrel core version. When set, only plugins
+	// whose latest installable release admits that version are returned.
+	CompatibleWith string
 }
 
 type Pagination struct {
@@ -133,6 +136,14 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 			dir = "DESC"
 		}
 		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: dir})
+	}
+
+	// Compatibility is a semver range, which SQL cannot evaluate. When the
+	// caller asks for it, the matching rows are fetched, filtered in Go and
+	// paginated here instead — so the page and the total stay consistent with
+	// each other, at the cost of a bounded scan.
+	if params.CompatibleWith != "" {
+		return s.listCompatible(ctx, params, filters)
 	}
 
 	offset := (params.Page - 1) * params.Limit
@@ -380,6 +391,16 @@ func (s *PluginService) CreateVersion(ctx context.Context, ref string, version m
 		return models.PluginVersion{}, err
 	}
 
+	// Both backends resolve "latest" by release date, nulls last. A version
+	// published without one therefore sorted as the *oldest* release and could
+	// never become the latest — so a publisher who omitted the field silently
+	// published something nobody would be offered. A release published now was
+	// released now.
+	if version.ReleaseDate == nil {
+		now := time.Now().UTC()
+		version.ReleaseDate = &now
+	}
+
 	plugin, err := s.lookupPlugin(ctx, ref)
 	if err != nil {
 		return models.PluginVersion{}, err
@@ -561,6 +582,7 @@ func normalizeListParams(params ListPluginsParams) ListPluginsParams {
 	params.Sort = strings.TrimSpace(params.Sort)
 	params.Namespace = strings.TrimSpace(params.Namespace)
 	params.Author = strings.TrimSpace(params.Author)
+	params.CompatibleWith = strings.TrimSpace(params.CompatibleWith)
 	return params
 }
 

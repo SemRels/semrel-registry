@@ -625,13 +625,7 @@ func applySeedPlugin(all *[]models.Plugin, meta *fileMeta, seed database.SeedPlu
 	}
 	sortPluginVersions(versions)
 	candidate.Versions = versions
-	if latest, ok := latestStable(versions); ok {
-		candidate.LatestVersion = latest.Version
-		candidate.LatestSemrelCore = latest.SemrelCore
-	} else {
-		candidate.LatestVersion = ""
-		candidate.LatestSemrelCore = ""
-	}
+	refreshLatest(&candidate)
 
 	if existingIndex >= 0 && !reflect.DeepEqual(candidate, (*all)[existingIndex]) {
 		candidate.UpdatedAt = now
@@ -750,7 +744,30 @@ func (s *fileStore) loadPlugin(id int64) (*models.Plugin, error) {
 	if p.Versions == nil {
 		p.Versions = []models.PluginVersion{}
 	}
+
+	// Derived on read rather than stored. These were only ever recomputed while
+	// seeding the catalogue, so a version published — or yanked — through the
+	// API left them pointing at whatever was true at seed time.
+	refreshLatest(&p)
+
 	return &p, nil
+}
+
+// refreshLatest sets the plugin's latest-release fields from its versions.
+//
+// It sorts first: latestStable takes the first eligible entry, and AddVersion
+// appends, so without this a version published through the API left "latest"
+// pointing at the oldest release in the file.
+func refreshLatest(p *models.Plugin) {
+	sortPluginVersions(p.Versions)
+
+	if latest, ok := latestStable(p.Versions); ok {
+		p.LatestVersion = latest.Version
+		p.LatestSemrelCore = latest.SemrelCore
+		return
+	}
+	p.LatestVersion = ""
+	p.LatestSemrelCore = ""
 }
 
 func (s *fileStore) savePlugin(p *models.Plugin) error {
@@ -783,6 +800,7 @@ func (s *fileStore) loadAll() ([]models.Plugin, error) {
 		if p.Versions == nil {
 			p.Versions = []models.PluginVersion{}
 		}
+		refreshLatest(&p)
 		plugins = append(plugins, p)
 	}
 	return plugins, nil

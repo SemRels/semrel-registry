@@ -140,3 +140,35 @@ func TestLatestInstallableVersionReportsNoneAvailable(t *testing.T) {
 	_, ok := LatestInstallableVersion([]models.PluginVersion{{Version: "1.0.0", YankedAt: &now}})
 	assert.False(t, ok)
 }
+
+// Both backends order versions by release date with nulls last, so a version
+// published without one sorted as the oldest release and could never become
+// "latest" — publishing it was effectively a no-op for anyone installing.
+func TestPublishedVersionWithoutAReleaseDateBecomesLatest(t *testing.T) {
+	svc, repo := newTestService(t)
+	ctx := context.Background()
+
+	plugin := submitTestPlugin(t, svc)
+	dated := time.Now().Add(-72 * time.Hour)
+	_, err := repo.AddVersion(ctx, &models.PluginVersion{
+		PluginID:    plugin.ID,
+		Version:     "1.0.0",
+		ReleaseDate: &dated,
+		DownloadURL: "https://github.com/alice/analyzer-example/releases/download/v1.0.0/plugin-linux-amd64",
+	})
+	require.NoError(t, err)
+
+	published, err := svc.CreateVersion(ctx, plugin.Ref(), models.PluginVersion{
+		Version:     "2.0.0",
+		SemrelCore:  ">=0.25.0 <1.0.0",
+		DownloadURL: "https://github.com/alice/analyzer-example/releases/download/v2.0.0/plugin-linux-amd64",
+		Checksums:   map[string]string{"linux_amd64": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, published.ReleaseDate, "the registry stamps a release date when the publisher omits one")
+
+	reloaded, err := svc.GetPlugin(ctx, plugin.Ref())
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", reloaded.LatestVersion)
+	assert.Equal(t, ">=0.25.0 <1.0.0", reloaded.LatestSemrelCore)
+}
