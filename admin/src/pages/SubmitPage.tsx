@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { validatePlugin, submitPlugin } from '../lib/api';
-import type { ValidationResult } from '../lib/api';
+import { validatePlugin, submitPlugin, verifyRepositoryOwnership } from '../lib/api';
+import type { ValidationResult, OwnershipResult } from '../lib/api';
 import LegalLinks from '../components/LegalLinks';
 import StatusIcon from '../components/StatusIcon';
 
@@ -13,6 +13,7 @@ export default function SubmitPage() {
   const [description, setDescription] = useState('');
   const [license, setLicense] = useState('Apache-2.0');
   const [notifyEmail, setNotifyEmail] = useState('');
+  const [ownership, setOwnership] = useState<OwnershipResult | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -27,10 +28,19 @@ export default function SubmitPage() {
   async function handleValidate() {
     setError('');
     setValidation(null);
+    setOwnership(null);
     setValidating(true);
     try {
-      const result = await validatePlugin(repoUrl);
+      // Ownership is checked here rather than at submit time: a claim that
+      // cannot be made is something the submitter must go and fix in their
+      // repository, which is a poor thing to discover after filling in a form.
+      const [result, owner] = await Promise.all([
+        validatePlugin(repoUrl),
+        verifyRepositoryOwnership(repoUrl).catch(() => null),
+      ]);
       setValidation(result);
+      setOwnership(owner);
+
       const parsed = parseRepo(repoUrl);
       if (parsed?.name && !category) {
         const m = parsed.name.match(/^(analyzer|condition|generator|hook|provider|updater|packager|publisher)-/);
@@ -126,6 +136,33 @@ export default function SubmitPage() {
             region a screen-reader user is given no indication it appeared. */}
         <div aria-live="polite" aria-busy={validating}>
           {validating && <p className="muted">Checking the repository against the plugin standards…</p>}
+
+          {/* Ownership is the gate: the standards checks can all pass on a
+              repository the submitter has nothing to do with. */}
+          {ownership && (
+            <div
+              className={ownership.verified ? 'alert alert--info' : 'alert alert--error'}
+              style={{ marginTop: '1rem' }}
+              role={ownership.verified ? undefined : 'alert'}
+            >
+              {ownership.verified ? (
+                <span>
+                  <strong>Repository ownership confirmed</strong>
+                  {ownership.method === 'claim-file' && ' via the claim file'}
+                  {ownership.method === 'public-org-member' && ' — you are a public member of this organisation'}
+                  {ownership.method === 'account-owner' && ' — the repository is on your account'}
+                  .
+                </span>
+              ) : (
+                <>
+                  <strong>You have not shown that you control this repository.</strong>
+                  {ownership.issue && <p style={{ margin: '.35rem 0 0', color: 'inherit' }}>{ownership.issue}</p>}
+                  {ownership.howToFix && <p style={{ margin: '.35rem 0 0', color: 'inherit' }}>{ownership.howToFix}</p>}
+                </>
+              )}
+            </div>
+          )}
+
           {validation && (
             <div style={{ marginTop: '1rem' }}>
               <div style={{
@@ -202,10 +239,16 @@ export default function SubmitPage() {
           type="submit"
           className="btn btn--primary"
           style={{ marginTop: '1rem', width: '100%' }}
-          disabled={submitting || !repoUrl || !description || !category}
+          disabled={submitting || !repoUrl || !description || !category || ownership?.verified !== true}
         >
           {submitting ? 'Submitting…' : 'Submit for review'}
         </button>
+        {ownership?.verified !== true && (
+          <p className="field__hint" style={{ marginTop: '.5rem' }}>
+            Validate the repository above first — submitting requires showing
+            that you control it.
+          </p>
+        )}
         <p className="legal-note mt-1">
           By submitting, you confirm that you are authorised to publish this metadata and agree to the semrel contributor terms.
         </p>

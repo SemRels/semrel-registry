@@ -581,3 +581,28 @@ export async function getPluginReadme(id: string | number): Promise<PluginReadme
     return null;
   }
 }
+
+// ---- Repository ownership ----
+
+export interface OwnershipResult {
+  verified: boolean;
+  /** How the claim was settled: account-owner, public-org-member, claim-file. */
+  method?: string;
+  issue?: string;
+  howToFix?: string;
+}
+
+/**
+ * Checks whether the signed-in user can show they control a repository.
+ *
+ * Called before the rest of the submission form is filled in, so a failed claim
+ * surfaces while the submitter can still act on it rather than after they have
+ * typed everything.
+ */
+export async function verifyRepositoryOwnership(repository: string): Promise<OwnershipResult> {
+  const { data } = await request<{ data: OwnershipResult }>('/plugins/verify-ownership', {
+    method: 'POST',
+    body: JSON.stringify({ repository }),
+  });
+  return data;
+}

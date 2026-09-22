@@ -842,6 +842,16 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The submitter has not shown they control the repository.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1500,6 +1510,57 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/plugins/verify-ownership": {
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Check whether you can show you control a repository",
+        "description": "Verified in three increasing-effort ways: the repository is on your account, you are a public member of the owning organisation, or a .semrel-registry-claim file on the default branch names your login. Submission requires one of them.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "repository"
+                ],
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The outcome, with instructions when it did not verify.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/OwnershipResult"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
@@ -2311,6 +2372,28 @@
             }
           }
         ]
+      },
+      "OwnershipResult": {
+        "type": "object",
+        "properties": {
+          "verified": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "account-owner",
+              "public-org-member",
+              "claim-file"
+            ]
+          },
+          "issue": {
+            "type": "string"
+          },
+          "howToFix": {
+            "type": "string"
+          }
+        }
       }
     }
   },

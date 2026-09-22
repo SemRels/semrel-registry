@@ -478,8 +478,32 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 
 	// Force author to submitter's GitHub login.
 	login, _ := c.Get("login")
-	if loginStr, ok := login.(string); ok && loginStr != "" {
+	loginStr, _ := login.(string)
+	if loginStr != "" {
 		submission.Author = loginStr
+	}
+
+	// Forcing the author field records who submitted; it proves nothing about
+	// whether they control the repository. Without this check a plugin could be
+	// claimed out from under the person actually maintaining it.
+	isAdmin, _ := c.Get("isAdmin")
+	if isAdmin != true {
+		owner, repo := ownerRepoFromURL(submission.Repository)
+		result := VerifyRepositoryOwnership(loginStr, owner, repo)
+		if !result.Verified {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": gin.H{
+					"code":    "REPOSITORY_NOT_VERIFIED",
+					"message": "You must show that you control this repository before submitting it.",
+					"details": gin.H{
+						"issue":     result.Issue,
+						"howToFix":  result.HowToFix,
+						"claimFile": ClaimFilePath,
+					},
+				},
+			})
+			return
+		}
 	}
 
 	created, err := h.service.SubmitPluginWithContact(c.Request.Context(), submission)

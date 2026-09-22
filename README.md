@@ -187,3 +187,23 @@ of the plugin record: it lives in a separate column (or, on the file backend, a
 separate `0600` file), is returned by no endpoint, and is erased when the
 account is deleted. Without SMTP configured the outcome is still recorded and
 shown on the author's plugin list; only the delivery is skipped.
+
+## Repository ownership
+
+Forcing the `author` field to the submitter's login records who submitted a
+plugin; it proves nothing about whether they control it. Submitting therefore
+requires showing control of the repository, checked in increasing order of
+effort and using only public GitHub endpoints:
+
+1. the repository is on the submitter's own account;
+2. the submitter is a **public** member of the owning organisation;
+3. the default branch carries a `.semrel-registry-claim` file containing the
+   submitter's login on a line of its own.
+
+The claim file is the fallback that always works — a private org membership, a
+collaborator who is not a member, a repository owned by a bot account — and
+needs only the write access a maintainer already has. Admins are exempt, since
+they import first-party plugins on the organisation's behalf.
+
+`POST /api/v1/plugins/verify-ownership` runs the same check on demand, which is
+what the submission form calls before asking for the rest of the details.

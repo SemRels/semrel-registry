@@ -302,6 +302,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	authRoutes.DELETE("/auth/me", authHandler.DeleteAccount)
 	// Community plugin submission (creates with status=pending for review).
 	authRoutes.POST("/plugins/submit", pluginHandler.SubmitPlugin)
+	// Checked before submitting, so a failed ownership claim surfaces while the
+	// submitter can still act on it.
+	authRoutes.POST("/plugins/verify-ownership", handlers.VerifyOwnership)
 	// Plugin writes: any authenticated user, but non-admins may only touch their own plugins.
 	authRoutes.POST("/plugins", pluginHandler.CreatePlugin)
 	authRoutes.PUT("/plugins/:id", pluginHandler.UpdatePlugin)
