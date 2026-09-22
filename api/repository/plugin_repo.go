@@ -36,6 +36,12 @@ type PluginRepository interface {
 	// SetReviewOutcome records an approval or rejection together with its
 	// reason and reviewer.
 	SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error
+	// SetNotifyEmail stores (or clears, when empty) the opt-in contact address
+	// for a plugin's review outcome.
+	SetNotifyEmail(ctx context.Context, pluginID int64, address string) error
+	// NotifyEmail reads that address back. It is deliberately not part of the
+	// Plugin struct, so it cannot reach a public response by accident.
+	NotifyEmail(ctx context.Context, pluginID int64) (string, error)
 	RecordAccountDeletion(ctx context.Context, audit models.AccountDeletionAudit) error
 	// IncrCounters atomically increments views/downloads for a plugin and optionally a version.
 	// Pass non-zero versionID to also update the version counters.
@@ -825,4 +831,39 @@ WHERE id = $4 AND deleted_at IS NULL`,
 		return appErrors.ErrPluginNotFound
 	}
 	return nil
+}
+
+func (r *pgRepository) SetNotifyEmail(ctx context.Context, pluginID int64, address string) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins SET notify_email = NULLIF($1, ''), updated_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, strings.TrimSpace(address), pluginID)
+	if err != nil {
+		return fmt.Errorf("set notify email: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) NotifyEmail(ctx context.Context, pluginID int64) (string, error) {
+	if err := r.validate(); err != nil {
+		return "", err
+	}
+	var address *string
+	err := r.db.Pool().QueryRow(ctx, `
+SELECT notify_email FROM plugins WHERE id = $1 AND deleted_at IS NULL`, pluginID).Scan(&address)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", appErrors.ErrPluginNotFound
+		}
+		return "", fmt.Errorf("read notify email: %w", err)
+	}
+	if address == nil {
+		return "", nil
+	}
+	return *address, nil
 }

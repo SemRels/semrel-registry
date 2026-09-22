@@ -184,6 +184,14 @@ func (a *mockRepositoryAdapter) SetVersionYank(_ context.Context, _ models.Versi
 	return nil
 }
 
+func (a *mockRepositoryAdapter) SetNotifyEmail(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
+func (a *mockRepositoryAdapter) NotifyEmail(_ context.Context, _ int64) (string, error) {
+	return "", nil
+}
+
 func (a *mockRepositoryAdapter) SetReviewOutcome(_ context.Context, _ models.ReviewOutcomeSpec) error {
 	return nil
 }

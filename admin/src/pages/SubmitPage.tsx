@@ -12,6 +12,7 @@ export default function SubmitPage() {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [license, setLicense] = useState('Apache-2.0');
+  const [notifyEmail, setNotifyEmail] = useState('');
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +57,7 @@ export default function SubmitPage() {
         repository: repoUrl.replace(/\.git$/, ''),
         license,
         tags: [category],
-      });
+      }, notifyEmail);
       setSubmitted(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Submission failed');
@@ -171,6 +172,28 @@ export default function SubmitPage() {
             <label htmlFor="plugin-license">License</label>
             <input id="plugin-license" className="input" value={license} onChange={e => setLicense(e.target.value)} required />
           </div>
+        </div>
+
+        {/* Optional and opt-in. Without it the outcome is still recorded and
+            shown on the submitter's plugin list — they just have to come back
+            and look, which is what the review loop used to require. */}
+        <div className="field">
+          <label htmlFor="notify-email">Email for the review result <span className="muted">(optional)</span></label>
+          <input
+            id="notify-email"
+            className="input"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={notifyEmail}
+            onChange={e => setNotifyEmail(e.target.value)}
+            aria-describedby="notify-email-hint"
+          />
+          <span id="notify-email-hint" className="field__hint">
+            Used once, to tell you whether this plugin was accepted, and for
+            nothing else. It is never shown publicly and is deleted with your
+            account. Leave it empty to check back here instead.
+          </span>
         </div>
 
         {error && <div className="alert alert--error" role="alert" style={{ marginTop: '.75rem' }}>{error}</div>}

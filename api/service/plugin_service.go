@@ -84,6 +84,9 @@ type PluginManager interface {
 	ListVersions(ctx context.Context, ref string, limit, offset int) ([]models.PluginVersion, error)
 	CreatePlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
 	SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
+	// SubmitPluginWithContact additionally records where to send the review
+	// outcome, when the submitter opted in.
+	SubmitPluginWithContact(ctx context.Context, submission models.PluginSubmission) (models.Plugin, error)
 	UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error)
 	DeletePlugin(ctx context.Context, ref string) error
 	DeletePluginWithRequest(ctx context.Context, ref string, request models.PluginDeletionRequest, actor models.DeleteActor) error
@@ -102,10 +105,21 @@ type PluginManager interface {
 
 type PluginService struct {
 	repo repository.PluginRepository
+	// notifier tells submitters what happened to their plugin. Optional: the
+	// outcome is recorded and shown in the UI either way.
+	notifier ReviewNotifier
 }
 
 func NewPluginService(repo repository.PluginRepository) *PluginService {
-	return &PluginService{repo: repo}
+	return &PluginService{repo: repo, notifier: NoopNotifier{}}
+}
+
+// NewPluginServiceWithNotifier wires a delivery channel for review outcomes.
+func NewPluginServiceWithNotifier(repo repository.PluginRepository, notifier ReviewNotifier) *PluginService {
+	if notifier == nil {
+		notifier = NoopNotifier{}
+	}
+	return &PluginService{repo: repo, notifier: notifier}
 }
 
 func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParams) (PluginListResult, error) {
@@ -497,6 +511,14 @@ func (s *PluginService) DeleteAccount(ctx context.Context, request models.Accoun
 	for _, plugin := range plugins {
 		result.PluginsDeleted++
 		result.VersionsDeleted += len(plugin.Versions)
+
+		// Erase the contact address before the plugin record is soft-deleted.
+		// A soft delete keeps the row, and personal data the account no longer
+		// exists to consent to must not be among what it keeps.
+		if err := s.repo.SetNotifyEmail(ctx, plugin.ID, ""); err != nil {
+			return models.AccountDeletionResult{}, fmt.Errorf("clear notification address: %w", err)
+		}
+
 		if err := s.repo.Delete(ctx, models.PluginDeletionSpec{
 			PluginID:        plugin.ID,
 			DeletedBy:       actor.Login,

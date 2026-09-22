@@ -175,3 +175,15 @@ plugins' versions; admins may yank any.
 - `POST /api/v1/plugins/:id/versions/:version/downloads` counts one download per
   client per version per hour, so the figure reflects adoption rather than how
   often a CI pipeline ran.
+
+## Review notifications
+
+A submitter may give an address on the submission form. If they do — and
+`SMTP_HOST` and `SMTP_FROM` are configured — the registry emails them once,
+when their plugin is approved or rejected, with the reviewer's reason.
+
+The address is deliberately not derived from the GitHub profile and is not part
+of the plugin record: it lives in a separate column (or, on the file backend, a
+separate `0600` file), is returned by no endpoint, and is erased when the
+account is deleted. Without SMTP configured the outcome is still recorded and
+shown on the author's plugin list; only the delivery is skipped.

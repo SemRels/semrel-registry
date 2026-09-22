@@ -470,8 +470,8 @@ func currentDeleteActor(c *gin.Context) models.DeleteActor {
 // SubmitPlugin handles community plugin submissions.
 // POST /api/v1/plugins/submit — requires auth; creates plugin with status=pending.
 func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
-	var plugin models.Plugin
-	if err := c.ShouldBindJSON(&plugin); err != nil {
+	var submission models.PluginSubmission
+	if err := c.ShouldBindJSON(&submission); err != nil {
 		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
 		return
 	}
@@ -479,10 +479,10 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 	// Force author to submitter's GitHub login.
 	login, _ := c.Get("login")
 	if loginStr, ok := login.(string); ok && loginStr != "" {
-		plugin.Author = loginStr
+		submission.Author = loginStr
 	}
 
-	created, err := h.service.SubmitPlugin(c.Request.Context(), plugin)
+	created, err := h.service.SubmitPluginWithContact(c.Request.Context(), submission)
 	if err != nil {
 		HandleError(c, err)
 		return

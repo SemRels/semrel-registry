@@ -453,10 +453,20 @@ export async function validatePlugin(repository: string): Promise<ValidationResu
 
 // ---- Community plugin submission ----
 
-export async function submitPlugin(plugin: Partial<Plugin>): Promise<Plugin> {
+/**
+ * Submits a community plugin for review.
+ *
+ * `notifyEmail` is optional and is stored apart from the plugin record: the
+ * registry returns it from no endpoint and erases it when the account is
+ * deleted.
+ */
+export async function submitPlugin(
+  plugin: Partial<Plugin>,
+  notifyEmail?: string,
+): Promise<Plugin> {
   return request<{ data: Plugin }>('/plugins/submit', {
     method: 'POST',
-    body: JSON.stringify(plugin),
+    body: JSON.stringify({ ...plugin, notifyEmail: notifyEmail?.trim() || undefined }),
   }).then(r => r.data);
 }
 

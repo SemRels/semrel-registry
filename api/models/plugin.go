@@ -194,3 +194,28 @@ type ReviewOutcomeSpec struct {
 	Reviewer string
 	Reason   string
 }
+
+// PluginSubmission is a community submission: the plugin itself plus the
+// contact details the submitter chose to provide.
+//
+// The address is a separate field rather than one on Plugin so that it cannot
+// be serialised by accident. Plugin is returned by public endpoints and written
+// into plugins.json; an address on that struct would be one forgotten `omit`
+// away from being published.
+type PluginSubmission struct {
+	Plugin
+	// NotifyEmail is optional. When set, the registry emails the review
+	// outcome here and nowhere else.
+	NotifyEmail string `json:"notifyEmail,omitempty"`
+}
+
+// ReviewNotification is what the notifier needs to tell an author what
+// happened to their submission.
+type ReviewNotification struct {
+	Recipient  string
+	PluginRef  string
+	Repository string
+	Approved   bool
+	Reason     string
+	Reviewer   string
+}

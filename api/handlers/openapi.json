@@ -821,7 +821,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PluginInput"
+                "$ref": "#/components/schemas/PluginSubmission"
               }
             }
           }
@@ -2294,6 +2294,23 @@
             }
           }
         }
+      },
+      "PluginSubmission": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PluginInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "notifyEmail": {
+                "type": "string",
+                "format": "email",
+                "description": "Optional, opt-in address for the review outcome. Stored apart from the plugin record, never returned by any endpoint, and erased when the account is deleted."
+              }
+            }
+          }
+        ]
       }
     }
   },

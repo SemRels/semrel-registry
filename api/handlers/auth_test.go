@@ -39,6 +39,9 @@ func (s *stubAccountManager) CreatePlugin(context.Context, models.Plugin) (model
 func (s *stubAccountManager) SubmitPlugin(context.Context, models.Plugin) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }
+func (s *stubAccountManager) SubmitPluginWithContact(context.Context, models.PluginSubmission) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
 func (s *stubAccountManager) UpdatePlugin(context.Context, string, models.PluginPatch) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }

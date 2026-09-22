@@ -48,6 +48,14 @@ type Config struct {
 
 	// AllowedDownloadHosts restricts the hosts a published artifact may live on.
 	AllowedDownloadHosts []string
+
+	// Review notifications. Optional: without a relay the outcome is still
+	// recorded and shown in the UI, it just is not delivered.
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
 }
 
 // Load reads configuration from environment variables.
@@ -88,6 +96,12 @@ func Load() *Config {
 		MaxRequestKiB: int64(getEnvInt("MAX_REQUEST_KIB", 1024)),
 
 		AllowedDownloadHosts: getEnvList("ALLOWED_DOWNLOAD_HOSTS", defaultDownloadHosts),
+
+		SMTPHost:     getEnv("SMTP_HOST", ""),
+		SMTPPort:     getEnvInt("SMTP_PORT", 587),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: os.Getenv("SMTP_PASSWORD"),
+		SMTPFrom:     getEnv("SMTP_FROM", ""),
 	}
 
 	cfg.Port = normalizePort(cfg.Port)

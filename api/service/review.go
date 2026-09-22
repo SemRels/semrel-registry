@@ -54,6 +54,11 @@ func (s *PluginService) ReviewPlugin(ctx context.Context, ref, status string, de
 	if err != nil {
 		return models.Plugin{}, err
 	}
+
+	// The author asked to be told, so tell them. Until now a decision was
+	// recorded and the author had to think to come back and look.
+	s.notifyReviewOutcome(ctx, *updated, status == models.StatusActive, reason, reviewer)
+
 	return *updated, nil
 }
 

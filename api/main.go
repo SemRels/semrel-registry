@@ -89,7 +89,24 @@ func main() {
 		}
 	}()
 
-	pluginService := service.NewPluginService(pluginRepo)
+	// Review outcomes are delivered only when a relay is configured. Without
+	// one the decision is still recorded and shown to the author in the UI,
+	// and the attempt is logged so the path stays exercised in development.
+	smtpCfg := service.SMTPConfig{
+		Host:       cfg.SMTPHost,
+		Port:       cfg.SMTPPort,
+		Username:   cfg.SMTPUsername,
+		Password:   cfg.SMTPPassword,
+		From:       cfg.SMTPFrom,
+		AppBaseURL: cfg.FrontendURL,
+	}
+	var notifier service.ReviewNotifier = service.LoggingNotifier{}
+	if smtpCfg.Configured() {
+		notifier = service.NewSMTPNotifier(smtpCfg)
+		log.Printf("review notifications will be sent via %s", cfg.SMTPHost)
+	}
+
+	pluginService := service.NewPluginServiceWithNotifier(pluginRepo, notifier)
 
 	var pool *pgxpool.Pool
 	if postgresDB != nil {

@@ -54,6 +54,10 @@ func (stubPluginService) SubmitPlugin(_ context.Context, plugin models.Plugin) (
 	return plugin, nil
 }
 
+func (stubPluginService) SubmitPluginWithContact(_ context.Context, submission models.PluginSubmission) (models.Plugin, error) {
+	return submission.Plugin, nil
+}
+
 func (stubPluginService) ApprovePlugin(_ context.Context, _ string) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }

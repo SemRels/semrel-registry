@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -1053,4 +1054,84 @@ func (s *fileStore) SetReviewOutcome(_ context.Context, spec models.ReviewOutcom
 	p.ReviewedBy = spec.Reviewer
 	p.UpdatedAt = now
 	return s.savePlugin(p)
+}
+
+// notifyEmails is the file backend's side-store for opt-in contact addresses.
+//
+// They live outside the plugin file on purpose. The plugin file is what the
+// catalogue exporter reads, so an address inside it would be one export away
+// from being published; keeping it separate makes that impossible rather than
+// merely unlikely.
+type notifyEmails map[string]string
+
+func (s *fileStore) notifyEmailPath() string {
+	return filepath.Join(s.dataDir, "notify-emails.json")
+}
+
+func (s *fileStore) loadNotifyEmails() (notifyEmails, error) {
+	data, err := os.ReadFile(s.notifyEmailPath())
+	if os.IsNotExist(err) {
+		return notifyEmails{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read notify emails: %w", err)
+	}
+	emails := notifyEmails{}
+	if err := json.Unmarshal(data, &emails); err != nil {
+		return nil, fmt.Errorf("parse notify emails: %w", err)
+	}
+	return emails, nil
+}
+
+func (s *fileStore) SetNotifyEmail(_ context.Context, pluginID int64, address string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, err := s.loadPlugin(pluginID); err != nil {
+		return err
+	}
+
+	emails, err := s.loadNotifyEmails()
+	if err != nil {
+		return err
+	}
+
+	key := strconv.FormatInt(pluginID, 10)
+	if trimmed := strings.TrimSpace(address); trimmed != "" {
+		emails[key] = trimmed
+	} else {
+		delete(emails, key)
+	}
+
+	data, err := json.MarshalIndent(emails, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal notify emails: %w", err)
+	}
+	// 0600: this file holds personal data and nothing else needs to read it.
+	return writeFileAtomicMode(s.notifyEmailPath(), data, 0o600)
+}
+
+func (s *fileStore) NotifyEmail(_ context.Context, pluginID int64) (string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	emails, err := s.loadNotifyEmails()
+	if err != nil {
+		return "", err
+	}
+	return emails[strconv.FormatInt(pluginID, 10)], nil
+}
+
+// writeFileAtomicMode writes data via a temp file and rename, with an explicit
+// file mode. Used for files that must not be world-readable.
+func writeFileAtomicMode(path string, data []byte, mode os.FileMode) error {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, mode); err != nil {
+		return fmt.Errorf("write temp file %s: %w", path, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("rename %s: %w", path, err)
+	}
+	return nil
 }
