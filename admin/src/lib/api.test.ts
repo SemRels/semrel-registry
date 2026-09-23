@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getAuthConfig, validatePlugin } from './api';
+import { getAuthConfig, getCurrentUser, getToken, saveToken, validatePlugin } from './api';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -10,6 +10,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe('validatePlugin', () => {
@@ -54,5 +55,41 @@ describe('getAuthConfig', () => {
     ));
 
     await expect(getAuthConfig()).rejects.toThrow();
+  });
+});
+
+describe('getCurrentUser', () => {
+  // A stale dev token (leftover from the ADMIN_TOKEN login form) takes
+  // precedence over a valid GitHub session cookie, since the API checks the
+  // Authorization header before the cookie. Regression test for a bug where
+  // this call never cleared the bad token, permanently locking the browser
+  // out of an otherwise-valid cookie session.
+  it('clears a stale dev token that the API rejected', async () => {
+    saveToken('stale-token');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ error: 'invalid token' }, 401)));
+
+    const result = await getCurrentUser();
+
+    expect(result).toBeNull();
+    expect(getToken()).toBe('');
+  });
+
+  it('does not touch storage when there was no token to begin with', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ error: 'no session' }, 401)));
+
+    const result = await getCurrentUser();
+
+    expect(result).toBeNull();
+    expect(getToken()).toBe('');
+  });
+
+  it('resolves the user on success', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      jsonResponse({ user: { login: 'mwaldheim', is_admin: true } }),
+    ));
+
+    const result = await getCurrentUser();
+
+    expect(result).toEqual({ login: 'mwaldheim', name: '', avatarUrl: '', role: 'admin', isAdmin: true });
   });
 });
