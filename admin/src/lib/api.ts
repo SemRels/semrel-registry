@@ -368,7 +368,16 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const resp = await fetch(`${API_BASE}/auth/me`, { headers, credentials: 'include' });
-  if (!resp.ok) return null;
+  if (!resp.ok) {
+    // A stale dev token takes precedence over a perfectly valid GitHub session
+    // cookie (the API checks the Authorization header first) and, unlike
+    // request()'s shared 401 handling, this call never clears it -- so a
+    // leftover token from the ADMIN_TOKEN login form permanently locks the
+    // user out of their real session. Only ever clear the token itself, never
+    // the caller's session cookie.
+    if (token) clearToken();
+    return null;
+  }
 
   const body = await resp.json().catch(() => null) as { user?: RawSessionUser } | null;
   const user = body?.user;
