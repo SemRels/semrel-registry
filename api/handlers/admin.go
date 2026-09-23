@@ -187,7 +187,7 @@ func readPluginsJSON(filePath string) (string, []byte, error) {
 
 	var lastErr error
 	for _, p := range candidates {
-		data, err := os.ReadFile(p) //nolint:gosec // derived from PLUGINS_JSON_PATH, an operator-set env var, not request input
+		data, err := os.ReadFile(p) // #nosec G304 -- derived from PLUGINS_JSON_PATH, an operator-set env var, not request input
 		if err == nil {
 			return p, data, nil
 		}

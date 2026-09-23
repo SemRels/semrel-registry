@@ -7,7 +7,7 @@ import (
 
 // DevJWTSecret is the insecure fallback used when JWT_SECRET is unset.
 // It is only ever accepted outside production; Validate rejects it in prod.
-const DevJWTSecret = "dev-jwt-secret-change-in-production" //nolint:gosec // documented, intentionally insecure dev-only default
+const DevJWTSecret = "dev-jwt-secret-change-in-production" // #nosec G101 -- documented, intentionally insecure dev-only default
 
 // minSecretLength is the minimum length for secrets that protect admin access.
 // 32 characters ≈ 192 bits of entropy for a base64/hex secret.
