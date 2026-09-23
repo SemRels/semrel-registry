@@ -403,6 +403,7 @@ export interface AuthConfig {
 
 export async function getAuthConfig(): Promise<AuthConfig> {
   const resp = await fetch('/auth/config');
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   return resp.json() as Promise<AuthConfig>;
 }
 
@@ -442,12 +443,10 @@ export interface ValidationResult {
 }
 
 export async function validatePlugin(repository: string): Promise<ValidationResult> {
-  const resp = await fetch(`${API_BASE}/plugins/validate`, {
+  return request<ValidationResult>('/plugins/validate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ repository }),
   });
-  return resp.json() as Promise<ValidationResult>;
 }
 
 
