@@ -63,7 +63,7 @@ jobs:
       - name: Scan Go dependencies for known vulnerabilities
         working-directory: api
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
           govulncheck ./...
       # Installed from source rather than via a marketplace action so the whole
       # tool chain is pinned by Go module version, consistent with how the rest

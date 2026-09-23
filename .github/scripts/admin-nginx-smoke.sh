@@ -238,8 +238,10 @@ request_through_admin() {
   fail "admin did not recover after API DNS registration for $path"
 }
 
-# wget includes the non-default port in the Host header it sends.
-forwarded="host=127.0.0.1:$admin_port|real=127.0.0.1|forwarded=127.0.0.1|proto=http"
+# nginx's $host variable is always the Host header normalized to exclude the
+# port (per nginx's own docs), regardless of what the client sent — wget
+# includes the port in the Host header it sends, but $host strips it back off.
+forwarded="host=127.0.0.1|real=127.0.0.1|forwarded=127.0.0.1|proto=http"
 api_response="$(request_through_admin '/api/runtime-dns?probe=api')"
 [[ "$api_response" == "uri=/api/runtime-dns?probe=api|$forwarded" ]] ||
   fail "/api/ URI or forwarding headers changed: $api_response"
