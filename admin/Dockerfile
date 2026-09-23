@@ -10,6 +10,11 @@ RUN npm run build
 # its port.
 FROM nginxinc/nginx-unprivileged:1.29-alpine
 USER root
+# The base image's own Alpine package layer lags behind upstream security
+# fixes between its own rebuilds (curl, libexpat, libssl3, libuuid, libxml2
+# CVEs have all shown up here) — upgrade at build time instead of waiting on
+# nginxinc to cut a new tag.
+RUN apk update && apk upgrade --no-cache
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY admin/nginx.conf /etc/nginx/templates/default.conf.template
 COPY admin/security-headers.conf /etc/nginx/snippets/security-headers.conf
