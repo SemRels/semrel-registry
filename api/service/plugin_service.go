@@ -48,6 +48,7 @@ var allowedSorts = map[string]struct{}{
 	"created_at": {},
 	"updated_at": {},
 	"downloads":  {},
+	"views":      {},
 }
 
 type ListPluginsParams struct {
@@ -60,6 +61,9 @@ type ListPluginsParams struct {
 	Namespace string   // when set, filter by namespace (e.g. "@semrel")
 	Author    string   // when set, only return plugins by this author (exact, case-insensitive)
 	Statuses  []string // when set, filter by status (e.g. ["active"] or ["pending"]); default: ["active"]
+	// CompatibleWith is a concrete semrel core version. When set, only plugins
+	// whose latest installable release admits that version are returned.
+	CompatibleWith string
 }
 
 type Pagination struct {
@@ -80,6 +84,9 @@ type PluginManager interface {
 	ListVersions(ctx context.Context, ref string, limit, offset int) ([]models.PluginVersion, error)
 	CreatePlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
 	SubmitPlugin(ctx context.Context, plugin models.Plugin) (models.Plugin, error)
+	// SubmitPluginWithContact additionally records where to send the review
+	// outcome, when the submitter opted in.
+	SubmitPluginWithContact(ctx context.Context, submission models.PluginSubmission) (models.Plugin, error)
 	UpdatePlugin(ctx context.Context, ref string, patch models.PluginPatch) (models.Plugin, error)
 	DeletePlugin(ctx context.Context, ref string) error
 	DeletePluginWithRequest(ctx context.Context, ref string, request models.PluginDeletionRequest, actor models.DeleteActor) error
@@ -89,15 +96,35 @@ type PluginManager interface {
 	DeleteAccount(ctx context.Context, request models.AccountDeletionRequest, actor models.DeleteActor) (models.AccountDeletionResult, error)
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
+	// ReviewPlugin records an approval or rejection with its reason and reviewer.
+	ReviewPlugin(ctx context.Context, ref, status string, decision models.ReviewDecision, reviewer string) (models.Plugin, error)
+	// YankVersion retracts a published version, or lifts the retraction.
+	YankVersion(ctx context.Context, ref string, versionID int64, yanked bool, request models.VersionYankRequest, actor models.DeleteActor) (models.PluginVersion, error)
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
+	// SetProvenance records a build-attestation lookup for a version.
+	SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error
+	// SetSecurityAdvisories records the imported GitHub security advisories
+	// for a plugin's repository.
+	SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error
 }
 
 type PluginService struct {
 	repo repository.PluginRepository
+	// notifier tells submitters what happened to their plugin. Optional: the
+	// outcome is recorded and shown in the UI either way.
+	notifier ReviewNotifier
 }
 
 func NewPluginService(repo repository.PluginRepository) *PluginService {
-	return &PluginService{repo: repo}
+	return &PluginService{repo: repo, notifier: NoopNotifier{}}
+}
+
+// NewPluginServiceWithNotifier wires a delivery channel for review outcomes.
+func NewPluginServiceWithNotifier(repo repository.PluginRepository, notifier ReviewNotifier) *PluginService {
+	if notifier == nil {
+		notifier = NoopNotifier{}
+	}
+	return &PluginService{repo: repo, notifier: notifier}
 }
 
 func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParams) (PluginListResult, error) {
@@ -128,6 +155,14 @@ func (s *PluginService) ListPlugins(ctx context.Context, params ListPluginsParam
 			dir = "DESC"
 		}
 		filters = append(filters, repository.SortFilter{Field: params.Sort, Direction: dir})
+	}
+
+	// Compatibility is a semver range, which SQL cannot evaluate. When the
+	// caller asks for it, the matching rows are fetched, filtered in Go and
+	// paginated here instead — so the page and the total stay consistent with
+	// each other, at the cost of a bounded scan.
+	if params.CompatibleWith != "" {
+		return s.listCompatible(ctx, params, filters)
 	}
 
 	offset := (params.Page - 1) * params.Limit
@@ -375,6 +410,16 @@ func (s *PluginService) CreateVersion(ctx context.Context, ref string, version m
 		return models.PluginVersion{}, err
 	}
 
+	// Both backends resolve "latest" by release date, nulls last. A version
+	// published without one therefore sorted as the *oldest* release and could
+	// never become the latest — so a publisher who omitted the field silently
+	// published something nobody would be offered. A release published now was
+	// released now.
+	if version.ReleaseDate == nil {
+		now := time.Now().UTC()
+		version.ReleaseDate = &now
+	}
+
 	plugin, err := s.lookupPlugin(ctx, ref)
 	if err != nil {
 		return models.PluginVersion{}, err
@@ -471,6 +516,14 @@ func (s *PluginService) DeleteAccount(ctx context.Context, request models.Accoun
 	for _, plugin := range plugins {
 		result.PluginsDeleted++
 		result.VersionsDeleted += len(plugin.Versions)
+
+		// Erase the contact address before the plugin record is soft-deleted.
+		// A soft delete keeps the row, and personal data the account no longer
+		// exists to consent to must not be among what it keeps.
+		if err := s.repo.SetNotifyEmail(ctx, plugin.ID, ""); err != nil {
+			return models.AccountDeletionResult{}, fmt.Errorf("clear notification address: %w", err)
+		}
+
 		if err := s.repo.Delete(ctx, models.PluginDeletionSpec{
 			PluginID:        plugin.ID,
 			DeletedBy:       actor.Login,
@@ -556,6 +609,7 @@ func normalizeListParams(params ListPluginsParams) ListPluginsParams {
 	params.Sort = strings.TrimSpace(params.Sort)
 	params.Namespace = strings.TrimSpace(params.Namespace)
 	params.Author = strings.TrimSpace(params.Author)
+	params.CompatibleWith = strings.TrimSpace(params.CompatibleWith)
 	return params
 }
 
@@ -579,7 +633,7 @@ func validateListParams(params ListPluginsParams) error {
 		return &appErrors.ValidationError{Field: "search", Issue: fmt.Sprintf("must be at most %d characters", maxSearchLength)}
 	}
 	if _, ok := allowedSorts[params.Sort]; !ok {
-		return &appErrors.ValidationError{Field: "sort", Issue: "must be one of: name, category, created_at, updated_at"}
+		return &appErrors.ValidationError{Field: "sort", Issue: "must be one of: name, category, created_at, updated_at, downloads, views"}
 	}
 	return nil
 }
@@ -846,6 +900,9 @@ func validateVersion(version models.PluginVersion) error {
 	if version.DownloadURL == "" {
 		return &appErrors.ValidationError{Field: "downloadUrl", Issue: "is required"}
 	}
+	if err := validateArtifactURL("downloadUrl", version.DownloadURL); err != nil {
+		return err
+	}
 	if len(version.Changelog) > maxChangelogLength {
 		return &appErrors.ValidationError{Field: "changelog", Issue: fmt.Sprintf("must be at most %d characters", maxChangelogLength)}
 	}
@@ -861,6 +918,9 @@ func validateVersion(version models.PluginVersion) error {
 		}
 		if len(value) > maxChecksumLength {
 			return &appErrors.ValidationError{Field: "checksums", Issue: fmt.Sprintf("checksum hash must be at most %d characters", maxChecksumLength)}
+		}
+		if err := validateChecksum(value); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -931,18 +991,16 @@ func trimPointer(value *string) *string {
 	return &trimmed
 }
 
-func enrichPlugin(plugin models.Plugin, includeVersions bool) models.Plugin {
-	if plugin.LatestVersion == "" && len(plugin.Versions) > 0 {
-		plugin.LatestVersion = plugin.Versions[0].Version
-	}
-	if !includeVersions {
-		plugin.Versions = nil
-	}
-	return plugin
-}
-
 func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error {
 	return s.repo.UpdateValidationChecks(ctx, id, checksJSON)
+}
+
+func (s *PluginService) SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error {
+	return s.repo.SetProvenance(ctx, versionID, provenance)
+}
+
+func (s *PluginService) SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	return s.repo.SetSecurityAdvisories(ctx, pluginID, advisories)
 }
 
 func applyPatch(plugin *models.Plugin, patch models.PluginPatch) {

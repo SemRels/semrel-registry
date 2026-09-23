@@ -2,7 +2,11 @@ package handlers
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,6 +20,7 @@ import (
 
 	"github.com/SemRels/semrel-registry/api/models"
 	"github.com/SemRels/semrel-registry/api/naming"
+	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 )
@@ -41,11 +46,29 @@ type ghAsset struct {
 // ── SyncHandler ───────────────────────────────────────────────────────────────
 
 type SyncHandler struct {
-	svc service.PluginManager
+	svc           service.PluginManager
+	webhookSecret string
+	// consumerWebhooks delivers outbound notifications to registry consumers
+	// who subscribed to a plugin's events — distinct from webhookSecret, which
+	// authenticates the *inbound* release notification a plugin repository
+	// sends this handler. Nil makes delivery a no-op.
+	consumerWebhooks repository.WebhookRepository
 }
 
 func NewSyncHandler(s service.PluginManager) *SyncHandler {
-	return &SyncHandler{svc: s}
+	return &SyncHandler{svc: s, webhookSecret: strings.TrimSpace(os.Getenv("WEBHOOK_SECRET"))}
+}
+
+// NewSyncHandlerWithSecret builds a sync handler with an explicit webhook
+// secret rather than reading the environment.
+func NewSyncHandlerWithSecret(s service.PluginManager, secret string) *SyncHandler {
+	return &SyncHandler{svc: s, webhookSecret: strings.TrimSpace(secret)}
+}
+
+// WithWebhooks wires consumer webhook delivery into the handler.
+func (h *SyncHandler) WithWebhooks(webhooks repository.WebhookRepository) *SyncHandler {
+	h.consumerWebhooks = webhooks
+	return h
 }
 
 // POST /api/v1/admin/sync-versions
@@ -124,13 +147,21 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 	}
 
 	type semrelPluginVersion struct {
-		Version       string            `json:"version"`
-		ReleaseDate   string            `json:"releaseDate"`
-		Changelog     string            `json:"changelog,omitempty"`
-		DownloadURL   string            `json:"downloadUrl"`
-		DownloadURLs  map[string]string `json:"downloadUrls,omitempty"`
-		Checksums     map[string]string `json:"checksums"`
-		Prerelease    bool              `json:"prerelease,omitempty"`
+		Version      string            `json:"version"`
+		ReleaseDate  string            `json:"releaseDate"`
+		Changelog    string            `json:"changelog,omitempty"`
+		DownloadURL  string            `json:"downloadUrl"`
+		DownloadURLs map[string]string `json:"downloadUrls,omitempty"`
+		Checksums    map[string]string `json:"checksums"`
+		Prerelease   bool              `json:"prerelease,omitempty"`
+		// Yanked marks a retracted release. Clients must keep resolving it for
+		// pinned installs but must not choose it as an update target.
+		Yanked       bool   `json:"yanked,omitempty"`
+		YankedReason string `json:"yankedReason,omitempty"`
+		// Provenance is omitted until a lookup has actually been attempted.
+		// Once present it carries verified:false and Issue for a mismatch too
+		// — that negative result is the one clients most need to see.
+		Provenance    *models.Provenance `json:"provenance,omitempty"`
 		Compatibility *struct {
 			SemrelCore string `json:"semrelCore,omitempty"`
 		} `json:"compatibility,omitempty"`
@@ -147,6 +178,10 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Tags        []string              `json:"tags,omitempty"`
 		Downloads   int64                 `json:"downloads"`
 		Versions    []semrelPluginVersion `json:"versions"`
+		// SecurityAdvisories is omitted until import has actually been
+		// attempted; an empty (non-nil) slice means it was checked and none
+		// were found, which is a different, worth-distinguishing state.
+		SecurityAdvisories []models.SecurityAdvisory `json:"securityAdvisories,omitempty"`
 	}
 	type semrelRegistry struct {
 		SchemaVersion int            `json:"schemaVersion"`
@@ -174,6 +209,9 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 				DownloadURLs: deriveDownloadURLs(v.DownloadURL, v.Checksums),
 				Checksums:    v.Checksums,
 				Prerelease:   v.Prerelease,
+				Yanked:       v.Yanked(),
+				YankedReason: v.YankedReason,
+				Provenance:   v.Provenance,
 				Compatibility: func() *struct {
 					SemrelCore string `json:"semrelCore,omitempty"`
 				} {
@@ -191,21 +229,22 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 			tags = []string{}
 		}
 		registry.Plugins = append(registry.Plugins, semrelPlugin{
-			Namespace:   p.Namespace,
-			Name:        p.Name,
-			Aliases:     p.Aliases,
-			Description: p.Description,
-			Author:      p.Author,
-			License:     p.License,
-			Category:    p.Category,
-			Repository:  p.Repository,
-			Tags:        tags,
-			Downloads:   p.Downloads,
-			Versions:    svs,
+			Namespace:          p.Namespace,
+			Name:               p.Name,
+			Aliases:            p.Aliases,
+			Description:        p.Description,
+			Author:             p.Author,
+			License:            p.License,
+			Category:           p.Category,
+			Repository:         p.Repository,
+			Tags:               tags,
+			Downloads:          p.Downloads,
+			Versions:           svs,
+			SecurityAdvisories: p.SecurityAdvisories,
 		})
 	}
 
-	c.JSON(http.StatusOK, registry)
+	writeCacheableJSON(c, registry, pluginsJSONMaxAge)
 }
 
 // POST /api/v1/webhooks/release
@@ -219,9 +258,14 @@ type syncResult struct {
 }
 
 func (h *SyncHandler) WebhookRelease(c *gin.Context) {
-	secret := os.Getenv("WEBHOOK_SECRET")
-	if secret != "" && c.GetHeader("X-Webhook-Secret") != secret {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid webhook secret"})
+	body, err := io.ReadAll(io.LimitReader(c.Request.Body, maxWebhookBodyBytes))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "could not read request body"})
+		return
+	}
+
+	if authErr := h.authenticateWebhook(c, body); authErr != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": authErr.Error()})
 		return
 	}
 
@@ -242,7 +286,7 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 			Repository string `json:"repository"`
 		} `json:"plugin"`
 	}
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := json.Unmarshal(body, &payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
 		return
 	}
@@ -311,9 +355,9 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 
 	var rel *ghRelease
 	if payload.Tag != "" {
-		rel, err = fetchGHRelease(owner, repo, payload.Tag)
+		rel, err = fetchGHRelease(ctx, owner, repo, payload.Tag)
 	} else {
-		rel, err = fetchGHLatestRelease(owner, repo)
+		rel, err = fetchGHLatestRelease(ctx, owner, repo)
 	}
 	if err != nil {
 		InternalServerError(c, "failed to fetch release", err)
@@ -367,7 +411,7 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 		org = strings.TrimSpace(org[:idx])
 	}
 
-	repos, err := fetchOrgRepos(org)
+	repos, err := fetchOrgRepos(ctx, org)
 	if err != nil {
 		return nil, err
 	}
@@ -518,23 +562,26 @@ type ghRepo struct {
 	Fork        bool   `json:"fork"`
 }
 
-func fetchOrgRepos(org string) ([]ghRepo, error) {
+func fetchOrgRepos(ctx context.Context, org string) ([]ghRepo, error) {
 	token := os.Getenv("GITHUB_TOKEN")
 	var all []ghRepo
 	for page := 1; ; page++ {
 		url := fmt.Sprintf("https://api.github.com/orgs/%s/repos?type=public&per_page=100&page=%d", org, page)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
 		if token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
 		req.Header.Set("Accept", "application/vnd.github+json")
 
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := githubHTTPClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			return nil, githubAPIError("org repos", org, resp.StatusCode, body)
 		}
@@ -556,7 +603,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 	if repo == "" {
 		return 0, 0, fmt.Errorf("cannot parse repository URL %q", p.Repository)
 	}
-	releases, err := fetchGHReleases(owner, repo)
+	releases, err := fetchGHReleases(ctx, owner, repo)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -583,6 +630,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 			skipped++
 		}
 	}
+	triggerAdvisoryRefresh(h.svc, h.consumerWebhooks, p.ID, p.Repository)
 	return created, skipped, firstErr
 }
 
@@ -618,16 +666,21 @@ func (h *SyncHandler) upsertVersion(ctx context.Context, p *models.Plugin, rel *
 		}
 	}
 
+	checksums := pickChecksums(rel.Assets)
 	ver := models.PluginVersion{
 		PluginID:    p.ID,
 		Version:     tag,
 		ReleaseDate: releaseDate,
 		Changelog:   rel.Body,
 		DownloadURL: downloadURL,
-		Checksums:   pickChecksums(rel.Assets),
+		Checksums:   checksums,
 		Prerelease:  rel.Prerelease,
 	}
-	_, createErr := h.svc.CreateVersion(ctx, ref, ver)
+	created, createErr := h.svc.CreateVersion(ctx, ref, ver)
+	if createErr == nil {
+		triggerProvenanceCheck(h.svc, created.ID, p.Repository, checksums)
+		DeliverWebhookEvent(h.consumerWebhooks, ref, models.WebhookEventVersionPublished, created)
+	}
 	return createErr == nil, createErr
 }
 
@@ -657,7 +710,7 @@ func ValidatePlugin(c *gin.Context) {
 		return
 	}
 
-	result := validatePluginStandards(owner, repo)
+	result := validatePluginStandards(c.Request.Context(), owner, repo)
 	status := http.StatusOK
 	if !result.Valid {
 		status = http.StatusUnprocessableEntity
@@ -680,7 +733,7 @@ type ValidationCheck struct {
 	Message string `json:"message,omitempty"`
 }
 
-func validatePluginStandards(owner, repo string) ValidationResult {
+func validatePluginStandards(ctx context.Context, owner, repo string) ValidationResult {
 	result := ValidationResult{Plugin: repo, Owner: owner}
 
 	type check struct {
@@ -690,8 +743,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	}
 
 	// Detect language by presence of go.mod or Cargo.toml.
-	hasGoMod, _ := checkGHFile(owner, repo, "go.mod")
-	hasCargo, _ := checkGHFile(owner, repo, "Cargo.toml")
+	hasGoMod, _ := checkGHFile(ctx, owner, repo, "go.mod")
+	hasCargo, _ := checkGHFile(ctx, owner, repo, "Cargo.toml")
 
 	var lang string
 	switch {
@@ -709,15 +762,15 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	case "rust":
 		manifestCheck = check{
 			"lang_manifest", "Cargo.toml present (Rust)",
-			func() (bool, string) { return checkGHFile(owner, repo, "Cargo.toml") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "Cargo.toml") },
 		}
 		entrypointCheck = check{
 			"lang_entrypoint", "src/main.rs or src/lib.rs present",
 			func() (bool, string) {
-				if ok, _ := checkGHFile(owner, repo, "src/main.rs"); ok {
+				if ok, _ := checkGHFile(ctx, owner, repo, "src/main.rs"); ok {
 					return true, ""
 				}
-				if ok, _ := checkGHFile(owner, repo, "src/lib.rs"); ok {
+				if ok, _ := checkGHFile(ctx, owner, repo, "src/lib.rs"); ok {
 					return true, ""
 				}
 				return false, "neither src/main.rs nor src/lib.rs found"
@@ -726,11 +779,11 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	default: // "go" or unknown — default to Go expectations
 		manifestCheck = check{
 			"lang_manifest", "go.mod present (Go)",
-			func() (bool, string) { return checkGHFile(owner, repo, "go.mod") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "go.mod") },
 		}
 		entrypointCheck = check{
 			"lang_entrypoint", "cmd/plugin/ entry point present",
-			func() (bool, string) { return checkGHFile(owner, repo, "cmd/plugin") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "cmd/plugin") },
 		}
 	}
 
@@ -746,21 +799,21 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 				return false, fmt.Sprintf("%q must match {category}-{name}, e.g. updater-pypi", repo)
 			},
 		},
-		{"security_md", "SECURITY.md present", func() (bool, string) { return checkGHFile(owner, repo, "SECURITY.md") }},
-		{"contributing_md", "CONTRIBUTING.md present", func() (bool, string) { return checkGHFile(owner, repo, "CONTRIBUTING.md") }},
-		{"governance_md", "GOVERNANCE.md present", func() (bool, string) { return checkGHFile(owner, repo, "GOVERNANCE.md") }},
-		{"license", "LICENSE file present", func() (bool, string) { return checkGHFile(owner, repo, "LICENSE") }},
+		{"security_md", "SECURITY.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "SECURITY.md") }},
+		{"contributing_md", "CONTRIBUTING.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "CONTRIBUTING.md") }},
+		{"governance_md", "GOVERNANCE.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "GOVERNANCE.md") }},
+		{"license", "LICENSE file present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "LICENSE") }},
 		{"release_workflow", ".github/workflows/release.yml present", func() (bool, string) {
-			if ok, _ := checkGHFile(owner, repo, ".github/workflows/release.yml"); ok {
+			if ok, _ := checkGHFile(ctx, owner, repo, ".github/workflows/release.yml"); ok {
 				return true, ""
 			}
-			return checkGHFile(owner, repo, ".github/workflows/release.yaml")
+			return checkGHFile(ctx, owner, repo, ".github/workflows/release.yaml")
 		}},
 		{"security_workflow", ".github/workflows/security.yml present", func() (bool, string) {
-			if ok, _ := checkGHFile(owner, repo, ".github/workflows/security.yml"); ok {
+			if ok, _ := checkGHFile(ctx, owner, repo, ".github/workflows/security.yml"); ok {
 				return true, ""
 			}
-			return checkGHFile(owner, repo, ".github/workflows/security.yaml")
+			return checkGHFile(ctx, owner, repo, ".github/workflows/security.yaml")
 		}},
 		manifestCheck,
 		entrypointCheck,
@@ -769,9 +822,9 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 			"release.yml triggers registry sync",
 			func() (bool, string) {
 				// Accept both .yml and .yaml extensions.
-				content, err := fetchGHFileContent(owner, repo, ".github/workflows/release.yml")
+				content, err := fetchGHFileContent(ctx, owner, repo, ".github/workflows/release.yml")
 				if err != nil {
-					content, err = fetchGHFileContent(owner, repo, ".github/workflows/release.yaml")
+					content, err = fetchGHFileContent(ctx, owner, repo, ".github/workflows/release.yaml")
 				}
 				if err != nil {
 					return false, "could not fetch release workflow"
@@ -811,8 +864,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 
 // ── GitHub API helpers ────────────────────────────────────────────────────────
 
-func ghRequest(url string) ([]byte, int, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func ghRequest(ctx context.Context, url string) ([]byte, int, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -821,7 +874,7 @@ func ghRequest(url string) ([]byte, int, error) {
 	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
 		req.Header.Set("Authorization", "Bearer "+tok)
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := githubHTTPClient.Do(req)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -830,9 +883,9 @@ func ghRequest(url string) ([]byte, int, error) {
 	return body, resp.StatusCode, nil
 }
 
-func fetchGHReleases(owner, repo string) ([]ghRelease, error) {
+func fetchGHReleases(ctx context.Context, owner, repo string) ([]ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases?per_page=100", owner, repo)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -846,9 +899,9 @@ func fetchGHReleases(owner, repo string) ([]ghRelease, error) {
 	return releases, json.Unmarshal(body, &releases)
 }
 
-func fetchGHRelease(owner, repo, tag string) (*ghRelease, error) {
+func fetchGHRelease(ctx context.Context, owner, repo, tag string) (*ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/tags/%s", owner, repo, tag)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -859,9 +912,9 @@ func fetchGHRelease(owner, repo, tag string) (*ghRelease, error) {
 	return &rel, json.Unmarshal(body, &rel)
 }
 
-func fetchGHLatestRelease(owner, repo string) (*ghRelease, error) {
+func fetchGHLatestRelease(ctx context.Context, owner, repo string) (*ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -890,9 +943,9 @@ func isGitHubRateLimitError(err error) bool {
 	return strings.Contains(msg, "rate limit") || (strings.Contains(msg, "github api 403") && !errors.Is(err, context.Canceled))
 }
 
-func checkGHFile(owner, repo, path string) (bool, string) {
+func checkGHFile(ctx context.Context, owner, repo, path string) (bool, string) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, path)
-	_, status, err := ghRequest(url)
+	_, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -902,9 +955,9 @@ func checkGHFile(owner, repo, path string) (bool, string) {
 	return false, fmt.Sprintf("%s not found (HTTP %d)", path, status)
 }
 
-func fetchGHFileContent(owner, repo, path string) (string, error) {
+func fetchGHFileContent(ctx context.Context, owner, repo, path string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, path)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return "", err
 	}
@@ -985,3 +1038,49 @@ func pickDownloadURL(assets []ghAsset) string {
 }
 
 // deriveDownloadURLs is defined in download_urls.go (shared with the versions handler).
+
+// maxWebhookBodyBytes bounds how much of a webhook body the registry will read.
+// The payloads are a handful of fields; anything larger is either a mistake or
+// an attempt to make the server allocate on demand.
+const maxWebhookBodyBytes = 64 << 10
+
+// authenticateWebhook verifies that a release webhook really came from a holder
+// of the shared secret.
+//
+// The preferred proof is an HMAC over the exact request body
+// (X-Hub-Signature-256, the scheme GitHub itself uses): it authenticates the
+// payload, not just the caller, so a captured request cannot be edited in
+// flight. The older X-Webhook-Secret header — which sends the secret itself on
+// every call, where any intermediary can read and replay it — stays supported
+// for plugin repositories that have not migrated yet, but is compared in
+// constant time and logged as deprecated.
+//
+// With no secret configured the endpoint is open. Config.Validate refuses to
+// start a production server in that state; in development it only warns,
+// because a webhook that cannot be exercised locally never gets tested.
+func (h *SyncHandler) authenticateWebhook(c *gin.Context, body []byte) error {
+	if h.webhookSecret == "" {
+		log.Printf("warning: release webhook accepted without authentication — set WEBHOOK_SECRET")
+		return nil
+	}
+
+	if signature := strings.TrimSpace(c.GetHeader("X-Hub-Signature-256")); signature != "" {
+		mac := hmac.New(sha256.New, []byte(h.webhookSecret))
+		mac.Write(body)
+		expected := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+		if hmac.Equal([]byte(expected), []byte(signature)) {
+			return nil
+		}
+		return errors.New("invalid webhook signature")
+	}
+
+	if presented := strings.TrimSpace(c.GetHeader("X-Webhook-Secret")); presented != "" {
+		if subtle.ConstantTimeCompare([]byte(h.webhookSecret), []byte(presented)) == 1 {
+			log.Printf("warning: release webhook used the deprecated X-Webhook-Secret header; switch to X-Hub-Signature-256")
+			return nil
+		}
+		return errors.New("invalid webhook secret")
+	}
+
+	return errors.New("webhook authentication required: send X-Hub-Signature-256")
+}

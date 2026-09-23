@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -132,4 +133,67 @@ func TestRateLimitTrustProxy(t *testing.T) {
 	r3.Header.Set("X-Forwarded-For", "203.0.113.99")
 	router.ServeHTTP(w3, r3)
 	assert.Equal(t, http.StatusOK, w3.Code, "different X-Forwarded-For should have its own bucket")
+}
+
+// TestRateLimitIgnoresSpoofedForwardedFor is the regression guard for a limiter
+// that read X-Forwarded-For directly: a client could then pick a fresh bucket
+// on every request and never be throttled at all. With the trusted-proxy list
+// configured, a header from an untrusted peer must be ignored, so all of these
+// requests share one bucket.
+func TestRateLimitIgnoresSpoofedForwardedFor(t *testing.T) {
+	cfg := middleware.RateLimitConfig{Enabled: true, PublicRPM: 3, TrustProxy: true}
+	router := gin.New()
+	require.NoError(t, router.SetTrustedProxies([]string{"10.0.0.0/8"}))
+	router.GET("/test", middleware.RateLimit(cfg, cfg.PublicRPM), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	statuses := make([]int, 0, 5)
+	for i := 0; i < 5; i++ {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		req.RemoteAddr = "203.0.113.7:4444" // not a trusted proxy
+		req.Header.Set("X-Forwarded-For", fmt.Sprintf("198.51.100.%d", i))
+		router.ServeHTTP(w, req)
+		statuses = append(statuses, w.Code)
+	}
+
+	assert.Equal(t, []int{200, 200, 200, 429, 429}, statuses,
+		"spoofed forwarding headers must not hand the caller a fresh bucket")
+}
+
+// A genuine proxy inside the trusted range is still honoured, so real client
+// addresses keep their own budgets.
+func TestRateLimitHonoursTrustedProxyHeader(t *testing.T) {
+	cfg := middleware.RateLimitConfig{Enabled: true, PublicRPM: 1, TrustProxy: true}
+	router := gin.New()
+	require.NoError(t, router.SetTrustedProxies([]string{"10.0.0.0/8"}))
+	router.GET("/test", middleware.RateLimit(cfg, cfg.PublicRPM), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	call := func(clientIP string) int {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		req.RemoteAddr = "10.1.2.3:4444" // the reverse proxy
+		req.Header.Set("X-Forwarded-For", clientIP)
+		router.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	assert.Equal(t, http.StatusOK, call("198.51.100.1"))
+	assert.Equal(t, http.StatusTooManyRequests, call("198.51.100.1"), "same client, budget spent")
+	assert.Equal(t, http.StatusOK, call("198.51.100.2"), "a different client has its own budget")
+}
+
+// TestRateLimitAdvertisesBudget checks the headers clients pace themselves on.
+func TestRateLimitAdvertisesBudget(t *testing.T) {
+	cfg := middleware.RateLimitConfig{Enabled: true, PublicRPM: 5}
+	router := newTestRouter(middleware.RateLimit(cfg, cfg.PublicRPM))
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/test", nil))
+
+	assert.Equal(t, "5", w.Header().Get("X-RateLimit-Limit"))
+	assert.Equal(t, "4", w.Header().Get("X-RateLimit-Remaining"))
 }

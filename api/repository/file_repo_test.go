@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -528,6 +529,101 @@ func TestFileRepo_AddVersion_NilReturnsError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+// -------------------------------------------------------------------------
+// SetProvenance
+// -------------------------------------------------------------------------
+
+func TestFileRepo_SetProvenance_RecordsResultAndTimestamp(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, err := repo.Create(context.Background(), basePlugin("plugin"))
+	require.NoError(t, err)
+	vid, err := repo.AddVersion(context.Background(), &models.PluginVersion{
+		PluginID:    id,
+		Version:     "1.0.0",
+		DownloadURL: "https://example.com/dl/1.0.0",
+	})
+	require.NoError(t, err)
+
+	provenance := &models.Provenance{
+		Verified:         true,
+		SourceRepository: "acme/plugin",
+		Digest:           "sha256:" + strings.Repeat("a", 64),
+	}
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, provenance))
+
+	versions, err := repo.GetVersions(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, versions, 1)
+	require.NotNil(t, versions[0].Provenance)
+	assert.True(t, versions[0].Provenance.Verified)
+	assert.Equal(t, "acme/plugin", versions[0].Provenance.SourceRepository)
+	require.NotNil(t, versions[0].ProvenanceCheckedAt)
+}
+
+func TestFileRepo_SetProvenance_NilClearsIt(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
+	vid, _ := repo.AddVersion(context.Background(), &models.PluginVersion{PluginID: id, Version: "1.0.0"})
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, &models.Provenance{Verified: true}))
+
+	require.NoError(t, repo.SetProvenance(context.Background(), vid, nil))
+
+	versions, err := repo.GetVersions(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, versions, 1)
+	assert.Nil(t, versions[0].Provenance)
+}
+
+func TestFileRepo_SetProvenance_UnknownVersionReturnsNotFound(t *testing.T) {
+	repo := newTestFileRepo(t)
+	err := repo.SetProvenance(context.Background(), 999, &models.Provenance{})
+	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
+}
+
+// -------------------------------------------------------------------------
+// SetSecurityAdvisories
+// -------------------------------------------------------------------------
+
+func TestFileRepo_SetSecurityAdvisories_RecordsResultAndTimestamp(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, err := repo.Create(context.Background(), basePlugin("plugin"))
+	require.NoError(t, err)
+
+	advisories := []models.SecurityAdvisory{
+		{GHSAID: "GHSA-aaaa-bbbb-cccc", Summary: "Arbitrary file write", VulnerableRange: "<1.2.3"},
+	}
+	require.NoError(t, repo.SetSecurityAdvisories(context.Background(), id, advisories))
+
+	stored, err := repo.GetByID(context.Background(), id)
+	require.NoError(t, err)
+	require.Len(t, stored.SecurityAdvisories, 1)
+	assert.Equal(t, "GHSA-aaaa-bbbb-cccc", stored.SecurityAdvisories[0].GHSAID)
+	require.NotNil(t, stored.AdvisoriesCheckedAt)
+}
+
+// A nil result and "found nothing" are still distinguishable — via
+// AdvisoriesCheckedAt, not via whether the slice round-trips as nil or empty.
+// JSON's omitempty erases that distinction for a slice once it goes through
+// the file backend's marshal/unmarshal round trip, so this only asserts what
+// the feature actually depends on.
+func TestFileRepo_SetSecurityAdvisories_NilMeansCheckedAndEmpty(t *testing.T) {
+	repo := newTestFileRepo(t)
+	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
+
+	require.NoError(t, repo.SetSecurityAdvisories(context.Background(), id, nil))
+
+	stored, err := repo.GetByID(context.Background(), id)
+	require.NoError(t, err)
+	assert.Empty(t, stored.SecurityAdvisories)
+	require.NotNil(t, stored.AdvisoriesCheckedAt)
+}
+
+func TestFileRepo_SetSecurityAdvisories_UnknownPluginReturnsNotFound(t *testing.T) {
+	repo := newTestFileRepo(t)
+	err := repo.SetSecurityAdvisories(context.Background(), 999, nil)
+	assert.ErrorIs(t, err, appErrors.ErrPluginNotFound)
+}
+
 func TestFileRepo_AddVersion_SortsByReleaseDateDesc(t *testing.T) {
 	repo := newTestFileRepo(t)
 	id, _ := repo.Create(context.Background(), basePlugin("plugin"))
@@ -593,4 +689,44 @@ func TestFileRepo_PersistsAcrossInstances(t *testing.T) {
 	got, err := repo2.GetByID(context.Background(), id)
 	require.NoError(t, err)
 	assert.Equal(t, "provider-github", got.Name)
+}
+
+// A version published through the API is appended to the file, not inserted in
+// order. latestStable takes the first eligible entry, so without a sort the
+// plugin kept advertising its oldest release as the latest one — and with it
+// that release's compatibility range.
+func TestLatestReflectsVersionsAddedAfterCreation(t *testing.T) {
+	repo, err := NewFileRepository(t.TempDir())
+	require.NoError(t, err)
+	ctx := context.Background()
+
+	plugin := &models.Plugin{Name: "analyzer-example", Category: "analyzer"}
+	id, err := repo.Create(ctx, plugin)
+	require.NoError(t, err)
+
+	older := time.Now().Add(-48 * time.Hour)
+	newer := time.Now()
+
+	for _, v := range []models.PluginVersion{
+		{PluginID: id, Version: "1.0.0", ReleaseDate: &older, SemrelCore: ">=0.1.0 <0.2.0",
+			DownloadURL: "https://github.com/a/b/releases/download/v1.0.0/plugin-linux-amd64"},
+		{PluginID: id, Version: "2.0.0", ReleaseDate: &newer, SemrelCore: ">=0.25.0 <1.0.0",
+			DownloadURL: "https://github.com/a/b/releases/download/v2.0.0/plugin-linux-amd64"},
+	} {
+		version := v
+		_, addErr := repo.AddVersion(ctx, &version)
+		require.NoError(t, addErr)
+	}
+
+	loaded, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, "2.0.0", loaded.LatestVersion)
+	require.Equal(t, ">=0.25.0 <1.0.0", loaded.LatestSemrelCore)
+
+	// The listing path loads plugins separately and must agree.
+	all, err := repo.GetAll(ctx, 10, 0)
+	require.NoError(t, err)
+	require.Len(t, all, 1)
+	require.Equal(t, "2.0.0", all[0].LatestVersion)
+	require.Equal(t, ">=0.25.0 <1.0.0", all[0].LatestSemrelCore)
 }

@@ -10,13 +10,16 @@ import (
 	"strings"
 
 	"github.com/SemRels/semrel-registry/api/models"
+	"github.com/SemRels/semrel-registry/api/repository"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
 )
 
 type PluginHandler struct {
-	service service.PluginManager
-	metrics service.MetricsRecorder
+	service  service.PluginManager
+	metrics  service.MetricsRecorder
+	dedup    *service.DownloadDeduplicator
+	webhooks repository.WebhookRepository
 }
 
 func NewPluginHandler(pluginService service.PluginManager, metrics ...service.MetricsRecorder) *PluginHandler {
@@ -24,7 +27,19 @@ func NewPluginHandler(pluginService service.PluginManager, metrics ...service.Me
 	if len(metrics) > 0 && metrics[0] != nil {
 		recorder = metrics[0]
 	}
-	return &PluginHandler{service: pluginService, metrics: recorder}
+	return &PluginHandler{
+		service: pluginService,
+		metrics: recorder,
+		dedup:   service.NewDownloadDeduplicator(service.DownloadDedupWindow),
+	}
+}
+
+// WithWebhooks wires consumer webhook delivery into the handler. Left unset,
+// every trigger point becomes a no-op — existing callers and tests that build
+// a PluginHandler without a webhook repository keep working unchanged.
+func (h *PluginHandler) WithWebhooks(webhooks repository.WebhookRepository) *PluginHandler {
+	h.webhooks = webhooks
+	return h
 }
 
 func Health() gin.HandlerFunc {
@@ -84,6 +99,9 @@ func (h *PluginHandler) ListPlugins(c *gin.Context) {
 		Namespace: strings.TrimSpace(c.Query("namespace")),
 		Author:    author,
 		Statuses:  statuses,
+		// "Which plugins work with the semrel I am running?" — the question a
+		// visitor actually has, which the catalogue could not answer before.
+		CompatibleWith: strings.TrimSpace(c.Query("compatibleWith")),
 	})
 	if err != nil {
 		HandleError(c, err)
@@ -237,6 +255,15 @@ func (h *PluginHandler) trackDownloadByRef(c *gin.Context, ref string) {
 		return
 	}
 
+	// This endpoint is unauthenticated, so anyone can call it in a loop. Counting
+	// one download per client per version per window keeps the number a measure
+	// of adoption rather than of how often someone pressed the button — and
+	// keeps CI pipelines from drowning out real users.
+	if !h.dedup.ShouldCount(c.ClientIP(), c.Request.UserAgent(), version.ID) {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
 	h.metrics.Record(service.MetricEvent{
 		PluginID:  version.PluginID,
 		VersionID: version.ID,
@@ -307,6 +334,7 @@ func (h *PluginHandler) CreatePlugin(c *gin.Context) {
 		HandleError(c, err)
 		return
 	}
+	triggerAdvisoryRefresh(h.service, h.webhooks, created.ID, created.Repository)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
@@ -385,11 +413,30 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 		return
 	}
 
+	plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	// Non-admin users can only add versions to their own plugins.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		if !strings.EqualFold(plugin.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only add versions to your own plugins", "author": plugin.Author})
+			return
+		}
+	}
+
 	created, err := h.service.CreateVersion(c.Request.Context(), c.Param("id"), version)
 	if err != nil {
 		HandleError(c, err)
 		return
 	}
+
+	triggerProvenanceCheck(h.service, created.ID, plugin.Repository, created.Checksums)
+	DeliverWebhookEvent(h.webhooks, plugin.Ref(), models.WebhookEventVersionPublished, created)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%s/versions/%d", c.Param("id"), created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
@@ -453,19 +500,43 @@ func currentDeleteActor(c *gin.Context) models.DeleteActor {
 // SubmitPlugin handles community plugin submissions.
 // POST /api/v1/plugins/submit — requires auth; creates plugin with status=pending.
 func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
-	var plugin models.Plugin
-	if err := c.ShouldBindJSON(&plugin); err != nil {
+	var submission models.PluginSubmission
+	if err := c.ShouldBindJSON(&submission); err != nil {
 		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
 		return
 	}
 
 	// Force author to submitter's GitHub login.
 	login, _ := c.Get("login")
-	if loginStr, ok := login.(string); ok && loginStr != "" {
-		plugin.Author = loginStr
+	loginStr, _ := login.(string)
+	if loginStr != "" {
+		submission.Author = loginStr
 	}
 
-	created, err := h.service.SubmitPlugin(c.Request.Context(), plugin)
+	// Forcing the author field records who submitted; it proves nothing about
+	// whether they control the repository. Without this check a plugin could be
+	// claimed out from under the person actually maintaining it.
+	isAdmin, _ := c.Get("isAdmin")
+	if isAdmin != true {
+		owner, repo := ownerRepoFromURL(submission.Repository)
+		result := VerifyRepositoryOwnership(c.Request.Context(), loginStr, owner, repo)
+		if !result.Verified {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": gin.H{
+					"code":    "REPOSITORY_NOT_VERIFIED",
+					"message": "You must show that you control this repository before submitting it.",
+					"details": gin.H{
+						"issue":     result.Issue,
+						"howToFix":  result.HowToFix,
+						"claimFile": ClaimFilePath,
+					},
+				},
+			})
+			return
+		}
+	}
+
+	created, err := h.service.SubmitPluginWithContact(c.Request.Context(), submission)
 	if err != nil {
 		HandleError(c, err)
 		return
@@ -477,13 +548,14 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 		if owner == "" || repo == "" {
 			return
 		}
-		result := validatePluginStandards(owner, repo)
+		result := validatePluginStandards(context.Background(), owner, repo)
 		raw, err := json.Marshal(result)
 		if err != nil {
 			return
 		}
 		_ = h.service.UpdateValidationChecks(context.Background(), id, raw)
 	}(created.ID, created.Repository)
+	triggerAdvisoryRefresh(h.service, h.webhooks, created.ID, created.Repository)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%d", created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})
@@ -582,7 +654,7 @@ func (h *PluginHandler) revalidatePlugin(ctx context.Context, plugin models.Plug
 	if owner == "" || repo == "" {
 		return ValidationResult{}, fmt.Errorf("plugin has no valid GitHub repository URL")
 	}
-	result := validatePluginStandards(owner, repo)
+	result := validatePluginStandards(ctx, owner, repo)
 	raw, err := json.Marshal(result)
 	if err != nil {
 		return ValidationResult{}, fmt.Errorf("failed to marshal result: %w", err)
@@ -596,18 +668,28 @@ func (h *PluginHandler) revalidatePlugin(ctx context.Context, plugin models.Plug
 // ApprovePlugin approves a pending plugin submission (admin only).
 // PUT /api/v1/admin/plugins/:id/approve
 func (h *PluginHandler) ApprovePlugin(c *gin.Context) {
-	updated, err := h.service.ApprovePlugin(c.Request.Context(), c.Param("id"))
-	if err != nil {
-		HandleError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": updated})
+	h.reviewPlugin(c, models.StatusActive)
 }
 
 // RejectPlugin rejects a pending plugin submission (admin only).
 // PUT /api/v1/admin/plugins/:id/reject
+//
+// A rejection must carry a reason. Without one the author is left with a
+// "rejected" badge and nothing to act on, which is where the review loop
+// used to end.
 func (h *PluginHandler) RejectPlugin(c *gin.Context) {
-	updated, err := h.service.RejectPlugin(c.Request.Context(), c.Param("id"))
+	h.reviewPlugin(c, models.StatusRejected)
+}
+
+func (h *PluginHandler) reviewPlugin(c *gin.Context, status string) {
+	var decision models.ReviewDecision
+	// Approvals may arrive with no body at all.
+	_ = c.ShouldBindJSON(&decision)
+
+	reviewer, _ := c.Get("login")
+	reviewerLogin, _ := reviewer.(string)
+
+	updated, err := h.service.ReviewPlugin(c.Request.Context(), c.Param("id"), status, decision, reviewerLogin)
 	if err != nil {
 		HandleError(c, err)
 		return

@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
+import { initTheme } from './hooks/useTheme';
 
 async function clearLocalServiceWorkers(): Promise<void> {
 	if (!('serviceWorker' in navigator)) return;
@@ -13,6 +14,10 @@ async function clearLocalServiceWorkers(): Promise<void> {
 }
 
 void clearLocalServiceWorkers();
+
+// Applied before the first paint so a light-theme visitor never sees a flash
+// of the dark palette.
+initTheme();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('No #root element');

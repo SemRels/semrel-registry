@@ -313,13 +313,13 @@ func nullableVersionID(versionID int64) interface{} {
 // ---------------------------------------------------------------------------
 
 type fileMetricsRecorder struct {
-	repo      repository.PluginRepository
-	events    chan MetricEvent
-	flushDur  time.Duration
-	dropped   atomic.Int64
-	stopCh    chan struct{}
-	doneCh    chan struct{}
-	once      sync.Once
+	repo     repository.PluginRepository
+	events   chan MetricEvent
+	flushDur time.Duration
+	dropped  atomic.Int64
+	stopCh   chan struct{}
+	doneCh   chan struct{}
+	once     sync.Once
 }
 
 // NewFileMetricsRecorder returns a MetricsRecorder that persists counts via
@@ -437,4 +437,3 @@ func (r *fileMetricsRecorder) flushBatch(events []MetricEvent) {
 		}
 	}
 }
-

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -15,8 +16,9 @@ type bucket struct {
 	mu        sync.Mutex
 }
 
-// allow returns true when the request should be allowed (consumes 1 token).
-func (b *bucket) allow(ratePerMin float64) bool {
+// allowWithRemaining consumes a token and reports how many whole tokens are
+// left, for the X-RateLimit-Remaining header.
+func (b *bucket) allowWithRemaining(ratePerMin float64) (allowed bool, remaining int) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -31,10 +33,10 @@ func (b *bucket) allow(ratePerMin float64) bool {
 	}
 
 	if b.tokens < 1 {
-		return false
+		return false, 0
 	}
 	b.tokens--
-	return true
+	return true, int(b.tokens)
 }
 
 // rateLimiter holds per-IP buckets.
@@ -55,15 +57,19 @@ func newRateLimiter(ratePerMin float64, trustProxy bool) *rateLimiter {
 	}
 }
 
+// maxBuckets caps the per-IP table. Without a cap, a client rotating source
+// addresses (trivial over IPv6) grows the map until the process runs out of
+// memory — turning the rate limiter itself into the denial-of-service vector.
+const maxBuckets = 50_000
+
+// clientIP returns the address the limiter buckets on.
+//
+// It deliberately relies on gin's c.ClientIP(), which only honours
+// X-Forwarded-For when the immediate peer is one of the engine's trusted
+// proxies. Reading the header directly — as this used to — lets any caller
+// pick its own bucket by sending a different value on every request, which
+// makes the limit unenforceable.
 func (rl *rateLimiter) clientIP(c *gin.Context) string {
-	if rl.trustProxy {
-		if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
-			return xff
-		}
-		if xri := c.GetHeader("X-Real-IP"); xri != "" {
-			return xri
-		}
-	}
 	return c.ClientIP()
 }
 
@@ -73,29 +79,55 @@ func (rl *rateLimiter) getBucket(ip string) *bucket {
 
 	// Evict buckets older than 5 minutes every minute.
 	if time.Since(rl.lastCleanup) > time.Minute {
-		for k, b := range rl.buckets {
-			b.mu.Lock()
-			idle := time.Since(b.lastRefil)
-			b.mu.Unlock()
-			if idle > 5*time.Minute {
-				delete(rl.buckets, k)
-			}
-		}
+		rl.evictIdleLocked(5 * time.Minute)
 		rl.lastCleanup = time.Now()
 	}
 
 	if b, ok := rl.buckets[ip]; ok {
 		return b
 	}
+
+	// Under pressure, evict aggressively before admitting a new bucket; if that
+	// is not enough, drop the table entirely rather than grow without bound.
+	if len(rl.buckets) >= maxBuckets {
+		rl.evictIdleLocked(time.Minute)
+		if len(rl.buckets) >= maxBuckets {
+			rl.buckets = make(map[string]*bucket, maxBuckets/2)
+		}
+	}
+
 	b := &bucket{tokens: rl.ratePerMin, lastRefil: time.Now()}
 	rl.buckets[ip] = b
 	return b
 }
 
+// evictIdleLocked removes buckets untouched for longer than idleFor.
+// Callers hold rl.mu.
+func (rl *rateLimiter) evictIdleLocked(idleFor time.Duration) {
+	for key, b := range rl.buckets {
+		b.mu.Lock()
+		idle := time.Since(b.lastRefil)
+		b.mu.Unlock()
+		if idle > idleFor {
+			delete(rl.buckets, key)
+		}
+	}
+}
+
 func (rl *rateLimiter) middleware() gin.HandlerFunc {
+	limit := strconv.FormatFloat(rl.ratePerMin, 'f', -1, 64)
+
 	return func(c *gin.Context) {
 		ip := rl.clientIP(c)
-		if !rl.getBucket(ip).allow(rl.ratePerMin) {
+		b := rl.getBucket(ip)
+		allowed, remaining := b.allowWithRemaining(rl.ratePerMin)
+
+		// Advertise the budget so clients can pace themselves instead of
+		// discovering the limit by being cut off.
+		c.Header("X-RateLimit-Limit", limit)
+		c.Header("X-RateLimit-Remaining", strconv.Itoa(remaining))
+
+		if !allowed {
 			c.Header("Retry-After", "60")
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
 				"error":       "rate limit exceeded",
@@ -117,7 +149,11 @@ type RateLimitConfig struct {
 	PluginsRPM float64
 	// AuthRPM limits auth/OAuth endpoints.
 	AuthRPM float64
-	// TrustProxy honours X-Forwarded-For / X-Real-IP headers.
+	// WriteRPM limits authenticated write endpoints and the release webhook.
+	WriteRPM float64
+	// TrustProxy controls whether the engine trusts forwarding headers at all.
+	// The set of peers those headers are accepted from is configured on the Gin
+	// engine itself (SetTrustedProxies), not here.
 	TrustProxy bool
 }
 

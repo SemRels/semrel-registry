@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { getStats, syncFromFile, syncVersions, syncGitHubOrg, listPlugins } from '../lib/api';
 import type { Stats, SyncResult, SyncVersionsResult, OrgSyncResult, Plugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { TileSkeleton, TableSkeleton, EmptyState } from '../components/LoadingState';
+import { CategoryDonut, StatusDonut } from '../components/StatCharts';
 
 type TrendPoint = { period: string; views: number; downloads: number };
 
@@ -101,51 +103,57 @@ function SeriesLineChart({
       aria-label="Trend chart for views and downloads"
       onMouseLeave={() => onHoverIndexChange(null)}
     >
+      {/* Every colour here is a theme token. The chart used to be painted in
+          fixed dark values — a near-black plot area, a near-black tooltip and
+          #c9d1d9 text — which became an unreadable dark rectangle the moment
+          the palette flipped to light. */}
       <defs>
         <linearGradient id="viewGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#3b82f6" />
+          <stop offset="0%" stopColor="var(--chart-views)" stopOpacity=".75" />
+          <stop offset="100%" stopColor="var(--chart-views)" />
         </linearGradient>
         <linearGradient id="downloadGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#059669" />
+          <stop offset="0%" stopColor="var(--chart-downloads)" stopOpacity=".75" />
+          <stop offset="100%" stopColor="var(--chart-downloads)" />
         </linearGradient>
         <linearGradient id="viewFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity=".28" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--chart-views)" stopOpacity=".28" />
+          <stop offset="100%" stopColor="var(--chart-views)" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity=".22" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--chart-downloads)" stopOpacity=".22" />
+          <stop offset="100%" stopColor="var(--chart-downloads)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(3,7,18,.3)" stroke="var(--border)" strokeWidth="1" />
+      <rect x="0" y="0" width={width} height={height} rx="10" fill="var(--chart-surface)" stroke="var(--border)" strokeWidth="1" />
       {[0, .25, .5, .75, 1].map((fraction) => (
         <line key={fraction} x1={pad} x2={width - pad} y1={pad + innerH * fraction} y2={pad + innerH * fraction}
-          stroke="rgba(148,163,184,.14)" strokeDasharray="2 5" />
+          stroke="var(--chart-grid)" strokeDasharray="2 5" />
       ))}
       <path d={areaPath(views)} fill="url(#viewFill)" />
       <path d={areaPath(downloads)} fill="url(#downloadFill)" />
-      <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="3" strokeLinecap="round" />
-      <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="3" strokeLinecap="round" />
+      {/* Dashed versus solid, so the two series stay distinguishable without
+          relying on colour alone. */}
+      <path d={viewPath} fill="none" stroke="url(#viewGrad)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d={downloadPath} fill="none" stroke="url(#downloadGrad)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" />
       {data.map((point, idx) => (
         <g key={`points-${point.period}`}>
-          <circle cx={pointX(idx)} cy={pointY(views[idx] ?? 0)} r="2.5" fill="#3b82f6" />
-          <circle cx={pointX(idx)} cy={pointY(downloads[idx] ?? 0)} r="2.5" fill="#10b981" />
+          <circle cx={pointX(idx)} cy={pointY(views[idx] ?? 0)} r="2.5" fill="var(--chart-views)" />
+          <circle cx={pointX(idx)} cy={pointY(downloads[idx] ?? 0)} r="2.5" fill="var(--chart-downloads)" />
         </g>
       ))}
       {hoverX !== null && hoveredPoint && (
         <>
-          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="rgba(201,209,217,.3)" strokeDasharray="3 3" />
-          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="1.5" />
-          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
+          <line x1={hoverX} x2={hoverX} y1={pad} y2={height - pad} stroke="var(--chart-grid)" strokeDasharray="3 3" />
+          <circle cx={hoverX} cy={hoverViewsY ?? 0} r="5" fill="var(--chart-views)" stroke="var(--chart-point-ring)" strokeWidth="1.5" />
+          <circle cx={hoverX} cy={hoverDownloadsY ?? 0} r="5" fill="var(--chart-downloads)" stroke="var(--chart-point-ring)" strokeWidth="1.5" />
           {/* Tooltip box directly on the chart */}
-          <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="6" fill="rgba(13,17,23,.92)" stroke="rgba(201,209,217,.2)" strokeWidth="1" />
-          <text x={tooltipX + 8} y={tooltipY + 14} fontSize="10" fill="rgba(201,209,217,.7)">{hoveredPoint.period}</text>
-          <circle cx={tooltipX + 12} cy={tooltipY + 27} r="4" fill="#3b82f6" />
-          <text x={tooltipX + 20} y={tooltipY + 31} fontSize="11" fill="#c9d1d9">Views: <tspan fontWeight="bold">{Number(hoveredPoint.views ?? 0).toLocaleString()}</tspan></text>
-          <circle cx={tooltipX + 12} cy={tooltipY + 44} r="4" fill="#10b981" />
-          <text x={tooltipX + 20} y={tooltipY + 48} fontSize="11" fill="#c9d1d9">Downloads: <tspan fontWeight="bold">{Number(hoveredPoint.downloads ?? 0).toLocaleString()}</tspan></text>
+          <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="6" fill="var(--chart-tooltip-bg)" stroke="var(--border)" strokeWidth="1" />
+          <text x={tooltipX + 8} y={tooltipY + 14} fontSize="10" fill="var(--text-muted)">{hoveredPoint.period}</text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 27} r="4" fill="var(--chart-views)" />
+          <text x={tooltipX + 20} y={tooltipY + 31} fontSize="11" fill="var(--chart-tooltip-fg)">Views: <tspan fontWeight="bold">{Number(hoveredPoint.views ?? 0).toLocaleString()}</tspan></text>
+          <circle cx={tooltipX + 12} cy={tooltipY + 44} r="4" fill="var(--chart-downloads)" />
+          <text x={tooltipX + 20} y={tooltipY + 48} fontSize="11" fill="var(--chart-tooltip-fg)">Downloads: <tspan fontWeight="bold">{Number(hoveredPoint.downloads ?? 0).toLocaleString()}</tspan></text>
         </>
       )}
       {data.map((point, idx) => {
@@ -174,21 +182,29 @@ function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlu
   if (!data || data.length === 0) return null;
   const max = Math.max(1, ...data.map((d) => Math.max(d.views, d.downloads)));
   return (
-    <div style={{ display: 'grid', gap: '.6rem' }}>
+    <div className="top-plugins-list">
       {data.slice(0, 6).map((item) => {
         const views = Number(item.views ?? 0);
         const downloads = Number(item.downloads ?? 0);
         const v = Math.max(2, Math.round((views / max) * 100));
         const d = Math.max(2, Math.round((downloads / max) * 100));
         return (
-          <div key={item.pluginId} style={{ display: 'grid', gap: '.2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)' }}>
+          <div key={item.pluginId} className="top-plugins-item">
+            <div className="top-plugins-item__header">
               <span>{item.namespace ? `${item.namespace}/` : ''}{item.name}</span>
               <span className="muted">V {views.toLocaleString()} · D {downloads.toLocaleString()}</span>
             </div>
-            <div style={{ display: 'grid', gap: '.2rem' }}>
-              <div style={{ width: `${v}%`, height: 6, borderRadius: 999, background: 'rgba(56,139,253,.7)' }} />
-              <div style={{ width: `${d}%`, height: 6, borderRadius: 999, background: 'rgba(63,185,80,.75)' }} />
+            {/* The bar length is data-driven and continuous, so it is drawn as
+                an SVG rect sized by a plain width attribute rather than a
+                percentage-width styled div — an inline style attribute would
+                need style-src 'unsafe-inline' to render at all. */}
+            <div className="top-plugins-bars">
+              <svg viewBox="0 0 100 6" width="100%" height="6" preserveAspectRatio="none" aria-hidden="true">
+                <rect width={v} height="6" rx="3" fill="var(--chart-views)" />
+              </svg>
+              <svg viewBox="0 0 100 6" width="100%" height="6" preserveAspectRatio="none" aria-hidden="true">
+                <rect width={d} height="6" rx="3" fill="var(--chart-downloads)" />
+              </svg>
             </div>
           </div>
         );
@@ -198,7 +214,7 @@ function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlu
 }
 
 export default function DashboardPage() {
-  const user    = useCurrentUser();
+  const { user } = useCurrentUser();
   const navigate = useNavigate();
   const isAdmin = user?.isAdmin === true;
   const [stats, setStats]                     = useState<Stats | null>(null);
@@ -295,6 +311,10 @@ export default function DashboardPage() {
   const topPlugins = stats?.topPlugins ?? [];
   const topVersions = stats?.topVersions ?? [];
   const statusCounts = stats?.statusCounts ?? {};
+  const categoryData = Object.entries(categories)
+    .map(([key, value]) => ({ key, label: key, value: Number(value ?? 0) }))
+    .filter(entry => entry.value > 0);
+  const hasStatusCounts = Object.values(statusCounts).some(value => Number(value ?? 0) > 0);
   // hoveredSeriesIndex maps directly to activeSeries (oldest→newest)
   const activePoint = (() => {
     if (activeSeries.length === 0) return null;
@@ -307,7 +327,7 @@ export default function DashboardPage() {
       <div className="page__header">
         <h1 className="page__title">Dashboard</h1>
         {isAdmin && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="flex gap-sm flex-wrap">
             <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncVersions(); }} disabled={syncingVersions}>
               {syncingVersions ? 'Syncing…' : '↓ Sync versions'}
             </button>
@@ -332,7 +352,7 @@ export default function DashboardPage() {
             Version sync — new: {versionStats.created}, up-to-date: {versionStats.skipped}
             {versionStats.errors > 0 && `, errors: ${versionStats.errors}`}
             {versionStats.errors > 0 && (
-              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+              <ul className="error-list">
                 {versionResult!.results.filter(r => r.error).map(r => (
                   <li key={r.plugin}><code>{r.plugin}</code>: {r.error}</li>
                 ))}
@@ -345,7 +365,7 @@ export default function DashboardPage() {
             GitHub org sync — discovered: {orgResult!.total}, new: {orgStats.created}, updated: {orgStats.updated}
             {orgStats.errors > 0 && `, errors: ${orgStats.errors}`}
             {orgStats.errors > 0 && (
-              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+              <ul className="error-list">
                 {orgResult!.results.filter(r => r.error).map(r => (
                   <li key={r.repo}><code>{r.repo}</code>: {r.error}</li>
                 ))}
@@ -354,7 +374,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {!stats && !error && <p className="muted">Loading…</p>}
+        {!stats && !error && <TileSkeleton label="Loading registry statistics" />}
         {stats && (
           <>
           <div className="dashboard-metrics">
@@ -376,24 +396,33 @@ export default function DashboardPage() {
               <div className="stat-card__label">Downloads</div>
               <div className="stat-card__value">{totalDownloads.toLocaleString()}</div>
             </div>
-            {Object.entries(categories).map(([cat, count]) => (
-              <div key={cat} className="stat-card stat-card--category">
-                <div className="stat-card__label">{cat}</div>
-                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
-              </div>
-            ))}
-            {isAdmin && Object.entries(statusCounts).map(([status, count]) => (
-              <div key={`status-${status}`} className={`stat-card stat-card--status stat-card--${status}`}>
-                <div className="stat-card__label">{status} status</div>
-                <div className="stat-card__value">{Number(count ?? 0).toLocaleString()}</div>
-              </div>
-            ))}
           </div>
 
-          <div className="card" style={{ marginTop: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)' }}>Traffic trend</h2>
-              <div style={{ display: 'flex', gap: '.5rem' }}>
+          {/* The four totals above stay numbers: a single current value has no
+              shape, and a one-bar chart says less than the figure does. These
+              two carry structure — a magnitude comparison and a part-to-whole
+              split — which is what a chart is for. */}
+          {(categoryData.length > 0 || hasStatusCounts) && (
+            <div className="dashboard-panels">
+              {/* A card is only drawn when its chart has something to draw —
+                  an empty bordered box reads as a broken panel. */}
+              {categoryData.length > 0 && (
+                <div className="card">
+                  <CategoryDonut data={categoryData} />
+                </div>
+              )}
+              {isAdmin && hasStatusCounts && (
+                <div className="card">
+                  <StatusDonut counts={statusCounts} />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="card mt-2">
+            <div className="flex justify-between items-center gap-md flex-wrap">
+              <h2 className="m-0 text-md">Traffic trend</h2>
+              <div className="flex gap-sm">
                 {(['day', 'week', 'month'] as const).map((range) => (
                   <button
                     key={range}
@@ -406,23 +435,31 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: '.75rem' }}>
+            <div className="mt-md">
               <SeriesLineChart
                 data={activeSeries}
                 hoveredIndex={hoveredSeriesIndex}
                 onHoverIndexChange={setHoveredSeriesIndex}
               />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '.4rem', fontSize: 'var(--fs-xs)' }}>
-                <span style={{ color: 'rgba(56,139,253,.95)' }}>Views</span>
-                <span style={{ color: 'rgba(63,185,80,.95)' }}>Downloads</span>
+              {/* The legend repeats the line style, not just the colour, so
+                  the two series stay tellable apart without colour vision. */}
+              <div className="chart-legend mt-1">
+                <span className="chart-legend__item">
+                  <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-views)" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                  Views
+                </span>
+                <span className="chart-legend__item">
+                  <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-downloads)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" /></svg>
+                  Downloads
+                </span>
               </div>
               {rawSeries.length === 0 && (
-                <div style={{ marginTop: '.4rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                <div className="chart-note mt-1">
                   Noch keine Events vorhanden. Die Grafik zeigt aktuell eine 0-Basislinie.
                 </div>
               )}
               {activePoint && (
-                <div style={{ marginTop: '.5rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                <div className="chart-note mt-1">
                   <strong>{activePoint.period}</strong> · Views {Number(activePoint.views ?? 0).toLocaleString()} · Downloads {Number(activePoint.downloads ?? 0).toLocaleString()}
                 </div>
               )}
@@ -431,13 +468,13 @@ export default function DashboardPage() {
 
           <div className="dashboard-panels">
             <div className="card">
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top plugins</h2>
+              <h2 className="section-title">Top plugins</h2>
               {topPlugins.length === 0 ? (
                 <p className="muted">No plugin metrics yet.</p>
               ) : (
                 <>
                 <TopPluginsBarChart data={topPlugins} />
-                <div className="table-wrap" style={{ marginTop: '.8rem' }}>
+                <div className="table-wrap mt-2">
                   <table className="table--stack">
                     <thead><tr><th>Plugin</th><th>Category</th><th>Views</th><th>Downloads</th></tr></thead>
                     <tbody>
@@ -457,7 +494,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="card">
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top versions</h2>
+              <h2 className="section-title">Top versions</h2>
               {topVersions.length === 0 ? (
                 <p className="muted">No version metrics yet.</p>
               ) : (
@@ -484,32 +521,37 @@ export default function DashboardPage() {
 
         {/* Pending submissions — admin only */}
         {isAdmin && (
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: 'var(--fs-md)', margin: 0 }}>
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-md m-0">
                 Pending submissions
                 {pending.length > 0 && (
-                  <span style={{ background: '#f85149', color: '#fff', borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>
+                  <span className="count-badge">
                     {pending.length}
                   </span>
                 )}
               </h2>
               <button
-                className="btn btn--primary"
-                style={{ padding: '4px 14px', fontSize: 'var(--fs-sm)' }}
+                className="btn btn--primary btn--header"
                 onClick={() => navigate('/admin/submissions')}
               >
                 Review submissions →
               </button>
             </div>
-            {pendingLoading && <p className="muted">Loading…</p>}
-            {!pendingLoading && pending.length === 0 && <p className="muted">No pending submissions. 🎉</p>}
+            {pendingLoading && <TableSkeleton label="Loading pending submissions" count={3} />}
+            {!pendingLoading && pending.length === 0 && (
+              <EmptyState title="Nothing waiting for review">
+                Community submissions appear here. Approving one publishes it to
+                the catalogue; rejecting one asks you for a reason the author
+                will see.
+              </EmptyState>
+            )}
             {!pendingLoading && pending.length > 0 && pending.map(p => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ flex: 1 }}>
-                  <a href={p.repository} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.name}</a>
-                  <span className="muted" style={{ fontSize: 'var(--fs-xs)', marginLeft: '.5rem' }}>by {p.author}</span>
-                  <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>{p.description}</div>
+              <div key={p.id} className="pending-item">
+                <div className="flex-1">
+                  <a href={p.repository} target="_blank" rel="noreferrer" className="font-semibold">{p.name}</a>
+                  <span className="muted text-xs ml-1">by {p.author}</span>
+                  <div className="muted text-xs">{p.description}</div>
                 </div>
               </div>
             ))}

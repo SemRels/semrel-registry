@@ -54,6 +54,10 @@ func (stubPluginService) SubmitPlugin(_ context.Context, plugin models.Plugin) (
 	return plugin, nil
 }
 
+func (stubPluginService) SubmitPluginWithContact(_ context.Context, submission models.PluginSubmission) (models.Plugin, error) {
+	return submission.Plugin, nil
+}
+
 func (stubPluginService) ApprovePlugin(_ context.Context, _ string) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }
@@ -64,6 +68,22 @@ func (stubPluginService) RejectPlugin(_ context.Context, _ string) (models.Plugi
 
 func (stubPluginService) UpdateValidationChecks(_ context.Context, _ int64, _ []byte) error {
 	return nil
+}
+
+func (stubPluginService) SetProvenance(_ context.Context, _ int64, _ *models.Provenance) error {
+	return nil
+}
+
+func (stubPluginService) SetSecurityAdvisories(_ context.Context, _ int64, _ []models.SecurityAdvisory) error {
+	return nil
+}
+
+func (stubPluginService) ReviewPlugin(_ context.Context, _, _ string, _ models.ReviewDecision, _ string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+
+func (stubPluginService) YankVersion(_ context.Context, _ string, _ int64, _ bool, _ models.VersionYankRequest, _ models.DeleteActor) (models.PluginVersion, error) {
+	return models.PluginVersion{}, nil
 }
 
 func (stubPluginService) DeleteVersion(_ context.Context, _ int64, _ int64) error {

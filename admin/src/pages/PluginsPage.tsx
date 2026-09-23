@@ -4,6 +4,7 @@ import { listPlugins, deletePlugin, revalidateAllPlugins } from '../lib/api';
 import type { BatchRevalidationResponse } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { TableSkeleton, EmptyState } from '../components/LoadingState';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
 
 const CAT_CLASS: Record<string, string> = {
@@ -14,7 +15,7 @@ const CAT_CLASS: Record<string, string> = {
 };
 
 export default function PluginsPage() {
-  const user                          = useCurrentUser();
+  const { user } = useCurrentUser();
   const isAdmin                       = user?.isAdmin ?? false;
   const [searchParams, setSearchParams] = useSearchParams();
   const initialPage = Number.parseInt(searchParams.get('page') ?? '1', 10);
@@ -128,14 +129,14 @@ export default function PluginsPage() {
       </div>
       <div className="page__body">
         {!isAdmin && (
-          <div className="alert" style={{ background:'rgba(56,139,253,.1)', border:'1px solid rgba(56,139,253,.3)', color:'#79c0ff', padding:'.5rem .75rem', borderRadius:'6px', fontSize:'var(--fs-sm)', marginBottom:'.75rem' }}>
+          <div className="alert alert--info">
             Community view — you can only manage plugins attributed to <strong>{user?.login}</strong>.{' '}
-            <a href="/admin/submit" target="_blank" rel="noopener" style={{ color:'var(--accent)' }}>
+            <a href="/admin/submit" target="_blank" rel="noopener">
               Submit a new plugin →
             </a>
           </div>
         )}
-        <p className="muted" style={{ fontSize:'var(--fs-xs)', marginBottom:'.75rem' }}>
+        <p className="muted text-xs mb-2">
           Destructive plugin deletions require typed confirmation before the existing authenticated API delete request is sent.
         </p>
         {error && <div className="alert alert--error">{error}</div>}
@@ -145,7 +146,7 @@ export default function PluginsPage() {
             Re-checked {revalidation.summary.processed} of {revalidation.summary.total} plugins:
             {' '}{revalidation.summary.succeeded} completed, {revalidation.summary.failed} failed.
             {revalidation.summary.failed > 0 && (
-              <ul style={{ margin: '.5rem 0 0 1.25rem' }}>
+              <ul className="error-list">
                 {revalidation.data.filter((item) => item.error).map((item) => (
                   <li key={item.id}><strong>{item.name}</strong>: {item.error}</li>
                 ))}
@@ -153,15 +154,15 @@ export default function PluginsPage() {
             )}
           </div>
         )}
-        <div className="search-bar" style={{ marginBottom: '.75rem' }}>
+        <div className="search-bar mb-2">
           <input type="search" className="search-input" placeholder="Search…" value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
-          <select className="select" style={{ width: 160 }} value={category}
+          <select className="select w-160" value={category}
             onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
             <option value="">All categories</option>
             {['provider','analyzer','condition','hook','updater','generator','packager','publisher'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <select className="select" style={{ width: 180 }} value={`${sort}:${order}`}
+          <select className="select w-180" value={`${sort}:${order}`}
             onChange={(e) => {
               const [nextSort, nextOrder] = e.target.value.split(':') as ['name' | 'downloads' | 'views', 'asc' | 'desc'];
               setSort(nextSort);
@@ -177,36 +178,44 @@ export default function PluginsPage() {
           </select>
         </div>
 
-        {loading ? <p className="muted">Loading…</p> : (
+        {loading ? <TableSkeleton label="Loading plugins" count={6} /> : plugins.length === 0 ? (
+          <EmptyState
+            title={isAdmin ? 'No plugins in the registry yet' : 'No plugins attributed to your account'}
+            action={isAdmin
+              ? <Link to="/admin/plugins/new" className="btn btn--primary">Add the first plugin</Link>
+              : <Link to="/admin/submit" className="btn btn--primary">Submit a plugin</Link>}
+          >
+            {isAdmin
+              ? 'Plugins appear here once they are published or imported from GitHub.'
+              : 'Plugins you submit are listed here, including while they wait for review.'}
+          </EmptyState>
+        ) : (
           <div className="table-wrap">
             <table className="table--stack">
               <thead><tr>
                 <th>Name</th><th>Category</th><th>Author</th><th>License</th><th>Latest</th><th>Views</th><th>Downloads</th><th>Status</th><th></th>
               </tr></thead>
               <tbody>
-                {plugins.length === 0 && (
-                  <tr><td colSpan={9} style={{ textAlign:'center', padding:'2rem' }} className="muted">
-                    {isAdmin ? <Link to="/admin/plugins/new">Add the first plugin</Link> : 'No plugins attributed to your account yet.'}
-                  </td></tr>
-                )}
                 {plugins.map((p) => (
                   <tr key={p.id}>
-                    <td data-label="Name"><strong style={{ fontSize:'var(--fs-sm)' }}>{p.namespace ? <span className="muted" style={{ fontWeight:400 }}>{p.namespace}/</span> : null}{p.name}</strong>
-                      {p.description && <div className="muted truncate" style={{ fontSize:'var(--fs-xs)', maxWidth:240 }}>{p.description}</div>}
+                    <td data-label="Name"><strong>{p.namespace ? <span className="muted font-normal">{p.namespace}/</span> : null}{p.name}</strong>
+                      {p.description && <div className="muted truncate text-xs max-w-240">{p.description}</div>}
                     </td>
                     <td data-label="Category"><span className={`badge ${CAT_CLASS[p.category] ?? ''}`}>{p.category}</span></td>
-                    <td data-label="Author" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.author}</td>
-                    <td data-label="License" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{p.license}</td>
-                    <td data-label="Latest" style={{ fontSize:'var(--fs-sm)' }}>{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
-                    <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.views ?? 0).toLocaleString()}</td>
-                    <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(p.downloads ?? 0).toLocaleString()}</td>
+                    <td data-label="Author" className="muted">{p.author}</td>
+                    <td data-label="License" className="muted">{p.license}</td>
+                    <td data-label="Latest">{p.latestVersion ? <code>v{p.latestVersion}</code> : <span className="muted">—</span>}</td>
+                    <td data-label="Views">{Number(p.views ?? 0).toLocaleString()}</td>
+                    <td data-label="Downloads">{Number(p.downloads ?? 0).toLocaleString()}</td>
                     <td data-label="Status">
-                      <span style={{
-                        display:'inline-block', padding:'1px 7px', borderRadius:4,
-                        fontSize:'var(--fs-xs)', fontWeight:600,
-                        background: p.status === 'pending' ? 'rgba(210,153,34,.2)' : p.status === 'rejected' ? 'rgba(248,81,73,.15)' : 'rgba(63,185,80,.12)',
-                        color: p.status === 'pending' ? '#d29922' : p.status === 'rejected' ? '#f85149' : 'var(--success)',
-                      }}>{p.status ?? 'active'}</span>
+                      <span className={`status-pill status-pill--${p.status === 'pending' ? 'pending' : p.status === 'rejected' ? 'rejected' : 'active'}`}>{p.status ?? 'active'}</span>
+                      {/* The reason a submission was turned down, where its
+                          author will actually see it. */}
+                      {p.status === 'rejected' && p.rejectionReason && (
+                        <p className="field__error rejection-reason">
+                          {p.rejectionReason}
+                        </p>
+                      )}
                     </td>
                     <td data-label="Actions"><div className="flex gap-sm">
                       {canEdit(p) ? (
@@ -216,7 +225,7 @@ export default function PluginsPage() {
                           <button type="button" className="btn btn--sm btn--danger" onClick={() => { setDeleteError(''); setDeleteTarget(p); }}>Del</button>
                         </>
                       ) : (
-                        <span className="muted" style={{ fontSize:'var(--fs-xs)' }}>read-only</span>
+                        <span className="muted text-xs">read-only</span>
                       )}
                     </div></td>
                   </tr>
@@ -227,9 +236,9 @@ export default function PluginsPage() {
         )}
 
         {pagination && pagination.pages > 1 && (
-          <div className="flex gap-sm mt-2" style={{ justifyContent:'center', alignItems:'center' }}>
+          <div className="flex gap-sm mt-2 justify-center items-center">
             <button type="button" className="btn btn--sm" disabled={page <= 1} onClick={() => setPage(p => p-1)}>← Prev</button>
-            <span className="muted" style={{ fontSize:'var(--fs-xs)' }}>Page {pagination.page}/{pagination.pages} ({pagination.total})</span>
+            <span className="muted text-xs">Page {pagination.page}/{pagination.pages} ({pagination.total})</span>
             <button type="button" className="btn btn--sm" disabled={page >= pagination.pages} onClick={() => setPage(p => p+1)}>Next →</button>
           </div>
         )}

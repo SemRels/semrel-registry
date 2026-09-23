@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -26,9 +27,28 @@ type PluginRepository interface {
 	Update(ctx context.Context, plugin *models.Plugin) error
 	UpdateStatus(ctx context.Context, id int64, status string) error
 	UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error
+	// SetSecurityAdvisories records the imported GitHub security advisories for
+	// a plugin's repository.
+	SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error
 	Delete(ctx context.Context, spec models.PluginDeletionSpec) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
 	DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error
+	// SetVersionYank retracts a published version, or lifts the retraction.
+	// Unlike deletion it leaves the version resolvable, so builds that already
+	// pin it keep working while new installs are steered away.
+	SetVersionYank(ctx context.Context, spec models.VersionYankSpec) error
+	// SetProvenance records the build-attestation lookup for a version, or
+	// clears it when provenance is nil.
+	SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error
+	// SetReviewOutcome records an approval or rejection together with its
+	// reason and reviewer.
+	SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error
+	// SetNotifyEmail stores (or clears, when empty) the opt-in contact address
+	// for a plugin's review outcome.
+	SetNotifyEmail(ctx context.Context, pluginID int64, address string) error
+	// NotifyEmail reads that address back. It is deliberately not part of the
+	// Plugin struct, so it cannot reach a public response by accident.
+	NotifyEmail(ctx context.Context, pluginID int64) (string, error)
 	RecordAccountDeletion(ctx context.Context, audit models.AccountDeletionAudit) error
 	// IncrCounters atomically increments views/downloads for a plugin and optionally a version.
 	// Pass non-zero versionID to also update the version counters.
@@ -50,34 +70,50 @@ func (r *pgRepository) GetAll(ctx context.Context, limit, offset int, filters ..
 
 	var query strings.Builder
 	query.WriteString(`
-	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+	SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[]) AS aliases,
-       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version
+       -- yanked_at IS NULL: a retracted release must never be advertised as
+       -- the latest version, which is the whole point of yanking it.
+       COALESCE((SELECT version FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_version,
+       -- The core-version range of that same release, so a listing can tell
+       -- the reader whether a plugin works with the semrel they are running
+       -- without a round trip per plugin.
+       COALESCE((SELECT semrel_core FROM plugin_versions WHERE plugin_id = plugins.id AND deleted_at IS NULL AND yanked_at IS NULL AND prerelease = false ORDER BY release_date DESC, created_at DESC LIMIT 1), '') AS latest_semrel_core
 FROM plugins
 WHERE deleted_at IS NULL`)
 
 	args := make([]interface{}, 0)
 	hasSort := false
+	searchTerm := ""
 	for _, filter := range filters {
 		if filter == nil {
 			continue
 		}
-		if _, ok := filter.(SortFilter); ok {
+		switch typed := filter.(type) {
+		case SortFilter:
 			hasSort = true
+		case SearchFilter:
+			searchTerm = typed.Query
 		}
 		filter.ApplyTo(&query, &args)
 	}
 
 	if !hasSort {
-		query.WriteString(" ORDER BY name ASC")
+		// An unsorted search is ordered by relevance; an unsorted listing by
+		// name. Ranking a search alphabetically buries the best match.
+		if order := RelevanceOrder(searchTerm, &args); order != "" {
+			query.WriteString(order)
+		} else {
+			query.WriteString(" ORDER BY name ASC")
+		}
 	}
 	if limit > 0 {
 		args = append(args, limit)
-		query.WriteString(fmt.Sprintf(" LIMIT $%d", len(args)))
+		fmt.Fprintf(&query, " LIMIT $%d", len(args))
 	}
 	if offset > 0 {
 		args = append(args, offset)
-		query.WriteString(fmt.Sprintf(" OFFSET $%d", len(args)))
+		fmt.Fprintf(&query, " OFFSET $%d", len(args))
 	}
 
 	rows, err := r.db.Pool().Query(ctx, query.String(), args...)
@@ -108,7 +144,7 @@ func (r *pgRepository) GetByID(ctx context.Context, id int64) (*models.Plugin, e
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE id = $1 AND deleted_at IS NULL`, id)
@@ -132,7 +168,7 @@ func (r *pgRepository) GetByName(ctx context.Context, name string) (*models.Plug
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE deleted_at IS NULL
@@ -162,7 +198,7 @@ func (r *pgRepository) GetByNamespacedName(ctx context.Context, namespace, name 
 	}
 
 	row := r.db.Pool().QueryRow(ctx, `
-SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, created_at, updated_at, deleted_at,
+SELECT id, COALESCE(namespace, ''), name, COALESCE(description, ''), COALESCE(author, ''), category, COALESCE(repository, ''), COALESCE(license, ''), COALESCE(status, 'active'), COALESCE(tags, ARRAY[]::TEXT[]), COALESCE(views, 0), COALESCE(downloads, 0), validation_checks, validated_at, security_advisories, advisories_checked_at, created_at, updated_at, deleted_at,
        COALESCE((SELECT ARRAY_AGG(alias ORDER BY alias) FROM plugin_aliases WHERE plugin_id = plugins.id), ARRAY[]::TEXT[])
 FROM plugins
 WHERE deleted_at IS NULL
@@ -195,7 +231,7 @@ func (r *pgRepository) GetVersions(ctx context.Context, pluginID int64) ([]model
 	}
 
 	rows, err := r.db.Pool().Query(ctx, `
-SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, '')
+SELECT id, plugin_id, version, release_date, COALESCE(changelog, ''), download_url, prerelease, COALESCE(semrel_core, ''), COALESCE(views, 0), COALESCE(downloads, 0), created_at, deleted_at, COALESCE(deleted_by, ''), COALESCE(deletion_reason, ''), yanked_at, COALESCE(yanked_by, ''), COALESCE(yanked_reason, ''), provenance, provenance_checked_at
 FROM plugin_versions
 WHERE plugin_id = $1 AND deleted_at IS NULL
 ORDER BY release_date DESC NULLS LAST, created_at DESC`, pluginID)
@@ -357,6 +393,29 @@ UPDATE plugins SET validation_checks = $1, validated_at = NOW(), updated_at = NO
 WHERE id = $2 AND deleted_at IS NULL`, checksJSON, id)
 	if err != nil {
 		return fmt.Errorf("update validation checks: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) SetSecurityAdvisories(ctx context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	encoded, err := json.Marshal(advisories)
+	if err != nil {
+		return fmt.Errorf("encode security advisories: %w", err)
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins SET security_advisories = $1, advisories_checked_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, encoded, pluginID)
+	if err != nil {
+		return fmt.Errorf("set security advisories: %w", err)
 	}
 	if result.RowsAffected() == 0 {
 		return appErrors.ErrPluginNotFound
@@ -614,6 +673,7 @@ func scanPlugin(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Plugin, error) {
 	var plugin models.Plugin
+	var advisoriesJSON []byte
 	if err := scanner.Scan(
 		&plugin.ID,
 		&plugin.Namespace,
@@ -629,6 +689,8 @@ func scanPlugin(scanner interface {
 		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
+		&advisoriesJSON,
+		&plugin.AdvisoriesCheckedAt,
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
@@ -648,7 +710,29 @@ func scanPlugin(scanner interface {
 	if plugin.Aliases == nil {
 		plugin.Aliases = []string{}
 	}
+	advisories, err := decodeSecurityAdvisories(advisoriesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("scan plugin: %w", err)
+	}
+	plugin.SecurityAdvisories = advisories
 	return &plugin, nil
+}
+
+// decodeSecurityAdvisories unmarshals the plugins.security_advisories JSONB
+// column. Absent that column-level nil vs. empty distinction, an empty result
+// still decodes to a non-nil empty slice, matching "checked, found nothing".
+func decodeSecurityAdvisories(raw []byte) ([]models.SecurityAdvisory, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	var advisories []models.SecurityAdvisory
+	if err := json.Unmarshal(raw, &advisories); err != nil {
+		return nil, fmt.Errorf("decode security advisories: %w", err)
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	return advisories, nil
 }
 
 // scanPluginWithLatest scans the extended list SELECT that includes a latest_version subquery column.
@@ -656,6 +740,7 @@ func scanPluginWithLatest(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.Plugin, error) {
 	var plugin models.Plugin
+	var advisoriesJSON []byte
 	if err := scanner.Scan(
 		&plugin.ID,
 		&plugin.Namespace,
@@ -671,11 +756,14 @@ func scanPluginWithLatest(scanner interface {
 		&plugin.Downloads,
 		&plugin.ValidationChecks,
 		&plugin.ValidatedAt,
+		&advisoriesJSON,
+		&plugin.AdvisoriesCheckedAt,
 		&plugin.CreatedAt,
 		&plugin.UpdatedAt,
 		&plugin.DeletedAt,
 		&plugin.Aliases,
 		&plugin.LatestVersion,
+		&plugin.LatestSemrelCore,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, appErrors.ErrPluginNotFound
@@ -688,6 +776,11 @@ func scanPluginWithLatest(scanner interface {
 	if plugin.Aliases == nil {
 		plugin.Aliases = []string{}
 	}
+	advisories, err := decodeSecurityAdvisories(advisoriesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("scan plugin: %w", err)
+	}
+	plugin.SecurityAdvisories = advisories
 	plugin.Versions = []models.PluginVersion{}
 	return &plugin, nil
 }
@@ -696,6 +789,7 @@ func scanVersion(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*models.PluginVersion, error) {
 	var version models.PluginVersion
+	var provenanceJSON []byte
 	if err := scanner.Scan(
 		&version.ID,
 		&version.PluginID,
@@ -711,11 +805,23 @@ func scanVersion(scanner interface {
 		&version.DeletedAt,
 		&version.DeletedBy,
 		&version.DeletionReason,
+		&version.YankedAt,
+		&version.YankedBy,
+		&version.YankedReason,
+		&provenanceJSON,
+		&version.ProvenanceCheckedAt,
 	); err != nil {
 		return nil, fmt.Errorf("scan version: %w", err)
 	}
 	if version.Checksums == nil {
 		version.Checksums = make(map[string]string)
+	}
+	if len(provenanceJSON) > 0 {
+		var provenance models.Provenance
+		if err := json.Unmarshal(provenanceJSON, &provenance); err != nil {
+			return nil, fmt.Errorf("scan version: decode provenance: %w", err)
+		}
+		version.Provenance = &provenance
 	}
 	return &version, nil
 }
@@ -738,4 +844,126 @@ func nullableString(s string) interface{} {
 		return nil
 	}
 	return s
+}
+
+func (r *pgRepository) SetVersionYank(ctx context.Context, spec models.VersionYankSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	// Yanking is idempotent by design: re-yanking refreshes the reason rather
+	// than failing, and un-yanking a version that was never yanked is a no-op
+	// at the data level but still has to report "not found" for a bad id.
+	var (
+		result pgconn.CommandTag
+		err    error
+	)
+	if spec.Yanked {
+		result, err = r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET yanked_at = COALESCE(yanked_at, NOW()),
+    yanked_by = NULLIF($3, ''),
+    yanked_reason = NULLIF($4, '')
+WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
+			spec.VersionID, spec.PluginID, spec.Actor, spec.Reason)
+	} else {
+		result, err = r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET yanked_at = NULL,
+    yanked_by = NULL,
+    yanked_reason = NULL
+WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
+			spec.VersionID, spec.PluginID)
+	}
+	if err != nil {
+		return wrapWriteError("set version yank", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) SetReviewOutcome(ctx context.Context, spec models.ReviewOutcomeSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins
+SET status = $1,
+    rejection_reason = NULLIF($2, ''),
+    reviewed_at = NOW(),
+    reviewed_by = NULLIF($3, ''),
+    updated_at = NOW()
+WHERE id = $4 AND deleted_at IS NULL`,
+		spec.Status, spec.Reason, spec.Reviewer, spec.PluginID)
+	if err != nil {
+		return fmt.Errorf("record review outcome: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) SetNotifyEmail(ctx context.Context, pluginID int64, address string) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	result, err := r.execPluginWrite(ctx, `
+UPDATE plugins SET notify_email = NULLIF($1, ''), updated_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, strings.TrimSpace(address), pluginID)
+	if err != nil {
+		return fmt.Errorf("set notify email: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) NotifyEmail(ctx context.Context, pluginID int64) (string, error) {
+	if err := r.validate(); err != nil {
+		return "", err
+	}
+	var address *string
+	err := r.db.Pool().QueryRow(ctx, `
+SELECT notify_email FROM plugins WHERE id = $1 AND deleted_at IS NULL`, pluginID).Scan(&address)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", appErrors.ErrPluginNotFound
+		}
+		return "", fmt.Errorf("read notify email: %w", err)
+	}
+	if address == nil {
+		return "", nil
+	}
+	return *address, nil
+}
+
+func (r *pgRepository) SetProvenance(ctx context.Context, versionID int64, provenance *models.Provenance) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	var encoded []byte
+	if provenance != nil {
+		var err error
+		encoded, err = json.Marshal(provenance)
+		if err != nil {
+			return fmt.Errorf("encode provenance: %w", err)
+		}
+	}
+
+	result, err := r.db.Pool().Exec(ctx, `
+UPDATE plugin_versions
+SET provenance = $1, provenance_checked_at = NOW()
+WHERE id = $2 AND deleted_at IS NULL`, encoded, versionID)
+	if err != nil {
+		return fmt.Errorf("set provenance: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	return nil
 }

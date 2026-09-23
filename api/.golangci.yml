@@ -1,0 +1,32 @@
+version: "2"
+
+# Kept deliberately narrow: correctness and security linters only. Style rules
+# on an existing codebase produce noise that trains people to ignore the run.
+linters:
+  default: standard
+  enable:
+    - bodyclose  # an undrained response body leaks a connection per call
+    - errorlint  # %w and errors.Is/As correctness
+    - gosec      # security-relevant patterns
+    - noctx      # outbound requests must carry a context
+  settings:
+    gosec:
+      excludes:
+        # Redirect and fetch targets are validated against the artifact host
+        # allowlist in service/artifact_url.go before reaching a handler.
+        - G107
+  exclusions:
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # Test fixtures deliberately contain weak secrets and unchecked errors.
+      - path: _test\.go
+        linters:
+          - bodyclose
+          - gosec
+          - noctx
+
+formatters:
+  enable:
+    - gofmt

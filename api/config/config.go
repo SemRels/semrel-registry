@@ -25,7 +25,37 @@ type Config struct {
 	RateLimitPublicRPM  float64
 	RateLimitPluginsRPM float64
 	RateLimitAuthRPM    float64
+	RateLimitWriteRPM   float64
 	RateLimitTrustProxy bool
+	// TrustedProxies lists the CIDRs Gin accepts X-Forwarded-For from. Any
+	// other peer's forwarding headers are ignored, so a client cannot choose
+	// its own rate-limit bucket by spoofing the header.
+	TrustedProxies []string
+
+	// Secrets and origins
+	JWTSecret      string
+	AdminToken     string
+	WebhookSecret  string
+	AllowedOrigins []string
+
+	// Session cookie
+	SessionTTL    time.Duration
+	CookieSecure  bool
+	CookieDomain  string
+	CookieName    string
+	FrontendURL   string
+	MaxRequestKiB int64
+
+	// AllowedDownloadHosts restricts the hosts a published artifact may live on.
+	AllowedDownloadHosts []string
+
+	// Review notifications. Optional: without a relay the outcome is still
+	// recorded and shown in the UI, it just is not delivered.
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
 }
 
 // Load reads configuration from environment variables.
@@ -50,10 +80,45 @@ func Load() *Config {
 		RateLimitPublicRPM:  getEnvFloat("RATE_LIMIT_PUBLIC_RPM", 60),
 		RateLimitPluginsRPM: getEnvFloat("RATE_LIMIT_PLUGINS_JSON_RPM", 10),
 		RateLimitAuthRPM:    getEnvFloat("RATE_LIMIT_AUTH_RPM", 20),
+		RateLimitWriteRPM:   getEnvFloat("RATE_LIMIT_WRITE_RPM", 30),
 		RateLimitTrustProxy: getEnvBool("RATE_LIMIT_TRUST_PROXY", true),
+		TrustedProxies:      getEnvList("TRUSTED_PROXIES", defaultTrustedProxies),
+
+		JWTSecret:      strings.TrimSpace(os.Getenv("JWT_SECRET")),
+		AdminToken:     strings.TrimSpace(os.Getenv("ADMIN_TOKEN")),
+		WebhookSecret:  strings.TrimSpace(os.Getenv("WEBHOOK_SECRET")),
+		AllowedOrigins: getEnvList("ALLOWED_ORIGINS", nil),
+
+		SessionTTL:    getEnvDuration("SESSION_TTL", 24*time.Hour),
+		CookieDomain:  getEnv("COOKIE_DOMAIN", ""),
+		CookieName:    getEnv("SESSION_COOKIE_NAME", "semrel_session"),
+		FrontendURL:   getEnv("FRONTEND_URL", "http://localhost:5173"),
+		MaxRequestKiB: int64(getEnvInt("MAX_REQUEST_KIB", 1024)),
+
+		AllowedDownloadHosts: getEnvList("ALLOWED_DOWNLOAD_HOSTS", defaultDownloadHosts),
+
+		SMTPHost:     getEnv("SMTP_HOST", ""),
+		SMTPPort:     getEnvInt("SMTP_PORT", 587),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: os.Getenv("SMTP_PASSWORD"),
+		SMTPFrom:     getEnv("SMTP_FROM", ""),
 	}
 
 	cfg.Port = normalizePort(cfg.Port)
+
+	// Production defaults differ from development defaults: throttling on,
+	// cookies Secure-only. Both stay overridable by an explicit env var.
+	if cfg.IsProduction() {
+		cfg.RateLimitEnabled = getEnvBool("RATE_LIMIT_ENABLED", true)
+		cfg.CookieSecure = getEnvBool("COOKIE_SECURE", true)
+	} else {
+		cfg.CookieSecure = getEnvBool("COOKIE_SECURE", false)
+	}
+
+	if cfg.JWTSecret == "" {
+		cfg.JWTSecret = DevJWTSecret
+	}
+
 	return cfg
 }
 
@@ -81,29 +146,67 @@ func loadDotEnv() {
 		return
 	}
 
-	// Collect .env files from root → CWD (root loads first = lowest precedence).
-	var files []string
-	for _, rel := range []string{"../.env", "../../.env"} {
-		path := filepath.Join(cwd, rel)
-		if _, err := os.Stat(path); err == nil {
-			files = append([]string{path}, files...) // prepend (root first)
-		}
-	}
-	// CWD .env overrides root (appended last = highest precedence for Overload).
-	if local := filepath.Join(cwd, ".env"); func() bool {
-		_, err := os.Stat(local)
-		return err == nil
-	}() {
-		files = append(files, local)
+	// Highest precedence first: godotenv.Load keeps the first value it sees for
+	// a key and never replaces one already in the environment.
+	//
+	// This used to call Overload, which meant a .env file beat the real process
+	// environment — so a stale file baked into an image or left in a working
+	// copy silently overrode the variables the deployment actually set, and
+	// setting PORT or DATABASE_URL on the command line did nothing.
+	candidates := []string{
+		filepath.Join(cwd, ".env"),       // closest to the process
+		filepath.Join(cwd, "../.env"),    // project root when run from api/
+		filepath.Join(cwd, "../../.env"), // one level further out
 	}
 
+	var files []string
+	for _, path := range candidates {
+		if _, err := os.Stat(path); err == nil {
+			files = append(files, path)
+		}
+	}
 	if len(files) == 0 {
 		return
 	}
-	// Load in order: root first (sets defaults), local last (overrides).
-	// godotenv.Load does NOT override already-set env vars; use Overload so
-	// later files in the list take precedence over earlier ones.
-	_ = godotenv.Overload(files...)
+
+	_ = godotenv.Load(files...)
+}
+
+// defaultTrustedProxies covers loopback plus the RFC1918 ranges Docker and
+// Kubernetes assign to ingress containers, which is where the reverse proxy
+// sits in every deployment topology this repository ships.
+var defaultTrustedProxies = []string{
+	"127.0.0.1/32", "::1/128",
+	"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
+}
+
+// defaultDownloadHosts are the hosts that may serve plugin artifacts. GitHub
+// release assets and their redirect targets are the only ones the registry
+// itself publishes.
+var defaultDownloadHosts = []string{
+	"github.com",
+	"objects.githubusercontent.com",
+	"release-assets.githubusercontent.com",
+}
+
+// getEnvList splits a comma-separated variable into trimmed, non-empty
+// entries, falling back when the variable is unset or blank.
+func getEnvList(key string, fallback []string) []string {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return fallback
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	if len(out) == 0 {
+		return fallback
+	}
+	return out
 }
 
 func getEnv(key, fallback string) string {

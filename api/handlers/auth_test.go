@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/SemRels/semrel-registry/api/models"
 	"github.com/SemRels/semrel-registry/api/service"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +37,9 @@ func (s *stubAccountManager) CreatePlugin(context.Context, models.Plugin) (model
 	return models.Plugin{}, nil
 }
 func (s *stubAccountManager) SubmitPlugin(context.Context, models.Plugin) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+func (s *stubAccountManager) SubmitPluginWithContact(context.Context, models.PluginSubmission) (models.Plugin, error) {
 	return models.Plugin{}, nil
 }
 func (s *stubAccountManager) UpdatePlugin(context.Context, string, models.PluginPatch) (models.Plugin, error) {
@@ -63,29 +68,56 @@ func (s *stubAccountManager) RejectPlugin(context.Context, string) (models.Plugi
 	return models.Plugin{}, nil
 }
 func (s *stubAccountManager) UpdateValidationChecks(context.Context, int64, []byte) error { return nil }
+func (s *stubAccountManager) SetProvenance(context.Context, int64, *models.Provenance) error {
+	return nil
+}
+func (s *stubAccountManager) SetSecurityAdvisories(context.Context, int64, []models.SecurityAdvisory) error {
+	return nil
+}
+func (s *stubAccountManager) ReviewPlugin(context.Context, string, string, models.ReviewDecision, string) (models.Plugin, error) {
+	return models.Plugin{}, nil
+}
+func (s *stubAccountManager) YankVersion(context.Context, string, int64, bool, models.VersionYankRequest, models.DeleteActor) (models.PluginVersion, error) {
+	return models.PluginVersion{}, nil
+}
+
+// accountDeletionRouter wires DeleteAccount behind a stub session whose last
+// interactive sign-in happened authAge ago.
+func accountDeletionRouter(handler *AuthHandler, authAge time.Duration) *gin.Engine {
+	router := gin.New()
+	router.DELETE("/auth/me", func(c *gin.Context) {
+		c.Set("login", "alice")
+		c.Set("isAdmin", false)
+		c.Set("claims", &Claims{
+			Login:    "alice",
+			AuthTime: time.Now().Add(-authAge).Unix(),
+			RegisteredClaims: jwt.RegisteredClaims{
+				ID:        "session-1",
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+		})
+		c.Next()
+	}, handler.DeleteAccount)
+	return router
+}
+
+func deleteAccountRequest(t *testing.T) *http.Request {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodDelete, "/auth/me", mustJSONReader(t, map[string]any{
+		"confirmation":       "DELETE alice",
+		"deleteOwnedPlugins": true,
+	}))
+	req.Header.Set("Content-Type", "application/json")
+	return req
+}
 
 func TestDeleteAccountRequiresReauthAndDelegates(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	manager := &stubAccountManager{result: models.AccountDeletionResult{PluginsDeleted: 2, VersionsDeleted: 5}}
 	handler := NewAuthHandler(manager)
 
-	router := gin.New()
-	router.DELETE("/auth/me", func(c *gin.Context) {
-		c.Set("login", "alice")
-		c.Set("isAdmin", false)
-		c.Next()
-	}, handler.DeleteAccount)
-
-	req := httptest.NewRequest(http.MethodDelete, "/auth/me", mustJSONReader(t, map[string]any{
-		"confirmation":       "DELETE alice",
-		"reauthToken":        "secret",
-		"deleteOwnedPlugins": true,
-	}))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer secret")
 	resp := httptest.NewRecorder()
-
-	router.ServeHTTP(resp, req)
+	accountDeletionRouter(handler, time.Minute).ServeHTTP(resp, deleteAccountRequest(t))
 
 	require.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, "alice", manager.actor.Login)
@@ -121,6 +153,40 @@ func TestDeleteAccountRejectsWrongReauthToken(t *testing.T) {
 	router.ServeHTTP(resp, req)
 
 	assert.Equal(t, http.StatusUnauthorized, resp.Code)
+}
+
+// TestDeleteAccountRequiresRecentSignIn covers the step-up rule: a valid but
+// old session is not enough to delete an account, so a stolen cookie alone
+// cannot destroy data.
+func TestDeleteAccountRequiresRecentSignIn(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	manager := &stubAccountManager{}
+	handler := NewAuthHandler(manager)
+
+	resp := httptest.NewRecorder()
+	accountDeletionRouter(handler, 2*time.Hour).ServeHTTP(resp, deleteAccountRequest(t))
+
+	require.Equal(t, http.StatusUnauthorized, resp.Code)
+	assert.Contains(t, resp.Body.String(), "REAUTH_REQUIRED")
+	assert.Empty(t, manager.actor.Login, "deletion must not reach the service layer")
+}
+
+// TestDeleteAccountClearsSessionCookie ensures the session that deleted an
+// account does not outlive it.
+func TestDeleteAccountClearsSessionCookie(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler := NewAuthHandler(&stubAccountManager{})
+
+	resp := httptest.NewRecorder()
+	accountDeletionRouter(handler, time.Minute).ServeHTTP(resp, deleteAccountRequest(t))
+
+	require.Equal(t, http.StatusOK, resp.Code)
+	require.NotEmpty(t, resp.Result().Cookies())
+	cookie := resp.Result().Cookies()[0]
+	assert.Equal(t, "semrel_session", cookie.Name)
+	assert.Empty(t, cookie.Value)
+	assert.True(t, cookie.HttpOnly)
+	assert.Less(t, cookie.MaxAge, 0)
 }
 
 func mustJSONReader(t *testing.T, payload any) *bytes.Reader {

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -36,15 +37,6 @@ type fileMeta struct {
 	NextVersionID int64 `json:"next_version_id"`
 }
 
-// pluginFile is the on-disk representation – the Plugin struct with versions
-// embedded (checksums are part of each PluginVersion already).
-type pluginFile struct {
-	models.Plugin
-	Versions []versionFile `json:"versions"`
-}
-
-type versionFile = models.PluginVersion
-
 // NewFileRepository returns a PluginRepository that persists data as JSON files
 // inside dataDir.  The directory (and its sub-directories) are created on first
 // use if they do not exist yet.
@@ -52,7 +44,7 @@ func NewFileRepository(dataDir string) (PluginRepository, error) {
 	if strings.TrimSpace(dataDir) == "" {
 		return nil, fmt.Errorf("file repository: dataDir must not be empty")
 	}
-	if err := os.MkdirAll(filepath.Join(dataDir, "plugins"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dataDir, "plugins"), 0o750); err != nil {
 		return nil, fmt.Errorf("file repository: create data directory: %w", err)
 	}
 	return &fileStore{dataDir: dataDir}, nil
@@ -297,6 +289,26 @@ func (s *fileStore) UpdateValidationChecks(_ context.Context, id int64, checksJS
 	p.ValidationChecks = checksJSON
 	p.ValidatedAt = &now
 	p.UpdatedAt = now
+	return s.savePlugin(p)
+}
+
+func (s *fileStore) SetSecurityAdvisories(_ context.Context, pluginID int64, advisories []models.SecurityAdvisory) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(pluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+	if advisories == nil {
+		advisories = []models.SecurityAdvisory{}
+	}
+	now := time.Now().UTC()
+	p.SecurityAdvisories = advisories
+	p.AdvisoriesCheckedAt = &now
 	return s.savePlugin(p)
 }
 
@@ -625,7 +637,7 @@ func applySeedPlugin(all *[]models.Plugin, meta *fileMeta, seed database.SeedPlu
 	}
 	sortPluginVersions(versions)
 	candidate.Versions = versions
-	candidate.LatestVersion = latestStableVersion(versions)
+	refreshLatest(&candidate)
 
 	if existingIndex >= 0 && !reflect.DeepEqual(candidate, (*all)[existingIndex]) {
 		candidate.UpdatedAt = now
@@ -652,7 +664,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 		}
 		if writeErr := os.WriteFile(
 			filepath.Join(stageDir, fmt.Sprintf("%d.json", plugins[i].ID)),
-			data, 0o644,
+			data, 0o600,
 		); writeErr != nil {
 			return fmt.Errorf("stage plugin %d: %w", plugins[i].ID, writeErr)
 		}
@@ -672,7 +684,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 	}
 	if err := os.Rename(stageDir, s.pluginsDir()); err != nil {
 		if restoreErr := os.Rename(backupDir, s.pluginsDir()); restoreErr != nil {
-			return fmt.Errorf("install seeded catalog: %w (restore failed: %v)", err, restoreErr)
+			return fmt.Errorf("install seeded catalog: %w (restore failed: %w)", err, restoreErr)
 		}
 		return fmt.Errorf("install seeded catalog: %w", err)
 	}
@@ -682,7 +694,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 		moveErr := os.Rename(s.pluginsDir(), failedDir)
 		restoreErr := os.Rename(backupDir, s.pluginsDir())
 		if moveErr != nil || restoreErr != nil {
-			return fmt.Errorf("save seeded metadata: %w (rollback failed: move=%v restore=%v)",
+			return fmt.Errorf("save seeded metadata: %w (rollback failed: move=%w restore=%w)",
 				err, moveErr, restoreErr)
 		}
 		return fmt.Errorf("save seeded metadata: %w", err)
@@ -744,7 +756,30 @@ func (s *fileStore) loadPlugin(id int64) (*models.Plugin, error) {
 	if p.Versions == nil {
 		p.Versions = []models.PluginVersion{}
 	}
+
+	// Derived on read rather than stored. These were only ever recomputed while
+	// seeding the catalogue, so a version published — or yanked — through the
+	// API left them pointing at whatever was true at seed time.
+	refreshLatest(&p)
+
 	return &p, nil
+}
+
+// refreshLatest sets the plugin's latest-release fields from its versions.
+//
+// It sorts first: latestStable takes the first eligible entry, and AddVersion
+// appends, so without this a version published through the API left "latest"
+// pointing at the oldest release in the file.
+func refreshLatest(p *models.Plugin) {
+	sortPluginVersions(p.Versions)
+
+	if latest, ok := latestStable(p.Versions); ok {
+		p.LatestVersion = latest.Version
+		p.LatestSemrelCore = latest.SemrelCore
+		return
+	}
+	p.LatestVersion = ""
+	p.LatestSemrelCore = ""
 }
 
 func (s *fileStore) savePlugin(p *models.Plugin) error {
@@ -777,6 +812,7 @@ func (s *fileStore) loadAll() ([]models.Plugin, error) {
 		if p.Versions == nil {
 			p.Versions = []models.PluginVersion{}
 		}
+		refreshLatest(&p)
 		plugins = append(plugins, p)
 	}
 	return plugins, nil
@@ -786,7 +822,7 @@ func (s *fileStore) loadAll() ([]models.Plugin, error) {
 // partial writes being visible to concurrent readers.
 func writeFileAtomic(path string, data []byte) error {
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
 		return fmt.Errorf("write temp file %s: %w", path, err)
 	}
 	if err := os.Rename(tmp, path); err != nil {
@@ -906,13 +942,19 @@ func sortPluginVersions(versions []models.PluginVersion) {
 	})
 }
 
-func latestStableVersion(versions []models.PluginVersion) string {
+// latestStable returns the newest release a client should install by default.
+//
+// It skips prereleases, deleted versions and — the reason yanking exists —
+// retracted ones: advertising a yanked release as "latest" would defeat the
+// retraction entirely.
+func latestStable(versions []models.PluginVersion) (models.PluginVersion, bool) {
 	for _, version := range versions {
-		if !version.Prerelease {
-			return version.Version
+		if version.Prerelease || version.DeletedAt != nil || version.YankedAt != nil {
+			continue
 		}
+		return version, true
 	}
-	return ""
+	return models.PluginVersion{}, false
 }
 
 func ensureUniqueIdentity(all []models.Plugin, candidate models.Plugin, excludeID int64) error {
@@ -951,6 +993,13 @@ func sortPlugins(plugins []models.Plugin, field string, desc bool) {
 			less = plugins[i].CreatedAt.Before(plugins[j].CreatedAt)
 		case "updated_at":
 			less = plugins[i].UpdatedAt.Before(plugins[j].UpdatedAt)
+		case "downloads":
+			// Missing here, these fell through to the name comparison, so the
+			// file backend answered "most downloaded" with an alphabetical
+			// list and no indication that the sort had been ignored.
+			less = plugins[i].Downloads < plugins[j].Downloads
+		case "views":
+			less = plugins[i].Views < plugins[j].Views
 		default: // "name"
 			less = strings.ToLower(plugins[i].Name) < strings.ToLower(plugins[j].Name)
 		}
@@ -959,4 +1008,163 @@ func sortPlugins(plugins []models.Plugin, field string, desc bool) {
 		}
 		return less
 	})
+}
+
+func (s *fileStore) SetVersionYank(_ context.Context, spec models.VersionYankSpec) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(spec.PluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	for i := range p.Versions {
+		if p.Versions[i].ID != spec.VersionID || p.Versions[i].DeletedAt != nil {
+			continue
+		}
+		now := time.Now().UTC()
+		if spec.Yanked {
+			// Re-yanking refreshes the reason without moving the timestamp, so
+			// "yanked since" stays accurate.
+			if p.Versions[i].YankedAt == nil {
+				p.Versions[i].YankedAt = &now
+			}
+			p.Versions[i].YankedBy = spec.Actor
+			p.Versions[i].YankedReason = spec.Reason
+		} else {
+			p.Versions[i].YankedAt = nil
+			p.Versions[i].YankedBy = ""
+			p.Versions[i].YankedReason = ""
+		}
+		p.UpdatedAt = now
+		return s.savePlugin(p)
+	}
+	return appErrors.ErrPluginNotFound
+}
+
+func (s *fileStore) SetProvenance(_ context.Context, versionID int64, provenance *models.Provenance) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	plugins, err := s.loadAll()
+	if err != nil {
+		return err
+	}
+	for _, p := range plugins {
+		for i := range p.Versions {
+			if p.Versions[i].ID != versionID || p.Versions[i].DeletedAt != nil {
+				continue
+			}
+			now := time.Now().UTC()
+			p.Versions[i].Provenance = provenance
+			p.Versions[i].ProvenanceCheckedAt = &now
+			return s.savePlugin(&p)
+		}
+	}
+	return appErrors.ErrPluginNotFound
+}
+
+func (s *fileStore) SetReviewOutcome(_ context.Context, spec models.ReviewOutcomeSpec) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	p, err := s.loadPlugin(spec.PluginID)
+	if err != nil {
+		return err
+	}
+	if p.DeletedAt != nil {
+		return appErrors.ErrPluginNotFound
+	}
+
+	now := time.Now().UTC()
+	p.Status = spec.Status
+	p.RejectionReason = spec.Reason
+	p.ReviewedAt = &now
+	p.ReviewedBy = spec.Reviewer
+	p.UpdatedAt = now
+	return s.savePlugin(p)
+}
+
+// notifyEmails is the file backend's side-store for opt-in contact addresses.
+//
+// They live outside the plugin file on purpose. The plugin file is what the
+// catalogue exporter reads, so an address inside it would be one export away
+// from being published; keeping it separate makes that impossible rather than
+// merely unlikely.
+type notifyEmails map[string]string
+
+func (s *fileStore) notifyEmailPath() string {
+	return filepath.Join(s.dataDir, "notify-emails.json")
+}
+
+func (s *fileStore) loadNotifyEmails() (notifyEmails, error) {
+	data, err := os.ReadFile(s.notifyEmailPath())
+	if os.IsNotExist(err) {
+		return notifyEmails{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read notify emails: %w", err)
+	}
+	emails := notifyEmails{}
+	if err := json.Unmarshal(data, &emails); err != nil {
+		return nil, fmt.Errorf("parse notify emails: %w", err)
+	}
+	return emails, nil
+}
+
+func (s *fileStore) SetNotifyEmail(_ context.Context, pluginID int64, address string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, err := s.loadPlugin(pluginID); err != nil {
+		return err
+	}
+
+	emails, err := s.loadNotifyEmails()
+	if err != nil {
+		return err
+	}
+
+	key := strconv.FormatInt(pluginID, 10)
+	if trimmed := strings.TrimSpace(address); trimmed != "" {
+		emails[key] = trimmed
+	} else {
+		delete(emails, key)
+	}
+
+	data, err := json.MarshalIndent(emails, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal notify emails: %w", err)
+	}
+	// 0600: this file holds personal data and nothing else needs to read it.
+	return writeFileAtomicMode(s.notifyEmailPath(), data, 0o600)
+}
+
+func (s *fileStore) NotifyEmail(_ context.Context, pluginID int64) (string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	emails, err := s.loadNotifyEmails()
+	if err != nil {
+		return "", err
+	}
+	return emails[strconv.FormatInt(pluginID, 10)], nil
+}
+
+// writeFileAtomicMode writes data via a temp file and rename, with an explicit
+// file mode. Used for files that must not be world-readable.
+func writeFileAtomicMode(path string, data []byte, mode os.FileMode) error {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, mode); err != nil {
+		return fmt.Errorf("write temp file %s: %w", path, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("rename %s: %w", path, err)
+	}
+	return nil
 }

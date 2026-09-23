@@ -1,45 +1,53 @@
-import { useEffect, useState } from 'react';
-import { getToken } from '../lib/api';
+import { useCallback, useEffect, useState } from 'react';
+import { getCurrentUser, onSessionExpired } from '../lib/api';
+import type { SessionUser } from '../lib/api';
 
-export interface CurrentUser {
-  login: string;
-  name: string;
-  avatarUrl: string;
-  role: string;       // "admin" | "user"
-  isAdmin: boolean;
+export type CurrentUser = SessionUser;
+
+export interface CurrentUserState {
+  user: CurrentUser | null;
+  /** True until the first /auth/me response arrives. */
+  loading: boolean;
+  refresh: () => void;
 }
 
-function parseJWT(token: string): CurrentUser | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const payload = JSON.parse(atob(parts[1]));
-    return {
-      login:     payload.login     ?? '',
-      name:      payload.name      ?? '',
-      avatarUrl: payload.avatar_url ?? '',
-      role:      payload.role      ?? 'user',
-      isAdmin:   payload.is_admin  === true || payload.role === 'admin',
-    };
-  } catch {
-    return null;
-  }
-}
-
-/** Returns the current user decoded from the stored JWT, or null if not logged in. */
-export function useCurrentUser(): CurrentUser | null {
+/**
+ * Resolves the signed-in user from the API.
+ *
+ * This used to decode the JWT out of localStorage, which only worked because
+ * the token was readable by any script on the page. The session is now an
+ * HttpOnly cookie, so identity has to be asked for — which also means an
+ * expired or revoked session is noticed instead of being trusted until the
+ * next failed write.
+ */
+export function useCurrentUser(): CurrentUserState {
   const [user, setUser] = useState<CurrentUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [nonce, setNonce] = useState(0);
+
+  const refresh = useCallback(() => setNonce(n => n + 1), []);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    // Static ADMIN_TOKEN (dev): cannot decode; treat as admin.
-    if (!token.includes('.')) {
-      setUser({ login: 'admin', name: 'Dev Admin', avatarUrl: '', role: 'admin', isAdmin: true });
-      return;
-    }
-    setUser(parseJWT(token));
-  }, []);
+    let cancelled = false;
+    setLoading(true);
 
-  return user;
+    getCurrentUser()
+      .then(result => {
+        if (!cancelled) setUser(result);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [nonce]);
+
+  // A session that expires mid-visit must clear the cached identity, otherwise
+  // the UI keeps offering actions that will fail.
+  useEffect(() => onSessionExpired(() => setUser(null)), []);
+
+  return { user, loading, refresh };
 }
