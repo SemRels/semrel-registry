@@ -16,12 +16,6 @@ type bucket struct {
 	mu        sync.Mutex
 }
 
-// allow returns true when the request should be allowed (consumes 1 token).
-func (b *bucket) allow(ratePerMin float64) bool {
-	allowed, _ := b.allowWithRemaining(ratePerMin)
-	return allowed
-}
-
 // allowWithRemaining consumes a token and reports how many whole tokens are
 // left, for the X-RateLimit-Remaining header.
 func (b *bucket) allowWithRemaining(ratePerMin float64) (allowed bool, remaining int) {

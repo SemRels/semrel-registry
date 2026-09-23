@@ -40,11 +40,11 @@ type Plugin struct {
 	SecurityAdvisories  []SecurityAdvisory `json:"securityAdvisories,omitempty"`
 	AdvisoriesCheckedAt *time.Time         `json:"advisoriesCheckedAt,omitempty"`
 
-	CreatedAt        time.Time       `json:"createdAt"`
-	UpdatedAt        time.Time       `json:"updatedAt"`
-	DeletedAt        *time.Time      `json:"deletedAt,omitempty"`
-	DeletedBy        string          `json:"deletedBy,omitempty"`
-	DeletionReason   string          `json:"deletionReason,omitempty"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	UpdatedAt      time.Time  `json:"updatedAt"`
+	DeletedAt      *time.Time `json:"deletedAt,omitempty"`
+	DeletedBy      string     `json:"deletedBy,omitempty"`
+	DeletionReason string     `json:"deletionReason,omitempty"`
 
 	// Review outcome. A rejected submission used to carry no explanation, so
 	// the author saw a "rejected" badge with nothing to act on.

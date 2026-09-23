@@ -59,6 +59,8 @@ func seedStartupCatalog(ctx context.Context, repo repository.PluginRepository, p
 
 // seedPlugins retains the PostgreSQL importer entry point used by integration
 // tests and maintenance code. Its per-plugin transaction semantics are unchanged.
+//
+//nolint:unused // only called from postgres_container_test.go, gated behind the "container" build tag
 func seedPlugins(ctx context.Context, pool *pgxpool.Pool, filePath string) error {
 	if filePath == "" {
 		filePath = "plugins.json"

@@ -62,7 +62,7 @@ func main() {
 	}
 	output = append(output, '\n')
 	if !bytes.Equal(data, output) {
-		if err := os.WriteFile(*file, output, 0o644); err != nil {
+		if err := os.WriteFile(*file, output, 0o600); err != nil {
 			fatal(err)
 		}
 	}

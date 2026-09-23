@@ -223,13 +223,13 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	user, err := h.fetchGitHubUser(token.AccessToken)
+	user, err := h.fetchGitHubUser(c.Request.Context(), token.AccessToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch GitHub user"})
 		return
 	}
 
-	role := h.resolveRole(user.Login, token.AccessToken)
+	role := h.resolveRole(c.Request.Context(), user.Login, token.AccessToken)
 
 	jwtToken, err := h.issueJWT(user, role)
 	if err != nil {
@@ -380,8 +380,11 @@ func (h *AuthHandler) requireRecentAuth(c *gin.Context, login, reauthToken strin
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-func (h *AuthHandler) fetchGitHubUser(accessToken string) (*GitHubUser, error) {
-	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com/user", nil)
+func (h *AuthHandler) fetchGitHubUser(ctx context.Context, accessToken string) (*GitHubUser, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user", nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
@@ -403,7 +406,7 @@ func (h *AuthHandler) fetchGitHubUser(accessToken string) (*GitHubUser, error) {
 //
 //	"admin" — org owner/maintainer or in ADMIN_GITHUB_USERS list
 //	"user"  — any other authenticated GitHub user
-func (h *AuthHandler) resolveRole(login, accessToken string) string {
+func (h *AuthHandler) resolveRole(ctx context.Context, login, accessToken string) string {
 	// Explicit admin list always wins.
 	for _, u := range h.adminUsers {
 		if strings.EqualFold(u, login) {
@@ -413,7 +416,7 @@ func (h *AuthHandler) resolveRole(login, accessToken string) string {
 
 	// Check if the user is an owner/maintainer in any allowed org.
 	for _, org := range h.allowedOrgs {
-		if h.isOrgOwnerOrMaintainer(org, login, accessToken) {
+		if h.isOrgOwnerOrMaintainer(ctx, org, login, accessToken) {
 			return "admin"
 		}
 	}
@@ -422,10 +425,10 @@ func (h *AuthHandler) resolveRole(login, accessToken string) string {
 
 // isOrgOwnerOrMaintainer checks whether the user has role "admin" (org owner)
 // in the given GitHub org, using the user's own OAuth token.
-func (h *AuthHandler) isOrgOwnerOrMaintainer(org, login, accessToken string) bool {
+func (h *AuthHandler) isOrgOwnerOrMaintainer(ctx context.Context, org, login, accessToken string) bool {
 	// GET /orgs/{org}/memberships/{username} — the user can read their own membership.
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/memberships/%s", org, login)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return false
 	}

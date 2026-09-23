@@ -37,15 +37,6 @@ type fileMeta struct {
 	NextVersionID int64 `json:"next_version_id"`
 }
 
-// pluginFile is the on-disk representation – the Plugin struct with versions
-// embedded (checksums are part of each PluginVersion already).
-type pluginFile struct {
-	models.Plugin
-	Versions []versionFile `json:"versions"`
-}
-
-type versionFile = models.PluginVersion
-
 // NewFileRepository returns a PluginRepository that persists data as JSON files
 // inside dataDir.  The directory (and its sub-directories) are created on first
 // use if they do not exist yet.
@@ -53,7 +44,7 @@ func NewFileRepository(dataDir string) (PluginRepository, error) {
 	if strings.TrimSpace(dataDir) == "" {
 		return nil, fmt.Errorf("file repository: dataDir must not be empty")
 	}
-	if err := os.MkdirAll(filepath.Join(dataDir, "plugins"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dataDir, "plugins"), 0o750); err != nil {
 		return nil, fmt.Errorf("file repository: create data directory: %w", err)
 	}
 	return &fileStore{dataDir: dataDir}, nil
@@ -673,7 +664,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 		}
 		if writeErr := os.WriteFile(
 			filepath.Join(stageDir, fmt.Sprintf("%d.json", plugins[i].ID)),
-			data, 0o644,
+			data, 0o600,
 		); writeErr != nil {
 			return fmt.Errorf("stage plugin %d: %w", plugins[i].ID, writeErr)
 		}
@@ -693,7 +684,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 	}
 	if err := os.Rename(stageDir, s.pluginsDir()); err != nil {
 		if restoreErr := os.Rename(backupDir, s.pluginsDir()); restoreErr != nil {
-			return fmt.Errorf("install seeded catalog: %w (restore failed: %v)", err, restoreErr)
+			return fmt.Errorf("install seeded catalog: %w (restore failed: %w)", err, restoreErr)
 		}
 		return fmt.Errorf("install seeded catalog: %w", err)
 	}
@@ -703,7 +694,7 @@ func (s *fileStore) saveSeedSnapshot(plugins []models.Plugin, meta *fileMeta) er
 		moveErr := os.Rename(s.pluginsDir(), failedDir)
 		restoreErr := os.Rename(backupDir, s.pluginsDir())
 		if moveErr != nil || restoreErr != nil {
-			return fmt.Errorf("save seeded metadata: %w (rollback failed: move=%v restore=%v)",
+			return fmt.Errorf("save seeded metadata: %w (rollback failed: move=%w restore=%w)",
 				err, moveErr, restoreErr)
 		}
 		return fmt.Errorf("save seeded metadata: %w", err)
@@ -831,7 +822,7 @@ func (s *fileStore) loadAll() ([]models.Plugin, error) {
 // partial writes being visible to concurrent readers.
 func writeFileAtomic(path string, data []byte) error {
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
 		return fmt.Errorf("write temp file %s: %w", path, err)
 	}
 	if err := os.Rename(tmp, path); err != nil {

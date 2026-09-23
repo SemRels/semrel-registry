@@ -68,7 +68,7 @@ func ImportSeedFile(ctx context.Context, pool *pgxpool.Pool, filePath string) (S
 
 // ReadSeedFile reads and parses a registry catalog without importing it.
 func ReadSeedFile(filePath string) (SeedRegistry, error) {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // operator-supplied startup path (PLUGINS_JSON_PATH), not request input
 	if err != nil {
 		return SeedRegistry{}, fmt.Errorf("read seed file %q: %w", filePath, err)
 	}

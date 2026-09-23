@@ -27,7 +27,7 @@ type webhookFile struct {
 }
 
 func NewFileWebhookRepository(dataDir string) (WebhookRepository, error) {
-	if err := os.MkdirAll(dataDir, 0o755); err != nil {
+	if err := os.MkdirAll(dataDir, 0o750); err != nil {
 		return nil, fmt.Errorf("webhook repository: create data directory: %w", err)
 	}
 	return &fileWebhookRepository{path: filepath.Join(dataDir, "webhook-subscriptions.json")}, nil

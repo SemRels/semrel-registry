@@ -68,7 +68,7 @@ func (d *Database) RunMigrations(dir string) error {
 	if err := d.preflightCanonicalNamesMigration(); err != nil {
 		return fmt.Errorf("preflight canonical names migration: %w", err)
 	}
-	if err := migrator.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := migrator.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("apply migrations: %w", err)
 	}
 

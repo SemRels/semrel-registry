@@ -991,16 +991,6 @@ func trimPointer(value *string) *string {
 	return &trimmed
 }
 
-func enrichPlugin(plugin models.Plugin, includeVersions bool) models.Plugin {
-	if plugin.LatestVersion == "" && len(plugin.Versions) > 0 {
-		plugin.LatestVersion = plugin.Versions[0].Version
-	}
-	if !includeVersions {
-		plugin.Versions = nil
-	}
-	return plugin
-}
-
 func (s *PluginService) UpdateValidationChecks(ctx context.Context, id int64, checksJSON []byte) error {
 	return s.repo.UpdateValidationChecks(ctx, id, checksJSON)
 }

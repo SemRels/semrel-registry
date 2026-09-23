@@ -156,8 +156,8 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 		Prerelease   bool              `json:"prerelease,omitempty"`
 		// Yanked marks a retracted release. Clients must keep resolving it for
 		// pinned installs but must not choose it as an update target.
-		Yanked        bool   `json:"yanked,omitempty"`
-		YankedReason  string `json:"yankedReason,omitempty"`
+		Yanked       bool   `json:"yanked,omitempty"`
+		YankedReason string `json:"yankedReason,omitempty"`
 		// Provenance is omitted until a lookup has actually been attempted.
 		// Once present it carries verified:false and Issue for a mismatch too
 		// — that negative result is the one clients most need to see.
@@ -229,14 +229,14 @@ func (h *SyncHandler) PluginsJSON(c *gin.Context) {
 			tags = []string{}
 		}
 		registry.Plugins = append(registry.Plugins, semrelPlugin{
-			Namespace:   p.Namespace,
-			Name:        p.Name,
-			Aliases:     p.Aliases,
-			Description: p.Description,
-			Author:      p.Author,
-			License:     p.License,
-			Category:    p.Category,
-			Repository:  p.Repository,
+			Namespace:          p.Namespace,
+			Name:               p.Name,
+			Aliases:            p.Aliases,
+			Description:        p.Description,
+			Author:             p.Author,
+			License:            p.License,
+			Category:           p.Category,
+			Repository:         p.Repository,
 			Tags:               tags,
 			Downloads:          p.Downloads,
 			Versions:           svs,
@@ -578,7 +578,7 @@ func fetchOrgRepos(org string) ([]ghRepo, error) {
 			return nil, err
 		}
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			return nil, githubAPIError("org repos", org, resp.StatusCode, body)
 		}

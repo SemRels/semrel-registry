@@ -6,7 +6,7 @@
 //
 // Usage:
 //
-//go -C api run cmd/dedup/main.go [-dry-run]
+// go -C api run cmd/dedup/main.go [-dry-run]
 package main
 
 import (

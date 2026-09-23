@@ -233,7 +233,7 @@ func deliverWebhook(webhooks repository.WebhookRepository, sub models.WebhookSub
 	if err == nil && resp != nil {
 		status = resp.StatusCode
 		success = status >= 200 && status < 300
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 	_ = webhooks.RecordDelivery(context.Background(), sub.ID, status, success)
 }

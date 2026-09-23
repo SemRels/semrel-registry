@@ -23,7 +23,7 @@ func (f CategoryFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	}
 
 	*args = append(*args, category)
-	builder.WriteString(fmt.Sprintf(" AND category = $%d", len(*args)))
+	fmt.Fprintf(builder, " AND category = $%d", len(*args))
 }
 
 type SearchFilter struct {
@@ -55,14 +55,14 @@ func (f SearchFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	// websearch_to_tsquery never errors on user input — unbalanced quotes and
 	// stray operators are treated as text rather than raising, which a search
 	// box needs.
-	builder.WriteString(fmt.Sprintf(
+	fmt.Fprintf(builder,
 		" AND (search_vector @@ websearch_to_tsquery('simple', $%[1]d)"+
 			" OR name ILIKE $%[2]d"+
 			" OR description ILIKE $%[2]d"+
 			" OR author ILIKE $%[2]d"+
 			" OR repository ILIKE $%[2]d"+
 			" OR EXISTS (SELECT 1 FROM plugin_aliases WHERE plugin_id = plugins.id AND alias ILIKE $%[2]d))",
-		termIndex, likeIndex))
+		termIndex, likeIndex)
 }
 
 // RelevanceOrder returns the ORDER BY clause that ranks full-text matches
@@ -94,7 +94,7 @@ func (f AuthorFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 		return
 	}
 	*args = append(*args, author)
-	builder.WriteString(fmt.Sprintf(" AND LOWER(author) = LOWER($%d)", len(*args)))
+	fmt.Fprintf(builder, " AND LOWER(author) = LOWER($%d)", len(*args))
 }
 
 // StatusFilter restricts results to plugins with a specific status.
