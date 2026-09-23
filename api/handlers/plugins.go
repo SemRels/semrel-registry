@@ -413,16 +413,30 @@ func (h *PluginHandler) CreatePluginVersion(c *gin.Context) {
 		return
 	}
 
+	plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	// Non-admin users can only add versions to their own plugins.
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		if !strings.EqualFold(plugin.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only add versions to your own plugins", "author": plugin.Author})
+			return
+		}
+	}
+
 	created, err := h.service.CreateVersion(c.Request.Context(), c.Param("id"), version)
 	if err != nil {
 		HandleError(c, err)
 		return
 	}
 
-	if plugin, err := h.service.GetPlugin(c.Request.Context(), c.Param("id")); err == nil {
-		triggerProvenanceCheck(h.service, created.ID, plugin.Repository, created.Checksums)
-		DeliverWebhookEvent(h.webhooks, plugin.Ref(), models.WebhookEventVersionPublished, created)
-	}
+	triggerProvenanceCheck(h.service, created.ID, plugin.Repository, created.Checksums)
+	DeliverWebhookEvent(h.webhooks, plugin.Ref(), models.WebhookEventVersionPublished, created)
 
 	c.Header("Location", fmt.Sprintf("/api/v1/plugins/%s/versions/%d", c.Param("id"), created.ID))
 	c.JSON(http.StatusCreated, gin.H{"data": created})

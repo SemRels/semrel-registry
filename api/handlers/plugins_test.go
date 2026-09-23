@@ -594,6 +594,64 @@ func TestCreateVersionValidationError(t *testing.T) {
 	assertErrorCode(t, resp, "VALIDATION_ERROR")
 }
 
+// newPluginTestRouterWithLogin simulates the requireAuth middleware (which
+// sets "login"/"isAdmin" from a verified session) instead of the static
+// admin-token middleware, so non-owner authorization checks can be exercised.
+func newPluginTestRouterWithLogin(repo *mockPluginRepository, login string, isAdmin bool) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.Use(ErrorHandler(), CORSMiddleware())
+
+	handler := NewPluginHandler(service.NewPluginService(&mockRepositoryAdapter{mock: repo}))
+	protected := router.Group("/api/v1")
+	protected.Use(func(c *gin.Context) {
+		c.Set("login", login)
+		c.Set("isAdmin", isAdmin)
+		c.Next()
+	})
+	protected.POST("/plugins/:id/versions", handler.CreatePluginVersion)
+
+	return router
+}
+
+func TestCreateVersionForbidsNonOwner(t *testing.T) {
+	repo := &mockPluginRepository{
+		getFunc: func(_ context.Context, _ string) (models.Plugin, error) { return samplePlugin(), nil },
+		createVersionFunc: func(_ context.Context, _ string, _ models.PluginVersion) (models.PluginVersion, error) {
+			t.Fatal("CreateVersion must not run when the caller doesn't own the plugin")
+			return models.PluginVersion{}, nil
+		},
+	}
+
+	router := newPluginTestRouterWithLogin(repo, "mallory", false)
+	resp := performRequest(t, router, http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{
+		"version":     "1.2.3",
+		"downloadUrl": validDownloadURL,
+		"checksums":   map[string]string{"linux_amd64": validChecksum},
+	}, "")
+
+	assert.Equal(t, http.StatusForbidden, resp.Code)
+}
+
+func TestCreateVersionAllowsOwner(t *testing.T) {
+	repo := &mockPluginRepository{
+		getFunc: func(_ context.Context, _ string) (models.Plugin, error) { return samplePlugin(), nil },
+		createVersionFunc: func(_ context.Context, _ string, version models.PluginVersion) (models.PluginVersion, error) {
+			version.ID = 9
+			return version, nil
+		},
+	}
+
+	router := newPluginTestRouterWithLogin(repo, "GoSemantics", false)
+	resp := performRequest(t, router, http.MethodPost, "/api/v1/plugins/1/versions", map[string]any{
+		"version":     "1.2.3",
+		"downloadUrl": validDownloadURL,
+		"checksums":   map[string]string{"linux_amd64": validChecksum},
+	}, "")
+
+	assert.Equal(t, http.StatusCreated, resp.Code)
+}
+
 func TestRevalidateAllPluginsReportsPerPluginErrors(t *testing.T) {
 	fileRepo, err := repository.NewFileRepository(t.TempDir())
 	require.NoError(t, err)
