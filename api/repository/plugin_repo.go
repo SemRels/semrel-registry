@@ -109,11 +109,11 @@ WHERE deleted_at IS NULL`)
 	}
 	if limit > 0 {
 		args = append(args, limit)
-		query.WriteString(fmt.Sprintf(" LIMIT $%d", len(args)))
+		fmt.Fprintf(&query, " LIMIT $%d", len(args))
 	}
 	if offset > 0 {
 		args = append(args, offset)
-		query.WriteString(fmt.Sprintf(" OFFSET $%d", len(args)))
+		fmt.Fprintf(&query, " OFFSET $%d", len(args))
 	}
 
 	rows, err := r.db.Pool().Query(ctx, query.String(), args...)

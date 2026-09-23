@@ -56,10 +56,10 @@ func (h *SitemapHandler) Sitemap(c *gin.Context) {
 	}
 
 	for _, p := range staticPages {
-		b.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&b,
 			"  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>\n    <changefreq>%s</changefreq>\n    <priority>%s</priority>\n  </url>\n",
 			p.loc, now, p.changefreq, p.priority,
-		))
+		)
 	}
 
 	// Plugin detail pages
@@ -69,10 +69,10 @@ func (h *SitemapHandler) Sitemap(c *gin.Context) {
 		if !plugin.UpdatedAt.IsZero() {
 			lastmod = plugin.UpdatedAt.UTC().Format("2006-01-02")
 		}
-		b.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&b,
 			"  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n",
 			loc, lastmod,
-		))
+		)
 	}
 
 	b.WriteString("</urlset>\n")

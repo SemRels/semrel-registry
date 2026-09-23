@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -62,7 +63,7 @@ func (h *PluginHandler) PluginReadme(c *gin.Context) {
 		return
 	}
 
-	markdown, source, fetchErr := fetchReadme(owner, repo)
+	markdown, source, fetchErr := fetchReadme(c.Request.Context(), owner, repo)
 	if fetchErr != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": gin.H{
@@ -90,7 +91,7 @@ func isGitHubRepository(repository string) bool {
 		strings.HasPrefix(lowered, "http://github.com/")
 }
 
-func fetchReadme(owner, repo string) (markdown, source string, err error) {
+func fetchReadme(ctx context.Context, owner, repo string) (markdown, source string, err error) {
 	key := owner + "/" + repo
 
 	readmeCacheMu.RLock()
@@ -100,7 +101,7 @@ func fetchReadme(owner, repo string) (markdown, source string, err error) {
 		return entry.markdown, entry.source, entry.err
 	}
 
-	markdown, source, err = fetchReadmeFromGitHub(owner, repo)
+	markdown, source, err = fetchReadmeFromGitHub(ctx, owner, repo)
 
 	readmeCacheMu.Lock()
 	// Failures are cached too, for a shorter effective life: without that, a
@@ -114,8 +115,8 @@ func fetchReadme(owner, repo string) (markdown, source string, err error) {
 	return markdown, source, err
 }
 
-func fetchReadmeFromGitHub(owner, repo string) (string, string, error) {
-	body, status, err := ghRequest(fmt.Sprintf("https://api.github.com/repos/%s/%s/readme", owner, repo))
+func fetchReadmeFromGitHub(ctx context.Context, owner, repo string) (string, string, error) {
+	body, status, err := ghRequest(ctx, fmt.Sprintf("https://api.github.com/repos/%s/%s/readme", owner, repo))
 	if err != nil {
 		return "", "", err
 	}

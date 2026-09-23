@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"testing"
@@ -101,8 +102,8 @@ func TestNormalizeDigest(t *testing.T) {
 // A missing digest or repository must produce a stated reason, never a silent
 // "unverified" the reader cannot act on.
 func TestVerifyProvenanceExplainsMissingInputs(t *testing.T) {
-	assert.Contains(t, VerifyProvenance("SemRels", "x", "not-a-digest").Issue, "digest")
-	assert.Contains(t, VerifyProvenance("", "", testDigest).Issue, "repository")
+	assert.Contains(t, VerifyProvenance(context.Background(), "SemRels", "x", "not-a-digest").Issue, "digest")
+	assert.Contains(t, VerifyProvenance(context.Background(), "", "", testDigest).Issue, "repository")
 }
 
 func TestDecodeStatementRoundTrip(t *testing.T) {

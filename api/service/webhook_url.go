@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"net"
 	"net/url"
 	"strings"
@@ -18,7 +19,7 @@ import (
 // that resolves to a loopback, private, link-local, or unspecified address.
 // Callers that deliver to a previously-validated URL should call this again
 // immediately before dialing, since DNS answers can change between the two.
-func ValidateWebhookURL(raw string) error {
+func ValidateWebhookURL(ctx context.Context, raw string) error {
 	parsed, err := url.Parse(raw)
 	if err != nil || parsed.Host == "" {
 		return &appErrors.ValidationError{Field: "url", Issue: "must be a valid URL"}
@@ -41,12 +42,12 @@ func ValidateWebhookURL(raw string) error {
 		return nil
 	}
 
-	addrs, err := net.LookupIP(host)
+	addrs, err := (&net.Resolver{}).LookupIPAddr(ctx, host)
 	if err != nil || len(addrs) == 0 {
 		return &appErrors.ValidationError{Field: "url", Issue: "host does not resolve"}
 	}
 	for _, addr := range addrs {
-		if !publiclyRoutable(addr) {
+		if !publiclyRoutable(addr.IP) {
 			return &appErrors.ValidationError{Field: "url", Issue: "must not point at a private or internal address"}
 		}
 	}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -44,7 +45,7 @@ type OwnershipResult struct {
 }
 
 // VerifyRepositoryOwnership checks whether login controls owner/repo.
-func VerifyRepositoryOwnership(login, owner, repo string) OwnershipResult {
+func VerifyRepositoryOwnership(ctx context.Context, login, owner, repo string) OwnershipResult {
 	login = strings.TrimSpace(login)
 	owner = strings.TrimSpace(owner)
 	repo = strings.TrimSpace(repo)
@@ -59,12 +60,12 @@ func VerifyRepositoryOwnership(login, owner, repo string) OwnershipResult {
 	}
 
 	// 2. The submitter is a public member of the owning organisation.
-	if isPublicOrgMember(owner, login) {
+	if isPublicOrgMember(ctx, owner, login) {
 		return OwnershipResult{Verified: true, Method: "public-org-member"}
 	}
 
 	// 3. A claim file in the repository names the submitter.
-	switch claimed, err := claimFileNames(owner, repo, login); {
+	switch claimed, err := claimFileNames(ctx, owner, repo, login); {
 	case err != nil:
 		return OwnershipResult{
 			Issue:    fmt.Sprintf("could not read %s: %v", ClaimFilePath, err),
@@ -89,8 +90,8 @@ func claimInstructions(login string) string {
 
 // isPublicOrgMember uses the endpoint that answers 204 for a public member and
 // 404 otherwise. It needs no authentication and discloses nothing private.
-func isPublicOrgMember(org, login string) bool {
-	_, status, err := ghRequest(fmt.Sprintf(
+func isPublicOrgMember(ctx context.Context, org, login string) bool {
+	_, status, err := ghRequest(ctx, fmt.Sprintf(
 		"https://api.github.com/orgs/%s/public_members/%s", org, login))
 	return err == nil && status == http.StatusNoContent
 }
@@ -99,8 +100,8 @@ func isPublicOrgMember(org, login string) bool {
 //
 // The comparison is on the trimmed contents so that a trailing newline — which
 // every editor adds — does not fail an otherwise correct claim.
-func claimFileNames(owner, repo, login string) (bool, error) {
-	body, status, err := ghRequest(fmt.Sprintf(
+func claimFileNames(ctx context.Context, owner, repo, login string) (bool, error) {
+	body, status, err := ghRequest(ctx, fmt.Sprintf(
 		"https://api.github.com/repos/%s/%s/contents/%s", owner, repo, ClaimFilePath))
 	if err != nil {
 		return false, err
@@ -176,6 +177,6 @@ func VerifyOwnership(c *gin.Context) {
 		return
 	}
 
-	result := VerifyRepositoryOwnership(loginStr, owner, repo)
+	result := VerifyRepositoryOwnership(c.Request.Context(), loginStr, owner, repo)
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }

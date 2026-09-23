@@ -38,7 +38,7 @@ import (
 //
 // digest is the bare hex SHA-256 or a "sha256:"-prefixed one; expectedRepo is
 // the plugin's own repository in owner/name form.
-func VerifyProvenance(owner, repo, digest string) models.Provenance {
+func VerifyProvenance(ctx context.Context, owner, repo, digest string) models.Provenance {
 	normalized := normalizeDigest(digest)
 	if normalized == "" {
 		return models.Provenance{Issue: "no usable artifact digest to look up"}
@@ -47,7 +47,7 @@ func VerifyProvenance(owner, repo, digest string) models.Provenance {
 		return models.Provenance{Digest: normalized, Issue: "the plugin has no GitHub repository on record"}
 	}
 
-	body, status, err := ghRequest(fmt.Sprintf(
+	body, status, err := ghRequest(ctx, fmt.Sprintf(
 		"https://api.github.com/repos/%s/%s/attestations/%s", owner, repo, normalized))
 	if err != nil {
 		return models.Provenance{Digest: normalized, Issue: "could not reach GitHub: " + err.Error()}
@@ -220,7 +220,7 @@ func (h *PluginHandler) ReverifyProvenance(c *gin.Context) {
 	}
 
 	owner, repo := ownerRepoFromURL(plugin.Repository)
-	provenance := VerifyProvenance(owner, repo, digest)
+	provenance := VerifyProvenance(c.Request.Context(), owner, repo, digest)
 	if err := h.service.SetProvenance(c.Request.Context(), versionID, &provenance); err != nil {
 		HandleError(c, err)
 		return
@@ -240,8 +240,9 @@ func triggerProvenanceCheck(svc service.PluginManager, versionID int64, reposito
 	}
 	owner, repo := ownerRepoFromURL(repositoryURL)
 	go func() {
-		provenance := VerifyProvenance(owner, repo, digest)
-		_ = svc.SetProvenance(context.Background(), versionID, &provenance)
+		ctx := context.Background()
+		provenance := VerifyProvenance(ctx, owner, repo, digest)
+		_ = svc.SetProvenance(ctx, versionID, &provenance)
 	}()
 }
 

@@ -1,29 +1,32 @@
 package service
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 // IP-literal hosts exercise the classification logic without a real DNS
 // lookup, so these stay hermetic and fast.
 func TestValidateWebhookURL_AcceptsAPubliclyRoutableIPLiteral(t *testing.T) {
-	if err := ValidateWebhookURL("https://93.184.216.34/hook"); err != nil {
+	if err := ValidateWebhookURL(context.Background(), "https://93.184.216.34/hook"); err != nil {
 		t.Fatalf("expected a public IP literal to be accepted, got: %v", err)
 	}
 }
 
 func TestValidateWebhookURL_RejectsNonHTTPS(t *testing.T) {
-	if err := ValidateWebhookURL("http://93.184.216.34/hook"); err == nil {
+	if err := ValidateWebhookURL(context.Background(), "http://93.184.216.34/hook"); err == nil {
 		t.Fatal("expected http to be rejected")
 	}
 }
 
 func TestValidateWebhookURL_RejectsEmbeddedCredentials(t *testing.T) {
-	if err := ValidateWebhookURL("https://user:pass@93.184.216.34/hook"); err == nil {
+	if err := ValidateWebhookURL(context.Background(), "https://user:pass@93.184.216.34/hook"); err == nil {
 		t.Fatal("expected embedded credentials to be rejected")
 	}
 }
 
 func TestValidateWebhookURL_RejectsMalformedURL(t *testing.T) {
-	if err := ValidateWebhookURL("://not a url"); err == nil {
+	if err := ValidateWebhookURL(context.Background(), "://not a url"); err == nil {
 		t.Fatal("expected a malformed URL to be rejected")
 	}
 }
@@ -42,7 +45,7 @@ func TestValidateWebhookURL_RejectsPrivateAndInternalAddresses(t *testing.T) {
 		"https://224.0.0.1/hook",       // multicast
 	}
 	for _, raw := range cases {
-		if err := ValidateWebhookURL(raw); err == nil {
+		if err := ValidateWebhookURL(context.Background(), raw); err == nil {
 			t.Errorf("expected %q to be rejected as a private/internal address", raw)
 		}
 	}

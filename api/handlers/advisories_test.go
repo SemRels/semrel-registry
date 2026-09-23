@@ -110,7 +110,7 @@ func TestAuditPluginsReportsAffectingAdvisoriesOnly(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NoError(t, fileRepo.SetSecurityAdvisories(context.Background(), id, []models.SecurityAdvisory{
-		{GHSAID: "GHSA-old", VulnerableRange: "<1.0.0"},          // does not affect 1.5.0
+		{GHSAID: "GHSA-old", VulnerableRange: "<1.0.0"},             // does not affect 1.5.0
 		{GHSAID: "GHSA-current", VulnerableRange: ">=1.0.0 <2.0.0"}, // affects 1.5.0
 	}))
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 // The cheapest case, and the only one that needs no network: the repository
 // lives under the submitter's own account.
 func TestOwnershipAcceptsTheAccountOwner(t *testing.T) {
-	result := VerifyRepositoryOwnership("alice", "alice", "analyzer-example")
+	result := VerifyRepositoryOwnership(context.Background(), "alice", "alice", "analyzer-example")
 
 	assert.True(t, result.Verified)
 	assert.Equal(t, "account-owner", result.Method)
@@ -18,8 +19,8 @@ func TestOwnershipAcceptsTheAccountOwner(t *testing.T) {
 func TestOwnershipIsCaseInsensitiveOnTheLogin(t *testing.T) {
 	// GitHub logins are case-insensitive, and the session carries whatever
 	// casing the profile uses.
-	assert.True(t, VerifyRepositoryOwnership("Alice", "alice", "x").Verified)
-	assert.True(t, VerifyRepositoryOwnership("alice", "ALICE", "x").Verified)
+	assert.True(t, VerifyRepositoryOwnership(context.Background(), "Alice", "alice", "x").Verified)
+	assert.True(t, VerifyRepositoryOwnership(context.Background(), "alice", "ALICE", "x").Verified)
 }
 
 func TestOwnershipRequiresBothPartiesNamed(t *testing.T) {
@@ -29,7 +30,7 @@ func TestOwnershipRequiresBothPartiesNamed(t *testing.T) {
 		"no repo":  {"alice", "owner", ""},
 	} {
 		t.Run(name, func(t *testing.T) {
-			result := VerifyRepositoryOwnership(args[0], args[1], args[2])
+			result := VerifyRepositoryOwnership(context.Background(), args[0], args[1], args[2])
 			assert.False(t, result.Verified)
 			assert.NotEmpty(t, result.Issue)
 		})
@@ -39,7 +40,7 @@ func TestOwnershipRequiresBothPartiesNamed(t *testing.T) {
 // A refusal has to tell the submitter what would make it succeed. Otherwise the
 // check is a wall rather than a step.
 func TestOwnershipRefusalExplainsTheFix(t *testing.T) {
-	result := VerifyRepositoryOwnership("mallory", "some-unlikely-org-93ba7", "repo-93ba7")
+	result := VerifyRepositoryOwnership(context.Background(), "mallory", "some-unlikely-org-93ba7", "repo-93ba7")
 
 	assert.False(t, result.Verified)
 	assert.Contains(t, result.HowToFix, ClaimFilePath)

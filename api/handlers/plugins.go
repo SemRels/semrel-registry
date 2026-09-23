@@ -505,7 +505,7 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 	isAdmin, _ := c.Get("isAdmin")
 	if isAdmin != true {
 		owner, repo := ownerRepoFromURL(submission.Repository)
-		result := VerifyRepositoryOwnership(loginStr, owner, repo)
+		result := VerifyRepositoryOwnership(c.Request.Context(), loginStr, owner, repo)
 		if !result.Verified {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error": gin.H{
@@ -534,7 +534,7 @@ func (h *PluginHandler) SubmitPlugin(c *gin.Context) {
 		if owner == "" || repo == "" {
 			return
 		}
-		result := validatePluginStandards(owner, repo)
+		result := validatePluginStandards(context.Background(), owner, repo)
 		raw, err := json.Marshal(result)
 		if err != nil {
 			return
@@ -640,7 +640,7 @@ func (h *PluginHandler) revalidatePlugin(ctx context.Context, plugin models.Plug
 	if owner == "" || repo == "" {
 		return ValidationResult{}, fmt.Errorf("plugin has no valid GitHub repository URL")
 	}
-	result := validatePluginStandards(owner, repo)
+	result := validatePluginStandards(ctx, owner, repo)
 	raw, err := json.Marshal(result)
 	if err != nil {
 		return ValidationResult{}, fmt.Errorf("failed to marshal result: %w", err)

@@ -43,13 +43,13 @@ type ghSecurityAdvisory struct {
 // plugin's own GitHub repository. A repository with none, or whose visibility
 // hides the endpoint, returns an empty slice rather than an error — that is
 // the overwhelmingly common case, not a failure.
-func FetchSecurityAdvisories(owner, repo string) ([]models.SecurityAdvisory, error) {
+func FetchSecurityAdvisories(ctx context.Context, owner, repo string) ([]models.SecurityAdvisory, error) {
 	if owner == "" || repo == "" {
 		return []models.SecurityAdvisory{}, nil
 	}
 
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/security-advisories?per_page=100&state=published", owner, repo)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, fmt.Errorf("could not reach github: %w", err)
 	}
@@ -139,11 +139,11 @@ func triggerAdvisoryRefresh(svc service.PluginManager, webhooks repository.Webho
 		return
 	}
 	go func() {
-		advisories, err := FetchSecurityAdvisories(owner, repo)
+		ctx := context.Background()
+		advisories, err := FetchSecurityAdvisories(ctx, owner, repo)
 		if err != nil {
 			return
 		}
-		ctx := context.Background()
 		ref := fmt.Sprintf("%d", pluginID)
 		before, _ := svc.GetPlugin(ctx, ref)
 		if err := svc.SetSecurityAdvisories(ctx, pluginID, advisories); err != nil {
@@ -198,7 +198,7 @@ func (h *PluginHandler) RefreshSecurityAdvisories(c *gin.Context) {
 		return
 	}
 
-	advisories, err := FetchSecurityAdvisories(owner, repo)
+	advisories, err := FetchSecurityAdvisories(c.Request.Context(), owner, repo)
 	if err != nil {
 		if isGitHubRateLimitError(err) {
 			writeError(c, http.StatusTooManyRequests, "GITHUB_RATE_LIMIT", "GitHub API rate limit exceeded. Configure GITHUB_TOKEN for higher limits.", err)

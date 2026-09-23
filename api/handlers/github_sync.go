@@ -355,9 +355,9 @@ func (h *SyncHandler) WebhookRelease(c *gin.Context) {
 
 	var rel *ghRelease
 	if payload.Tag != "" {
-		rel, err = fetchGHRelease(owner, repo, payload.Tag)
+		rel, err = fetchGHRelease(ctx, owner, repo, payload.Tag)
 	} else {
-		rel, err = fetchGHLatestRelease(owner, repo)
+		rel, err = fetchGHLatestRelease(ctx, owner, repo)
 	}
 	if err != nil {
 		InternalServerError(c, "failed to fetch release", err)
@@ -411,7 +411,7 @@ func (h *SyncHandler) performOrgSync(ctx context.Context, org string) ([]syncRes
 		org = strings.TrimSpace(org[:idx])
 	}
 
-	repos, err := fetchOrgRepos(org)
+	repos, err := fetchOrgRepos(ctx, org)
 	if err != nil {
 		return nil, err
 	}
@@ -562,12 +562,15 @@ type ghRepo struct {
 	Fork        bool   `json:"fork"`
 }
 
-func fetchOrgRepos(org string) ([]ghRepo, error) {
+func fetchOrgRepos(ctx context.Context, org string) ([]ghRepo, error) {
 	token := os.Getenv("GITHUB_TOKEN")
 	var all []ghRepo
 	for page := 1; ; page++ {
 		url := fmt.Sprintf("https://api.github.com/orgs/%s/repos?type=public&per_page=100&page=%d", org, page)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
 		if token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
@@ -600,7 +603,7 @@ func (h *SyncHandler) syncPluginReleases(ctx context.Context, p *models.Plugin) 
 	if repo == "" {
 		return 0, 0, fmt.Errorf("cannot parse repository URL %q", p.Repository)
 	}
-	releases, err := fetchGHReleases(owner, repo)
+	releases, err := fetchGHReleases(ctx, owner, repo)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -707,7 +710,7 @@ func ValidatePlugin(c *gin.Context) {
 		return
 	}
 
-	result := validatePluginStandards(owner, repo)
+	result := validatePluginStandards(c.Request.Context(), owner, repo)
 	status := http.StatusOK
 	if !result.Valid {
 		status = http.StatusUnprocessableEntity
@@ -730,7 +733,7 @@ type ValidationCheck struct {
 	Message string `json:"message,omitempty"`
 }
 
-func validatePluginStandards(owner, repo string) ValidationResult {
+func validatePluginStandards(ctx context.Context, owner, repo string) ValidationResult {
 	result := ValidationResult{Plugin: repo, Owner: owner}
 
 	type check struct {
@@ -740,8 +743,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	}
 
 	// Detect language by presence of go.mod or Cargo.toml.
-	hasGoMod, _ := checkGHFile(owner, repo, "go.mod")
-	hasCargo, _ := checkGHFile(owner, repo, "Cargo.toml")
+	hasGoMod, _ := checkGHFile(ctx, owner, repo, "go.mod")
+	hasCargo, _ := checkGHFile(ctx, owner, repo, "Cargo.toml")
 
 	var lang string
 	switch {
@@ -759,15 +762,15 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	case "rust":
 		manifestCheck = check{
 			"lang_manifest", "Cargo.toml present (Rust)",
-			func() (bool, string) { return checkGHFile(owner, repo, "Cargo.toml") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "Cargo.toml") },
 		}
 		entrypointCheck = check{
 			"lang_entrypoint", "src/main.rs or src/lib.rs present",
 			func() (bool, string) {
-				if ok, _ := checkGHFile(owner, repo, "src/main.rs"); ok {
+				if ok, _ := checkGHFile(ctx, owner, repo, "src/main.rs"); ok {
 					return true, ""
 				}
-				if ok, _ := checkGHFile(owner, repo, "src/lib.rs"); ok {
+				if ok, _ := checkGHFile(ctx, owner, repo, "src/lib.rs"); ok {
 					return true, ""
 				}
 				return false, "neither src/main.rs nor src/lib.rs found"
@@ -776,11 +779,11 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 	default: // "go" or unknown — default to Go expectations
 		manifestCheck = check{
 			"lang_manifest", "go.mod present (Go)",
-			func() (bool, string) { return checkGHFile(owner, repo, "go.mod") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "go.mod") },
 		}
 		entrypointCheck = check{
 			"lang_entrypoint", "cmd/plugin/ entry point present",
-			func() (bool, string) { return checkGHFile(owner, repo, "cmd/plugin") },
+			func() (bool, string) { return checkGHFile(ctx, owner, repo, "cmd/plugin") },
 		}
 	}
 
@@ -796,21 +799,21 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 				return false, fmt.Sprintf("%q must match {category}-{name}, e.g. updater-pypi", repo)
 			},
 		},
-		{"security_md", "SECURITY.md present", func() (bool, string) { return checkGHFile(owner, repo, "SECURITY.md") }},
-		{"contributing_md", "CONTRIBUTING.md present", func() (bool, string) { return checkGHFile(owner, repo, "CONTRIBUTING.md") }},
-		{"governance_md", "GOVERNANCE.md present", func() (bool, string) { return checkGHFile(owner, repo, "GOVERNANCE.md") }},
-		{"license", "LICENSE file present", func() (bool, string) { return checkGHFile(owner, repo, "LICENSE") }},
+		{"security_md", "SECURITY.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "SECURITY.md") }},
+		{"contributing_md", "CONTRIBUTING.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "CONTRIBUTING.md") }},
+		{"governance_md", "GOVERNANCE.md present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "GOVERNANCE.md") }},
+		{"license", "LICENSE file present", func() (bool, string) { return checkGHFile(ctx, owner, repo, "LICENSE") }},
 		{"release_workflow", ".github/workflows/release.yml present", func() (bool, string) {
-			if ok, _ := checkGHFile(owner, repo, ".github/workflows/release.yml"); ok {
+			if ok, _ := checkGHFile(ctx, owner, repo, ".github/workflows/release.yml"); ok {
 				return true, ""
 			}
-			return checkGHFile(owner, repo, ".github/workflows/release.yaml")
+			return checkGHFile(ctx, owner, repo, ".github/workflows/release.yaml")
 		}},
 		{"security_workflow", ".github/workflows/security.yml present", func() (bool, string) {
-			if ok, _ := checkGHFile(owner, repo, ".github/workflows/security.yml"); ok {
+			if ok, _ := checkGHFile(ctx, owner, repo, ".github/workflows/security.yml"); ok {
 				return true, ""
 			}
-			return checkGHFile(owner, repo, ".github/workflows/security.yaml")
+			return checkGHFile(ctx, owner, repo, ".github/workflows/security.yaml")
 		}},
 		manifestCheck,
 		entrypointCheck,
@@ -819,9 +822,9 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 			"release.yml triggers registry sync",
 			func() (bool, string) {
 				// Accept both .yml and .yaml extensions.
-				content, err := fetchGHFileContent(owner, repo, ".github/workflows/release.yml")
+				content, err := fetchGHFileContent(ctx, owner, repo, ".github/workflows/release.yml")
 				if err != nil {
-					content, err = fetchGHFileContent(owner, repo, ".github/workflows/release.yaml")
+					content, err = fetchGHFileContent(ctx, owner, repo, ".github/workflows/release.yaml")
 				}
 				if err != nil {
 					return false, "could not fetch release workflow"
@@ -861,8 +864,8 @@ func validatePluginStandards(owner, repo string) ValidationResult {
 
 // ── GitHub API helpers ────────────────────────────────────────────────────────
 
-func ghRequest(url string) ([]byte, int, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func ghRequest(ctx context.Context, url string) ([]byte, int, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -880,9 +883,9 @@ func ghRequest(url string) ([]byte, int, error) {
 	return body, resp.StatusCode, nil
 }
 
-func fetchGHReleases(owner, repo string) ([]ghRelease, error) {
+func fetchGHReleases(ctx context.Context, owner, repo string) ([]ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases?per_page=100", owner, repo)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -896,9 +899,9 @@ func fetchGHReleases(owner, repo string) ([]ghRelease, error) {
 	return releases, json.Unmarshal(body, &releases)
 }
 
-func fetchGHRelease(owner, repo, tag string) (*ghRelease, error) {
+func fetchGHRelease(ctx context.Context, owner, repo, tag string) (*ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/tags/%s", owner, repo, tag)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -909,9 +912,9 @@ func fetchGHRelease(owner, repo, tag string) (*ghRelease, error) {
 	return &rel, json.Unmarshal(body, &rel)
 }
 
-func fetchGHLatestRelease(owner, repo string) (*ghRelease, error) {
+func fetchGHLatestRelease(ctx context.Context, owner, repo string) (*ghRelease, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -940,9 +943,9 @@ func isGitHubRateLimitError(err error) bool {
 	return strings.Contains(msg, "rate limit") || (strings.Contains(msg, "github api 403") && !errors.Is(err, context.Canceled))
 }
 
-func checkGHFile(owner, repo, path string) (bool, string) {
+func checkGHFile(ctx context.Context, owner, repo, path string) (bool, string) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, path)
-	_, status, err := ghRequest(url)
+	_, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -952,9 +955,9 @@ func checkGHFile(owner, repo, path string) (bool, string) {
 	return false, fmt.Sprintf("%s not found (HTTP %d)", path, status)
 }
 
-func fetchGHFileContent(owner, repo, path string) (string, error) {
+func fetchGHFileContent(ctx context.Context, owner, repo, path string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, path)
-	body, status, err := ghRequest(url)
+	body, status, err := ghRequest(ctx, url)
 	if err != nil {
 		return "", err
 	}

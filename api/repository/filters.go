@@ -109,7 +109,7 @@ func (f StatusFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 	}
 	if len(f.Statuses) == 1 {
 		*args = append(*args, f.Statuses[0])
-		builder.WriteString(fmt.Sprintf(" AND status = $%d", len(*args)))
+		fmt.Fprintf(builder, " AND status = $%d", len(*args))
 		return
 	}
 	placeholders := make([]string, len(f.Statuses))
@@ -117,7 +117,7 @@ func (f StatusFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) {
 		*args = append(*args, s)
 		placeholders[i] = fmt.Sprintf("$%d", len(*args))
 	}
-	builder.WriteString(fmt.Sprintf(" AND status IN (%s)", strings.Join(placeholders, ",")))
+	fmt.Fprintf(builder, " AND status IN (%s)", strings.Join(placeholders, ","))
 }
 
 // NamespaceFilter restricts results to plugins belonging to a specific namespace (exact, case-insensitive).
@@ -134,7 +134,7 @@ func (f NamespaceFilter) ApplyTo(builder *strings.Builder, args *[]interface{}) 
 		return
 	}
 	*args = append(*args, ns)
-	builder.WriteString(fmt.Sprintf(" AND LOWER(namespace) = LOWER($%d)", len(*args)))
+	fmt.Fprintf(builder, " AND LOWER(namespace) = LOWER($%d)", len(*args))
 }
 
 type SortFilter struct {
@@ -157,7 +157,7 @@ func (f SortFilter) ApplyTo(builder *strings.Builder, _ *[]interface{}) {
 		direction = "ASC"
 	}
 
-	builder.WriteString(fmt.Sprintf(" ORDER BY %s %s", sortColumnExpr(field), direction))
+	fmt.Fprintf(builder, " ORDER BY %s %s", sortColumnExpr(field), direction)
 }
 
 // normalizeSortField maps a caller-supplied sort field onto the canonical

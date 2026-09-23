@@ -60,7 +60,7 @@ func (h *WebhookHandler) CreateSubscription(c *gin.Context) {
 		return
 	}
 
-	if err := service.ValidateWebhookURL(body.URL); err != nil {
+	if err := service.ValidateWebhookURL(c.Request.Context(), body.URL); err != nil {
 		HandleError(c, err)
 		return
 	}
@@ -209,15 +209,16 @@ func DeliverWebhookEvent(webhooks repository.WebhookRepository, pluginRef, event
 }
 
 func deliverWebhook(webhooks repository.WebhookRepository, sub models.WebhookSubscription, body []byte) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	// Re-validate immediately before dialing: DNS can change between when a
 	// URL passed validation at subscription time and now.
-	if err := service.ValidateWebhookURL(sub.URL); err != nil {
+	if err := service.ValidateWebhookURL(ctx, sub.URL); err != nil {
 		_ = webhooks.RecordDelivery(context.Background(), sub.ID, 0, false)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, sub.URL, bytes.NewReader(body))
 	if err != nil {
 		return
