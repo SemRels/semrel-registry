@@ -39,17 +39,15 @@ export function renderMarkdown(source: string): string {
 interface MarkdownProps {
   readonly source: string;
   readonly className?: string;
-  readonly style?: React.CSSProperties;
 }
 
 /** Renders untrusted markdown. Links open in a new tab. */
-export default function Markdown({ source, className, style }: MarkdownProps) {
+export default function Markdown({ source, className }: MarkdownProps) {
   const html = useMemo(() => renderMarkdown(source), [source]);
 
   return (
     <div
       className={className ? `markdown-body ${className}` : 'markdown-body'}
-      style={style}
       // Safe: renderMarkdown sanitises with the allowlist above.
       dangerouslySetInnerHTML={{ __html: html }}
       onClick={e => {

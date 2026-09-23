@@ -44,9 +44,9 @@ export default function PluginEditPage() {
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
-        <div className="card" style={{ maxWidth: 640, margin: '0 auto' }}>
+        <div className="card max-w-640 mx-auto">
           <form onSubmit={(e) => { void handleSubmit(e); }}>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'.75rem' }}>
+            <div className="form-grid-3">
               <div className="field">
                 <label htmlFor="namespace">Namespace</label>
                 <input id="namespace" className="input" value={form.namespace ?? ''} onChange={e => set('namespace', e.target.value)} placeholder="@semrel" />
@@ -66,7 +66,7 @@ export default function PluginEditPage() {
               <label htmlFor="desc">Description *</label>
               <textarea id="desc" className="textarea" value={form.description ?? ''} onChange={e => set('description', e.target.value)} placeholder="Short description" required />
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
+            <div className="form-grid-2">
               <div className="field">
                 <label htmlFor="author">Author *</label>
                 <input id="author" className="input" value={form.author ?? ''} onChange={e => set('author', e.target.value)} placeholder="semrel Authors" required />

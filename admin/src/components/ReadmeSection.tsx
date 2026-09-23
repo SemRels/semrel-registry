@@ -32,9 +32,9 @@ export default function ReadmeSection({
 
   if (loading) {
     return (
-      <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }} aria-busy="true">
-        <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>Documentation</h2>
-        <div className="skeleton" style={{ height: '6rem' }} />
+      <section className="card section-card" aria-busy="true">
+        <h2 className="section-card__title">Documentation</h2>
+        <div className="skeleton readme-skeleton" />
       </section>
     );
   }
@@ -42,14 +42,14 @@ export default function ReadmeSection({
   if (!readme?.markdown) return null;
 
   return (
-    <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', flexWrap: 'wrap', marginBottom: '.75rem' }}>
-        <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', fontWeight: 700 }}>Documentation</h2>
+    <section className="card section-card">
+      <div className="flex items-center justify-between gap-sm flex-wrap mb-1">
+        <h2 className="section-card__title m-0">Documentation</h2>
         <a
           href={readme.source || repository}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontSize: 'var(--fs-xs)' }}
+          className="text-xs"
         >
           Read on GitHub <span aria-hidden="true">↗</span>
           <span className="sr-only">(opens in a new tab)</span>
@@ -65,8 +65,7 @@ export default function ReadmeSection({
 
       <button
         type="button"
-        className="btn btn--secondary btn--sm"
-        style={{ marginTop: '.75rem' }}
+        className="btn btn--secondary btn--sm mt-2"
         aria-expanded={expanded}
         onClick={() => setExpanded(open => !open)}
       >

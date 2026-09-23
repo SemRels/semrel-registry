@@ -56,7 +56,7 @@ export function EmptyState({ title, children, action }: EmptyStateProps) {
   return (
     <div className="empty-state">
       <span className="empty-state__title">{title}</span>
-      {children && <p style={{ margin: 0, maxWidth: '34rem' }}>{children}</p>}
+      {children && <p className="empty-state__hint">{children}</p>}
       {action}
     </div>
   );

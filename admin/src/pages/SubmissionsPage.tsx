@@ -6,7 +6,7 @@ import { TableSkeleton, EmptyState } from '../components/LoadingState';
 
 function CheckIcon({ passed }: { passed: boolean }) {
   return (
-    <span style={{ color: passed ? 'var(--success)' : 'var(--danger)', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0 }}>
+    <span className={passed ? 'validation-panel__icon--pass' : 'validation-panel__icon--fail'}>
       {passed ? '✓' : '✗'}
     </span>
   );
@@ -14,29 +14,25 @@ function CheckIcon({ passed }: { passed: boolean }) {
 
 function ValidationPanel({ checks, summary, valid, validatedAt }: ValidationResult & { validatedAt?: string }) {
   return (
-    <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.25rem' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-          fontSize: 'var(--fs-xs)', fontWeight: 700,
-          color: valid ? 'var(--success)' : 'var(--danger)',
-        }}>
+    <div className="validation-panel">
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-xs">
+        <div className={`inline-flex items-center gap-xs text-xs font-bold ${valid ? 'validation-panel__status--pass' : 'validation-panel__status--fail'}`}>
           {valid ? '✓ All checks passed' : '✗ Some checks failed'}
-          {summary && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> — {summary}</span>}
+          {summary && <span className="validation-panel__summary"> — {summary}</span>}
         </div>
         {validatedAt && (
-          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
+          <span className="text-xs muted">
             checked {new Date(validatedAt).toLocaleString()}
           </span>
         )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.3rem' }}>
+      <div className="validation-panel__grid">
         {checks.map(ch => (
-          <div key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', fontSize: 'var(--fs-xs)' }}>
+          <div key={ch.id} className="validation-panel__check">
             <CheckIcon passed={ch.passed} />
-            <span style={{ color: ch.passed ? 'var(--text)' : 'var(--text-muted)' }}>
+            <span className={ch.passed ? '' : 'muted'}>
               {ch.label}
-              {ch.message && <span style={{ color: 'var(--danger)', display: 'block' }}>{ch.message}</span>}
+              {ch.message && <span className="validation-panel__message">{ch.message}</span>}
             </span>
           </div>
         ))}
@@ -81,33 +77,29 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
   const allPassed = checks?.valid ?? false;
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
+    <div className="card mb-2">
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{plugin.name}</span>
+      <div className="flex items-start gap-md flex-wrap">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-sm flex-wrap mb-1">
+            <span className="submission-card__name">{plugin.name}</span>
             <span className={`badge badge--${plugin.category}`}>{plugin.category}</span>
             {checks && (
-              <span style={{
-                fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '0.1rem 0.4rem', borderRadius: 4,
-                background: allPassed ? 'var(--success-soft)' : 'var(--danger-soft)',
-                color: allPassed ? 'var(--success)' : 'var(--danger)',
-              }}>
+              <span className={`submission-status ${allPassed ? 'submission-status--pass' : 'submission-status--fail'}`}>
                 {allPassed ? '✓ passes standards' : '✗ issues found'}
               </span>
             )}
             {!checks && (
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>not yet validated</span>
+              <span className="text-xs muted">not yet validated</span>
             )}
           </div>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+          <div className="text-sm muted mb-1">
             {plugin.description}
           </div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="text-xs muted flex gap-md flex-wrap">
             <span>👤 {plugin.author}</span>
             <span>📄 {plugin.license}</span>
-            <a href={plugin.repository} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-text)' }}>
+            <a href={plugin.repository} target="_blank" rel="noreferrer" className="link-accent">
               ↗ {plugin.repository.replace('https://github.com/', '')}
             </a>
             <span>🕐 {new Date(plugin.createdAt).toLocaleDateString()}</span>
@@ -115,13 +107,12 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
         </div>
 
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, alignItems: 'flex-start' }}>
+        <div className="flex gap-xs no-shrink items-start">
           <button
-            className="btn btn--sm"
+            className="btn btn--sm text-xs"
             title="Re-run validation checks"
             onClick={() => { void handleRevalidate(); }}
             disabled={revalidating}
-            style={{ fontSize: 'var(--fs-xs)' }}
           >
             {revalidating ? '⏳' : checks ? '↻ Re-check' : '▶ Run check'}
           </button>
@@ -142,12 +133,12 @@ function SubmissionCard({ plugin, onApprove, onReject, onRevalidate }: {
         </div>
       </div>
 
-      {revalError && <div className="alert alert--error" style={{ marginTop: '0.5rem', padding: '0.3rem 0.5rem' }}>{revalError}</div>}
+      {revalError && <div className="alert alert--error mt-1">{revalError}</div>}
 
       {/* A rejected submission carries the reviewer's explanation, so a
           maintainer revisiting the list can see why it was turned down. */}
       {plugin.status === 'rejected' && plugin.rejectionReason && (
-        <div className="alert alert--error" style={{ marginTop: '0.5rem' }}>
+        <div className="alert alert--error mt-1">
           <strong>Rejected{plugin.reviewedBy ? ` by ${plugin.reviewedBy}` : ''}:</strong>{' '}
           {plugin.rejectionReason}
         </div>
@@ -224,12 +215,12 @@ export default function SubmissionsPage() {
         <h1 className="page__title">
           Submissions
           {total > 0 && filter !== 'all' && (
-            <span style={{ background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700, borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '0.5rem', verticalAlign: 'middle' }}>
+            <span className="count-badge count-badge--middle">
               {total}
             </span>
           )}
         </h1>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div className="flex gap-xs">
           {(['pending', 'rejected', 'all'] as const).map(f => (
             <button key={f} className={`btn btn--sm${filter === f ? ' btn--primary' : ''}`} onClick={() => setFilter(f)}>
               {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -278,9 +269,9 @@ export default function SubmissionsPage() {
 
         {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+          <div className="flex items-center justify-center gap-sm mt-2">
             <button className="btn btn--secondary btn--sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span className="muted" style={{ fontSize: 'var(--fs-sm)' }}>Page {page} / {totalPages}</span>
+            <span className="muted text-sm">Page {page} / {totalPages}</span>
             <button className="btn btn--secondary btn--sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         )}

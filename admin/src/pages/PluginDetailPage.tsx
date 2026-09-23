@@ -20,27 +20,27 @@ function setOrCreate(selector: string, attr: string, attrValue: string, content:
 
 function ValidationPanel({ checks, summary, valid, validatedAt }: ValidationResult & { validatedAt?: string }) {
   return (
-    <div style={{ marginTop: '.75rem', padding: '.75rem', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.5rem', flexWrap: 'wrap', gap: '.25rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', fontSize: 'var(--fs-xs)', fontWeight: 700, color: valid ? 'var(--success)' : 'var(--danger)' }}>
+    <div className="validation-panel">
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-xs">
+        <div className={`inline-flex items-center gap-xs text-xs font-bold ${valid ? 'validation-panel__status--pass' : 'validation-panel__status--fail'}`}>
           {valid ? '✓ All checks passed' : '✗ Some checks failed'}
-          {summary && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> — {summary}</span>}
+          {summary && <span className="validation-panel__summary"> — {summary}</span>}
         </div>
         {validatedAt && (
-          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
+          <span className="text-xs muted">
             checked {new Date(validatedAt).toLocaleString()}
           </span>
         )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '.3rem' }}>
+      <div className="validation-panel__grid">
         {checks.map(ch => (
-          <div key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '.4rem', fontSize: 'var(--fs-xs)' }}>
-            <span style={{ color: ch.passed ? 'var(--success)' : 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>
+          <div key={ch.id} className="validation-panel__check">
+            <span className={ch.passed ? 'validation-panel__icon--pass' : 'validation-panel__icon--fail'}>
               {ch.passed ? '✓' : '✗'}
             </span>
-            <span style={{ color: ch.passed ? 'var(--text)' : 'var(--text-muted)' }}>
+            <span className={ch.passed ? '' : 'muted'}>
               {ch.label}
-              {ch.message && <span style={{ color: 'var(--danger)', display: 'block' }}>{ch.message}</span>}
+              {ch.message && <span className="validation-panel__message">{ch.message}</span>}
             </span>
           </div>
         ))}
@@ -126,10 +126,10 @@ function configSnippet(namespace: string | undefined, name: string, category: st
 
 function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
-    <div style={{ position: 'relative', marginTop: label ? '.5rem' : 0 }}>
-      {label && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--muted)', marginBottom: '.25rem', fontWeight: 600 }}>{label}</div>}
-      <div style={{ background: 'var(--surface2)', borderRadius: 8, padding: '.75rem 1rem', fontFamily: 'monospace', fontSize: 'var(--fs-sm)', overflowX: 'auto', border: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '.5rem' }}>
-        <pre style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{code}</pre>
+    <div className={label ? 'mt-1' : ''}>
+      {label && <div className="text-xs muted mb-1 font-semibold">{label}</div>}
+      <div className="code-block">
+        <pre className="code-block__pre">{code}</pre>
         <CopyButton text={code} label={label ? `Copy ${label.toLowerCase()}` : 'Copy'} showLabel />
       </div>
     </div>
@@ -138,17 +138,17 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
 
 /** Renders registry-supplied markdown through the sanitising renderer. */
 function MarkdownContent({ md }: { md: string }) {
-  return <Markdown source={md} style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.7 }} />;
+  return <Markdown source={md} className="markdown-content--relaxed" />;
 }
 
 /** Version badge reflecting semver semantics. */
 function VersionBadge({ version, isLatest }: { version: string; isLatest: boolean }) {
   const dev = isDevVersion(version);
   if (dev) {
-    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--warning-soft)', color: 'var(--warning)', borderRadius: 4, padding: '1px 6px' }}>dev</span>;
+    return <span className="pill pill--warning ml-1">dev</span>;
   }
   if (isLatest) {
-    return <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px' }}>latest</span>;
+    return <span className="pill pill--success ml-1">latest</span>;
   }
   return null;
 }
@@ -156,7 +156,7 @@ function VersionBadge({ version, isLatest }: { version: string; isLatest: boolea
 /** Expandable multi-arch download links for a version. */
 function DownloadLinks({ downloadUrls }: { downloadUrls?: Record<string, string> }) {
   const [open, setOpen] = useState(false);
-  if (!downloadUrls || Object.keys(downloadUrls).length === 0) return <span style={{ color: 'var(--muted)' }}>—</span>;
+  if (!downloadUrls || Object.keys(downloadUrls).length === 0) return <span className="muted">—</span>;
 
   const platforms = PLATFORM_ORDER.filter(k => downloadUrls[k]);
 
@@ -164,24 +164,24 @@ function DownloadLinks({ downloadUrls }: { downloadUrls?: Record<string, string>
     <div>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-text)', fontSize: 'var(--fs-xs)', padding: 0, textDecoration: 'underline dotted' }}
+        className="download-links__toggle"
       >
         {open ? '▾ Hide' : `▸ Download (${platforms.length} platforms)`}
       </button>
       {open && (
-        <div style={{ marginTop: '.4rem', display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
+        <div className="download-links__list">
           {platforms.map(key => (
             <a
               key={key}
               href={downloadUrls[key]}
               target="_blank"
               rel="noopener"
-              style={{ fontSize: '11px', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', gap: '.3rem' }}
+              className="download-links__item"
             >
-              <span style={{ fontFamily: 'monospace', background: 'var(--surface2)', borderRadius: 3, padding: '1px 5px', fontSize: '10px', color: 'var(--muted)' }}>{key}</span>
+              <span className="download-links__platform">{key}</span>
               {PLATFORM_LABELS[key] ?? key}
               {key.startsWith('windows') ? ' (.exe)' : ''}
-              <span style={{ opacity: .5 }}>↗</span>
+              <span className="download-links__external">↗</span>
             </a>
           ))}
         </div>
@@ -257,96 +257,64 @@ export default function PluginDetailPage() {
   const latest = versions.find(v => !v.prerelease) ?? versions[0] ?? null;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
+    <div className="public-page">
       {/* Top bar */}
-      <header style={{
-        borderBottom: '1px solid var(--border)', padding: '0 1.5rem',
-        height: '3.25rem', display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', position: 'sticky', top: 0,
-        background: 'var(--bg)', zIndex: 10,
-      }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '.5rem', textDecoration: 'none', color: 'var(--fg)', fontWeight: 700 }}>
-          <img src="/semrel.svg" alt="semrel" style={{ width: '1.4rem', height: '1.4rem' }} />
+      <header className="public-header">
+        <Link to="/" className="public-header__brand">
+          <img src="/semrel.svg" alt="semrel" />
           semrel Registry
         </Link>
-        <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+        <div className="public-header__actions">
           {isLoggedIn
-            ? <Link to="/admin" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Admin Panel</Link>
-            : <Link to="/login" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Sign In</Link>
+            ? <Link to="/admin" className="btn btn--secondary btn--header">Admin Panel</Link>
+            : <Link to="/login" className="btn btn--primary btn--header">Sign In</Link>
           }
         </div>
       </header>
 
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <div className="public-main public-main--narrow">
         {/* Breadcrumb */}
-        <nav style={{ fontSize: 'var(--fs-sm)', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-          <Link to="/" style={{ color: 'var(--accent-text)' }}>Registry</Link>
+        <nav className="public-breadcrumb">
+          <Link to="/">Registry</Link>
           {' / '}
           <span>{name}</span>
         </nav>
 
-        {loading && <p className="muted" style={{ textAlign: 'center', padding: '4rem 0' }}>Loading…</p>}
+        {loading && <p className="muted text-center public-loading">Loading…</p>}
         {error && <div className="alert alert--error">{error} — <Link to="/">Back to registry</Link></div>}
 
         {plugin && (
           <>
             {/* Header */}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap', marginBottom: '.4rem' }}>
-                  <h1 style={{ margin: 0, fontSize: 'clamp(1.25rem,3vw,1.75rem)', fontWeight: 800 }}>
-                    {plugin.namespace && <span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: '0.75em' }}>{plugin.namespace}/</span>}
+            <div className="flex gap-md items-start flex-wrap mb-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-sm flex-wrap mb-1">
+                  <h1 className="plugin-detail__title">
+                    {plugin.namespace && <span className="plugin-detail__namespace">{plugin.namespace}/</span>}
                     {plugin.name}
                   </h1>
                   <span className={`badge ${CAT_CLASS[plugin.category] ?? ''}`}>{plugin.category}</span>
                   {latest && (
-                    <span style={{
-                      fontSize: 'var(--fs-xs)',
-                      background: isDevVersion(latest.version) ? 'var(--warning-soft)' : 'var(--accent-soft)',
-                      color: isDevVersion(latest.version) ? 'var(--warning)' : 'var(--accent-text)',
-                      borderRadius: 6, padding: '2px 8px', fontFamily: 'monospace', fontWeight: 600,
-                    }}>
+                    <span className={`pill ${isDevVersion(latest.version) ? 'pill--warning' : 'pill--accent'} pill--roomy`}>
                       v{latest.version}
-                      {isDevVersion(latest.version) && <span style={{ marginLeft: '.3rem', fontSize: '9px', opacity: .8 }}>dev</span>}
+                      {isDevVersion(latest.version) && <span className="pill__sub">dev</span>}
                     </span>
                   )}
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontFamily: 'monospace',
-                      background: 'var(--success-soft)',
-                      color: 'var(--success)',
-                      borderRadius: 5,
-                      padding: '1px 7px',
-                      fontWeight: 600,
-                    }}
-                    title="Total downloads"
-                  >
+                  <span className="pill pill--success pill--roomy" title="Total downloads">
                     ↓ {Number(plugin.downloads ?? 0).toLocaleString()}
                   </span>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontFamily: 'monospace',
-                      background: 'var(--accent-soft)',
-                      color: 'var(--accent-text)',
-                      borderRadius: 5,
-                      padding: '1px 7px',
-                      fontWeight: 600,
-                    }}
-                    title="Total views"
-                  >
+                  <span className="pill pill--accent pill--roomy" title="Total views">
                     👁 {Number(plugin.views ?? 0).toLocaleString()}
                   </span>
                 </div>
-                <p className="muted" style={{ margin: '0 0 .5rem', fontSize: 'var(--fs-md)' }}>
+                <p className="muted mb-1 text-md">
                   {plugin.description || 'No description.'}
                 </p>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                <div className="flex gap-md flex-wrap text-xs muted">
                   <span>by <strong>{plugin.author}</strong></span>
                   <span>License: <strong>{plugin.license || 'unknown'}</strong></span>
                   {plugin.repository && (
-                    <a href={plugin.repository} target="_blank" rel="noopener" style={{ color: 'var(--accent-text)' }}>
+                    <a href={plugin.repository} target="_blank" rel="noopener">
                       GitHub ↗
                     </a>
                   )}
@@ -355,31 +323,25 @@ export default function PluginDetailPage() {
             </div>
 
             {/* Install */}
-            <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-              <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>Installation</h2>
+            <section className="card section-card">
+              <h2 className="section-card__title">Installation</h2>
               <CodeBlock
                 label="Install via semrel CLI"
                 code={`semrel plugin install ${plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}`}
               />
-              <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.5rem', marginBottom: 0 }}>
-                Set <code style={{ background: 'var(--surface2)', padding: '1px 4px', borderRadius: 3 }}>SEMREL_REGISTRY_URL</code> to
+              <p className="muted text-xs mt-1 m-0">
+                Set <code className="inline-code">SEMREL_REGISTRY_URL</code> to
                 point at your registry instance, or leave unset to use the default public registry.
               </p>
             </section>
 
             {/* Quality / MVP Standards */}
-            <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem', flexWrap: 'wrap' }}>
-                <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', fontWeight: 700 }}>
+            <section className="card section-card">
+              <div className="flex items-center justify-between gap-sm flex-wrap">
+                <h2 className="section-card__title m-0">
                   Quality Standards
                   {checks && (
-                    <span style={{
-                      marginLeft: '.5rem', fontSize: 'var(--fs-xs)', fontWeight: 700,
-                      padding: '1px 8px', borderRadius: 5,
-                      background: checks.valid ? 'var(--success-soft)' : 'var(--danger-soft)',
-                      color: checks.valid ? 'var(--success)' : 'var(--danger)',
-                      border: `1px solid ${checks.valid ? 'var(--success)' : 'var(--danger)'}`,
-                    }}>
+                    <span className={`quality-badge ${checks.valid ? 'quality-badge--pass' : 'quality-badge--fail'}`}>
                       {checks.valid ? '✓ MVP' : '✗ MVP'}
                     </span>
                   )}
@@ -398,7 +360,7 @@ export default function PluginDetailPage() {
               </div>
               {checks
                 ? <ValidationPanel {...checks} validatedAt={plugin.validatedAt} />
-                : <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: '.5rem 0 0' }}>
+                : <p className="muted text-sm m-0 mt-1">
                     No quality checks run yet.{isLoggedIn ? ' Click "Run check" to validate.' : ''}
                   </p>
               }
@@ -409,124 +371,130 @@ export default function PluginDetailPage() {
             <ReadmeSection pluginId={plugin.id} repository={plugin.repository} />
 
             {/* Configuration */}
-            <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-              <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>Configuration</h2>
-              <p className="muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '.75rem' }}>
-                Add this to your <code style={{ background: 'var(--surface2)', padding: '1px 4px', borderRadius: 3 }}>.semrel.yaml</code>:
+            <section className="card section-card">
+              <h2 className="section-card__title">Configuration</h2>
+              <p className="muted text-sm mb-1">
+                Add this to your <code className="inline-code">.semrel.yaml</code>:
               </p>
               <CodeBlock code={configSnippet(plugin.namespace, plugin.name, plugin.category)} />
 
               {plugin.category === 'provider' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Providers run in the <strong>provider</strong> phase and are responsible for reading and creating VCS tags and releases.
                   Only one provider should be active at a time.
                 </p>
               )}
               {plugin.category === 'analyzer' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Analyzers run in the <strong>analyze</strong> phase and determine the next semantic version from commit messages.
                 </p>
               )}
               {plugin.category === 'condition' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Conditions run first (before any git work) and can abort the release if prerequisites aren't met (e.g., wrong CI environment).
                 </p>
               )}
               {plugin.category === 'generator' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Generators run in the <strong>generate</strong> phase to produce changelogs and release notes.
                   Multiple generators can run in sequence.
                 </p>
               )}
               {plugin.category === 'updater' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Updaters run in the <strong>pre-tag</strong> phase to rewrite version strings in source files (e.g., package.json, go.mod).
                 </p>
               )}
               {plugin.category === 'hook' && (
-                <p className="muted" style={{ fontSize: 'var(--fs-xs)', marginTop: '.75rem', marginBottom: 0 }}>
+                <p className="muted text-xs mt-2 m-0">
                   💡 Hooks run in the <strong>release</strong> phase and can trigger notifications (Slack, Teams, email) or other post-release actions.
                 </p>
               )}
             </section>
 
             {/* Versions */}
-            <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-              <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
-                Versions <span className="muted" style={{ fontWeight: 400, fontSize: 'var(--fs-sm)' }}>({versions.length})</span>
+            <section className="card section-card">
+              <h2 className="section-card__title">
+                Versions <span className="muted count-suffix">({versions.length})</span>
               </h2>
               {versions.length === 0 ? (
-                <p className="muted" style={{ fontSize: 'var(--fs-sm)' }}>No versions published yet.</p>
+                <p className="muted text-sm">No versions published yet.</p>
               ) : (
                 <div className="table-wrap">
-                  <table className="table--stack" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+                  <table className="table--stack plugin-versions-table">
                     <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Version</th>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Released</th>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Core</th>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Install</th>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Stats</th>
-                        <th style={{ textAlign: 'left', padding: '.4rem .5rem', color: 'var(--muted)', fontWeight: 600 }}>Downloads</th>
+                      <tr>
+                        <th>Version</th>
+                        <th>Released</th>
+                        <th>Core</th>
+                        <th>Install</th>
+                        <th>Stats</th>
+                        <th>Downloads</th>
                       </tr>
                     </thead>
                     <tbody>
                       {versions.map((v, i) => (
                         <>
-                          <tr key={v.id} style={{ borderBottom: expandedVersionId === v.id ? undefined : '1px solid var(--border)', background: i === 0 ? 'var(--accent-soft)' : undefined }}>
-                            <td data-label="Version" style={{ padding: '.5rem', fontFamily: 'monospace', fontWeight: 600 }}>
+                          <tr
+                            key={v.id}
+                            className={[
+                              i === 0 ? 'plugin-versions-table__row--latest' : '',
+                              expandedVersionId === v.id ? 'plugin-versions-table__row--expanded' : '',
+                            ].filter(Boolean).join(' ')}
+                          >
+                            <td data-label="Version">
                               <button
                                 type="button"
                                 onClick={() => setExpandedVersionId(expandedVersionId === v.id ? null : v.id)}
-                                style={{ background: 'none', border: 'none', cursor: v.changelog ? 'pointer' : 'default', color: 'var(--fg)', fontFamily: 'monospace', fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: '.25rem' }}
+                                className={`plugin-versions-table__toggle ${v.changelog ? '' : 'plugin-versions-table__toggle--empty'}`}
                                 title={v.changelog ? 'Click to view release notes' : 'No release notes'}
                               >
-                                {v.changelog ? (expandedVersionId === v.id ? '▾' : '▸') : <span style={{ opacity: 0.3 }}>—</span>}
+                                {v.changelog ? (expandedVersionId === v.id ? '▾' : '▸') : <span className="plugin-versions-table__dash">—</span>}
                                 {' '}v{v.version}
                               </button>
                               {v.yanked
-                                ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--danger-soft)', color: 'var(--danger)', borderRadius: 4, padding: '1px 6px', fontWeight: 700 }}>yanked</span>
+                                ? <span className="pill pill--danger ml-1">yanked</span>
                                 : v.prerelease
-                                  ? <span style={{ marginLeft: '.4rem', fontSize: '10px', background: 'var(--warning-soft)', color: 'var(--warning)', borderRadius: 4, padding: '1px 6px' }}>pre</span>
+                                  ? <span className="pill pill--warning ml-1">pre</span>
                                   : <VersionBadge version={v.version} isLatest={i === 0} />
                               }
                               {/* The reason matters more than the badge: it is
                                   what tells someone on this version whether to
                                   move urgently or at leisure. */}
                               {v.yanked && v.yankedReason && (
-                                <p className="field__error" style={{ margin: '.25rem 0 0', whiteSpace: 'normal', maxWidth: '20rem' }}>
+                                <p className="field__error plugin-versions-table__yank-reason">
                                   {v.yankedReason}
                                 </p>
                               )}
                             </td>
-                            <td data-label="Released" style={{ padding: '.5rem', color: 'var(--muted)' }}>
+                            <td data-label="Released" className="muted">
                               {v.releaseDate ? new Date(v.releaseDate).toLocaleDateString() : '—'}
                             </td>
-                            <td data-label="Core" style={{ padding: '.5rem', color: 'var(--muted)', fontFamily: 'monospace', fontSize: 'var(--fs-xs)' }}>
+                            <td data-label="Core" className="muted mono text-xs">
                               {v.compatibility?.semrelCore || '—'}
                             </td>
-                            <td data-label="Install" style={{ padding: '.5rem' }}>
-                              <code style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontSize: 'var(--fs-xs)' }}>
+                            <td data-label="Install">
+                              <code className="inline-code text-xs">
                                 semrel plugin install {plugin.namespace ? `${plugin.namespace}/${plugin.name}` : plugin.name}@{v.version}
                               </code>
                             </td>
-                            <td data-label="Stats" style={{ padding: '.5rem' }}>
-                              <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
-                                <span title="Downloads" style={{ fontSize: '10px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                            <td data-label="Stats">
+                              <div className="flex gap-xs flex-wrap">
+                                <span title="Downloads" className="pill pill--success">
                                   ↓ {Number(v.downloads ?? 0).toLocaleString()}
                                 </span>
-                                <span title="Views" style={{ fontSize: '10px', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                                <span title="Views" className="pill pill--accent">
                                   👁 {Number(v.views ?? 0).toLocaleString()}
                                 </span>
                               </div>
                             </td>
-                            <td data-label="Downloads" style={{ padding: '.5rem' }}>
+                            <td data-label="Downloads">
                               <DownloadLinks downloadUrls={v.downloadUrls} />
                             </td>
                           </tr>
                           {expandedVersionId === v.id && v.changelog && (
-                            <tr key={`${v.id}-notes`} style={{ borderBottom: '1px solid var(--border)' }}>
-                              <td colSpan={5} style={{ padding: '1rem 1.25rem', background: 'var(--surface-subtle)' }}>
+                            <tr key={`${v.id}-notes`}>
+                              <td colSpan={5} className="plugin-versions-table__notes">
                                 <MarkdownContent md={v.changelog} />
                               </td>
                             </tr>
@@ -541,9 +509,9 @@ export default function PluginDetailPage() {
 
             {/* Latest release notes (kept for quick access on page load) */}
             {latest?.changelog && expandedVersionId === null && (
-              <section className="card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
-                <h2 style={{ margin: '0 0 .75rem', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
-                  Release notes <span className="muted" style={{ fontWeight: 400, fontSize: 'var(--fs-sm)' }}>v{latest.version}</span>
+              <section className="card section-card">
+                <h2 className="section-card__title">
+                  Release notes <span className="muted count-suffix">v{latest.version}</span>
                 </h2>
                 <MarkdownContent md={latest.changelog} />
               </section>
@@ -551,9 +519,9 @@ export default function PluginDetailPage() {
 
             {/* Tags */}
             {plugin.tags?.length > 0 && (
-              <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap' }}>
+              <div className="flex gap-xs flex-wrap">
                 {plugin.tags.map(t => (
-                  <span key={t} style={{ fontSize: 'var(--fs-xs)', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 5, padding: '2px 8px' }}>{t}</span>
+                  <span key={t} className="pill pill--accent pill--roomy">{t}</span>
                 ))}
               </div>
             )}

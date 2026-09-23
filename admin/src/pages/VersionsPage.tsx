@@ -106,7 +106,7 @@ export default function VersionsPage() {
   return (
     <>
       <div className="page__header">
-        <h1 className="page__title">Versions · <span style={{ color:'var(--accent)' }}>{plugin?.name}</span></h1>
+        <h1 className="page__title">Versions · <span className="text-accent">{plugin?.name}</span></h1>
         <div className="flex gap-sm">
           <button type="button" className="btn btn--sm" onClick={() => navigate('/admin/plugins')}>← Back</button>
           <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
@@ -117,7 +117,7 @@ export default function VersionsPage() {
       <div className="page__body">
         {error && <div className="alert alert--error" role="alert">{error}</div>}
         {notice && <div className="alert alert--info" role="status">{notice}</div>}
-        <p className="muted" style={{ fontSize:'var(--fs-xs)', marginBottom:'1rem' }}>
+        <p className="muted text-xs mb-2">
           <strong>Yank</strong> retracts a release without breaking builds that pin it — it stops
           being offered for new installs and the reason is shown to anyone using it.
           <strong> Delete</strong> removes it outright and does break those builds; it requires
@@ -125,11 +125,11 @@ export default function VersionsPage() {
         </p>
 
         {showForm && (
-          <div className="card" style={{ maxWidth:600, marginBottom:'1rem' }}>
-            <h2 style={{ marginBottom:'.75rem' }}>New Version</h2>
+          <div className="card form-card">
+            <h2 className="mb-md">New Version</h2>
             {formError && <div className="alert alert--error">{formError}</div>}
             <form onSubmit={(e) => { void handleCreate(e); }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
+              <div className="form-grid-2">
                 <div className="field"><label htmlFor="ver">Version *</label>
                   <input id="ver" className="input" value={form.version} onChange={e => setForm(f=>({...f,version:e.target.value}))} placeholder="0.1.0" required /></div>
                 <div className="field"><label htmlFor="date">Release date</label>
@@ -140,8 +140,8 @@ export default function VersionsPage() {
               <div className="field"><label htmlFor="cl">Changelog</label>
                 <textarea id="cl" className="textarea" value={form.changelog} onChange={e => setForm(f=>({...f,changelog:e.target.value}))} /></div>
               <div className="field"><label htmlFor="cs">Checksums (JSON)</label>
-                <textarea id="cs" className="textarea" style={{ fontFamily:'monospace', fontSize:'var(--fs-xs)' }} value={form.checksums} onChange={e => setForm(f=>({...f,checksums:e.target.value}))} placeholder={'{"linux_amd64":"<sha256>"}'} /></div>
-              <label style={{ display:'flex', alignItems:'center', gap:'.375rem', fontSize:'var(--fs-sm)', marginBottom:'.75rem', cursor:'pointer' }}>
+                <textarea id="cs" className="textarea textarea--mono" value={form.checksums} onChange={e => setForm(f=>({...f,checksums:e.target.value}))} placeholder={'{"linux_amd64":"<sha256>"}'} /></div>
+              <label className="checkbox-label">
                 <input type="checkbox" checked={form.prerelease} onChange={e => setForm(f=>({...f,prerelease:e.target.checked}))} />
                 {' '}Pre-release
               </label>
@@ -171,24 +171,24 @@ export default function VersionsPage() {
                         <button
                           type="button"
                           onClick={() => setExpandedId(expandedId === v.id ? null : v.id)}
-                          style={{ background:'none', border:'none', cursor:'pointer', color:'var(--accent)', fontFamily:'monospace', padding:0, fontSize:'inherit' }}
+                          className="version-toggle"
                           title={v.changelog ? 'Click to view release notes' : 'No release notes'}
                         >
                           {expandedId === v.id ? '▾' : '▸'} v{v.version}
                         </button>
                       </td>
-                      <td data-label="Released" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.releaseDate ? new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(new Date(v.releaseDate)) : '—'}</td>
+                      <td data-label="Released" className="muted">{v.releaseDate ? new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(new Date(v.releaseDate)) : '—'}</td>
                       <td data-label="Channel">
                         {v.yankedAt
-                          ? <span className="badge" style={{ background:'var(--danger-soft)',color:'var(--danger)',borderColor:'var(--danger)' }} title={v.yankedReason}>yanked</span>
+                          ? <span className="badge badge--yanked" title={v.yankedReason}>yanked</span>
                           : v.prerelease
-                            ? <span className="badge" style={{ background:'var(--warning-soft)',color:'var(--warning)',borderColor:'var(--warning)' }}>pre</span>
-                            : <span className="badge" style={{ background:'var(--success-soft)',color:'var(--success)',borderColor:'var(--success)' }}>stable</span>
+                            ? <span className="badge badge--pre">pre</span>
+                            : <span className="badge badge--stable">stable</span>
                         }
                       </td>
-                      <td data-label="Views" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.views ?? 0).toLocaleString()}</td>
-                      <td data-label="Downloads" style={{ fontSize:'var(--fs-sm)' }}>{Number(v.downloads ?? 0).toLocaleString()}</td>
-                      <td data-label="Download" style={{ fontSize:'var(--fs-xs)', maxWidth:200 }} className="muted truncate">
+                      <td data-label="Views">{Number(v.views ?? 0).toLocaleString()}</td>
+                      <td data-label="Downloads">{Number(v.downloads ?? 0).toLocaleString()}</td>
+                      <td data-label="Download" className="muted truncate text-xs max-w-200">
                         <a
                           href={`/api/v1/plugins/${encodeURIComponent(id ?? '')}/versions/${encodeURIComponent(v.version)}/download`}
                           target="_blank"
@@ -197,9 +197,9 @@ export default function VersionsPage() {
                           Download via registry
                         </a>
                       </td>
-                      <td data-label="Platforms" className="muted" style={{ fontSize:'var(--fs-sm)' }}>{v.checksums ? Object.keys(v.checksums).length : 0}</td>
+                      <td data-label="Platforms" className="muted">{v.checksums ? Object.keys(v.checksums).length : 0}</td>
                       <td data-label="Actions">
-                        <div style={{ display: 'flex', gap: '.3rem', flexWrap: 'wrap' }}>
+                        <div className="flex gap-xs flex-wrap">
                           {/* Yank is the safe retraction: consumers who already
                               pin this version keep resolving it, they just stop
                               being offered it. Delete breaks those builds, so it
@@ -237,15 +237,14 @@ export default function VersionsPage() {
                     </tr>
                     {expandedId === v.id && (
                       <tr key={`${v.id}-notes`}>
-                        <td colSpan={8} style={{ background:'var(--surface-subtle)', padding:'1rem 1.25rem', borderTop:'1px solid var(--border)' }}>
+                        <td colSpan={8} className="version-notes-cell">
                           {v.changelog ? (
                             <Markdown
                               source={v.changelog}
-                              className="prose"
-                              style={{ fontSize:'var(--fs-sm)', color:'var(--fg)', maxWidth:'64rem' }}
+                              className="prose prose--version-notes"
                             />
                           ) : (
-                            <span className="muted" style={{ fontSize:'var(--fs-sm)' }}>No release notes for this version.</span>
+                            <span className="muted">No release notes for this version.</span>
                           )}
                         </td>
                       </tr>

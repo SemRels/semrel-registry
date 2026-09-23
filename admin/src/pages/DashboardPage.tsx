@@ -182,21 +182,29 @@ function TopPluginsBarChart({ data }: Readonly<{ data: NonNullable<Stats['topPlu
   if (!data || data.length === 0) return null;
   const max = Math.max(1, ...data.map((d) => Math.max(d.views, d.downloads)));
   return (
-    <div style={{ display: 'grid', gap: '.6rem' }}>
+    <div className="top-plugins-list">
       {data.slice(0, 6).map((item) => {
         const views = Number(item.views ?? 0);
         const downloads = Number(item.downloads ?? 0);
         const v = Math.max(2, Math.round((views / max) * 100));
         const d = Math.max(2, Math.round((downloads / max) * 100));
         return (
-          <div key={item.pluginId} style={{ display: 'grid', gap: '.2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)' }}>
+          <div key={item.pluginId} className="top-plugins-item">
+            <div className="top-plugins-item__header">
               <span>{item.namespace ? `${item.namespace}/` : ''}{item.name}</span>
               <span className="muted">V {views.toLocaleString()} · D {downloads.toLocaleString()}</span>
             </div>
-            <div style={{ display: 'grid', gap: '.2rem' }}>
-              <div style={{ width: `${v}%`, height: 6, borderRadius: 999, background: 'var(--chart-views)' }} />
-              <div style={{ width: `${d}%`, height: 6, borderRadius: 999, background: 'var(--chart-downloads)' }} />
+            {/* The bar length is data-driven and continuous, so it is drawn as
+                an SVG rect sized by a plain width attribute rather than a
+                percentage-width styled div — an inline style attribute would
+                need style-src 'unsafe-inline' to render at all. */}
+            <div className="top-plugins-bars">
+              <svg viewBox="0 0 100 6" width="100%" height="6" preserveAspectRatio="none" aria-hidden="true">
+                <rect width={v} height="6" rx="3" fill="var(--chart-views)" />
+              </svg>
+              <svg viewBox="0 0 100 6" width="100%" height="6" preserveAspectRatio="none" aria-hidden="true">
+                <rect width={d} height="6" rx="3" fill="var(--chart-downloads)" />
+              </svg>
             </div>
           </div>
         );
@@ -319,7 +327,7 @@ export default function DashboardPage() {
       <div className="page__header">
         <h1 className="page__title">Dashboard</h1>
         {isAdmin && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="flex gap-sm flex-wrap">
             <button type="button" className="btn btn--secondary" onClick={() => { void handleSyncVersions(); }} disabled={syncingVersions}>
               {syncingVersions ? 'Syncing…' : '↓ Sync versions'}
             </button>
@@ -344,7 +352,7 @@ export default function DashboardPage() {
             Version sync — new: {versionStats.created}, up-to-date: {versionStats.skipped}
             {versionStats.errors > 0 && `, errors: ${versionStats.errors}`}
             {versionStats.errors > 0 && (
-              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+              <ul className="error-list">
                 {versionResult!.results.filter(r => r.error).map(r => (
                   <li key={r.plugin}><code>{r.plugin}</code>: {r.error}</li>
                 ))}
@@ -357,7 +365,7 @@ export default function DashboardPage() {
             GitHub org sync — discovered: {orgResult!.total}, new: {orgStats.created}, updated: {orgStats.updated}
             {orgStats.errors > 0 && `, errors: ${orgStats.errors}`}
             {orgStats.errors > 0 && (
-              <ul style={{ margin: '.5rem 0 0', paddingLeft: '1.25rem', fontSize: 'var(--fs-sm)' }}>
+              <ul className="error-list">
                 {orgResult!.results.filter(r => r.error).map(r => (
                   <li key={r.repo}><code>{r.repo}</code>: {r.error}</li>
                 ))}
@@ -395,7 +403,7 @@ export default function DashboardPage() {
               two carry structure — a magnitude comparison and a part-to-whole
               split — which is what a chart is for. */}
           {(categoryData.length > 0 || hasStatusCounts) && (
-            <div className="dashboard-panels" style={{ marginTop: '1rem' }}>
+            <div className="dashboard-panels">
               {/* A card is only drawn when its chart has something to draw —
                   an empty bordered box reads as a broken panel. */}
               {categoryData.length > 0 && (
@@ -411,10 +419,10 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="card" style={{ marginTop: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)' }}>Traffic trend</h2>
-              <div style={{ display: 'flex', gap: '.5rem' }}>
+          <div className="card mt-2">
+            <div className="flex justify-between items-center gap-md flex-wrap">
+              <h2 className="m-0 text-md">Traffic trend</h2>
+              <div className="flex gap-sm">
                 {(['day', 'week', 'month'] as const).map((range) => (
                   <button
                     key={range}
@@ -427,7 +435,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: '.75rem' }}>
+            <div className="mt-md">
               <SeriesLineChart
                 data={activeSeries}
                 hoveredIndex={hoveredSeriesIndex}
@@ -435,23 +443,23 @@ export default function DashboardPage() {
               />
               {/* The legend repeats the line style, not just the colour, so
                   the two series stay tellable apart without colour vision. */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '.4rem', fontSize: 'var(--fs-xs)' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', color: 'var(--text-muted)' }}>
+              <div className="chart-legend mt-1">
+                <span className="chart-legend__item">
                   <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-views)" strokeWidth="2.5" strokeLinecap="round" /></svg>
                   Views
                 </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem', color: 'var(--text-muted)' }}>
+                <span className="chart-legend__item">
                   <svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--chart-downloads)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" /></svg>
                   Downloads
                 </span>
               </div>
               {rawSeries.length === 0 && (
-                <div style={{ marginTop: '.4rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                <div className="chart-note mt-1">
                   Noch keine Events vorhanden. Die Grafik zeigt aktuell eine 0-Basislinie.
                 </div>
               )}
               {activePoint && (
-                <div style={{ marginTop: '.5rem', fontSize: 'var(--fs-xs)', color: 'var(--muted)' }}>
+                <div className="chart-note mt-1">
                   <strong>{activePoint.period}</strong> · Views {Number(activePoint.views ?? 0).toLocaleString()} · Downloads {Number(activePoint.downloads ?? 0).toLocaleString()}
                 </div>
               )}
@@ -460,13 +468,13 @@ export default function DashboardPage() {
 
           <div className="dashboard-panels">
             <div className="card">
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top plugins</h2>
+              <h2 className="section-title">Top plugins</h2>
               {topPlugins.length === 0 ? (
                 <p className="muted">No plugin metrics yet.</p>
               ) : (
                 <>
                 <TopPluginsBarChart data={topPlugins} />
-                <div className="table-wrap" style={{ marginTop: '.8rem' }}>
+                <div className="table-wrap mt-2">
                   <table className="table--stack">
                     <thead><tr><th>Plugin</th><th>Category</th><th>Views</th><th>Downloads</th></tr></thead>
                     <tbody>
@@ -486,7 +494,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="card">
-              <h2 style={{ margin: 0, fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>Top versions</h2>
+              <h2 className="section-title">Top versions</h2>
               {topVersions.length === 0 ? (
                 <p className="muted">No version metrics yet.</p>
               ) : (
@@ -513,19 +521,18 @@ export default function DashboardPage() {
 
         {/* Pending submissions — admin only */}
         {isAdmin && (
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: 'var(--fs-md)', margin: 0 }}>
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-md m-0">
                 Pending submissions
                 {pending.length > 0 && (
-                  <span style={{ background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700, borderRadius: 10, padding: '0 6px', fontSize: 'var(--fs-xs)', marginLeft: '.4rem' }}>
+                  <span className="count-badge">
                     {pending.length}
                   </span>
                 )}
               </h2>
               <button
-                className="btn btn--primary"
-                style={{ padding: '4px 14px', fontSize: 'var(--fs-sm)' }}
+                className="btn btn--primary btn--header"
                 onClick={() => navigate('/admin/submissions')}
               >
                 Review submissions →
@@ -540,11 +547,11 @@ export default function DashboardPage() {
               </EmptyState>
             )}
             {!pendingLoading && pending.length > 0 && pending.map(p => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ flex: 1 }}>
-                  <a href={p.repository} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.name}</a>
-                  <span className="muted" style={{ fontSize: 'var(--fs-xs)', marginLeft: '.5rem' }}>by {p.author}</span>
-                  <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>{p.description}</div>
+              <div key={p.id} className="pending-item">
+                <div className="flex-1">
+                  <a href={p.repository} target="_blank" rel="noreferrer" className="font-semibold">{p.name}</a>
+                  <span className="muted text-xs ml-1">by {p.author}</span>
+                  <div className="muted text-xs">{p.description}</div>
                 </div>
               </div>
             ))}

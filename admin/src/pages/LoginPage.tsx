@@ -51,9 +51,9 @@ export default function LoginPage() {
   return (
     <main className="login-wrap" id="main-content">
       <div className="login-card">
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem', marginBottom: '1.5rem' }}>
-          <img src="/semrel.svg" alt="" aria-hidden="true" style={{ width: '3rem', height: '3rem' }} />
-          <h1 style={{ margin: 0, textAlign: 'center' }}>semrel Registry</h1>
+        <div className="login-card__header">
+          <img src="/semrel.svg" alt="" aria-hidden="true" className="login-card__logo" />
+          <h1 className="login-card__title">semrel Registry</h1>
         </div>
 
         {/* Explains why the user is here rather than dropping them at a bare
@@ -68,8 +68,7 @@ export default function LoginPage() {
           <>
             <a
               href={signInURL}
-              className="btn btn--primary"
-              style={{ width: '100%', justifyContent: 'center' }}
+              className="btn btn--primary btn--full"
             >
               Sign in with GitHub
             </a>
@@ -102,7 +101,7 @@ export default function LoginPage() {
                   ? <span id="token-error" className="field__error">{error}</span>
                   : <span id="token-hint" className="field__hint">Development fallback. Production uses GitHub sign-in.</span>}
               </div>
-              <button type="submit" className="btn btn--primary" style={{ width: '100%' }}
+              <button type="submit" className="btn btn--primary btn--full"
                 disabled={loading || !token.trim()}>
                 {loading ? 'Checking…' : 'Sign in with token'}
               </button>
@@ -111,13 +110,13 @@ export default function LoginPage() {
               By signing in, you agree to the semrel registry terms for authenticated contributors and acknowledge the applicable privacy and publisher information.
             </p>
             <LegalLinks inline className="legal-note__links" linkClassName="muted" />
-            <p className="muted mt-1" style={{ fontSize: 'var(--fs-xs)' }}>
+            <p className="muted mt-1 text-xs">
               Set <code>GITHUB_CLIENT_ID</code> + <code>GITHUB_CLIENT_SECRET</code> to enable GitHub OAuth.
             </p>
           </>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+        <div className="flex justify-center mt-2">
           <ThemeToggle />
         </div>
       </div>

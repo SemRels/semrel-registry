@@ -18,7 +18,7 @@ export default function StatusIcon({
 }) {
   return (
     <>
-      <span aria-hidden="true" style={{ color: passed ? 'var(--success)' : 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>
+      <span aria-hidden="true" className={passed ? 'validation-panel__icon--pass' : 'validation-panel__icon--fail'}>
         {passed ? '✓' : '✗'}
       </span>
       <span className="sr-only">{passed ? passedLabel : failedLabel}: </span>

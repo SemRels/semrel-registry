@@ -73,7 +73,7 @@ export default function Layout() {
         {...dialogProps}
       >
         <NavLink to="/" className="sidebar__brand">
-          <img src="/semrel.svg" alt="" aria-hidden="true" style={{ width: '1.5rem', height: '1.5rem', flexShrink: 0 }} />
+          <img src="/semrel.svg" alt="" aria-hidden="true" />
           <span>semrel Registry</span>
         </NavLink>
         <nav className="sidebar__nav" aria-label="Main">
@@ -123,23 +123,23 @@ export default function Layout() {
         </nav>
         <div className="sidebar__footer">
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', marginBottom: '.5rem', fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', overflow: 'hidden' }}>
+            <div className="sidebar__user">
               {user.avatarUrl && (
-                <img src={user.avatarUrl} alt="" aria-hidden="true" style={{ width: '1.5rem', height: '1.5rem', borderRadius: '50%', flexShrink: 0 }} />
+                <img src={user.avatarUrl} alt="" aria-hidden="true" className="sidebar__user-avatar" />
               )}
-              <div style={{ overflow: 'hidden' }}>
-                <div style={{ color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="sidebar__user-info">
+                <div className="sidebar__user-login">
                   <span className="sr-only">Signed in as </span>{user.login}
                 </div>
-                <div style={{ fontSize: 'var(--fs-xs)' }}>
-                  <span style={{ color: isAdmin ? 'var(--accent)' : 'var(--text-muted)' }}>
+                <div className="sidebar__user-role">
+                  <span className={isAdmin ? 'sidebar__user-role--admin' : ''}>
                     <span aria-hidden="true">{isAdmin ? '★ ' : ''}</span>{isAdmin ? 'admin' : 'community'}
                   </span>
                 </div>
               </div>
             </div>
           )}
-          <div style={{ display: 'flex', gap: '.5rem', marginBottom: '.5rem' }}>
+          <div className="sidebar__theme-row">
             <ThemeToggle />
           </div>
           <button className="sidebar__logout" type="button" onClick={() => { void handleSignOut(); }}>
@@ -174,7 +174,7 @@ export default function Layout() {
             <span aria-hidden="true">☰</span>
           </button>
           <NavLink to="/admin" className="topbar__brand">
-            <img src="/semrel.svg" alt="" aria-hidden="true" style={{ width: '1.25rem', height: '1.25rem', flexShrink: 0 }} />
+            <img src="/semrel.svg" alt="" aria-hidden="true" />
             <span>semrel Registry</span>
           </NavLink>
         </div>

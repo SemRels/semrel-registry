@@ -65,7 +65,7 @@ export default function DeletionConfirmDialog({
         <h2 id={`${dialogId}-title`} className="modal__title">{title}</h2>
         <p id={`${dialogId}-description`} className="modal__description">{message}</p>
 
-        <div className="alert alert--info" style={{ marginBottom: '1rem' }}>
+        <div className="alert alert--info mb-2">
           Type <code>{confirmationValue}</code> to continue.
         </div>
 

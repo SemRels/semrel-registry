@@ -82,14 +82,13 @@ export default function SubmitPage() {
         {/* role="status": submission succeeds without a navigation, so this is
             the only signal that anything happened. */}
         <div
-          className="alert"
+          className="alert alert--success alert--panel"
           role="status"
-          style={{ background: 'var(--success-soft)', borderColor: 'var(--success)', color: 'var(--success)', padding: '1.25rem', borderRadius: 8 }}
         >
           <strong>Plugin submitted for review</strong>
-          <p style={{ marginTop: '.5rem', marginBottom: 0, color: 'inherit' }}>
+          <p className="mt-1 m-0 text-inherit">
             Your plugin is now <em>pending review</em> by the SemRels maintainers. It appears
-            in <Link to="/admin/plugins" style={{ color: 'inherit', textDecoration: 'underline' }}>My Plugins</Link> with
+            in <Link to="/admin/plugins" className="link-inherit">My Plugins</Link> with
             status &ldquo;pending&rdquo; until a maintainer approves or rejects it. If it is
             rejected you will see the reason there.
           </p>
@@ -100,23 +99,22 @@ export default function SubmitPage() {
 
   return (
     <div className="page__body page__body--form">
-      <h1 style={{ fontSize: 'var(--fs-xl)', marginBottom: '.25rem' }}>Submit a Plugin</h1>
-      <p className="muted" style={{ marginBottom: '1.5rem' }}>
+      <h1 className="page__title mb-1">Submit a Plugin</h1>
+      <p className="muted mb-3">
         Community plugins must be hosted on GitHub and follow the{' '}
         <a href="https://github.com/SemRels/plugin-template" target="_blank" rel="noreferrer">plugin template</a>.
         After submission, a maintainer will review your plugin before it appears publicly.
       </p>
 
       {/* Step 1: Validate */}
-      <div className="card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>1. Validate repository</h2>
+      <div className="card mb-2">
+        <h2 className="section-title">1. Validate repository</h2>
         <div className="field">
           <label htmlFor="repo-url">Repository URL</label>
-          <div style={{ display: 'flex', gap: '.5rem' }}>
+          <div className="flex gap-sm">
             <input
               id="repo-url"
-              className="input"
-              style={{ flex: 1 }}
+              className="input flex-1"
               type="url"
               placeholder="https://github.com/your-org/analyzer-myanalyzer"
               value={repoUrl}
@@ -141,8 +139,7 @@ export default function SubmitPage() {
               repository the submitter has nothing to do with. */}
           {ownership && (
             <div
-              className={ownership.verified ? 'alert alert--info' : 'alert alert--error'}
-              style={{ marginTop: '1rem' }}
+              className={`${ownership.verified ? 'alert alert--info' : 'alert alert--error'} mt-2`}
               role={ownership.verified ? undefined : 'alert'}
             >
               {ownership.verified ? (
@@ -156,27 +153,22 @@ export default function SubmitPage() {
               ) : (
                 <>
                   <strong>You have not shown that you control this repository.</strong>
-                  {ownership.issue && <p style={{ margin: '.35rem 0 0', color: 'inherit' }}>{ownership.issue}</p>}
-                  {ownership.howToFix && <p style={{ margin: '.35rem 0 0', color: 'inherit' }}>{ownership.howToFix}</p>}
+                  {ownership.issue && <p className="alert-note">{ownership.issue}</p>}
+                  {ownership.howToFix && <p className="alert-note">{ownership.howToFix}</p>}
                 </>
               )}
             </div>
           )}
 
           {validation && (
-            <div style={{ marginTop: '1rem' }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.25rem .6rem',
-                borderRadius: 4, fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: '.75rem',
-                background: validation.valid ? 'var(--success-soft)' : 'var(--danger-soft)',
-                color: validation.valid ? 'var(--success)' : 'var(--danger)',
-              }}>
+            <div className="mt-2">
+              <div className={`validation-chip ${validation.valid ? 'validation-chip--pass' : 'validation-chip--fail'}`}>
                 <span aria-hidden="true">{validation.valid ? '✓' : '✗'}</span>
                 {validation.valid ? 'Passes all checks' : 'Some checks failed'}
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '.25rem' }}>
+              <ul className="checklist">
                 {validation.checks.map(ch => (
-                  <li key={ch.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '.4rem', fontSize: 'var(--fs-sm)' }}>
+                  <li key={ch.id} className="checklist__item">
                     <StatusIcon passed={ch.passed} />
                     <span>{ch.label}{ch.message ? ` — ${ch.message}` : ''}</span>
                   </li>
@@ -189,7 +181,7 @@ export default function SubmitPage() {
 
       {/* Step 2: Fill details and submit */}
       <form className="card" onSubmit={e => { void handleSubmit(e); }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', marginBottom: '.75rem' }}>2. Plugin details</h2>
+        <h2 className="section-title">2. Plugin details</h2>
 
         <div className="field">
           <label htmlFor="plugin-description">Description</label>
@@ -197,7 +189,7 @@ export default function SubmitPage() {
             value={description} onChange={e => setDescription(e.target.value)} required />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className="form-grid-2">
           <div className="field">
             <label htmlFor="plugin-category">Category</label>
             <select id="plugin-category" className="input" value={category} onChange={e => setCategory(e.target.value)} required>
@@ -233,18 +225,17 @@ export default function SubmitPage() {
           </span>
         </div>
 
-        {error && <div className="alert alert--error" role="alert" style={{ marginTop: '.75rem' }}>{error}</div>}
+        {error && <div className="alert alert--error mt-md" role="alert">{error}</div>}
 
         <button
           type="submit"
-          className="btn btn--primary"
-          style={{ marginTop: '1rem', width: '100%' }}
+          className="btn btn--primary mt-2 w-full"
           disabled={submitting || !repoUrl || !description || !category || ownership?.verified !== true}
         >
           {submitting ? 'Submitting…' : 'Submit for review'}
         </button>
         {ownership?.verified !== true && (
-          <p className="field__hint" style={{ marginTop: '.5rem' }}>
+          <p className="field__hint mt-1">
             Validate the repository above first — submitting requires showing
             that you control it.
           </p>

@@ -17,8 +17,14 @@ export interface Slice {
 interface DonutProps {
   readonly title: string;
   readonly slices: Slice[];
-  /** Fill per slice key. */
+  /** Fill per slice key, for the SVG arc (a plain "stroke" attribute, not a
+      style — so it stays outside style-src regardless of CSP). */
   readonly colorOf: (slice: Slice, index: number) => string;
+  /** The matching legend-swatch modifier class. The palette is a small fixed
+      set (8 category slots, 3 status colours, one muted fallback), so the
+      legend swatch — an HTML span, unlike the SVG arc — picks a class instead
+      of setting its background inline. */
+  readonly classOf: (slice: Slice, index: number) => string;
   /** What the centre counts, e.g. "plugins". */
   readonly unit: string;
 }
@@ -37,7 +43,7 @@ const GAP = 3;
  * light surface, so identity has to be carried by text as well as by fill. It
  * doubles as the table view for anyone who cannot read the arcs.
  */
-function Donut({ title, slices, colorOf, unit }: DonutProps) {
+function Donut({ title, slices, colorOf, classOf, unit }: DonutProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const headingId = useId();
 
@@ -56,6 +62,7 @@ function Donut({ title, slices, colorOf, unit }: DonutProps) {
     const arc = {
       slice,
       color: colorOf(slice, index),
+      swatchClass: classOf(slice, index),
       dash: `${drawn} ${CIRCUMFERENCE - drawn}`,
       // Negative offset winds clockwise from twelve o'clock.
       offset: -cursor,
@@ -142,7 +149,7 @@ function Donut({ title, slices, colorOf, unit }: DonutProps) {
               tabIndex={0}
               aria-label={`${arc.slice.label}: ${arc.slice.value} ${unit}, ${arc.share} percent`}
             >
-              <span className="viz-legend__swatch" style={{ background: arc.color }} aria-hidden="true" />
+              <span className={`viz-legend__swatch ${arc.swatchClass}`} aria-hidden="true" />
               <span className="viz-legend__label">{arc.slice.label}</span>
               <span className="viz-legend__value">{arc.slice.value.toLocaleString()} · {arc.share}%</span>
             </li>
@@ -164,6 +171,11 @@ const CATEGORY_SLOTS = [
   'var(--viz-cat-5)', 'var(--viz-cat-6)', 'var(--viz-cat-7)', 'var(--viz-cat-8)',
 ];
 
+const CATEGORY_SWATCH_CLASSES = [
+  'viz-legend__swatch--cat-1', 'viz-legend__swatch--cat-2', 'viz-legend__swatch--cat-3', 'viz-legend__swatch--cat-4',
+  'viz-legend__swatch--cat-5', 'viz-legend__swatch--cat-6', 'viz-legend__swatch--cat-7', 'viz-legend__swatch--cat-8',
+];
+
 export function CategoryDonut({ data }: Readonly<{ data: Slice[] }>) {
   return (
     <Donut
@@ -171,6 +183,7 @@ export function CategoryDonut({ data }: Readonly<{ data: Slice[] }>) {
       slices={data}
       unit="plugins"
       colorOf={(_, index) => CATEGORY_SLOTS[index % CATEGORY_SLOTS.length]}
+      classOf={(_, index) => CATEGORY_SWATCH_CLASSES[index % CATEGORY_SWATCH_CLASSES.length]}
     />
   );
 }
@@ -188,6 +201,12 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: 'Rejected',
 };
 
+const STATUS_SWATCH_CLASS: Record<string, string> = {
+  active: 'viz-legend__swatch--status-active',
+  pending: 'viz-legend__swatch--status-pending',
+  rejected: 'viz-legend__swatch--status-rejected',
+};
+
 export function StatusDonut({ counts }: Readonly<{ counts: Record<string, number> }>) {
   const slices: Slice[] = Object.entries(counts).map(([key, value]) => ({
     key,
@@ -201,6 +220,7 @@ export function StatusDonut({ counts }: Readonly<{ counts: Record<string, number
       slices={slices}
       unit="plugins"
       colorOf={slice => STATUS_FILL[slice.key] ?? 'var(--text-muted)'}
+      classOf={slice => STATUS_SWATCH_CLASS[slice.key] ?? 'viz-legend__swatch--muted'}
     />
   );
 }

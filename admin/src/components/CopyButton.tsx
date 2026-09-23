@@ -11,7 +11,6 @@ interface CopyButtonProps {
    */
   readonly showLabel?: boolean;
   readonly className?: string;
-  readonly style?: React.CSSProperties;
 }
 
 /**
@@ -21,7 +20,7 @@ interface CopyButtonProps {
  * button whose label flicks to "Copied" for two seconds is invisible feedback
  * to anyone not looking at that exact spot.
  */
-export default function CopyButton({ text, label = 'Copy', showLabel = false, className, style }: CopyButtonProps) {
+export default function CopyButton({ text, label = 'Copy', showLabel = false, className }: CopyButtonProps) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -50,7 +49,6 @@ export default function CopyButton({ text, label = 'Copy', showLabel = false, cl
       <button
         type="button"
         className={className ?? 'copy-button'}
-        style={style}
         onClick={(event) => { void copy(event); }}
         // The accessible name always spells out what is copied, whether or not
         // the label is drawn.

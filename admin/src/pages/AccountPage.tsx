@@ -44,8 +44,8 @@ export default function AccountPage() {
       <h1 className="page__title">Account</h1>
 
       {user && (
-        <p className="muted" style={{ marginBottom: '1rem' }}>
-          Signed in as <strong style={{ color: 'var(--text)' }}>{user.login}</strong>
+        <p className="muted mb-2">
+          Signed in as <strong className="text-strong">{user.login}</strong>
           {user.isAdmin ? ' (admin)' : ' (community contributor)'}.
         </p>
       )}
@@ -54,7 +54,7 @@ export default function AccountPage() {
         Account deletion is a soft-delete operation. Your owned plugins must be explicitly included and all actions are audit logged.
       </div>
 
-      <form onSubmit={(event) => { void handleDelete(event); }} className="form-stack" style={{ maxWidth: 620 }}>
+      <form onSubmit={(event) => { void handleDelete(event); }} className="form-stack max-w-620">
         <div className="field">
           <label htmlFor="account-confirmation">
             Type <code>{expected}</code> to confirm
@@ -100,9 +100,9 @@ export default function AccountPage() {
 
         {error && (
           <div className="alert alert--error" role="alert">
-            <p style={{ margin: 0, color: 'inherit' }}>{error}</p>
+            <p className="m-0 text-inherit">{error}</p>
             {reauthURL && (
-              <p style={{ margin: '.5rem 0 0' }}>
+              <p className="alert-note">
                 <a className="btn btn--secondary" href={`${reauthURL}`}>
                   Re-authenticate with GitHub
                 </a>

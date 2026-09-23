@@ -122,41 +122,39 @@ export default function RegistryPage() {
   const hasFilters = Boolean(search || category || compatibleWith);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
+    <div className="public-page">
       <a className="skip-link" href="#main-content">Skip to main content</a>
 
       {/* Top bar */}
-      <header style={{ borderBottom: '1px solid var(--border)', padding: '0 1.5rem', height: '3.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 10 }}>
-        <a style={{ display: 'flex', alignItems: 'center', gap: '.5rem', textDecoration: 'none', color: 'var(--fg)', fontWeight: 700 }} href="/">
-          <img src="/semrel.svg" alt="" aria-hidden="true" style={{ width: '1.4rem', height: '1.4rem' }} />
+      <header className="public-header">
+        <a className="public-header__brand" href="/">
+          <img src="/semrel.svg" alt="" aria-hidden="true" />
           semrel Registry
         </a>
-        <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+        <div className="public-header__actions">
           <ThemeToggle />
-          <a href="/api/v1/plugins" target="_blank" rel="noopener noreferrer" className="btn btn--secondary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>
+          <a href="/api/v1/plugins" target="_blank" rel="noopener noreferrer" className="btn btn--secondary btn--header">
             API <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
           </a>
           {isLoggedIn
-            ? <Link to="/admin" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Admin Panel</Link>
-            : <Link to="/login" className="btn btn--primary" style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>Sign In</Link>
+            ? <Link to="/admin" className="btn btn--primary btn--header">Admin Panel</Link>
+            : <Link to="/login" className="btn btn--primary btn--header">Sign In</Link>
           }
         </div>
       </header>
 
-      <main id="main-content" tabIndex={-1} style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <main id="main-content" tabIndex={-1} className="public-main">
         {/* Hero */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h1 style={{ fontSize: 'clamp(1.5rem,4vw,2.25rem)', fontWeight: 800, marginBottom: '.5rem' }}>
-            semrel Plugin Registry
-          </h1>
-          <p className="muted" style={{ fontSize: 'var(--fs-md)', marginBottom: '1.5rem' }}>
-            Discover and install plugins for <a href="https://semrel.io" target="_blank" rel="noopener" style={{ color: 'var(--accent-text)' }}>semrel</a> — semantic versioning made simple.
+        <div className="public-hero">
+          <h1>semrel Plugin Registry</h1>
+          <p className="muted text-sm mb-2">
+            Discover and install plugins for <a href="https://semrel.io" target="_blank" rel="noopener">semrel</a> — semantic versioning made simple.
           </p>
           {pagination && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent-text)' }}>{pagination.total}</div>
-                <div className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Plugins</div>
+            <div className="public-hero__stats">
+              <div className="public-hero__stat">
+                <div className="public-hero__stat-value">{pagination.total}</div>
+                <div className="muted text-xs">Plugins</div>
               </div>
             </div>
           )}
@@ -166,14 +164,13 @@ export default function RegistryPage() {
             not a label — it disappears on typing and several screen readers
             never announce it. */}
         <search>
-          <div style={{ display: 'flex', gap: '.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '200px' }}>
+          <div className="flex gap-md flex-wrap mb-2">
+            <div className="flex-1 search-field">
               <label className="sr-only" htmlFor="registry-search">Search plugins</label>
               <input
                 id="registry-search"
                 type="search"
-                className="input"
-                style={{ width: '100%' }}
+                className="input w-full"
                 placeholder="Search plugins…"
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
@@ -183,8 +180,7 @@ export default function RegistryPage() {
               <label className="sr-only" htmlFor="registry-category">Filter by category</label>
               <select
                 id="registry-category"
-                className="input"
-                style={{ width: 'auto' }}
+                className="input select-auto"
                 value={category}
                 onChange={e => updateParams({ category: e.target.value })}
               >
@@ -196,8 +192,7 @@ export default function RegistryPage() {
               <label className="sr-only" htmlFor="registry-sort">Sort by</label>
               <select
                 id="registry-sort"
-                className="input"
-                style={{ width: 'auto' }}
+                className="input select-auto"
                 value={sort}
                 onChange={e => updateParams({ sort: e.target.value })}
               >
@@ -245,8 +240,7 @@ export default function RegistryPage() {
             <span>{error}</span>
             <button
               type="button"
-              className="btn btn--secondary btn--sm"
-              style={{ marginLeft: '.75rem' }}
+              className="btn btn--secondary btn--sm ml-1"
               onClick={() => setReloadToken(t => t + 1)}
             >
               Try again
@@ -261,7 +255,7 @@ export default function RegistryPage() {
 
         {/* Plugin grid */}
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }} aria-hidden="true">
+          <div className="plugin-grid" aria-hidden="true">
             {Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton skeleton-card" />)}
           </div>
         ) : plugins.length === 0 ? (
@@ -269,7 +263,7 @@ export default function RegistryPage() {
             <span className="empty-state__title">
               {hasFilters ? 'No plugins match these filters' : 'No plugins published yet'}
             </span>
-            <p style={{ margin: 0, maxWidth: '32rem' }}>
+            <p className="m-0 max-w-prose">
               {hasFilters
                 ? 'Try a broader search term or a different category.'
                 : 'Once a plugin is published and approved it appears here.'}
@@ -281,7 +275,7 @@ export default function RegistryPage() {
             )}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
+          <div className="plugin-grid">
             {plugins.map(p => {
               const pluginKey = p.namespace ? `${p.namespace}/${p.name}` : p.name;
               // The card is a container with a stretched link over the title
@@ -291,23 +285,21 @@ export default function RegistryPage() {
               return (
               <div
                 key={p.id}
-                className="card plugin-card"
-                style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.4rem', width: '100%' }}
+                className="card plugin-card flex-col gap-xs w-full"
               >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
-                    <div style={{ overflow: 'hidden' }}>
-                      {p.namespace && <span className="muted" style={{ fontSize: 'var(--fs-xs)', display: 'block' }}>{p.namespace}</span>}
+                  <div className="flex items-center justify-between gap-sm">
+                    <div className="overflow-hidden">
+                      {p.namespace && <span className="muted text-xs block">{p.namespace}</span>}
                       <Link
                         to={`/plugins/${encodeURIComponent(pluginKey)}`}
-                        className="plugin-card__link"
-                        style={{ fontWeight: 700, fontSize: 'var(--fs-md)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', color: 'inherit' }}
+                        className="plugin-card__link truncate font-bold"
                       >
                         {p.name}
                       </Link>
                     </div>
-                    <span className={`badge ${CAT_CLASS[p.category] ?? ''}`} style={{ flexShrink: 0 }}>{p.category}</span>
+                    <span className={`badge ${CAT_CLASS[p.category] ?? ''} no-shrink`}>{p.category}</span>
                   </div>
-                  <p className="muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p className="muted text-sm m-0 line-clamp-2">
                     {p.description || 'No description.'}
                   </p>
 
@@ -322,26 +314,20 @@ export default function RegistryPage() {
                     />
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '.35rem', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '.25rem' }}>
-                    <span className="muted" style={{ fontSize: 'var(--fs-xs)', flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>by {p.author}</span>
-                    <div style={{ display: 'flex', gap: '.3rem', alignItems: 'center', flexShrink: 0 }}>
-                      <span
-                        style={{ fontSize: '11px', background: 'var(--success-soft)', color: 'var(--success)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
-                        title="Total downloads"
-                      >
+                  <div className="flex items-center gap-xs flex-wrap push-bottom">
+                    <span className="muted text-xs truncate min-w-0 flex-auto">by {p.author}</span>
+                    <div className="flex items-center gap-xs no-shrink">
+                      <span className="pill pill--success" title="Total downloads">
                         ↓ {Number(p.downloads ?? 0).toLocaleString()}
                       </span>
-                      <span
-                        style={{ fontSize: '11px', background: 'var(--accent-soft)', color: 'var(--accent-text)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}
-                        title="Total views"
-                      >
+                      <span className="pill pill--accent" title="Total views">
                         👁 {Number(p.views ?? 0).toLocaleString()}
                       </span>
                       {p.latestVersion && (() => {
                         const ver = p.latestVersion;
                         const isDev = ver.startsWith('0.');
                         return (
-                          <span style={{ fontSize: '11px', fontFamily: 'monospace', background: isDev ? 'var(--warning-soft)' : 'var(--accent-soft)', color: isDev ? 'var(--warning)' : 'var(--accent-text)', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          <span className={`pill ${isDev ? 'pill--warning' : 'pill--accent'}`}>
                             <span className="sr-only">{isDev ? 'Development version ' : 'Latest version '}</span>v{ver}
                           </span>
                         );
@@ -364,7 +350,7 @@ export default function RegistryPage() {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <nav aria-label="Pagination" style={{ display: 'flex', justifyContent: 'center', gap: '.5rem' }}>
+          <nav aria-label="Pagination" className="flex justify-center gap-sm">
             <button
               type="button"
               className="btn btn--secondary"
@@ -373,7 +359,7 @@ export default function RegistryPage() {
             >
               <span aria-hidden="true">←</span> Previous
             </button>
-            <span className="muted" style={{ lineHeight: '2rem', fontSize: 'var(--fs-sm)' }}>
+            <span className="muted text-sm line-height-2">
               Page {page} of {pagination.pages}
             </span>
             <button
@@ -388,15 +374,15 @@ export default function RegistryPage() {
         )}
 
         {/* Footer */}
-        <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
-          <span className="muted" style={{ fontSize: 'var(--fs-xs)' }}>© semrel · Plugin Registry</span>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <a href="/api/v1/plugins" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>API</a>
-            <a href="https://semrel.io" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Docs</a>
-            <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>GitHub</a>
-            <a href="https://semrel.io/legal/imprint/" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Imprint</a>
-            <a href="https://semrel.io/legal/privacy/" target="_blank" rel="noopener" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Privacy</a>
-            {!isLoggedIn && <Link to="/login" className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Admin</Link>}
+        <footer className="public-footer">
+          <span className="muted text-xs">© semrel · Plugin Registry</span>
+          <div className="flex gap-md flex-wrap">
+            <a href="/api/v1/plugins" target="_blank" rel="noopener" className="muted text-xs">API</a>
+            <a href="https://semrel.io" target="_blank" rel="noopener" className="muted text-xs">Docs</a>
+            <a href="https://github.com/SemRels" target="_blank" rel="noopener" className="muted text-xs">GitHub</a>
+            <a href="https://semrel.io/legal/imprint/" target="_blank" rel="noopener" className="muted text-xs">Imprint</a>
+            <a href="https://semrel.io/legal/privacy/" target="_blank" rel="noopener" className="muted text-xs">Privacy</a>
+            {!isLoggedIn && <Link to="/login" className="muted text-xs">Admin</Link>}
           </div>
         </footer>
       </main>
