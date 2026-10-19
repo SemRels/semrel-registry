@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o api .
 # change the runtime base. ca-certificates is explicit because the API calls
 # the GitHub API over TLS and a missing trust store fails at request time, not
 # at build time.
-FROM docker.io/library/alpine:3.22
+FROM docker.io/library/alpine:3.24
 RUN apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache ca-certificates tzdata \
