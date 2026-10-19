@@ -16,6 +16,17 @@ updates:
     directory: "/admin"
     schedule:
       interval: weekly
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      vite:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
   - package-ecosystem: docker
     directory: "/api"
     schedule:
