@@ -9,7 +9,7 @@ RUN npm run build
 # The unprivileged image runs nginx as uid 101 with no root master process and
 # listens on 8080, so the container needs neither root nor a capability to bind
 # its port.
-FROM docker.io/nginxinc/nginx-unprivileged:1.30.6-alpine3.24-slim
+FROM docker.io/nginxinc/nginx-unprivileged:1.31.6-alpine3.24-slim
 USER root
 # The base image's own Alpine package layer lags behind upstream security
 # fixes between its own rebuilds (curl, libexpat, libssl3, libuuid, libxml2
