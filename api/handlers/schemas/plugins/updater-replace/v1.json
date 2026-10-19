@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/updater-replace/v1.json",
+  "title": "updater-replace plugin configuration",
+  "description": "Schema v1 for the updater-replace semrel plugin.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_REPLACEMENTS": {
+      "type": "string",
+      "description": "YAML or JSON array of replacement rules."
+    },
+    "SEMREL_PLUGIN_FILES": {
+      "type": "string",
+      "description": "Comma, semicolon, or newline-separated file glob patterns for a single rule."
+    },
+    "SEMREL_PLUGIN_IGNORE": {
+      "type": "string",
+      "description": "Comma, semicolon, or newline-separated exclusion patterns."
+    },
+    "SEMREL_PLUGIN_FROM": {
+      "type": "string",
+      "description": "Go regular expression or literal source text."
+    },
+    "SEMREL_PLUGIN_TO": {
+      "type": "string",
+      "description": "Replacement string with release-context templates."
+    },
+    "SEMREL_PLUGIN_LITERAL": {
+      "type": "string",
+      "enum": ["true", "false"]
+    },
+    "SEMREL_PLUGIN_FLAGS": {
+      "type": "string",
+      "pattern": "^[imsU]*$"
+    },
+    "SEMREL_PLUGIN_COUNT_MATCHES": {
+      "type": "string",
+      "enum": ["true", "false"]
+    }
+  },
+  "oneOf": [
+    {"required": ["SEMREL_PLUGIN_REPLACEMENTS"]},
+    {"required": ["SEMREL_PLUGIN_FILES", "SEMREL_PLUGIN_FROM"]}
+  ],
+  "additionalProperties": true
+}
