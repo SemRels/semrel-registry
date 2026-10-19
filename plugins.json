@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-22T08:06:40.127Z",
+  "generatedAt": "2026-10-19T08:20:37.630Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -2238,6 +2238,46 @@
     },
     {
       "namespace": "@semrel",
+      "name": "hook-exec",
+      "aliases": [
+        "@semrel/exec",
+        "exec",
+        "hook-exec"
+      ],
+      "description": "Phase-aware shell command hook",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "hook",
+      "repository": "https://github.com/SemRels/hook-exec",
+      "tags": [
+        "exec",
+        "hook",
+        "shell"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-10-19T07:16:12Z",
+          "downloadUrl": "https://github.com/SemRels/hook-exec/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1e583a1d9a271f16ffaa29413928d799874ad501815cfbb9c3858fac3484087d",
+            "linux_arm64": "053aeea004f88441dc7029580786c3b7680fe186e20d2e12f80e4e6cae5b1eb2",
+            "darwin_amd64": "fd730cadf6290c5accf10cbd9eb4b32f51f503bb8a2ad26594e824763634db8e",
+            "darwin_arm64": "8022ca96cf314d17a8947279c49c2cd66b5884bc714dbd464738530a1687bdd9",
+            "windows_amd64": "202453d9a0a8b68999d3c436f8e48983e4b295048c36df13c2a4cdefa900c8ba",
+            "windows_arm64": "67ef240f55f250d678edf0c26c6db33d08953199d617db7961e0d836141910b6"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/hook-exec/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/hook-exec/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/hook-exec/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "namespace": "@semrel",
       "name": "hook-gitplugin",
       "aliases": [
         "@semrel/gitplugin",
@@ -4296,6 +4336,46 @@
             "gRPCVersion": "v1"
           },
           "changelog": "## What's Changed\n* feat: migrate implementation from semrel core by @mwaldheim in https://github.com/SemRels/updater-python/pull/12\n* chore(deps): Bump softprops/action-gh-release from 2 to 3 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/3\n* chore(deps): Bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/5\n* chore(deps): Bump fsfe/reuse-action from 5 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/2\n* chore(deps): Bump actions/download-artifact from 4 to 8 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/1\n* chore(deps): Bump actions/checkout from 4 to 6 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/16\n* chore(deps): Bump actions/upload-artifact from 4 to 7 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/15\n* chore(deps): Bump golangci/golangci-lint-action from 6 to 9 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/14\n* chore(deps): Bump actions/dependency-review-action from 4 to 5 by @dependabot[bot] in https://github.com/SemRels/updater-python/pull/13\n\n## New Contributors\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-python/pull/12\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-python/pull/3\n\n**Full Changelog**: https://github.com/SemRels/updater-python/commits/v0.1.0"
+        }
+      ]
+    },
+    {
+      "namespace": "@semrel",
+      "name": "updater-replace",
+      "aliases": [
+        "@semrel/replace",
+        "replace",
+        "updater-replace"
+      ],
+      "description": "Generic regex and literal file updater",
+      "author": "semrel Authors",
+      "license": "Apache-2.0",
+      "category": "updater",
+      "repository": "https://github.com/SemRels/updater-replace",
+      "tags": [
+        "files",
+        "replace",
+        "updater"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "releaseDate": "2026-10-19T07:16:17Z",
+          "downloadUrl": "https://github.com/SemRels/updater-replace/releases/download/v0.1.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "db596d739068d4b9344291db79b547825f3c7fa1ef0c497f705030ccbad7d579",
+            "linux_arm64": "729cacdcf20424524cb8e6cd063da08df8025cfc2f4925a863c3efba1ab25c14",
+            "darwin_amd64": "c6440d5f770c34fdfc0b869dd0a8d73c2a830ff65b32920cff01053d8939c8d5",
+            "darwin_arm64": "7a72ae6484ec2431fab918709f87d923bab08f9f902eb021383ed5b47368b0de",
+            "windows_amd64": "c7fa8d092e36d10f6930798bbb00a0fdd1217b83a99a5c75ccc66cf69062432c",
+            "windows_arm64": "bb565d89a255d5f24f4da1fd3fa37582a2d1bc8354e8253e7f3f56317b70c13e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "**Full Changelog**: https://github.com/SemRels/updater-replace/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/updater-replace/commits/v0.1.0\n\n**Full Changelog**: https://github.com/SemRels/updater-replace/commits/v0.1.0"
         }
       ]
     },

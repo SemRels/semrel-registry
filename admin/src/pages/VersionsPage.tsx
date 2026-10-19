@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPlugin, listVersions, createVersion, deleteVersion, hardDeleteVersion, yankVersion, unyankVersion, isRegistryOwnedPlugin } from '../lib/api';
+import { getPlugin, listVersions, createVersion, deleteVersion, hardDeleteVersion, yankVersion, unyankVersion, rescanVersions, isRegistryOwnedPlugin } from '../lib/api';
 import type { Plugin, PluginVersion } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import Markdown from '../components/Markdown';
@@ -33,6 +33,7 @@ export default function VersionsPage() {
   const [yankError, setYankError] = useState('');
   const [notice, setNotice] = useState('');
   const isRegistryOwned = plugin ? isRegistryOwnedPlugin(plugin) : false;
+  const [rescanning, setRescanning] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -53,6 +54,27 @@ export default function VersionsPage() {
       setForm({ version:'', releaseDate:'', downloadUrl:'', changelog:'', prerelease:false, checksums:'{}' });
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Failed'); }
     finally { setSaving(false); }
+  }
+
+  async function handleRescan() {
+    setRescanning(true);
+    setError('');
+    setNotice('');
+    try {
+      const { data: r } = await rescanVersions(id!);
+      const fresh = await listVersions(id!);
+      setVersions(fresh.data ?? []);
+      if (r.error) {
+        setError(`Rescan finished with errors: ${r.error}`);
+      }
+      setNotice(r.created > 0
+        ? `Imported ${r.created} new ${r.created === 1 ? 'version' : 'versions'} from GitHub releases.`
+        : 'No new releases found on GitHub.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Rescan failed');
+    } finally {
+      setRescanning(false);
+    }
   }
 
   async function handleYank(reason: string) {
@@ -135,9 +157,22 @@ export default function VersionsPage() {
         <h1 className="page__title">Versions · <span className="text-accent">{plugin?.name}</span></h1>
         <div className="flex gap-sm">
           <button type="button" className="btn btn--sm" onClick={() => navigate('/admin/plugins')}>← Back</button>
-          {!isRegistryOwned && <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
-            {showForm ? 'Cancel' : '+ Add Version'}
-          </button>}
+          {!isRegistryOwned && (
+            <>
+              <button
+                type="button"
+                className="btn btn--sm"
+                onClick={() => { void handleRescan(); }}
+                disabled={rescanning}
+                title="Import GitHub releases that are not in the registry yet"
+              >
+                {rescanning ? 'Rescanning…' : 'Rescan releases'}
+              </button>
+              <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
+                {showForm ? 'Cancel' : '+ Add Version'}
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className="page__body">
@@ -151,8 +186,9 @@ export default function VersionsPage() {
         <p className="muted text-xs mb-2">
           <strong>Yank</strong> retracts a release without breaking builds that pin it — it stops
           being offered for new installs and the reason is shown to anyone using it.
-          <strong> Delete</strong> removes it outright and does break those builds; it requires
-          typing the release tag to confirm.
+          <strong> Delete</strong> hides it from the registry but keeps its row and deletion metadata.
+          Admins can choose <strong>Hard delete</strong> to physically purge a community version
+          after confirming the reference and recording an audit reason.
         </p>
 
         {showForm && (
@@ -187,8 +223,8 @@ export default function VersionsPage() {
             action={<button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>Publish the first version</button>}
           >
             A plugin without a published version cannot be installed. Versions
-            usually arrive automatically from GitHub releases; you can also add
-            one by hand.
+            usually arrive automatically from GitHub releases; you can rescan
+            them now or add one by hand.
           </EmptyState>
         ) : (
           <div className="table-wrap">

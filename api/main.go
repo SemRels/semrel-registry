@@ -334,6 +334,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	authRoutes.DELETE("/plugins/:id", pluginHandler.DeletePlugin)
 	authRoutes.POST("/plugins/:id/versions", pluginHandler.CreatePluginVersion)
 	authRoutes.DELETE("/plugins/:id/versions/:versionId", pluginHandler.DeletePluginVersion)
+	authRoutes.POST("/plugins/:id/sync-versions", syncHandler.RescanPluginVersions)
 	// Yank retracts a release without breaking builds that already pin it.
 	authRoutes.PUT("/plugins/:id/versions/:versionId/yank", pluginHandler.YankVersion)
 	authRoutes.DELETE("/plugins/:id/versions/:versionId/yank", pluginHandler.UnyankVersion)

@@ -341,6 +341,22 @@ export async function createVersion(
   });
 }
 
+export interface RescanVersionsResult {
+  plugin: string;
+  created: number;
+  skipped: number;
+  error?: string;
+}
+
+/** Imports GitHub releases the registry does not know yet (owner or admin). */
+export async function rescanVersions(
+  pluginId: string | number,
+): Promise<{ data: RescanVersionsResult }> {
+  return request<{ data: RescanVersionsResult }>(`/plugins/${pluginId}/sync-versions`, {
+    method: 'POST',
+  });
+}
+
 // ---- Admin ----
 
 export async function getStats(): Promise<Stats> {

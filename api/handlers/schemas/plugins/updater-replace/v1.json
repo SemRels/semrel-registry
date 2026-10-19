@@ -27,20 +27,38 @@
     },
     "SEMREL_PLUGIN_LITERAL": {
       "type": "string",
-      "enum": ["true", "false"]
+      "enum": [
+        "true",
+        "false"
+      ],
+      "description": "Treat SEMREL_PLUGIN_FROM as literal text."
     },
     "SEMREL_PLUGIN_FLAGS": {
       "type": "string",
-      "pattern": "^[imsU]*$"
+      "pattern": "^[imsU]*$",
+      "description": "Go regular expression flags."
     },
     "SEMREL_PLUGIN_COUNT_MATCHES": {
       "type": "string",
-      "enum": ["true", "false"]
+      "enum": [
+        "true",
+        "false"
+      ],
+      "description": "Report per-file match counts."
     }
   },
   "oneOf": [
-    {"required": ["SEMREL_PLUGIN_REPLACEMENTS"]},
-    {"required": ["SEMREL_PLUGIN_FILES", "SEMREL_PLUGIN_FROM"]}
+    {
+      "required": [
+        "SEMREL_PLUGIN_REPLACEMENTS"
+      ]
+    },
+    {
+      "required": [
+        "SEMREL_PLUGIN_FILES",
+        "SEMREL_PLUGIN_FROM"
+      ]
+    }
   ],
   "additionalProperties": true
 }

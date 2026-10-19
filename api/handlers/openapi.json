@@ -688,6 +688,63 @@
         }
       }
     },
+    "/api/v1/plugins/{id}/sync-versions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        }
+      ],
+      "post": {
+        "tags": [
+          "publishing"
+        ],
+        "summary": "Rescan GitHub releases",
+        "description": "Imports the GitHub releases of the plugin's repository that the registry does not know yet. Existing versions are not modified. Allowed for admins and the plugin's author.",
+        "responses": {
+          "200": {
+            "description": "Import result with the number of created and skipped releases. A partial failure is reported in the `error` field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "plugin": {
+                          "type": "string"
+                        },
+                        "created": {
+                          "type": "integer"
+                        },
+                        "skipped": {
+                          "type": "integer"
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "description": "GitHub API rate limit exceeded."
+          }
+        }
+      }
+    },
     "/api/v1/plugins/{id}/versions/{version}/reverify-provenance": {
       "parameters": [
         {
