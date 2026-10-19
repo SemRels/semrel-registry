@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPlugin, listVersions, createVersion, deleteVersion, yankVersion, unyankVersion } from '../lib/api';
+import { getPlugin, listVersions, createVersion, deleteVersion, hardDeleteVersion, yankVersion, unyankVersion, isRegistryOwnedPlugin } from '../lib/api';
 import type { Plugin, PluginVersion } from '../lib/api';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import Markdown from '../components/Markdown';
 import DeletionConfirmDialog from '../components/DeletionConfirmDialog';
+import HardDeleteVersionDialog from '../components/HardDeleteVersionDialog';
 import ReasonDialog from '../components/ReasonDialog';
 import { TableSkeleton, EmptyState } from '../components/LoadingState';
 
 export default function VersionsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
   const [plugin, setPlugin]   = useState<Plugin | null>(null);
   const [versions, setVersions] = useState<PluginVersion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,10 +25,14 @@ export default function VersionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<PluginVersion | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [purgeTarget, setPurgeTarget] = useState<PluginVersion | null>(null);
+  const [purgeBusy, setPurgeBusy] = useState(false);
+  const [purgeError, setPurgeError] = useState('');
   const [yankTarget, setYankTarget] = useState<PluginVersion | null>(null);
   const [yankBusy, setYankBusy] = useState(false);
   const [yankError, setYankError] = useState('');
   const [notice, setNotice] = useState('');
+  const isRegistryOwned = plugin ? isRegistryOwnedPlugin(plugin) : false;
 
   useEffect(() => {
     if (!id) return;
@@ -95,6 +102,25 @@ export default function VersionsPage() {
     }
   }
 
+  async function handleHardDelete(reason: string) {
+    if (!purgeTarget || !user?.isAdmin) return;
+    setPurgeBusy(true);
+    setPurgeError('');
+    try {
+      await hardDeleteVersion(id!, purgeTarget.id, {
+        confirmation: `${plugin?.namespace ? `${plugin.namespace}/` : ''}${plugin?.name ?? id}@${purgeTarget.version}`,
+        reason,
+      });
+      setVersions((previous) => previous.filter((version) => version.id !== purgeTarget.id));
+      setNotice(`v${purgeTarget.version} was permanently purged. An audit snapshot was retained.`);
+      setPurgeTarget(null);
+    } catch (cause: unknown) {
+      setPurgeError(cause instanceof Error ? cause.message : 'Permanent purge failed');
+    } finally {
+      setPurgeBusy(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="page__body">
@@ -109,12 +135,17 @@ export default function VersionsPage() {
         <h1 className="page__title">Versions · <span className="text-accent">{plugin?.name}</span></h1>
         <div className="flex gap-sm">
           <button type="button" className="btn btn--sm" onClick={() => navigate('/admin/plugins')}>← Back</button>
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
+          {!isRegistryOwned && <button type="button" className="btn btn--primary btn--sm" onClick={() => setShowForm(s => !s)}>
             {showForm ? 'Cancel' : '+ Add Version'}
-          </button>
+          </button>}
         </div>
       </div>
       <div className="page__body">
+        {isRegistryOwned && (
+          <div className="alert alert--info">
+            <strong>@semrel is maintained through SQL migrations.</strong> Version changes, yanks, and deletions are read-only in the UI.
+          </div>
+        )}
         {error && <div className="alert alert--error" role="alert">{error}</div>}
         {notice && <div className="alert alert--info" role="status">{notice}</div>}
         <p className="muted text-xs mb-2">
@@ -204,34 +235,50 @@ export default function VersionsPage() {
                               pin this version keep resolving it, they just stop
                               being offered it. Delete breaks those builds, so it
                               is the secondary action, not the primary one. */}
-                          {v.yankedAt ? (
-                            <button
-                              type="button"
-                              className="btn btn--sm"
-                              onClick={() => { void handleUnyank(v); }}
-                              disabled={yankBusy}
-                              title="Make this version installable again"
-                            >
-                              Un-yank
-                            </button>
+                          {isRegistryOwned ? (
+                            <span className="muted text-xs">SQL-managed</span>
                           ) : (
-                            <button
-                              type="button"
-                              className="btn btn--sm"
-                              onClick={() => { setYankError(''); setYankTarget(v); }}
-                              title="Retract this version without breaking pinned installs"
-                            >
-                              Yank
-                            </button>
+                            <>
+                              {v.yankedAt ? (
+                                <button
+                                  type="button"
+                                  className="btn btn--sm"
+                                  onClick={() => { void handleUnyank(v); }}
+                                  disabled={yankBusy}
+                                  title="Make this version installable again"
+                                >
+                                  Un-yank
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn btn--sm"
+                                  onClick={() => { setYankError(''); setYankTarget(v); }}
+                                  title="Retract this version without breaking pinned installs"
+                                >
+                                  Yank
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="btn btn--sm btn--danger"
+                                onClick={() => { setDeleteError(''); setDeleteTarget(v); }}
+                                title="Soft-delete this version — breaks builds that pin it"
+                              >
+                                Delete
+                              </button>
+                              {user?.isAdmin && (
+                                <button
+                                  type="button"
+                                  className="btn btn--sm btn--danger"
+                                  onClick={() => { setPurgeError(''); setPurgeTarget(v); }}
+                                  title="Permanently purge this version and retain an audit snapshot"
+                                >
+                                  Hard delete
+                                </button>
+                              )}
+                            </>
                           )}
-                          <button
-                            type="button"
-                            className="btn btn--sm btn--danger"
-                            onClick={() => { setDeleteError(''); setDeleteTarget(v); }}
-                            title="Permanently remove this version — breaks builds that pin it"
-                          >
-                            Delete
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -272,7 +319,7 @@ export default function VersionsPage() {
       />
 
       <DeletionConfirmDialog
-        open={deleteTarget !== null}
+        open={deleteTarget !== null && !isRegistryOwned}
         title={deleteTarget ? `Delete v${deleteTarget.version}?` : 'Delete version?'}
         message={deleteTarget && plugin
           ? `This removes version v${deleteTarget.version} of ${plugin.name} from the registry. Anyone who pins this version will no longer be able to install it. If you only want to stop recommending it, yank it instead.`
@@ -288,6 +335,16 @@ export default function VersionsPage() {
         error={deleteError}
         onClose={() => { if (!deleteBusy) { setDeleteError(''); setDeleteTarget(null); } }}
         onConfirm={() => { void handleDelete(); }}
+      />
+      <HardDeleteVersionDialog
+        open={purgeTarget !== null && !isRegistryOwned && user?.isAdmin === true}
+        confirmationValue={purgeTarget && plugin
+          ? `${plugin.namespace ? `${plugin.namespace}/` : ''}${plugin.name}@${purgeTarget.version}`
+          : ''}
+        busy={purgeBusy}
+        error={purgeError}
+        onClose={() => { if (!purgeBusy) { setPurgeError(''); setPurgeTarget(null); } }}
+        onConfirm={(reason) => { void handleHardDelete(reason); }}
       />
     </>
   );

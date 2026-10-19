@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,6 +36,24 @@ func (h *AdminHandler) Status(c *gin.Context) {
 		"version":   "1",
 		"timestamp": time.Now().UTC(),
 	})
+}
+
+func (h *AdminHandler) HardDeleteVersion(c *gin.Context) {
+	versionID, err := strconv.ParseInt(c.Param("versionId"), 10, 64)
+	if err != nil || versionID < 1 {
+		BadRequest(c, "Invalid version ID", gin.H{"issue": "versionId must be a positive integer"})
+		return
+	}
+	var request models.VersionDeletionRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		BadRequest(c, "Invalid request body", gin.H{"issue": err.Error()})
+		return
+	}
+	if err := h.service.HardDeleteVersion(c.Request.Context(), c.Param("id"), versionID, request, currentDeleteActor(c)); err != nil {
+		HandleError(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 // SyncPlugins reads a plugins.json payload from the request body and upserts all plugins.

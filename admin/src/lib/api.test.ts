@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getAuthConfig, getCurrentUser, getToken, saveToken, validatePlugin } from './api';
+import { getAuthConfig, getCurrentUser, getToken, isRegistryOwnedPlugin, saveToken, validatePlugin } from './api';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -11,6 +11,18 @@ function jsonResponse(body: unknown, status = 200): Response {
 afterEach(() => {
   vi.unstubAllGlobals();
   localStorage.clear();
+});
+
+describe('isRegistryOwnedPlugin', () => {
+  it('protects the reserved namespace and SemRels-owned repositories', () => {
+    expect(isRegistryOwnedPlugin({ namespace: '@semrel', repository: '' })).toBe(true);
+    expect(isRegistryOwnedPlugin({ repository: 'https://github.com/SemRels/provider-github' })).toBe(true);
+  });
+
+  it('does not reserve lookalike namespaces or GitHub hosts', () => {
+    expect(isRegistryOwnedPlugin({ namespace: '@semrel-tools', repository: 'https://github.com/acme/plugin' })).toBe(false);
+    expect(isRegistryOwnedPlugin({ repository: 'https://github.com.evil.example/SemRels/plugin' })).toBe(false);
+  });
 });
 
 describe('validatePlugin', () => {

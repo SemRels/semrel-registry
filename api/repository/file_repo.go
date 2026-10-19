@@ -378,6 +378,10 @@ func (s *fileStore) DeleteVersion(_ context.Context, spec models.VersionDeletion
 	return s.savePlugin(p)
 }
 
+func (s *fileStore) HardDeleteVersion(_ context.Context, spec models.VersionPurgeSpec) error {
+	return fmt.Errorf("hard deletion requires a durable purge audit log: %w", appErrors.ErrUnsupportedStorage)
+}
+
 func (s *fileStore) RecordAccountDeletion(_ context.Context, audit models.AccountDeletionAudit) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

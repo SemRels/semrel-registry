@@ -146,6 +146,15 @@ type VersionDeletionSpec struct {
 	Confirmation string
 }
 
+type VersionPurgeSpec struct {
+	PluginID     int64
+	VersionID    int64
+	PluginRef    string
+	DeletedBy    string
+	Reason       string
+	Confirmation string
+}
+
 type AccountDeletionRequest struct {
 	Confirmation       string `json:"confirmation"`
 	Reason             string `json:"reason"`

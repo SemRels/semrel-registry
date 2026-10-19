@@ -33,6 +33,7 @@ type PluginRepository interface {
 	Delete(ctx context.Context, spec models.PluginDeletionSpec) error
 	AddVersion(ctx context.Context, version *models.PluginVersion) (int64, error)
 	DeleteVersion(ctx context.Context, spec models.VersionDeletionSpec) error
+	HardDeleteVersion(ctx context.Context, spec models.VersionPurgeSpec) error
 	// SetVersionYank retracts a published version, or lifts the retraction.
 	// Unlike deletion it leaves the version resolvable, so builds that already
 	// pin it keep working while new installs are steered away.
@@ -570,6 +571,63 @@ WHERE id = $1 AND plugin_id = $2 AND deleted_at IS NULL`,
 	}
 	if result.RowsAffected() == 0 {
 		return appErrors.ErrPluginNotFound
+	}
+	return nil
+}
+
+func (r *pgRepository) HardDeleteVersion(ctx context.Context, spec models.VersionPurgeSpec) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+	tx, err := r.db.BeginTx()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	if err := database.LockPluginWrites(ctx, tx); err != nil {
+		return err
+	}
+
+	var version string
+	var snapshot []byte
+	err = tx.QueryRow(ctx, `
+SELECT v.version,
+       jsonb_build_object(
+           'version', to_jsonb(v),
+           'checksums', COALESCE((
+               SELECT jsonb_object_agg(platform, jsonb_build_object('algorithm', algorithm, 'hash', hash))
+               FROM plugin_checksums
+               WHERE version_id = v.id
+           ), '{}'::jsonb)
+       )
+FROM plugin_versions v
+JOIN plugins p ON p.id = v.plugin_id
+WHERE v.id = $1 AND v.plugin_id = $2 AND p.deleted_at IS NULL
+FOR UPDATE OF v
+`, spec.VersionID, spec.PluginID).Scan(&version, &snapshot)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return appErrors.ErrPluginNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("load version for permanent deletion: %w", err)
+	}
+
+	if _, err := tx.Exec(ctx, `
+INSERT INTO version_purge_audits
+    (plugin_ref, version, deleted_by, reason, confirmation, version_snapshot)
+VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6)
+`, spec.PluginRef, version, spec.DeletedBy, spec.Reason, spec.Confirmation, snapshot); err != nil {
+		return fmt.Errorf("record version purge audit: %w", err)
+	}
+	result, err := tx.Exec(ctx, `DELETE FROM plugin_versions WHERE id = $1 AND plugin_id = $2`, spec.VersionID, spec.PluginID)
+	if err != nil {
+		return wrapWriteError("permanently delete plugin version", err)
+	}
+	if result.RowsAffected() == 0 {
+		return appErrors.ErrPluginNotFound
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit version purge: %w", err)
 	}
 	return nil
 }

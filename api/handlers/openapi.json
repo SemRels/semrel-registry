@@ -1440,6 +1440,58 @@
         }
       }
     },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "List registered users",
+        "description": "Returns the paginated account directory. Admin-only.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registered users and pagination metadata."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "503": {
+            "description": "The account directory requires PostgreSQL storage."
+          }
+        }
+      }
+    },
     "/api/v1/admin/status": {
       "get": {
         "tags": [
@@ -1455,6 +1507,68 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plugins/{id}/versions/{versionId}/purge": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PluginRef"
+        },
+        {
+          "name": "versionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Permanently purge a plugin version",
+        "description": "Admin-only. Physically deletes the version and cascading checksums and version metrics. A snapshot and audit reason are retained. First-party @semrel plugins cannot be purged through the registry.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirmation",
+                  "reason"
+                ],
+                "properties": {
+                  "confirmation": {
+                    "type": "string",
+                    "description": "Must match <plugin ref>@<version> exactly."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Version permanently purged."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "501": {
+            "description": "The configured storage backend does not support audited permanent deletion."
           }
         }
       }

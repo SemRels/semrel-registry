@@ -93,6 +93,7 @@ type PluginManager interface {
 	CreateVersion(ctx context.Context, ref string, version models.PluginVersion) (models.PluginVersion, error)
 	DeleteVersion(ctx context.Context, pluginID, versionID int64) error
 	DeleteVersionWithRequest(ctx context.Context, ref string, versionID int64, request models.VersionDeletionRequest, actor models.DeleteActor) error
+	HardDeleteVersion(ctx context.Context, ref string, versionID int64, request models.VersionDeletionRequest, actor models.DeleteActor) error
 	DeleteAccount(ctx context.Context, request models.AccountDeletionRequest, actor models.DeleteActor) (models.AccountDeletionResult, error)
 	ApprovePlugin(ctx context.Context, ref string) (models.Plugin, error)
 	RejectPlugin(ctx context.Context, ref string) (models.Plugin, error)
@@ -486,6 +487,50 @@ func (s *PluginService) DeleteVersionWithRequest(ctx context.Context, ref string
 			DeletedBy:    actor.Login,
 			Reason:       request.Reason,
 			Confirmation: request.Confirmation,
+		})
+	}
+	return appErrors.ErrPluginNotFound
+}
+
+func (s *PluginService) HardDeleteVersion(ctx context.Context, ref string, versionID int64, request models.VersionDeletionRequest, actor models.DeleteActor) error {
+	if err := validatePluginRef(ref); err != nil {
+		return err
+	}
+	if !actor.IsAdmin {
+		return appErrors.ErrForbidden
+	}
+	request = normalizeVersionDeletionRequest(request)
+	if err := validateDeleteActor(actor); err != nil {
+		return err
+	}
+	if err := validateVersionDeletionRequest(request); err != nil {
+		return err
+	}
+	if request.Reason == "" {
+		return &appErrors.ValidationError{Field: "reason", Issue: "is required for permanent deletion"}
+	}
+
+	plugin, err := s.lookupPlugin(ctx, ref)
+	if err != nil {
+		return err
+	}
+	if strings.EqualFold(plugin.Namespace, naming.FirstPartyNamespace) {
+		return appErrors.ErrForbidden
+	}
+	if _, firstParty := naming.FirstPartyByRepositoryURL(plugin.Repository); firstParty {
+		return appErrors.ErrForbidden
+	}
+	for _, version := range plugin.Versions {
+		if version.ID != versionID {
+			continue
+		}
+		expected := plugin.Ref() + "@" + version.Version
+		if !strings.EqualFold(request.Confirmation, expected) {
+			return &appErrors.ValidationError{Field: "confirmation", Issue: fmt.Sprintf("must match %q", expected)}
+		}
+		return s.repo.HardDeleteVersion(ctx, models.VersionPurgeSpec{
+			PluginID: plugin.ID, VersionID: versionID, PluginRef: plugin.Ref(),
+			DeletedBy: actor.Login, Reason: request.Reason, Confirmation: request.Confirmation,
 		})
 	}
 	return appErrors.ErrPluginNotFound

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPlugin, createPlugin, updatePlugin } from '../lib/api';
+import { getPlugin, createPlugin, updatePlugin, isRegistryOwnedPlugin } from '../lib/api';
 import type { Plugin } from '../lib/api';
 
 const CATS  = ['provider','analyzer','condition','hook','updater','generator','packager','publisher'];
@@ -15,6 +15,7 @@ export default function PluginEditPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState('');
+  const isRegistryOwned = isRegistryOwnedPlugin(form);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -27,6 +28,12 @@ export default function PluginEditPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('');
+    const namespace = form.namespace?.trim().toLowerCase() ?? '';
+    if (namespace === '@semrel' || isRegistryOwned) {
+      setError('@semrel plugins are maintained through SQL migrations and cannot be changed in the UI.');
+      setSaving(false);
+      return;
+    }
     const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
     try {
       isNew ? await createPlugin({ ...form, tags }) : await updatePlugin(id!, { ...form, tags });
@@ -44,12 +51,19 @@ export default function PluginEditPage() {
       </div>
       <div className="page__body">
         {error && <div className="alert alert--error">{error}</div>}
+        {isRegistryOwned && (
+          <div className="alert alert--info">
+            <strong>This plugin is owned by SemRels.</strong> Its metadata is maintained through SQL migrations; edit and save are disabled here.
+          </div>
+        )}
         <div className="card max-w-640 mx-auto">
           <form onSubmit={(e) => { void handleSubmit(e); }}>
+            <fieldset className="plugin-edit__fields" disabled={saving || isRegistryOwned}>
             <div className="form-grid-3">
               <div className="field">
                 <label htmlFor="namespace">Namespace</label>
-                <input id="namespace" className="input" value={form.namespace ?? ''} onChange={e => set('namespace', e.target.value)} placeholder="@semrel" />
+                <input id="namespace" className="input" value={form.namespace ?? ''} onChange={e => set('namespace', e.target.value)} placeholder="@your-org" aria-describedby="namespace-help" />
+                <span id="namespace-help" className="muted text-xs">The @semrel namespace is reserved for migration-managed plugins.</span>
               </div>
               <div className="field">
                 <label htmlFor="name">Name *</label>
@@ -86,9 +100,10 @@ export default function PluginEditPage() {
               <label htmlFor="tags">Tags (comma-separated)</label>
               <input id="tags" className="input" value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="github, provider" />
             </div>
+            </fieldset>
             <div className="flex gap-sm mt-1">
-              <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : isNew ? 'Create' : 'Save'}</button>
-              <button type="button" className="btn" onClick={() => navigate('/admin/plugins')}>Cancel</button>
+              {!isRegistryOwned && <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : isNew ? 'Create' : 'Save'}</button>}
+              <button type="button" className="btn" onClick={() => navigate('/admin/plugins')}>Back to plugins</button>
             </div>
           </form>
         </div>

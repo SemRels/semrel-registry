@@ -17,6 +17,8 @@ import SubmissionsPage from './pages/SubmissionsPage';
 import AccountPage from './pages/AccountPage';
 import CookieConsent from './components/CookieConsent';
 import RouteAnnouncer from './components/RouteAnnouncer';
+import AdminUsersPage from './pages/AdminUsersPage';
+import ApiDocsPage from './pages/ApiDocsPage';
 
 /**
  * Sends the user to the login page when their session ends mid-visit,
@@ -84,6 +86,8 @@ export default function App() {
           <Route path="submit" element={<SubmitPage />} />
           <Route path="account" element={<AccountPage />} />
           <Route path="submissions" element={<AdminOnly><SubmissionsPage /></AdminOnly>} />
+          <Route path="users" element={<AdminOnly><AdminUsersPage /></AdminOnly>} />
+          <Route path="api-docs" element={<ApiDocsPage />} />
         </Route>
 
         {/* A mistyped plugin link used to redirect to the home page, which

@@ -188,6 +188,10 @@ func (a *mockRepositoryAdapter) DeleteVersion(_ context.Context, _ models.Versio
 	return nil
 }
 
+func (a *mockRepositoryAdapter) HardDeleteVersion(_ context.Context, _ models.VersionPurgeSpec) error {
+	return nil
+}
+
 func (a *mockRepositoryAdapter) SetVersionYank(_ context.Context, _ models.VersionYankSpec) error {
 	return nil
 }

@@ -38,3 +38,26 @@ continue to be installable; clients should treat an omitted range as unknown.
 ## Schema reference
 
 The registry payload is validated against the semrel plugin metadata schema. Author-facing publishing guidance lives in the [release guide](release-guide.md).
+
+## API explorer and account directory
+
+The full HTTP API is described by the machine-readable OpenAPI document at
+`/openapi.json`. The signed-in registry panel includes a searchable,
+semrel-styled explorer at `/admin/api-docs`; the rendered reference is also
+available publicly at `/docs`.
+
+Admins can query the persisted account directory with `GET /api/v1/admin/users`.
+The endpoint accepts `page`, `limit` (maximum 100), and `search` (GitHub login
+or display name) query parameters. Results include the GitHub profile, the
+role last observed at sign-in, first and last seen timestamps, and counts for
+active/pending plugins attributed to the login. Directory records start
+accumulating at sign-in after the registry-users migration has been applied;
+the account directory is available with PostgreSQL storage.
+
+Admins can permanently purge a community plugin version from its version
+management screen. The operation requires typing the full plugin/version
+reference, an acknowledgement, and an audit reason. A version snapshot is
+written to the PostgreSQL purge audit before dependent checksums and metrics
+are removed. `@semrel` and SemRels-owned plugins remain read-only in the UI;
+the file-storage backend does not offer permanent deletion because it cannot
+provide the durable audit log.

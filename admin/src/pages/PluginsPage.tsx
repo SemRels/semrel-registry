@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { listPlugins, deletePlugin, revalidateAllPlugins } from '../lib/api';
+import { listPlugins, deletePlugin, revalidateAllPlugins, isRegistryOwnedPlugin } from '../lib/api';
 import type { BatchRevalidationResponse } from '../lib/api';
 import type { Plugin, Pagination } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
@@ -218,7 +218,12 @@ export default function PluginsPage() {
                       )}
                     </td>
                     <td data-label="Actions"><div className="flex gap-sm">
-                      {canEdit(p) ? (
+                      {isRegistryOwnedPlugin(p) ? (
+                        <>
+                          <Link to={`/admin/plugins/${p.id}/versions`} className="btn btn--sm">Versions</Link>
+                          <span className="muted text-xs">SQL-managed</span>
+                        </>
+                      ) : canEdit(p) ? (
                         <>
                           <Link to={`/admin/plugins/${p.id}`} className="btn btn--sm">Edit</Link>
                           <Link to={`/admin/plugins/${p.id}/versions`} className="btn btn--sm">Versions</Link>

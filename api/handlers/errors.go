@@ -61,6 +61,8 @@ func HandleError(c *gin.Context, err error) {
 		Forbidden(c, "Forbidden", nil)
 	case errors.Is(err, appErrors.ErrDatabaseUnavailable):
 		InternalServerError(c, "Database unavailable", nil)
+	case errors.Is(err, appErrors.ErrUnsupportedStorage):
+		writeError(c, http.StatusNotImplemented, "UNSUPPORTED_STORAGE", "This operation is not supported by the configured storage backend", nil)
 	default:
 		log.Printf("unhandled error: %v", err)
 		InternalServerError(c, "Internal server error", nil)

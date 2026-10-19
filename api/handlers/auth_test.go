@@ -53,6 +53,9 @@ func (s *stubAccountManager) CreateVersion(context.Context, string, models.Plugi
 	return models.PluginVersion{}, nil
 }
 func (s *stubAccountManager) DeleteVersion(context.Context, int64, int64) error { return nil }
+func (s *stubAccountManager) HardDeleteVersion(context.Context, string, int64, models.VersionDeletionRequest, models.DeleteActor) error {
+	return nil
+}
 func (s *stubAccountManager) DeleteVersionWithRequest(context.Context, string, int64, models.VersionDeletionRequest, models.DeleteActor) error {
 	return nil
 }
