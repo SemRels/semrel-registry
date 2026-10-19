@@ -321,6 +321,7 @@
             "hook-email",
             "hook-matrix",
             "hook-jira",
+            "hook-exec",
             "hook-gitplugin",
             "condition-github-actions",
             "condition-gitlab-ci",
@@ -336,6 +337,7 @@
             "updater-maven",
             "updater-nuget",
             "updater-python",
+            "updater-replace",
             "updater-terraform"
           ]
         },

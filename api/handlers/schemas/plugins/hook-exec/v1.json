@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://registry.semrel.io/schemas/plugins/hook-exec/v1.json",
+  "title": "hook-exec plugin configuration",
+  "description": "Schema v1 for the hook-exec semrel plugin.",
+  "type": "object",
+  "properties": {
+    "SEMREL_PLUGIN_CMD": {"type": "string", "minLength": 1},
+    "SEMREL_PLUGIN_VERIFY_CONDITIONS_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_VERIFY_RELEASE_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_GENERATE_NOTES_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_PREPARE_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_PUBLISH_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_SUCCESS_CMD": {"type": "string"},
+    "SEMREL_PLUGIN_SHELL": {"type": "string", "minLength": 1},
+    "SEMREL_PLUGIN_CWD": {"type": "string", "minLength": 1},
+    "SEMREL_PLUGIN_ENV": {
+      "type": "string",
+      "description": "YAML or JSON string map merged into the child environment."
+    },
+    "SEMREL_PLUGIN_TIMEOUT": {
+      "type": "string",
+      "pattern": "^[0-9]+(?:ns|us|µs|ms|s|m|h)(?:[0-9]+(?:ns|us|µs|ms|s|m|h))*$"
+    },
+    "SEMREL_PLUGIN_RUN_IN_DRY_RUN": {
+      "type": "string",
+      "enum": ["true", "false"]
+    },
+    "SEMREL_PLUGIN_PHASE": {
+      "type": "string",
+      "enum": ["condition", "generator", "pre-tag", "release"]
+    }
+  },
+  "anyOf": [
+    {"required": ["SEMREL_PLUGIN_CMD"]},
+    {"required": ["SEMREL_PLUGIN_VERIFY_CONDITIONS_CMD"]},
+    {"required": ["SEMREL_PLUGIN_VERIFY_RELEASE_CMD"]},
+    {"required": ["SEMREL_PLUGIN_GENERATE_NOTES_CMD"]},
+    {"required": ["SEMREL_PLUGIN_PREPARE_CMD"]},
+    {"required": ["SEMREL_PLUGIN_PUBLISH_CMD"]},
+    {"required": ["SEMREL_PLUGIN_SUCCESS_CMD"]}
+  ],
+  "additionalProperties": true
+}
