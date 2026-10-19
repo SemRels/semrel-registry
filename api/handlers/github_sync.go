@@ -128,6 +128,41 @@ func (h *SyncHandler) SyncVersions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"results": results})
 }
 
+// POST /api/v1/plugins/:id/sync-versions
+// Rescans the GitHub releases of one plugin and imports the versions the
+// registry does not know yet. Existing versions are left untouched. Allowed for
+// admins and for the plugin's own author, like adding a version by hand.
+func (h *SyncHandler) RescanPluginVersions(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	plugin, err := h.svc.GetPlugin(ctx, c.Param("id"))
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	if isAdmin, _ := c.Get("isAdmin"); isAdmin != true {
+		login, _ := c.Get("login")
+		loginStr, _ := login.(string)
+		if !strings.EqualFold(plugin.Author, loginStr) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "you can only rescan versions of your own plugins", "author": plugin.Author})
+			return
+		}
+	}
+
+	created, skipped, syncErr := h.syncPluginReleases(ctx, &plugin)
+	result := gin.H{"plugin": plugin.Name, "created": created, "skipped": skipped}
+	if syncErr != nil {
+		if isGitHubRateLimitError(syncErr) {
+			writeError(c, http.StatusTooManyRequests, "GITHUB_RATE_LIMIT", "GitHub API rate limit exceeded. Try again later.", syncErr)
+			return
+		}
+		log.Printf("version rescan error for plugin %q: %v", plugin.Name, syncErr)
+		result["error"] = syncErr.Error()
+	}
+	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
 // GET /plugins.json
 // Returns all active plugins with their versions in the semrel registry metadata format.
 // semrel CLI fetches this via SEMREL_REGISTRY_URL, e.g.:
