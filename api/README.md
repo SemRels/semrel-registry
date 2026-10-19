@@ -71,4 +71,4 @@ Build the production image from the `api/` directory:
 docker build -t semrel-registry-api .
 ```
 
-> Note: the Docker image uses Go 1.25 to match the resolved module toolchain in `go.mod`.
+> Note: the Docker image uses Go 1.26 to match the resolved module toolchain in `go.mod`.
