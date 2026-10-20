@@ -28,9 +28,15 @@ type RegistryUser struct {
 	PendingPluginCount int64     `json:"pendingPluginCount"`
 }
 
+type RegistryUserSummary struct {
+	TotalAccounts     int64 `json:"totalAccounts"`
+	AdminAccounts     int64 `json:"adminAccounts"`
+	AttributedPlugins int64 `json:"attributedPlugins"`
+}
+
 type RegistryUserStore interface {
 	RecordLogin(ctx context.Context, user RegistryUserIdentity) error
-	ListUsers(ctx context.Context, search string, limit, offset int) ([]RegistryUser, int64, error)
+	ListUsers(ctx context.Context, search string, limit, offset int) ([]RegistryUser, int64, RegistryUserSummary, error)
 }
 
 type PostgresRegistryUserStore struct {
@@ -67,9 +73,9 @@ SET login = EXCLUDED.login,
 	return nil
 }
 
-func (s *PostgresRegistryUserStore) ListUsers(ctx context.Context, search string, limit, offset int) ([]RegistryUser, int64, error) {
+func (s *PostgresRegistryUserStore) ListUsers(ctx context.Context, search string, limit, offset int) ([]RegistryUser, int64, RegistryUserSummary, error) {
 	if s == nil || s.db == nil || s.db.Pool() == nil {
-		return nil, 0, fmt.Errorf("registry user database is not initialized")
+		return nil, 0, RegistryUserSummary{}, fmt.Errorf("registry user database is not initialized")
 	}
 	search = strings.TrimSpace(search)
 	var total int64
@@ -78,7 +84,21 @@ SELECT COUNT(*)::BIGINT
 FROM registry_users
 WHERE $1 = '' OR login ILIKE '%' || $1 || '%' OR name ILIKE '%' || $1 || '%'
 `, search).Scan(&total); err != nil {
-		return nil, 0, fmt.Errorf("count registry users: %w", err)
+		return nil, 0, RegistryUserSummary{}, fmt.Errorf("count registry users: %w", err)
+	}
+
+	var summary RegistryUserSummary
+	if err := s.db.Pool().QueryRow(ctx, `
+SELECT
+    (SELECT COUNT(*)::BIGINT FROM registry_users),
+    (SELECT COUNT(*)::BIGINT FROM registry_users WHERE role = 'admin'),
+    (SELECT COUNT(DISTINCT p.id)::BIGINT
+     FROM plugins p
+     JOIN registry_users u ON LOWER(COALESCE(p.author, '')) = u.login_key
+     WHERE p.deleted_at IS NULL
+       AND p.status IN ('active', 'pending'))
+`).Scan(&summary.TotalAccounts, &summary.AdminAccounts, &summary.AttributedPlugins); err != nil {
+		return nil, 0, RegistryUserSummary{}, fmt.Errorf("summarize registry users: %w", err)
 	}
 
 	rows, err := s.db.Pool().Query(ctx, `
@@ -96,7 +116,7 @@ ORDER BY u.last_seen_at DESC, u.login_key ASC
 LIMIT $2 OFFSET $3
 `, search, limit, offset)
 	if err != nil {
-		return nil, 0, fmt.Errorf("query registry users: %w", err)
+		return nil, 0, RegistryUserSummary{}, fmt.Errorf("query registry users: %w", err)
 	}
 	defer rows.Close()
 
@@ -107,12 +127,12 @@ LIMIT $2 OFFSET $3
 			&user.Login, &user.Name, &user.AvatarURL, &user.Role,
 			&user.FirstSeenAt, &user.LastSeenAt, &user.PluginCount, &user.PendingPluginCount,
 		); err != nil {
-			return nil, 0, fmt.Errorf("scan registry user: %w", err)
+			return nil, 0, RegistryUserSummary{}, fmt.Errorf("scan registry user: %w", err)
 		}
 		users = append(users, user)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, 0, fmt.Errorf("iterate registry users: %w", err)
+		return nil, 0, RegistryUserSummary{}, fmt.Errorf("iterate registry users: %w", err)
 	}
-	return users, total, nil
+	return users, total, summary, nil
 }

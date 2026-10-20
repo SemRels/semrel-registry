@@ -1535,7 +1535,48 @@
         ],
         "responses": {
           "200": {
-            "description": "Registered users and pagination metadata."
+            "description": "Registered users, global directory metrics, and pagination metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "login": { "type": "string" },
+                          "name": { "type": "string" },
+                          "avatarUrl": { "type": "string" },
+                          "role": { "type": "string", "enum": ["admin", "user"] },
+                          "firstSeenAt": { "type": "string", "format": "date-time" },
+                          "lastSeenAt": { "type": "string", "format": "date-time" },
+                          "pluginCount": { "type": "integer" },
+                          "pendingPluginCount": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "description": "Global metrics that are independent of search and pagination.",
+                      "properties": {
+                        "totalAccounts": { "type": "integer", "format": "int64" },
+                        "adminAccounts": { "type": "integer", "format": "int64" },
+                        "attributedPlugins": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Active and pending plugins attributed to tracked accounts."
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

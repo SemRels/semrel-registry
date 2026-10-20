@@ -27,9 +27,11 @@ func (s *registryUserStoreStub) RecordLogin(context.Context, service.RegistryUse
 	return nil
 }
 
-func (s *registryUserStoreStub) ListUsers(_ context.Context, search string, limit, offset int) ([]service.RegistryUser, int64, error) {
+func (s *registryUserStoreStub) ListUsers(_ context.Context, search string, limit, offset int) ([]service.RegistryUser, int64, service.RegistryUserSummary, error) {
 	s.search, s.limit, s.offset = search, limit, offset
-	return s.users, s.total, s.err
+	return s.users, s.total, service.RegistryUserSummary{
+		TotalAccounts: 51, AdminAccounts: 3, AttributedPlugins: 8,
+	}, s.err
 }
 
 func TestRegistryUserHandlerListsPaginatedUsers(t *testing.T) {
@@ -53,7 +55,8 @@ func TestRegistryUserHandlerListsPaginatedUsers(t *testing.T) {
 	require.Equal(t, 25, store.limit)
 	require.Equal(t, 25, store.offset)
 	var payload struct {
-		Data       []service.RegistryUser `json:"data"`
+		Data       []service.RegistryUser      `json:"data"`
+		Summary    service.RegistryUserSummary `json:"summary"`
 		Pagination struct {
 			Page  int   `json:"page"`
 			Total int64 `json:"total"`
@@ -63,6 +66,9 @@ func TestRegistryUserHandlerListsPaginatedUsers(t *testing.T) {
 	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &payload))
 	require.Len(t, payload.Data, 1)
 	require.Equal(t, int64(3), payload.Data[0].PluginCount)
+	require.Equal(t, service.RegistryUserSummary{
+		TotalAccounts: 51, AdminAccounts: 3, AttributedPlugins: 8,
+	}, payload.Summary)
 	require.Equal(t, 2, payload.Pagination.Page)
 	require.Equal(t, int64(51), payload.Pagination.Total)
 	require.Equal(t, 3, payload.Pagination.Pages)

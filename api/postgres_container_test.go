@@ -1113,6 +1113,38 @@ func TestPostgresProductionBehavior(t *testing.T) {
 	})
 }
 
+func TestRegistryUserSummaryIsGlobalAndAccurate(t *testing.T) {
+	dsn := testutil.DatabaseURL(t, ".")
+	db := migratedDatabase(t, createDatabase(t, dsn, "registry_user_metrics"))
+	ctx := context.Background()
+	store := service.NewPostgresRegistryUserStore(db)
+
+	require.NoError(t, store.RecordLogin(ctx, service.RegistryUserIdentity{
+		Login: "alice", Role: "admin",
+	}))
+	require.NoError(t, store.RecordLogin(ctx, service.RegistryUserIdentity{
+		Login: "bob", Role: "user",
+	}))
+	_, err := db.Pool().Exec(ctx, `
+		INSERT INTO plugins (name, category, repository, author, status, deleted_at)
+		VALUES
+			('alice-active', 'hook', 'https://github.com/example/alice-active', 'ALICE', 'active', NULL),
+			('bob-pending', 'hook', 'https://github.com/example/bob-pending', 'bob', 'pending', NULL),
+			('alice-deleted', 'hook', 'https://github.com/example/alice-deleted', 'alice', 'active', NOW()),
+			('untracked-author', 'hook', 'https://github.com/example/untracked-author', 'carol', 'active', NULL)
+	`)
+	require.NoError(t, err)
+
+	users, filteredTotal, summary, err := store.ListUsers(ctx, "alice", 1, 0)
+	require.NoError(t, err)
+	require.Len(t, users, 1)
+	assert.EqualValues(t, 1, filteredTotal)
+	assert.EqualValues(t, 1, users[0].PluginCount)
+	assert.Equal(t, service.RegistryUserSummary{
+		TotalAccounts: 2, AdminAccounts: 1, AttributedPlugins: 2,
+	}, summary)
+}
+
 func createDatabase(t *testing.T, adminDSN, name string) string {
 	t.Helper()
 	pool, err := pgxpool.New(context.Background(), adminDSN)

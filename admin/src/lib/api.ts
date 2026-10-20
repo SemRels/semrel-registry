@@ -241,6 +241,11 @@ export interface RegistryUser {
 
 export interface RegistryUserList {
   data: RegistryUser[];
+  summary: {
+    totalAccounts: number;
+    adminAccounts: number;
+    attributedPlugins: number;
+  };
   pagination: Pagination;
 }
 

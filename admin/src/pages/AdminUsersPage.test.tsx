@@ -21,6 +21,7 @@ describe('AdminUsersPage', () => {
         pluginCount: 3,
         pendingPluginCount: 1,
       }],
+      summary: { totalAccounts: 80, adminAccounts: 4, attributedPlugins: 20 },
       pagination: { page: 1, limit: 25, total: 1, pages: 1 },
     });
   });
@@ -35,6 +36,12 @@ describe('AdminUsersPage', () => {
     expect(screen.getByText('Alice Example')).toBeInTheDocument();
     expect(screen.getByText('Role at sign-in')).toBeInTheDocument();
     expect(screen.getByText('Last seen')).toBeInTheDocument();
+    expect(screen.getByText('Tracked accounts')).toBeInTheDocument();
+    expect(screen.getByText('80')).toBeInTheDocument();
+    expect(screen.getByText('Admin accounts')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getByText('Attributed plugins')).toBeInTheDocument();
+    expect(screen.getByText('20')).toBeInTheDocument();
     expect(listUsers).toHaveBeenCalledWith({ page: 1, limit: 25, search: '' });
   });
 

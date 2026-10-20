@@ -504,6 +504,7 @@ tbody tr:hover td { background: var(--surface-subtle); }
 .stat-card:nth-child(4)::before { background: var(--warning); }
 
 .stat-card__label { 
+  display: block;
   font-size: var(--fs-xs); 
   color: var(--text-muted); 
   text-transform: uppercase; 
@@ -512,6 +513,7 @@ tbody tr:hover td { background: var(--surface-subtle); }
   margin-bottom: .25rem; 
 }
 .stat-card__value { 
+  display: block;
   font-size: 1.75rem; 
   font-weight: 800; 
   line-height: 1.1; 

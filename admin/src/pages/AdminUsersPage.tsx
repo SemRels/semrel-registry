@@ -8,6 +8,7 @@ const PAGE_SIZE = 25;
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<RegistryUser[]>([]);
   const [total, setTotal] = useState(0);
+  const [summary, setSummary] = useState({ totalAccounts: 0, adminAccounts: 0, attributedPlugins: 0 });
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -30,6 +31,7 @@ export default function AdminUsersPage() {
         if (cancelled) return;
         setUsers(result.data ?? []);
         setTotal(result.pagination?.total ?? 0);
+        setSummary(result.summary);
         setError('');
       })
       .catch((cause: unknown) => {
@@ -41,8 +43,6 @@ export default function AdminUsersPage() {
     return () => { cancelled = true; };
   }, [page, search]);
 
-  const admins = users.filter((user) => user.role === 'admin').length;
-  const attributedPlugins = users.reduce((sum, user) => sum + user.pluginCount, 0);
   const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
@@ -57,20 +57,20 @@ export default function AdminUsersPage() {
       <div className="page__body">
         <div className="stats-grid mb-3">
           <article className="stat-card">
-            <span className="stat-card__label">Registered accounts</span>
-            <strong className="stat-card__value">{total.toLocaleString()}</strong>
+            <span className="stat-card__label">Tracked accounts</span>
+            <strong className="stat-card__value">{summary.totalAccounts.toLocaleString()}</strong>
           </article>
           <article className="stat-card">
-            <span className="stat-card__label">Admins on this page</span>
-            <strong className="stat-card__value">{admins}</strong>
+            <span className="stat-card__label">Admin accounts</span>
+            <strong className="stat-card__value">{summary.adminAccounts.toLocaleString()}</strong>
           </article>
           <article className="stat-card">
-            <span className="stat-card__label">Attributed plugins on this page</span>
-            <strong className="stat-card__value">{attributedPlugins}</strong>
+            <span className="stat-card__label">Attributed plugins</span>
+            <strong className="stat-card__value">{summary.attributedPlugins.toLocaleString()}</strong>
           </article>
         </div>
         <p className="muted text-xs mb-2">
-          Accounts are recorded when a user signs in. The role is the last role observed from GitHub; plugin counts include active and pending plugins attributed to that login.
+          Counts cover the full directory and do not change with search or pagination. Accounts are tracked from sign-in; plugin totals include active and pending plugins attributed to those accounts.
         </p>
         <div className="search-bar mb-2">
           <input

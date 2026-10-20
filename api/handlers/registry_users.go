@@ -42,7 +42,7 @@ func (h *RegistryUserHandler) List(c *gin.Context) {
 	}
 
 	offset := (page - 1) * limit
-	users, total, err := h.users.ListUsers(c.Request.Context(), search, limit, offset)
+	users, total, summary, err := h.users.ListUsers(c.Request.Context(), search, limit, offset)
 	if err != nil {
 		log.Printf("list registry users failed: %v", err)
 		writeError(c, http.StatusInternalServerError, "USER_DIRECTORY_FAILED", "could not load user directory", nil)
@@ -50,7 +50,8 @@ func (h *RegistryUserHandler) List(c *gin.Context) {
 	}
 	pages := int((total + int64(limit) - 1) / int64(limit))
 	c.JSON(http.StatusOK, gin.H{
-		"data": users,
+		"data":    users,
+		"summary": summary,
 		"pagination": gin.H{
 			"page": page, "limit": limit, "total": total, "pages": pages,
 		},
