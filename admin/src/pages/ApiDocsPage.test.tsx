@@ -17,7 +17,16 @@ describe('ApiDocsPage', () => {
             get: {
               tags: ['review'],
               summary: 'List registered users',
-              responses: { '200': { description: 'User directory.' } },
+              responses: {
+                '200': {
+                  description: 'User directory.',
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object', properties: { total: { type: 'integer' } } },
+                    },
+                  },
+                },
+              },
             },
           },
           '/api/v1/plugins': {
@@ -32,6 +41,10 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByRole('heading', { name: 'semrel registry API' })).toBeInTheDocument();
     expect(screen.getByText('List registered users')).toBeInTheDocument();
     expect(screen.getByText('List plugins')).toBeInTheDocument();
+    const responseSchema = screen.getByText(/"total"/);
+    expect(responseSchema.tagName).toBe('PRE');
+    expect(responseSchema).toHaveClass('api-operation__schema');
+    expect(responseSchema.parentElement).toHaveClass('api-operation__schema-content');
 
     await user.type(screen.getByRole('searchbox', { name: 'Filter API operations' }), 'users');
     expect(screen.getByText('List registered users')).toBeInTheDocument();

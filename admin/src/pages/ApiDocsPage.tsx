@@ -131,7 +131,9 @@ export default function ApiDocsPage() {
                           <li key={`${parameter.in}:${parameter.name}`}>
                             <code>{parameter.name}</code> <span className="muted">{parameter.in}{parameter.required ? ' · required' : ''}</span>
                             {parameter.description && <p>{parameter.description}</p>}
-                            {parameter.schema !== undefined && <pre>{JSON.stringify(parameter.schema, null, 2)}</pre>}
+                            {parameter.schema !== undefined && (
+                              <pre className="api-operation__schema">{JSON.stringify(parameter.schema, null, 2)}</pre>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -142,7 +144,12 @@ export default function ApiDocsPage() {
                       <h3>Request body{operation.requestBody.required ? ' · required' : ''}</h3>
                       {operation.requestBody.description && <p>{operation.requestBody.description}</p>}
                       {Object.entries(operation.requestBody.content ?? {}).map(([type, content]) => (
-                        <div key={type}><span className="pill pill--accent">{type}</span>{content.schema !== undefined && <pre>{JSON.stringify(content.schema, null, 2)}</pre>}</div>
+                        <div className="api-operation__schema-content" key={type}>
+                          <span className="pill pill--accent">{type}</span>
+                          {content.schema !== undefined && (
+                            <pre className="api-operation__schema">{JSON.stringify(content.schema, null, 2)}</pre>
+                          )}
+                        </div>
                       ))}
                     </section>
                   )}
@@ -155,9 +162,11 @@ export default function ApiDocsPage() {
                             <code>{status}</code>
                             <span>{response.description ?? 'Response'}</span>
                             {Object.entries(response.content ?? {}).map(([type, content]) => (
-                              <div key={type}>
+                              <div className="api-operation__schema-content" key={type}>
                                 <span className="pill pill--accent">{type}</span>
-                                {content.schema !== undefined && <pre>{JSON.stringify(content.schema, null, 2)}</pre>}
+                                {content.schema !== undefined && (
+                                  <pre className="api-operation__schema">{JSON.stringify(content.schema, null, 2)}</pre>
+                                )}
                               </div>
                             ))}
                           </li>
