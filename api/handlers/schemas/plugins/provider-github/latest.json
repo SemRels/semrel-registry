@@ -20,15 +20,47 @@
     },
     "SEMREL_PLUGIN_BASE_URL": {
       "type": "string",
-      "default": "https://github.com",
-      "description": "GitHub web base URL.",
+      "default": "https://api.github.com",
+      "description": "GitHub API base URL (overrides SEMREL_PLUGIN_API_URL and GITHUB_API_URL).",
       "format": "uri"
     },
     "SEMREL_PLUGIN_API_URL": {
       "type": "string",
       "default": "https://api.github.com",
-      "description": "GitHub API base URL.",
+      "description": "GitHub API base URL (overrides GITHUB_API_URL).",
       "format": "uri"
+    },
+    "GITHUB_API_URL": {
+      "type": "string",
+      "default": "https://api.github.com",
+      "description": "GitHub API base URL set automatically by GitHub Actions on github.com and GitHub Enterprise Server.",
+      "format": "uri"
+    },
+    "SEMREL_PLUGIN_CA_CERT": {
+      "type": "string",
+      "description": "Optional path to a custom PEM-encoded CA certificate bundle added to the HTTP client's trusted roots (for self-signed or internal GHES certificates)."
+    },
+    "SEMREL_PLUGIN_INSECURE_SKIP_VERIFY": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "false",
+      "description": "Skip TLS certificate verification when connecting to GitHub API endpoints (use only as a last resort)."
+    },
+    "SEMREL_PLUGIN_COMMENT_ON_PRS": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "true",
+      "description": "Add an idempotent release comment to pull requests associated with commits in the release."
     },
     "SEMREL_PLUGIN_DRAFT": {
       "type": "string",
