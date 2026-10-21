@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-19T08:20:37.630Z",
+  "generatedAt": "2026-10-21T08:10:35.168Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -4533,6 +4533,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.1.6",
+          "releaseDate": "2026-10-20T14:00:30Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.1.6/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cd1e3b21d29e7d51ab4fb2ccb224de97602c249e724f005b02eb92ab6caab4a8",
+            "linux_arm64": "6b592315736c25bed827151cea0d4773fec46834790f8545585259a6cdc6c0b3",
+            "darwin_amd64": "19fd74cdd082bb9962bb1e366560d359075e82dd07aab73a105984197464c5c8",
+            "darwin_arm64": "db84e50d9296cbaaaeda7860a4028824684fff9f7ae638042d0fd91a5f583f35",
+            "windows_amd64": "5242b0951cdadb4c9139006f5779dff09dfa20c348c61beb6d3c0c046d33cec1",
+            "windows_arm64": "5ef9e81fab01d4fe19b24defc8f23092cd232367e80b6052ec60188dee5854ae"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## What's Changed\n* build(deps): Bump aquasecurity/trivy-action from 0.24.0 to 0.36.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/2\n* build(deps): Bump github/codeql-action/upload-sarif from 4.36.2 to 4.38.1 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/1\n* build(deps): Bump actions/checkout from 7.0.0 to 7.0.1 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/3\n* build(deps): Bump docker/build-push-action from 6.16.0 to 7.4.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/4\n* build(deps): Bump docker/login-action from 3.4.0 to 4.6.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/5\n* build(deps): Bump softprops/action-gh-release from 3.0.1 to 3.0.3 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/8\n* build(deps): Bump ossf/scorecard-action from 2.4.3 to 2.4.4 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/9\n* build(deps): Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/11\n* chore: automatically label pull requests by @mwaldheim in https://github.com/SemRels/updater-zig/pull/12\n* build(deps): Bump docker/metadata-action from 5.10.0 to 6.2.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/7\n* build(deps): Bump actions/setup-go from 6.4.0 to 7.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/10\n* build(deps): Bump actions/github-script from 8.0.0 to 9.0.0 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/13\n* build(deps): Bump actions/download-artifact from 8.0.1 to 8.0.2 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/14\n* build(deps): Bump actions/upload-artifact from 7.0.1 to 7.0.2 by @dependabot[bot] in https://github.com/SemRels/updater-zig/pull/15\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/SemRels/updater-zig/pull/2\n* @mwaldheim made their first contribution in https://github.com/SemRels/updater-zig/pull/12\n\n**Full Changelog**: https://github.com/SemRels/updater-zig/compare/v0.1.5...v0.1.6"
+        },
         {
           "version": "0.1.5",
           "releaseDate": "2026-09-21T15:29:06Z",
