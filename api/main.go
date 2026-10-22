@@ -127,10 +127,12 @@ func main() {
 		log.Fatalf("startup seed failed: %v", err)
 	}
 
+	syncHandler := handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret).WithWebhooks(webhookRepo)
 	router := newRouter(pluginService, routerDependencies{
 		metrics:  metricsRecorder,
 		stats:    statsProvider,
 		webhooks: webhookRepo,
+		syncer:   syncHandler,
 		rateLimCfg: middleware.RateLimitConfig{
 			Enabled:    cfg.RateLimitEnabled,
 			PublicRPM:  cfg.RateLimitPublicRPM,
@@ -172,17 +174,37 @@ func main() {
 		}
 	}()
 
+	var cancelVersionSync context.CancelFunc
+	done := make(chan struct{})
+	close(done)
+	var versionSyncDone <-chan struct{} = done
+	if cfg.GitHubToken == "" {
+		log.Printf("scheduled version sync disabled: configure GITHUB_TOKEN to avoid GitHub's unauthenticated API rate limit")
+	} else {
+		versionSyncCtx, cancel := context.WithCancel(context.Background())
+		cancelVersionSync = cancel
+		versionSyncDone = startScheduledVersionSync(versionSyncCtx, syncHandler, pool)
+	}
+
 	// Drain in-flight requests on SIGTERM so a deploy does not cut off a write
 	// midway through.
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 	log.Printf("shutdown signal received; draining connections")
+	if cancelVersionSync != nil {
+		cancelVersionSync()
+	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	if shutdownErr := server.Shutdown(shutdownCtx); shutdownErr != nil {
 		log.Printf("graceful shutdown failed: %v", shutdownErr)
+	}
+	select {
+	case <-versionSyncDone:
+	case <-shutdownCtx.Done():
+		log.Printf("scheduled version sync did not stop before shutdown timeout")
 	}
 }
 
@@ -191,6 +213,7 @@ type routerDependencies struct {
 	stats      service.RegistryStatsProvider
 	users      service.RegistryUserStore
 	webhooks   repository.WebhookRepository
+	syncer     *handlers.SyncHandler
 	rateLimCfg middleware.RateLimitConfig
 	cfg        *config.Config
 }
@@ -201,6 +224,7 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	var userStore service.RegistryUserStore
 	var webhookRepo repository.WebhookRepository
 	var rlCfg middleware.RateLimitConfig
+	var syncHandler *handlers.SyncHandler
 	cfg := &config.Config{}
 	if len(deps) > 0 {
 		if deps[0].metrics != nil {
@@ -211,6 +235,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 		}
 		userStore = deps[0].users
 		webhookRepo = deps[0].webhooks
+		if deps[0].syncer != nil {
+			syncHandler = deps[0].syncer
+		}
 		rlCfg = deps[0].rateLimCfg
 		if deps[0].cfg != nil {
 			cfg = deps[0].cfg
@@ -292,7 +319,9 @@ func newRouter(pluginService service.PluginManager, deps ...routerDependencies) 
 	// harder than an ordinary read even though it needs no authentication.
 	api.POST("/plugins/validate", rlWrite, handlers.ValidatePlugin)
 
-	syncHandler := handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret).WithWebhooks(webhookRepo)
+	if syncHandler == nil {
+		syncHandler = handlers.NewSyncHandlerWithSecret(pluginService, cfg.WebhookSecret).WithWebhooks(webhookRepo)
+	}
 
 	// Sitemap for SEO — lists all active plugin pages.
 	sitemapHandler := handlers.NewSitemapHandler(pluginService)
