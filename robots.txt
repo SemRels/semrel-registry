@@ -1,0 +1,12 @@
+# registry.semrel.io – robots.txt
+User-agent: *
+Allow: /
+
+# Don't index admin panel
+Disallow: /admin/
+
+# API endpoints — allow crawlers to discover plugin names but not index raw JSON
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://registry.semrel.io/sitemap.xml
