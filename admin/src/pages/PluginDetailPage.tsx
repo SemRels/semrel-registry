@@ -6,6 +6,7 @@ import ReadmeSection from '../components/ReadmeSection';
 import { revalidatePlugin } from '../lib/api';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import type { ValidationResult } from '../lib/api';
+import { stripReleaseVersionHeading } from '../lib/release-notes';
 
 /** Creates or updates a <meta> tag in the document head. */
 function setOrCreate(selector: string, attr: string, attrValue: string, content: string) {
@@ -495,7 +496,7 @@ export default function PluginDetailPage() {
                           {expandedVersionId === v.id && v.changelog && (
                             <tr key={`${v.id}-notes`}>
                               <td colSpan={5} className="plugin-versions-table__notes">
-                                <MarkdownContent md={v.changelog} />
+                                <MarkdownContent md={stripReleaseVersionHeading(v.changelog, v.version)} />
                               </td>
                             </tr>
                           )}
@@ -513,7 +514,7 @@ export default function PluginDetailPage() {
                 <h2 className="section-card__title">
                   Release notes <span className="muted count-suffix">v{latest.version}</span>
                 </h2>
-                <MarkdownContent md={latest.changelog} />
+                <MarkdownContent md={stripReleaseVersionHeading(latest.changelog, latest.version)} />
               </section>
             )}
 

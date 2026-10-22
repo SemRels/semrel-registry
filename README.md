@@ -14,10 +14,17 @@ Central registry for [semrel](https://github.com/SemRels/semrel) plugins — a G
 The registry is the canonical source for published semrel plugins.
 
 1. Plugin authors publish versioned GitHub Releases in their own repositories.
-2. A `repository_dispatch` webhook notifies the registry (`POST /api/v1/webhooks/release`).
-3. The registry validates metadata, stores plugin and version records, and updates `plugins.json`.
-4. Consumers fetch the index via `GET /plugins.json` or browse individual plugins via the REST API.
-5. The `semrel` CLI respects `SEMREL_REGISTRY_URL` to discover plugins from a custom registry.
+2. A `repository_dispatch` webhook notifies the registry (`POST /api/v1/webhooks/release`) so new releases are imported promptly.
+3. The API also checks registered plugins' GitHub Releases once at startup and hourly, importing any versions missed by webhooks.
+4. The registry validates metadata and stores plugin and version records in its configured storage backend.
+5. Consumers fetch the index via `GET /plugins.json` or browse individual plugins via the REST API.
+6. The `semrel` CLI respects `SEMREL_REGISTRY_URL` to discover plugins from a custom registry.
+
+The scheduled sync requires `GITHUB_TOKEN` to stay within GitHub's authenticated
+API rate limit. PostgreSQL-backed instances coordinate so only one runs the
+scheduled sync at a time; file-backed deployments coordinate within their
+process. The admin endpoint `POST /api/v1/admin/sync-versions` remains
+available for manual runs.
 
 For update-aware clients, each plugin's `versions` array is the source for version checks; clients are expected to select the highest stable release (`prerelease: false`) as the default update target.
 
@@ -26,6 +33,18 @@ Supported plugin categories in the registry are currently `provider`, `analyzer`
 ## For plugin authors
 
 See the [registry API docs](https://semrel.io/api/registry) for the full endpoint reference.
+
+Plugin release workflows dispatch new versions with the `REGISTRY_SYNC_TOKEN`
+GitHub Actions secret. Create a fine-grained token with `Contents: write`
+access to `SemRels/semrel-registry`, then add it as an organization Actions
+secret and grant access to the plugin repositories. If it is unset, the
+workflow logs that dispatch was skipped.
+
+The API also accepts authenticated HMAC webhooks using its deployment-side
+`WEBHOOK_SECRET`. The current plugin workflow's `REGISTRY_SYNC_WEBHOOK` fallback
+does not sign requests, so it cannot call that protected endpoint in
+production; use `REGISTRY_SYNC_TOKEN` for dispatch. The in-app hourly sync is a
+separate fallback and requires `GITHUB_TOKEN` in the registry deployment.
 
 ## For contributors
 
