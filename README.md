@@ -34,12 +34,16 @@ Supported plugin categories in the registry are currently `provider`, `analyzer`
 
 See the [registry API docs](https://semrel.io/api/registry) for the full endpoint reference.
 
-Plugin release workflows can dispatch new versions immediately with the
-`REGISTRY_SYNC_TOKEN` GitHub Actions secret. Create a fine-grained token with
-`Contents: write` access to `SemRels/semrel-registry`, then add it as an
-organization Actions secret and grant access to the plugin repositories. The
-workflow also accepts `REGISTRY_SYNC_WEBHOOK` as a fallback; if neither secret
-is configured, it logs that dispatch was skipped. The in-app hourly sync is a
+Plugin release workflows dispatch new versions with the `REGISTRY_SYNC_TOKEN`
+GitHub Actions secret. Create a fine-grained token with `Contents: write`
+access to `SemRels/semrel-registry`, then add it as an organization Actions
+secret and grant access to the plugin repositories. If it is unset, the
+workflow logs that dispatch was skipped.
+
+The API also accepts authenticated HMAC webhooks using its deployment-side
+`WEBHOOK_SECRET`. The current plugin workflow's `REGISTRY_SYNC_WEBHOOK` fallback
+does not sign requests, so it cannot call that protected endpoint in
+production; use `REGISTRY_SYNC_TOKEN` for dispatch. The in-app hourly sync is a
 separate fallback and requires `GITHUB_TOKEN` in the registry deployment.
 
 ## For contributors

@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: ["1.26"]
+        go: ["1.27"]
     defaults:
       run:
         working-directory: api
@@ -57,7 +57,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26"
+          go-version: "1.27"
           cache-dependency-path: api/go.sum
       # Reports only the vulnerabilities that are actually reachable from this
       # code, so a finding here is a real exposure rather than a version match.
@@ -93,7 +93,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26"
+          go-version: "1.27"
           cache-dependency-path: api/go.sum
       - name: Run golangci-lint
         working-directory: api
