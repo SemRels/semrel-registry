@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T08:10:35.168Z",
+  "generatedAt": "2026-10-22T08:11:03.127Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -21,6 +21,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:49:51Z",
+          "downloadUrl": "https://github.com/SemRels/provider-bitbucket/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "a59fd2f73647e05e152d842e9c97b6ea274ddde6870c6b1ec098a3a24737b6de",
+            "linux_arm64": "b036013862439ce4c0e92a476fd83dcc1c345f7db2be8b377a6ba78c892eeaa3",
+            "darwin_amd64": "36995daafd5b04871f5935e48176381d7d1002f15df3234bd5bf915450c77604",
+            "darwin_arm64": "22b5fb106921779f58c6ca26db82e160f414c4263bd87626b1de96eb4e7ce0de",
+            "windows_amd64": "4684fd6ed6ee91fd3b2d8b8f525be452d5b3b7b17b73942a2c6ac61fbe72aa38",
+            "windows_arm64": "30391eaf580f734830fbd4c1b82ee8b4a3ea110bb19ef82ba19bfa4cd17ffee3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.3 to 4.39.0 (#62)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#61)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#60)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#59)\n* **deps:** bump github/codeql-action/upload-sarif (#58)\n* comment on PRs included in releases (#55)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#50)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#51)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#52)\n* **deps:** bump github/codeql-action/upload-sarif (#53)\n* **deps:** bump github/codeql-action/upload-sarif (#49)\n* test against stable Go 1.27 instead of the release candidate (#48)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#47)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#46)\n* **deps:** bump github/codeql-action/upload-sarif (#45)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#44)\n* **deps:** bump github/codeql-action/upload-sarif (#41)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#42)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#43)"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:47:41Z",
@@ -157,6 +176,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:46:30Z",
+          "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9585d24672da84a6ec1777f752954a691bc3cdd37869052246f9adff7ffef8f2",
+            "linux_arm64": "4d2507a123dcbb4a29be7645fba1b7059adf2f9a42811c81d45c527d14af2b40",
+            "darwin_amd64": "2631623e2c8e51373bf05b3a1e75cc69d76a75271194a67808dd87f5c9591118",
+            "darwin_arm64": "b50f5262d31ac4f3759bc4c466591993aeb273d3ac3857a4beb02c996e4ab5f9",
+            "windows_amd64": "fdbba4cdb0f55e9a1daf2a071012e6729685aa9d9fddf0936ebf9f0901d2de35",
+            "windows_arm64": "2340a8db74606152892620daf9448f5432ad4a38a5a3914448be65829ddb11c8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* support legacy semrel release asset names (#42)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* format go sources\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump github/codeql-action/upload-sarif (#64)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#63)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#62)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#55)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#56)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#57)\n* **deps:** Bump github/codeql-action/upload-sarif (#58)\n* **deps:** Bump github/codeql-action/upload-sarif (#54)\n* test against stable Go 1.27 instead of the release candidate (#53)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#52)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump github/codeql-action/upload-sarif (#50)\n* **deps:** Bump github.com/stretchr/testify from 1.12.0 to 1.12.1 (#43)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#45)\n* **deps:** Bump actions/setup-go from 6.4.0 to 7.0.0 (#46)\n* **deps:** Bump github/codeql-action/upload-sarif (#47)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#48)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#49)"
+        },
+        {
           "version": "0.4.4",
           "releaseDate": "2026-08-17T20:46:35Z",
           "downloadUrl": "https://github.com/SemRels/provider-git/releases/download/v0.4.4/plugin-linux-amd64",
@@ -292,6 +330,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:51:14Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3024ca129a11ef9ce9d93894a46b7b2f9beb0c75792ee3f1c871d9831431fcbd",
+            "linux_arm64": "e164be2b80ce413d667230e043a2b33ba5d16bb6a897e8191eeb156c8cf55300",
+            "darwin_amd64": "b99f3b277f8408903f75db0d18d6ab34c8af40f00a01202f98f22c3f128685b5",
+            "darwin_arm64": "71db3e50f5cabe2bb2e8d3adabcd642ed4e22f187cc3ffe6ca797fa1e7f945f8",
+            "windows_amd64": "3829b66249aa0807ff969bedd4470393ba887eebe6e80a4accc4490257502b01",
+            "windows_arm64": "8803d4c9b3dc9b0e8f63ba7a5f66c47f32495689959d89658482a2dd29cd7668"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#66)\n* **deps:** Bump github/codeql-action/upload-sarif (#65)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#64)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#63)\n* **deps:** Bump github/codeql-action/upload-sarif (#62)\n* comment on PRs included in releases (#59)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#54)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#55)\n* **deps:** Bump github/codeql-action/upload-sarif (#56)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#57)\n* **deps:** Bump github/codeql-action/upload-sarif (#53)\n* test against stable Go 1.27 instead of the release candidate (#52)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#50)\n* **deps:** Bump github/codeql-action/upload-sarif (#49)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#48)\n* **deps:** Bump github.com/stretchr/testify from 1.10.0 to 1.12.1 (#44)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#45)\n* **deps:** Bump github/codeql-action/upload-sarif (#46)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#47)"
+        },
+        {
           "version": "0.4.3",
           "releaseDate": "2026-08-17T20:47:35Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitea/releases/download/v0.4.3/plugin-linux-amd64",
@@ -426,6 +483,25 @@
         "releases"
       ],
       "versions": [
+        {
+          "version": "0.6.0",
+          "releaseDate": "2026-10-21T18:46:00Z",
+          "downloadUrl": "https://github.com/SemRels/provider-github/releases/download/v0.6.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "257a7b5eff9a9e71fc8095b02d3b8e25ad646337aede92b11d2c7a81956571ed",
+            "linux_arm64": "04703ddc7579adfabc01af286c4fce87ceb1e96c1d09acafa5eeb4ddb03b9066",
+            "darwin_amd64": "b93696987ea281b249e168bcd8d30d9afb6605ea61b8996ce6d63363e42f57c8",
+            "darwin_arm64": "ab6cf2d5bd0850222253178a6ea6fd246cab3d95a626799eda65cb06e7475b88",
+            "windows_amd64": "e11304b7c31a3f638ea5ac7ccdedff92eeb4944fa642e1987562fd7e492d11f4",
+            "windows_arm64": "de3d020a6af12ce61f214ca15e9ce85c60637fca1e28617b8f80d01ed865ae50"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.6.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n* support GitHub Enterprise Server (GHES)\n\n### Bug Fixes\n\n* support legacy semrel release asset names (#45)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#67)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#66)\n* **deps:** bump github/codeql-action/upload-sarif (#65)\n* comment on PRs included in releases (#62)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#57)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#58)\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#59)\n* **deps:** bump github/codeql-action/upload-sarif (#60)\n* **deps:** bump github/codeql-action/upload-sarif (#56)\n* test against stable Go 1.27 instead of the release candidate (#55)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#54)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#53)\n* **deps:** bump github/codeql-action/upload-sarif (#52)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#46)\n* **deps:** bump github/codeql-action/upload-sarif (#47)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#48)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#49)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#50)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#51)"
+        },
         {
           "version": "0.5.3",
           "releaseDate": "2026-08-25T07:08:22Z",
@@ -581,6 +657,25 @@
       ],
       "versions": [
         {
+          "version": "0.6.0",
+          "releaseDate": "2026-10-21T17:47:28Z",
+          "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.6.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "30b4c8842282cd606ae08a40878bab6316219a7f3374d3eb8488d33fb34c3c93",
+            "linux_arm64": "ade7d6473c135bd1226a6e1f9a91331dfd6f9dc09965047ba7ed92e7d8b295d1",
+            "darwin_amd64": "c8c7a8ca9bd73def14dbb6c45964f0d3725d28fe5ba0158286939843a840d7c5",
+            "darwin_arm64": "02db6131064c551d5e26dee00c99acfb2ffbf45e0df7cd3bb7e6cb3a677d475e",
+            "windows_amd64": "2aeef521ac7028aed4fc19b0a8a8e7952fa28055226f6b7862c7f0794e096c80",
+            "windows_arm64": "a7901ac2d9a883fd0ca67af3bb276f8ad0da595ac31188d46b7e3299b586723d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.6.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump github/codeql-action/upload-sarif (#69)\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#68)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#67)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#65)\n* comment on MRs included in releases (#62)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#57)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#58)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#59)\n* **deps:** Bump github/codeql-action/upload-sarif (#60)\n* **deps:** Bump github/codeql-action/upload-sarif (#56)\n* test against stable Go 1.27 instead of the release candidate (#55)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#54)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#53)\n* **deps:** Bump github/codeql-action/upload-sarif (#52)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#51)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#47)\n* **deps:** Bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 (#48)\n* **deps:** Bump github/codeql-action/upload-sarif (#49)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#50)"
+        },
+        {
           "version": "0.5.3",
           "releaseDate": "2026-08-17T20:47:40Z",
           "downloadUrl": "https://github.com/SemRels/provider-gitlab/releases/download/v0.5.3/plugin-linux-amd64",
@@ -716,6 +811,44 @@
       ],
       "versions": [
         {
+          "version": "0.4.1",
+          "releaseDate": "2026-10-21T16:19:24Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d160fe1e63fbeecaf665bc6c7ffe02a0cbbed4be5db29aaa54228391cc0dde0a",
+            "linux_arm64": "4f7e0b729e76f60f60e311229875b36bd2a6e7ce993871b213c8245902276141",
+            "darwin_amd64": "5a6065ca2a918e0fc5c8b7ce2beca9275fd7f68ab42da86852566b1ba22d899e",
+            "darwin_arm64": "3546a12888c23607e7750e9d457696da8e17e96482e64e2bcf4a348b7e856c67",
+            "windows_amd64": "68954cee220cda8c35203f7873da3feb16679ca0a711104d08034a7e4d812156",
+            "windows_arm64": "377485b71306ba1b010d62f7d9790fd2b544e1144a915f74dcb2484911add05e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.1 (2026-10-21)\n\n### Other Changes\n\n* add more allowed rules to semrel config\n* **deps:** update gcr.io/distroless/static-debian13:nonroot docker digest to d620678 (#80)"
+        },
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T15:11:35Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "cf1d080a9bf51d7ffc41c2909f41a371a9151197d4c469c20c6336eb98b51b60",
+            "linux_arm64": "b9b006006df15c4655725392c185c3246ea4d4426aaf42d8dbb6977674ac5ec5",
+            "darwin_amd64": "46f0d5a8a88e7acda9c79cad36a616f7481a090c85fd3af7795508f0720f5024",
+            "darwin_arm64": "6ad94b15c85367c1edd195211fe1e96102043e010d8bf2d624dab18da6872e76",
+            "windows_amd64": "d488061c8c7050050e989eb2db00d8a1215e9680f63a17315bef56faf0db6789",
+            "windows_arm64": "6d2189470bee69e0f1648b27fa9d6b82618fbab205314f193fc1ff933e80ecf4"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* grant auto-label workflow write permission\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* format go sources\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* standardize automatic pull request labels\n* automate pull request labels\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#71)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#70)\n* **deps:** Bump github/codeql-action/upload-sarif (#69)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#62)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#63)\n* **deps:** Bump github/codeql-action/upload-sarif (#64)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#65)\n* test against stable Go 1.27 instead of the release candidate (#60)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#59)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#58)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#57)\n* **deps:** Bump github/codeql-action/upload-sarif (#56)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#55)\n* **deps:** Bump github.com/stretchr/testify from 1.12.0 to 1.12.1 (#49)\n* **deps:** Bump fsfe/reuse-action from 5.0.0 to 6.0.0 (#50)\n* **deps:** Bump github/codeql-action/upload-sarif (#51)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#52)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#53)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#54)"
+        },
+        {
           "version": "0.3.6",
           "releaseDate": "2026-08-17T20:48:41Z",
           "downloadUrl": "https://github.com/SemRels/analyzer-conventional/releases/download/v0.3.6/plugin-linux-amd64",
@@ -850,6 +983,44 @@
         "semver"
       ],
       "versions": [
+        {
+          "version": "0.5.1",
+          "releaseDate": "2026-10-21T16:37:06Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.5.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "10595b0485082f1c100cc4ca7073c44aa058e666f2e48d886d684b5a31e447bc",
+            "linux_arm64": "0787532a23724a5f64f07d1caeff4e5673a727f860e8d70c1e99f1287547882f",
+            "darwin_amd64": "00f2ade8d8ca3810cc9625b87d502ce2e620c8cceca7e3e29f5822e58c8befbb",
+            "darwin_arm64": "e54c6e12471a0f20f4aa3edf7bb48f7f03c10324f5bcdd94784660010e8761e7",
+            "windows_amd64": "8248f06dfc393a50288c772c3b643542f001841242019daf6ca97075219c4f4d",
+            "windows_arm64": "b697858611bc0330a276a8f49d1888a5077828f6a4eff721eb56fe95ac379bde"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.1 (2026-10-21)\n\n### Other Changes\n\n* **deps:** update gcr.io/distroless/static-debian13:nonroot docker digest to d620678 (#83)\n* **tools:** update github/codeql-action digest to 9b32540 (#82)"
+        },
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T16:28:30Z",
+          "downloadUrl": "https://github.com/SemRels/analyzer-default/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1f74c68b2ff81c3787350d082d86891e42a33aad4aad31ab89c54e120e683993",
+            "linux_arm64": "be037e68c83449a95936265ef870acacc6e924f4289be9622909ea072b8f75f2",
+            "darwin_amd64": "a34d76fd4994b304e0ba95129220122ecc02e60d3ee50657378931a5fff0a7e0",
+            "darwin_arm64": "917fd2ccd816f419049ca19ef1bcef26d4319cd7ffe166a4ccd49c08e7cda142",
+            "windows_amd64": "dabd54e2ab7b65ef0f645550428528d6a14c3226d167cef8d54326c5750b9115",
+            "windows_arm64": "6d8182d301ca5b96156459684c688fcb28b69d30bd846b6a58e03436e2309750"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#74)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#73)\n* **deps:** Bump github/codeql-action/upload-sarif (#72)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#65)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#66)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#67)\n* **deps:** Bump github/codeql-action/upload-sarif (#68)\n* **deps:** Bump github/codeql-action/upload-sarif (#64)\n* test against stable Go 1.27 instead of the release candidate (#63)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#62)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#61)\n* **deps:** Bump github/codeql-action/upload-sarif (#60)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#59)\n* **deps:** Bump github.com/stretchr/testify from 1.12.0 to 1.12.1 (#55)\n* **deps:** Bump github/codeql-action/upload-sarif (#56)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#57)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#58)"
+        },
         {
           "version": "0.4.6",
           "releaseDate": "2026-08-17T20:48:58Z",
@@ -1005,6 +1176,25 @@
       ],
       "versions": [
         {
+          "version": "0.7.0",
+          "releaseDate": "2026-10-21T17:50:30Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.7.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b7e5806338be69be4022e40707d883e42e76c214fe182816b1bb52d4f727e299",
+            "linux_arm64": "e38a1d4212393b2d4d0f7e92019c56db05f28507d66ea1b971dbbf82eebdbff8",
+            "darwin_amd64": "1462cd1f7a791b74da5ba389d8304533b8140d7930f3f558fb5d4ae2e188be4f",
+            "darwin_arm64": "ad39f876376524cd02a180d1f307c6d276b7b0129e779f2474cc4ac9cb39a9b7",
+            "windows_amd64": "bf1e38fce577288e799b4ca58d2c3f8977ba713f940eb4036db963a729c7df2e",
+            "windows_arm64": "1ecf0eba027f0fa6ab74e86aa0271efdd68162ae15418b3d905b09fb988568d5"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.7.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#62)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#61)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#56)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#57)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#58)\n* test against stable Go 1.27 instead of the release candidate (#55)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#54)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#53)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#52)\n* **deps:** Bump github.com/stretchr/testify from 1.12.0 to 1.12.1 (#49)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#50)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#51)"
+        },
+        {
           "version": "0.6.3",
           "releaseDate": "2026-08-17T20:43:26Z",
           "downloadUrl": "https://github.com/SemRels/generator-changelog-html/releases/download/v0.6.3/plugin-linux-amd64",
@@ -1158,6 +1348,25 @@
         "generator"
       ],
       "versions": [
+        {
+          "version": "0.8.0",
+          "releaseDate": "2026-10-21T17:50:50Z",
+          "downloadUrl": "https://github.com/SemRels/generator-changelog-md/releases/download/v0.8.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "225f23784b040aae2e0b9591a185ed8a5a66639549cbefba1cfa29ed9953bc95",
+            "linux_arm64": "0d3c142c2e422d64795573d50d7c0c8165a3708cad56d79c86fdbe0e53d05da9",
+            "darwin_amd64": "930753a77e66ae47b821cf8fc19fd387c73df875f0fff4d518fc1effc1d9dfa7",
+            "darwin_arm64": "63ca5d0d68e84ff41177284211a004c7b3440bc166441971f76a57e6b51ce888",
+            "windows_amd64": "a35e5f99ee94322ed9375d3c4aa1113e8ea620446f0e3ce7f0b25fa58cafb730",
+            "windows_arm64": "daa40fa2545240dfc1e0f94722f696b73b568374685cf7f8f8452e742a29b12c"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.8.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* format go sources\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#70)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#69)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#64)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#65)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#66)\n* test against stable Go 1.27 instead of the release candidate (#63)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#62)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#61)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#60)\n* **deps:** Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#58)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#59)\n* remove debug output from digest verification step"
+        },
         {
           "version": "0.7.7",
           "releaseDate": "2026-08-17T20:37:36Z",
@@ -1408,6 +1617,25 @@
       ],
       "versions": [
         {
+          "version": "0.7.0",
+          "releaseDate": "2026-10-21T17:48:25Z",
+          "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.7.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "9b4878909e2c337a43a9d7a3b2626673caade0b8f06aaddf2c1ddb69662fd900",
+            "linux_arm64": "3104434a278298bb030bb333f1c8a3d8de40c96b8bb1793ea86fb7c3894cba03",
+            "darwin_amd64": "3ecf1b777b941bbfe427bdde27071bf86f0678dc77fdeb1c2ba9128134c453fe",
+            "darwin_arm64": "74c5bf6c0ffb105182a5df0dca730aa1588ee8b6e9d39e16c67491b3f6f725a1",
+            "windows_amd64": "e198b44b96202beae9b0bae147f753fc550a97c894c8ab9aaceec7fe61ad5cc1",
+            "windows_arm64": "af0ccaecb8c5a5f5b6b2c6d69144a5045c61aad3fc50cd1a22b0bb4c1c218734"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.7.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* **release:** skip build on existing releases\n* **release:** skip already published releases\n* skip duplicate release orchestration\n* extract semrel binary into staging directory (#56)\n* indent semrel download step (#55)\n* support legacy semrel release asset names (#51)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#66)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#65)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#60)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#61)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#62)\n* test against stable Go 1.27 instead of the release candidate (#59)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#58)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#57)\n* **deps:** Bump github.com/stretchr/testify from 1.12.0 to 1.12.1 (#52)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#53)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#54)"
+        },
+        {
           "version": "0.6.3",
           "releaseDate": "2026-08-17T20:44:45Z",
           "downloadUrl": "https://github.com/SemRels/generator-release-notes/releases/download/v0.6.3/plugin-linux-amd64",
@@ -1561,6 +1789,44 @@
         "workflow"
       ],
       "versions": [
+        {
+          "version": "0.5.1",
+          "releaseDate": "2026-10-21T17:06:20Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.5.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "b74d7fe51c67736f77debaf2888c6a6146bbcc29a376e083a3b1dbbbba46c7e7",
+            "linux_arm64": "104eed3133cbc2e401d15f987d12bf9a04db6504e522d5a74658df22ce64b930",
+            "darwin_amd64": "3ba45a3de4ed0d00a872e2135ff3c42cd1bf1a9741a1e5382e59b13a59dd9e72",
+            "darwin_arm64": "2076fd0f1785b269fc02ff4b8c3f0eeae15c0f2df20c4fce75ed5b1e5d78a510",
+            "windows_amd64": "7b66b8ed06d255114a5e6795b1f4ba0b07ecd8a5bed49874ad1001b2cbb4b2db",
+            "windows_arm64": "7554a4da2af267525566980916a5262b14032fef10321886e5f1b9227d63b490"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.1 (2026-10-21)\n\n### Other Changes\n\n* **deps:** update gcr.io/distroless/static-debian13:nonroot docker digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540"
+        },
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T16:47:10Z",
+          "downloadUrl": "https://github.com/SemRels/condition-generic/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "26ac686a4d986e33be68c7ef4272ced28d8ea5197a92d8228317099a4d03ff9d",
+            "linux_arm64": "194ee717407f28e5d7ef6a08cc85a4bc617f9065e6b8ec4d1cc25c170a3299eb",
+            "darwin_amd64": "fda70e359c31b3cf4a7c6f33ac912060f51eacdd84d48f83a05f1246c42536ed",
+            "darwin_arm64": "f977f773d5c592e6bfeb577abef7c334579c556a81d8f31f3965f3fc8fd6d3ee",
+            "windows_amd64": "f3f61d9c3d92b374ea30f1c7548a459cbec57e921f5f97128119393f9bdee5de",
+            "windows_arm64": "5f1225ce307b05401dbd555d969db9405e9fe2f5ed174b6987dc0aec9799e220"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#68)\n* **deps:** Bump github/codeql-action/upload-sarif (#67)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#66)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2 (#65)\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#64)\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump github/codeql-action/upload-sarif (#57)\n* test against stable Go 1.27 instead of the release candidate (#56)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#55)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#54)\n* **deps:** Bump github/codeql-action/upload-sarif (#53)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#50)\n* **deps:** Bump github/codeql-action/upload-sarif (#51)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#52)\n* **deps:** Bump github/codeql-action/upload-sarif (#46)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#47)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#48)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#49)"
+        },
         {
           "version": "0.4.6",
           "releaseDate": "2026-08-17T20:48:29Z",
@@ -1716,6 +1982,44 @@
       ],
       "versions": [
         {
+          "version": "0.4.1",
+          "releaseDate": "2026-10-21T17:08:20Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.4.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c1d3aca9e62764b364de1e9f76b4ae58093f116787dd85da392a47a95da2af25",
+            "linux_arm64": "6a25b871df6979b72d45bc47d6ebf1ea18d5f8f7f0867ae44ff29145eecc2d62",
+            "darwin_amd64": "8d92b4e69a81627afcfb6e4b5b7cc2e3b28a4b3f82ae248bd4701913f8229d91",
+            "darwin_arm64": "b82289d15a72e57ad858f236bcb7c5eff0a1cf059639a56de80991889d9a10c0",
+            "windows_amd64": "81385d02fe437815279da157056057365d602db92e1a2703920400f38aae8003",
+            "windows_arm64": "4ca5f92d3d3473ec1e6efc3bf11cdb79c4e36a76b04b3e4549e58d797607d154"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.1 (2026-10-21)\n\n### Other Changes\n\n* **deps:** update gcr.io/distroless/static-debian13:nonroot docker digest to d620678 (#77)\n* **tools:** update github/codeql-action digest to 9b32540 (#76)"
+        },
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T16:53:34Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ed447baa525963b030e7953b5ebb0a84b7495db5e4cb2eefe1d36630dd3d33ec",
+            "linux_arm64": "084b0dacec4b927edefa8222210c9707691e5d5b9e58eb78fbb687784fef63d3",
+            "darwin_amd64": "b1885f258fe4e37a540bb021ab168c12420a4cf3c2aa8ad41f65620ed0811413",
+            "darwin_arm64": "60fbdf4cec31121b11074458875966bb317d39880b15e0f485fde10ed70db077",
+            "windows_amd64": "0d79a433d4ca384ff60c5906902b47cfcc3a7713c0685ed42c3838e4f1c6218a",
+            "windows_arm64": "d18c4a6e5eda8cddb20ba237bf85f32804680282a65984cfc9bbbde36a3967a3"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#69)\n* **deps:** Bump github/codeql-action/upload-sarif (#68)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#67)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#65)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#58)\n* **deps:** Bump github/codeql-action/upload-sarif (#59)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#60)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#61)\n* **deps:** Bump github/codeql-action/upload-sarif (#57)\n* test against stable Go 1.27 instead of the release candidate (#56)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#55)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#54)\n* **deps:** Bump github/codeql-action/upload-sarif (#53)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#52)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#49)\n* **deps:** Bump github/codeql-action/upload-sarif (#50)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#51)"
+        },
+        {
           "version": "0.3.6",
           "releaseDate": "2026-08-17T20:49:29Z",
           "downloadUrl": "https://github.com/SemRels/condition-gitea-actions/releases/download/v0.3.6/plugin-linux-amd64",
@@ -1851,6 +2155,25 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "releaseDate": "2026-10-21T17:11:09Z",
+          "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.3.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "004d02c6dc726e47d88f9fc1c204cf27008e8ee3cb2057282c63523558f24ace",
+            "linux_arm64": "c460d6fc6a82409e444c30c7697efbfa93b3fc48970ebe56c2bf73e7acf4e95d",
+            "darwin_amd64": "b93ee1a92c1ab748a9fc900b6a556afbbc8a1f9ee86aed1e51cd3c360d17fbb7",
+            "darwin_arm64": "fe1059970f7a23699667b06a04051b9ebda6df058415bf1906fea5df0ee57c2a",
+            "windows_amd64": "10f30e46ea50fdf0b1441c22ce58fcaef8fc9c9c62aea08ee28425779956eb50",
+            "windows_arm64": "98f03cace6708edee70f2d99f6b2e4a90838bc8bce302d7aee7cbc9a491d5a53"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.3.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n* support and validate GitHub Enterprise Server (GHES) URLs\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#65)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#64)\n* **deps:** Bump github/codeql-action/upload-sarif (#63)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump github/codeql-action/upload-sarif (#55)\n* test against stable Go 1.27 instead of the release candidate (#54)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#53)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#52)\n* **deps:** Bump github/codeql-action/upload-sarif (#51)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#48)\n* **deps:** Bump github/codeql-action/upload-sarif (#49)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#50)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#45)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#46)\n* **deps:** Bump github/codeql-action/upload-sarif (#47)"
+        },
+        {
           "version": "0.2.6",
           "releaseDate": "2026-08-17T20:46:57Z",
           "downloadUrl": "https://github.com/SemRels/condition-github-actions/releases/download/v0.2.6/plugin-linux-amd64",
@@ -1966,6 +2289,25 @@
         "ci"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:14:24Z",
+          "downloadUrl": "https://github.com/SemRels/condition-gitlab-ci/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "780648b7161c9a1b5c3bc65eff88215ee0fca7f4ace8b3a272c8eb983c77181e",
+            "linux_arm64": "999d79a03040eaecdae2b3eb87a0b1c5980701406f15c5afbc12b512f99686c8",
+            "darwin_amd64": "1b315d9a3dcf63ca2f13fb66f43ce9f97ebf817ff9f4a4412a9fe092929d6c9a",
+            "darwin_arm64": "75e90cbbffc043f3745eb79549d328d0a66c2995954bf77f5e0128f044e19c12",
+            "windows_amd64": "b76897050542a90fd95bbec1a9ab7ca5ce745eea24e435aa5b0217e4c0fcbf79",
+            "windows_arm64": "b850a0dc12de76a448fe7c1a7d5afad36f5452593bf843ea094a0d4e35b05ca0"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#66)\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#65)\n* **deps:** Bump github/codeql-action/upload-sarif (#64)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#63)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump github/codeql-action/upload-sarif (#55)\n* test against stable Go 1.27 instead of the release candidate (#54)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#53)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#52)\n* **deps:** Bump github/codeql-action/upload-sarif (#51)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#48)\n* **deps:** Bump github/codeql-action/upload-sarif (#49)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#50)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#45)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#46)\n* **deps:** Bump github/codeql-action/upload-sarif (#47)"
+        },
         {
           "version": "0.4.6",
           "releaseDate": "2026-08-17T20:49:24Z",
@@ -2120,6 +2462,25 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:51:13Z",
+          "downloadUrl": "https://github.com/SemRels/hook-email/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "49f7ccc32b3d55165e1f097f3ad199f9d96bfcf2cabad19fd340a1e1c2e6d976",
+            "linux_arm64": "e9ba7775605f8b39d74782f3cd1a889255092ccfbe2477abbb4852fa685d4dc5",
+            "darwin_amd64": "d52b4052059e8ef832ceefcc6629f7f30a315a1df9fadb504bbd33e7f3346129",
+            "darwin_arm64": "c9e3fc43c2e9114f6930813eb794dd92ea303a7b9f5a6759fec9c8f056a7fd02",
+            "windows_amd64": "f42f0e46bb9dbacee8937639987d1c0c0e7fe7cfbcbe8bf72f84f0cbb699866c",
+            "windows_arm64": "1e3d55192bc1bc9a7657b6be6bde43dbd257671307c43fae39834b5c79b2e4ea"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests (#60)\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#65)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#64)\n* **deps:** Bump github/codeql-action/upload-sarif (#63)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#62)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump github/codeql-action/upload-sarif (#54)\n* test against stable Go 1.27 instead of the release candidate (#53)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#52)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump github/codeql-action/upload-sarif (#50)\n* **deps:** Bump github/codeql-action/upload-sarif (#47)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#48)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#49)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#43)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)\n* **deps:** Bump github/codeql-action/upload-sarif (#45)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#46)"
+        },
         {
           "version": "0.3.6",
           "releaseDate": "2026-08-17T20:47:24Z",
@@ -2296,6 +2657,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:56:13Z",
+          "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0b70757e7e124a1c6ac2269669ac0ba2fc40ab5ffcaec5fe8d6e4f28f7a077d3",
+            "linux_arm64": "2a06530d5d3397e2c751a0c7ceb044d5c8152288c54e7a2f7e5f9645f51dd0cb",
+            "darwin_amd64": "3aa31b76cbc372637992d129672fe2645693ef11853ea5a279e1588442999b22",
+            "darwin_arm64": "35085315a12e005e360d8cd29b37cf7a6c19648b202072cf1abedccb9162d676",
+            "windows_amd64": "772aafe0a13bad133a04670cfcc1e6c78c8b519a7e004c3e12797a523af4ecb9",
+            "windows_arm64": "4c261e45f11e37189347f4817d6d044eef49a8b63adbca173e932908a00b3f2f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#62)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#61)\n* **deps:** bump github/codeql-action/upload-sarif (#60)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#59)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2 (#58)\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** bump github/codeql-action/upload-sarif (#51)\n* test against stable Go 1.27 instead of the release candidate (#50)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#49)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#48)\n* **deps:** bump github/codeql-action/upload-sarif (#47)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#44)\n* **deps:** bump github/codeql-action/upload-sarif (#45)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#46)\n* **deps:** bump github/codeql-action/upload-sarif (#43)"
+        },
+        {
           "version": "0.3.5",
           "releaseDate": "2026-08-17T20:43:59Z",
           "downloadUrl": "https://github.com/SemRels/hook-gitplugin/releases/download/v0.3.5/plugin-linux-amd64",
@@ -2431,6 +2811,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:53:08Z",
+          "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "367c450254efe60ab19d586a2dc273e60f8740d7c70e3bb020d36ef546902ed0",
+            "linux_arm64": "433122c8a54b4562766a7562af0d23567c54873e44afbaacec7b9abb77e21e85",
+            "darwin_amd64": "c3091de47c2b29f3c22761d7f44cb19955aab853068655ead818c001b9e1e7e4",
+            "darwin_arm64": "9291cd49828a9fd3933ae89eb91d12ffbbc27d6c14409fa710d8d4f4196455f7",
+            "windows_amd64": "b27dcf2201d048ec8f0cd07d90cf19e132522607703aa665242e1a1b12762a12",
+            "windows_arm64": "4888d88f063d4831da9e664c50a6288e469ba0657465e2226f95456d64cd4d4c"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#62)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#61)\n* **deps:** bump github/codeql-action/upload-sarif (#60)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#53)\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#54)\n* **deps:** bump github/codeql-action/upload-sarif (#55)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#56)\n* **deps:** bump github/codeql-action/upload-sarif (#52)\n* test against stable Go 1.27 instead of the release candidate (#51)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#50)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#49)\n* **deps:** bump github/codeql-action/upload-sarif (#48)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#47)\n* **deps:** bump github/codeql-action/upload-sarif (#45)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#46)"
+        },
+        {
           "version": "0.3.5",
           "releaseDate": "2026-08-17T20:45:14Z",
           "downloadUrl": "https://github.com/SemRels/hook-jira/releases/download/v0.3.5/plugin-linux-amd64",
@@ -2565,6 +2964,25 @@
         "notifications"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:46:06Z",
+          "downloadUrl": "https://github.com/SemRels/hook-matrix/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "0f7202acb3547c2131ae6446ac8200874647bb7e52993e142298ec02c4774d3c",
+            "linux_arm64": "3173292aeebe82e56c1ef490c0fe4bac6ab24244f4b352f8d474b5f87937e75d",
+            "darwin_amd64": "202e5fa7f1e2532dd84ac608ebb907890c7cf36020b7bad1f5697e709c925967",
+            "darwin_arm64": "1c76901d4fca9d38cfdc4414ab425bb8030b68bc90f731b8db1e6c39ef338af4",
+            "windows_amd64": "c66ff96c571b005a58b54b52eb0aff3279c9967be4c0f0d6d5dd037b2d425a4b",
+            "windows_arm64": "49ba0a3685fe111e3eac384f63053978507951edb6a3093b9b68aa37b1bf02e8"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* **release:** skip build on existing releases\n* **release:** skip already published releases\n* skip duplicate release orchestration\n* extract semrel binary into staging directory (#54)\n* indent semrel download step (#53)\n* support legacy semrel release asset names (#49)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#69)\n* **deps:** bump github/codeql-action/upload-sarif (#68)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#67)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** bump github/codeql-action/upload-sarif (#59)\n* test against stable Go 1.27 instead of the release candidate (#58)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#57)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#56)\n* **deps:** bump github/codeql-action/upload-sarif (#55)\n* **deps:** bump github/codeql-action/upload-sarif (#50)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#51)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#52)\n* **deps:** bump github/codeql-action/upload-sarif (#47)"
+        },
         {
           "version": "0.4.5",
           "releaseDate": "2026-08-17T20:44:21Z",
@@ -2720,6 +3138,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:49:26Z",
+          "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "647223dc1e536d18173187849af345a3a5d0a050a457ad2aeb4c0df6dc52853c",
+            "linux_arm64": "b558303129a8472a7dfa9882f8d955d2dcf211279b07b90b6c6a50edd18cdc64",
+            "darwin_amd64": "28c81ac89c6f28710132f3a62a3973ee261f31a72932a6d083fb568d417c5a9b",
+            "darwin_arm64": "424e1ca9273c9f7c57874f412f21660190ffe5b6ef468fd721e95fab026c99f4",
+            "windows_amd64": "3bc4b7da84af17a7a246c596765f541d479c4d62112bc3f558e5064e55baa8d2",
+            "windows_arm64": "624a89762f5a7e6eb2b7685cc5be01a6fce94f211e7df4343cabb014cdc73c4d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#69)\n* **deps:** Bump github/codeql-action/upload-sarif (#68)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#67)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump github/codeql-action/upload-sarif (#59)\n* test against stable Go 1.27 instead of the release candidate (#58)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#57)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#56)\n* **deps:** Bump github/codeql-action/upload-sarif (#55)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#52)\n* **deps:** Bump github/codeql-action/upload-sarif (#53)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#54)\n* **deps:** Bump actions/setup-go from 6.5.0 to 7.0.0 (#48)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#50)"
+        },
+        {
           "version": "0.4.6",
           "releaseDate": "2026-08-17T20:46:16Z",
           "downloadUrl": "https://github.com/SemRels/hook-slack/releases/download/v0.4.6/plugin-linux-amd64",
@@ -2874,6 +3311,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:50:24Z",
+          "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "d0c419f0702f32aaf98ff2ac828f94b69e9f11b92c306b88938a9cc611558826",
+            "linux_arm64": "e6234a7ac3adf6176898ea6603f73a8dadc508d54a5d0a50d799e61187431dbd",
+            "darwin_amd64": "2c72062b992676f073b05bc92c8e0b2341c57f7bdee3a151f8cd63f38c2c4f62",
+            "darwin_arm64": "f86e346a609e65d93bc03a0e215a3ca80b418208c551d53b52a7395eb0245c7f",
+            "windows_amd64": "a371915e56734ebec4bf96d4f7a4fc7e1f8e9be202c432d5f007221b41a47a8a",
+            "windows_arm64": "b4c4376d395f8d8832bc511139f81f3a4966fc859a9d1012efb466cfc791231e"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* **release:** skip build on existing releases\n* **release:** skip already published releases\n* skip duplicate release orchestration\n* extract semrel binary into staging directory (#16)\n* indent semrel download step (#15)\n* support legacy semrel release asset names (#14)\n* **ci:** use --version flag, not version subcommand (semrel has no version subcommand)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n* extract OCI tar before oras resolve to fix ORAS 1.3.1 path parsing\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* integrate required reuse files\n* remove repo specific dco, reuse workflows and REUSE.toml\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump github/codeql-action/upload-sarif (#34)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#33)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#32)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2 (#31)\n* **deps:** bump codecov/codecov-action from 5.5.5 to 7.1.1 (#24)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.4.0\n* **deps:** bump github/codeql-action/upload-sarif from 4.36.3 to 4.38.1\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4\n* **deps:** bump softprops/action-gh-release from 3.0.1 to 3.0.3\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.4.1 (#23)\n* **deps:** bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#18)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#19)\n* **deps:** bump fsfe/reuse-action from 5.0.0 to 6.0.0 (#20)\n* **deps:** bump actions/checkout from 4.2.2 to 7.0.1 (#21)\n* **deps:** bump actions/setup-go from 6.5.0 to 7.0.0 (#22)\n* **deps:** add Dependabot configuration\n* test against stable Go 1.27 instead of the release candidate (#17)\n* harden Teams hook delivery (#13)"
+        },
+        {
           "version": "0.3.5",
           "releaseDate": "2026-07-06T08:58:20Z",
           "downloadUrl": "https://github.com/SemRels/hook-teams/releases/download/v0.3.5/plugin-linux-amd64",
@@ -2970,6 +3426,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:44:45Z",
+          "downloadUrl": "https://github.com/SemRels/updater-cargo/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3a54b032d45586effcf4e29b601947b91559cf9623842386acea28fd08c35bc4",
+            "linux_arm64": "2d71e184f4d2ffa636fcd57c7f1e3f67521b2a154336911f117fefaade3d235a",
+            "darwin_amd64": "a93157243897a3a27500dfd416ab258447a776e94cf5203597e5876187a05ffd",
+            "darwin_arm64": "c9faa47632c60ddb9be26d712ae14d64a9ef91b08169c35ac2e5a9490197e177",
+            "windows_amd64": "a2f2d3a3c99464b91d57f28f896d13a127bb29a044bf01a6db449f13156d6b51",
+            "windows_arm64": "3ef323ac984db544eace6742455a441d44abb6765ed97dd6b6b9c876e021f460"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#63)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#62)\n* **deps:** bump github/codeql-action/upload-sarif (#61)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump github/codeql-action/upload-sarif (#55)\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#54)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#56)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#57)\n* **deps:** bump github/codeql-action/upload-sarif (#53)\n* test against stable Go 1.27 instead of the release candidate (#52)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#51)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#50)\n* **deps:** bump github/codeql-action/upload-sarif (#49)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#46)\n* **deps:** bump github/codeql-action/upload-sarif (#47)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#48)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#42)\n* **deps:** bump github/codeql-action/upload-sarif (#43)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#45)"
+        },
         {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:39:13Z",
@@ -3106,6 +3581,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:44:03Z",
+          "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "07e5b05883dbde24cab6479250332f20cd7606675ea585601f1d72370d9ff1cc",
+            "linux_arm64": "df82654159cd87951754a7454710d3e123891b3662624bb102e15dbc3c573975",
+            "darwin_amd64": "13ec8b95c9b135f6ac8d5667bd38032169d9cc3898f950572b571a251f7464dc",
+            "darwin_arm64": "e49a6172a3580b5461873c77fe111b22125f2bbcfa2647781a27e7f5887ae141",
+            "windows_amd64": "454cb7cff1072de779edc510e1a6e924124dddadaeb98a34501b39624bf51a17",
+            "windows_arm64": "ec5faa42ac211b54b0a55227917a28035b82f2b0f12ea5cce9cd491d77b46ce1"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#61)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#60)\n* **deps:** bump github/codeql-action/upload-sarif (#59)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#58)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** bump github/codeql-action/upload-sarif (#49)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#50)\n* test against stable Go 1.27 instead of the release candidate (#48)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#47)\n* **deps:** bump github/codeql-action/upload-sarif (#46)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#43)\n* **deps:** bump github/codeql-action/upload-sarif (#44)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#45)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#39)\n* **deps:** bump github/codeql-action/upload-sarif (#40)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#41)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#42)"
+        },
+        {
           "version": "0.4.3",
           "releaseDate": "2026-08-17T20:48:14Z",
           "downloadUrl": "https://github.com/SemRels/updater-docker/releases/download/v0.4.3/plugin-linux-amd64",
@@ -3240,6 +3734,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:43:54Z",
+          "downloadUrl": "https://github.com/SemRels/updater-go/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "8cd7360b65f4917526a9a762066dd984c309a2c8e002e7701ef614730ce4d790",
+            "linux_arm64": "9dcd0bb50e6e6aa9ea9d91f1861ce5635a981f1af48556637a20dadb4a568429",
+            "darwin_amd64": "2f30d7384136c52c7b8abf2ae8d0e48fe5c83339680fc704889bb5e29d331c87",
+            "darwin_arm64": "e08317cd00cfe908e8404f3ac838cef271de1df5b2bee2fda65cadec4daea185",
+            "windows_amd64": "9ab23d86c4af8fef4d2357ee5b2c7e6599ff1c165cc8f00b62da5455f1a2d0cf",
+            "windows_arm64": "f8acda0ff1cc063c3654bbc6c7176ff95d8566685803157f1e0ad840145a77a4"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump github/codeql-action/upload-sarif (#70)\n* **deps:** Bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#69)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#67)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#66)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump github/codeql-action/upload-sarif (#59)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#60)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#61)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#62)\n* **deps:** Bump github/codeql-action/upload-sarif (#58)\n* test against stable Go 1.27 instead of the release candidate (#57)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#56)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#55)\n* **deps:** Bump github/codeql-action/upload-sarif (#54)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#53)\n* **deps:** Bump github/codeql-action/upload-sarif (#49)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#50)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#52)"
+        },
         {
           "version": "0.4.3",
           "releaseDate": "2026-08-17T20:49:36Z",
@@ -3376,6 +3889,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:43:41Z",
+          "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6736d402e58bd4a4c6abb934a03d3a0ed6a6f6384be162b6eab8dba516a0ec6c",
+            "linux_arm64": "9ccb804ab1c89370ce1403b16b992767446961853671cb29fdfc540cca7985a4",
+            "darwin_amd64": "b1740bdee6e548bc83075a227f0944d2d6c6efdbe9409893b7dfc89b542fa4f7",
+            "darwin_arm64": "16b55ad0a09d1018a3401b4d6c5c4a9bad370e7e5c40e647c580636c79593aa8",
+            "windows_amd64": "3ae2b4b4cc58849454cd6395b4c784177b6f4d2d8b23bf89973563dc9fe647bd",
+            "windows_arm64": "6243be5a62f51994074875bc8c028352d0418fd18762ecf4a0a352e06586413a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* support legacy semrel release asset names (#43)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#59)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#58)\n* **deps:** bump github/codeql-action/upload-sarif (#57)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#50)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#51)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#52)\n* **deps:** bump github/codeql-action/upload-sarif (#53)\n* **deps:** bump github/codeql-action/upload-sarif (#49)\n* test against stable Go 1.27 instead of the release candidate (#48)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#47)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#46)\n* **deps:** bump github/codeql-action/upload-sarif (#45)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#40)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#38)\n* **deps:** bump github/codeql-action/upload-sarif (#39)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#41)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#42)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#44)"
+        },
+        {
           "version": "0.4.3",
           "releaseDate": "2026-08-17T20:48:28Z",
           "downloadUrl": "https://github.com/SemRels/updater-gradle/releases/download/v0.4.3/plugin-linux-amd64",
@@ -3510,6 +4042,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.6.0",
+          "releaseDate": "2026-10-21T17:36:36Z",
+          "downloadUrl": "https://github.com/SemRels/updater-helm/releases/download/v0.6.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e8bc84593c1561bc21368a6561b64e5d2a29497fa77aba7693d3ad7d578952a4",
+            "linux_arm64": "4873b19842ed4accf8803cc2e269968d94cdc31ba7cc6f339fd7a88fa1941f1e",
+            "darwin_amd64": "6c2e595df03f51f47d6693c9b1ac38145a8c3f5caa90f659ca25d98a121b5d53",
+            "darwin_arm64": "01857b492657516c51d1d31f7638ab635e64062e8269b5f225c532c12fe71891",
+            "windows_amd64": "1c97811fff60fb10f53b9d3ff94d276dd5e0eafdb163ba3ead523a0d5588d183",
+            "windows_arm64": "289e2f54450625336afe3c75fab9d0d3611d9d8e7d4b8df853b3fd3b56fb4c84"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.6.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#63)\n* **deps:** bump github/codeql-action/upload-sarif (#62)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#61)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#60)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** bump github/codeql-action/upload-sarif (#52)\n* test against stable Go 1.27 instead of the release candidate (#51)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#49)\n* **deps:** bump github/codeql-action/upload-sarif (#48)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#50)\n* **deps:** bump github/codeql-action/upload-sarif (#45)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#46)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#47)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#42)\n* **deps:** bump github/codeql-action/upload-sarif (#43)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)"
+        },
         {
           "version": "0.5.2",
           "releaseDate": "2026-08-17T20:45:23Z",
@@ -3665,6 +4216,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:34:44Z",
+          "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "44087aa1ad16be9a7ad088e22ba8d53e11b5e4088adfb7ac3899948ba4dd1148",
+            "linux_arm64": "735cb5823af8f1b683eb145e828d4f34ce96d20ed9350188ebe57efd5dd1fbee",
+            "darwin_amd64": "9cd75fa6d61bbb7ffe80e35cbd2c67862cb6f81499ec4be285f65d4d77b2e27b",
+            "darwin_arm64": "f2031571ea32d32b3f8d9cc534173aefce887cc043908a48bd6fe49a10fcc0b5",
+            "windows_amd64": "65177a690d1172f1452561b19f62355f0d2dbd614689a37e6d200ce6cbfa8a94",
+            "windows_arm64": "e383d7d3aa4f350d952540f5b4d66870719e83d42ac5e725d267269f3e672ed5"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump github/codeql-action/upload-sarif (#63)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#62)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#60)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#59)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#52)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#53)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#54)\n* **deps:** bump github/codeql-action/upload-sarif (#55)\n* **deps:** bump github/codeql-action/upload-sarif (#51)\n* test against stable Go 1.27 instead of the release candidate (#50)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#49)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#48)\n* **deps:** bump github/codeql-action/upload-sarif (#47)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#46)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#41)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#42)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#43)\n* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#44)\n* **deps:** bump github/codeql-action/upload-sarif (#45)"
+        },
+        {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:49:13Z",
           "downloadUrl": "https://github.com/SemRels/updater-homebrew/releases/download/v0.4.2/plugin-linux-amd64",
@@ -3800,6 +4370,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:32:37Z",
+          "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "e34a655bfb59e9279dd049e1afa44f68526e71618c30c0af8ca83065bd29392c",
+            "linux_arm64": "993a48cff2517f8990623845d5fa7261bbb68fdb68be4eb5505e48e36d61866b",
+            "darwin_amd64": "c2b7db914a350cae3f868a32e47555a2d2568cc97e99b68399452b131421d885",
+            "darwin_arm64": "602bbb56c27e787ec39c6281946c1d3e5c2df8ed6db2e6729ade61f42b495e9e",
+            "windows_amd64": "12119c2fbca266dd8c7f0c28c4825b1bbe5bf35d86f6834f3efa2f58e5aa54a5",
+            "windows_arm64": "9690f06ab1cb4f31262c578c59c7f06ba8ddfdf7fe2ac68616b2095082e05a06"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#62)\n* **deps:** bump github/codeql-action/upload-sarif (#61)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#59)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#58)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#54)\n* **deps:** bump github/codeql-action/upload-sarif (#53)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#52)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#51)\n* **deps:** bump github/codeql-action/upload-sarif (#50)\n* test against stable Go 1.27 instead of the release candidate (#49)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#48)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#47)\n* **deps:** bump github/codeql-action/upload-sarif (#46)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#45)\n* **deps:** bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 (#41)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#42)\n* **deps:** bump github/codeql-action/upload-sarif (#43)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#44)"
+        },
+        {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:46:00Z",
           "downloadUrl": "https://github.com/SemRels/updater-maven/releases/download/v0.4.2/plugin-linux-amd64",
@@ -3934,6 +4523,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.6.0",
+          "releaseDate": "2026-10-21T17:30:28Z",
+          "downloadUrl": "https://github.com/SemRels/updater-npm/releases/download/v0.6.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2c0368bbb1f9dfe893509650f2a947f38418cb5706a20274b439de36596db6cb",
+            "linux_arm64": "06c7bccdb5511f6ff0c589ed52a1ff5f0bfa5b78922231bcedcec1825bd60248",
+            "darwin_amd64": "67f9b6866b534f766229c116bc7a0f317bba254bd36c24b3aebda190c498c30e",
+            "darwin_arm64": "3795b234d1a8157693d93165424f94876e3560a09da4274bfc33cfc1205ae09c",
+            "windows_amd64": "cd7ff90a5247d655dff5a04a6ef94ec22798c7161fb087ae52f5f7934a28f6db",
+            "windows_arm64": "e2dfb4ae2e3cd1988069a7880d20e7b35cd86aa5cc30c8e0752d16023274924f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.6.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump github/codeql-action/upload-sarif (#71)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#70)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#69)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.0 to 4.38.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0\n* **deps:** Bump github/codeql-action/upload-sarif (#61)\n* test against stable Go 1.27 instead of the release candidate (#60)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#59)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#58)\n* **deps:** Bump github/codeql-action/upload-sarif (#57)\n* **deps:** Bump actions/setup-go from 6.4.0 to 7.0.0 (#53)\n* **deps:** Bump github/codeql-action/upload-sarif (#54)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#55)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#56)\n* **deps:** Bump ossf/scorecard-action from 2.4.3 to 2.4.4 (#49)\n* **deps:** Bump github/codeql-action/upload-sarif (#51)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#52)"
+        },
         {
           "version": "0.5.3",
           "releaseDate": "2026-08-17T20:39:52Z",
@@ -4089,6 +4697,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:28:27Z",
+          "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "3e789066dd9ee2d40ee69a2c74f9cad4549a5ffcc0e1d8d6645dd1160cd07cd7",
+            "linux_arm64": "23f8f0b2c6ec39ff7e4135979d41a45234423747793d4dbecab3fd84bf2cc1a7",
+            "darwin_amd64": "d033ecd1b3885f53973f005ea7db241c017b70f4a86b7f4a8a2c6b4907cd4105",
+            "darwin_arm64": "72283da183c992417bd9c7872a07c0b09c72982686a3b2d4e1a827371e64da2f",
+            "windows_amd64": "797d1fd5501db6f55691f02632116175a1efa03ef6afa6f1b665a5a639017135",
+            "windows_arm64": "142e7b94f5f6950cdbc259fe92ba2c3b8b737bcb38a464051e306e21e8d75472"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#62)\n* **deps:** bump github/codeql-action/upload-sarif (#61)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#60)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#56)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#55)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#54)\n* **deps:** bump github/codeql-action/upload-sarif (#53)\n* **deps:** bump github/codeql-action/upload-sarif (#52)\n* test against stable Go 1.27 instead of the release candidate (#51)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#50)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#49)\n* **deps:** bump github/codeql-action/upload-sarif (#48)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#45)\n* **deps:** bump github/codeql-action/upload-sarif (#46)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#47)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#42)\n* **deps:** bump github/codeql-action/upload-sarif (#43)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#44)"
+        },
+        {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:46:26Z",
           "downloadUrl": "https://github.com/SemRels/updater-nuget/releases/download/v0.4.2/plugin-linux-amd64",
@@ -4223,6 +4850,25 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:24:09Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "62ce2c5975a6ae697da838229d6570ce41cf35efeca27572cfed984a51358cc7",
+            "linux_arm64": "f45679ab477ec56697e71b43b361932835c9ebbdb16660b3a5aaa6299e4eec3b",
+            "darwin_amd64": "48497e4cdace1fc466466c4e3c6c6c19824a8465b4b7dec439c55ca2060d7100",
+            "darwin_arm64": "4698bfb06080574bb82d8d75209d97dbc13574e1ecd76edfe46d9d8e6abc10c3",
+            "windows_amd64": "09f4d39cef2e7bb80f813f8b7f28770a69cf786bc10a6c6bfaaaa28c89f96fa3",
+            "windows_arm64": "cc09e263cd73e5c0e8b2c85eb9a4ebd3cda6d90d1bd5fe9c3c8161ad770c9bcc"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* support legacy semrel release asset names (#50)\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#69)\n* **deps:** Bump github/codeql-action/upload-sarif (#68)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#67)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** Bump github/codeql-action/upload-sarif (#63)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#62)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#61)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#60)\n* **deps:** Bump github/codeql-action/upload-sarif (#59)\n* test against stable Go 1.27 instead of the release candidate (#58)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#57)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#56)\n* **deps:** Bump github/codeql-action/upload-sarif (#55)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#51)\n* **deps:** Bump github/codeql-action/upload-sarif (#52)\n* **deps:** Bump actions/checkout from 7.0.0 to 7.0.1 (#53)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile (#54)"
+        },
         {
           "version": "0.4.3",
           "releaseDate": "2026-08-17T20:47:17Z",
@@ -4399,6 +5045,25 @@
       ],
       "versions": [
         {
+          "version": "0.5.0",
+          "releaseDate": "2026-10-21T17:17:40Z",
+          "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.5.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "107086f79340a31f72d523ba0756a1c8f42273a9d31d52dd77b15d8dc5bbe47a",
+            "linux_arm64": "4099cb857689fa5f382793397c4ffa69f3cf49141240413c63ca3c9807229b25",
+            "darwin_amd64": "fa4fb935b80cac60da3e7fb5f385c182c649db38b0453a3b92908d9b92b19925",
+            "darwin_arm64": "ccb447e21ea2fa305460d77a5124d4ba4886619204801ba70e81d0ed5a85d3a2",
+            "windows_amd64": "b6f25579ba801dbe855d54fa8ed7ae5bff7ef45c0d39e5ac66837ef518ae550e",
+            "windows_arm64": "c842b788b44f0f9a2bdf88e0d331d6be18f266afb3fb3d23ba1d801f01ca787f"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.5.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* point cosign verification at the container workflow\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** bump github/codeql-action/upload-sarif (#63)\n* **deps:** bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#62)\n* **deps:** bump actions/download-artifact from 8.0.1 to 8.0.2 (#61)\n* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 (#60)\n* **deps:** bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** bump github/codeql-action/upload-sarif from 4.38.1 to 4.38.2\n* **deps:** bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#55)\n* **deps:** bump github/codeql-action/upload-sarif (#54)\n* **deps:** bump docker/build-push-action from 7.3.0 to 7.4.0 (#53)\n* **deps:** bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#52)\n* **deps:** bump github/codeql-action/upload-sarif (#51)\n* test against stable Go 1.27 instead of the release candidate (#50)\n* **deps:** bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#49)\n* **deps:** bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#48)\n* **deps:** bump github/codeql-action/upload-sarif (#47)\n* sync from plugin-template@ff3fd23 -- Dockerfile (#46)\n* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 (#41)\n* **deps:** bump golangci/golangci-lint-action from 9.2.1 to 9.3.0 (#42)\n* **deps:** bump actions/setup-go from 6.4.0 to 7.0.0 (#43)\n* **deps:** bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#44)\n* **deps:** bump github/codeql-action/upload-sarif (#45)"
+        },
+        {
           "version": "0.4.2",
           "releaseDate": "2026-08-17T20:46:02Z",
           "downloadUrl": "https://github.com/SemRels/updater-terraform/releases/download/v0.4.2/plugin-linux-amd64",
@@ -4533,6 +5198,82 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.2.3",
+          "releaseDate": "2026-10-21T16:20:12Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.2.3/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "2e0f5486de66dae0c0887a1ef6f566806a0d81d9bb257230d4e2d90dc3e3215a",
+            "linux_arm64": "ef0455b021e241b19ba818479f00ad8d9d8e7d048696b876336197f3ed72f38d",
+            "darwin_amd64": "f3d9cf7285c6cca11e4bdd4b60d8b18680b7aeaecda9fc3fcdd555777141267c",
+            "darwin_arm64": "952a9a63501fbf73a0afe2fba0ec009b96b33c350e9c7ac8cbf47c80ed01d8fe",
+            "windows_amd64": "b33e6673befae772610882ef272cb05062dcff35bb0663f3c3245f602be0b149",
+            "windows_arm64": "39b7b9f6420e0b10919f4139e134c9dff0e7aec05e0016f00e7a43656baccf3d"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.2.3 (2026-10-21)\n\n### Other Changes\n\n* add more allowed rules to semrel config\n* **deps:** update gcr.io/distroless/static-debian13:nonroot docker digest to d620678 (#33)\n* document plugin usage with uses, phase and args\n* add status badges to the readme\n* drop required linear history, works with rebase pretty well\n* use correct attestation url\n* **tools:** update build tools\n* **deps:** pin dependencies (#21)"
+        },
+        {
+          "version": "0.2.2",
+          "releaseDate": "2026-10-21T13:47:21Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.2.2/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "dbd5edea7cb0ead25af79567fe92a70255b3ff805048a90618431580a90804eb",
+            "linux_arm64": "04c0a1c6569a3a4c183a726d3028fbb81db4906254acffa3ddc1639a6a0e5d65",
+            "darwin_amd64": "cac110134f061b84139ac449c3919bf45a122ce39ee8cd5d9bcc38f12ede2dda",
+            "darwin_arm64": "9eab4734ef5bf3d372eb974501572ba30203fd1eb29adba7ab1a7b0533035b7a",
+            "windows_amd64": "b621f54f16bf22525d485bd8f6ce5324e4ebe903393394f799baaa186b58a4fc",
+            "windows_arm64": "495cf4030b64bd232df06f0eff0275da1595614ad4b429d633f778c0b226cf8b"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.2.2 (2026-10-21)\n\n### Other Changes\n\n* **mise:** update dependency go to v1.27.3"
+        },
+        {
+          "version": "0.2.1",
+          "releaseDate": "2026-10-21T13:43:01Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.2.1/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "43992cd32109b71d6697c9f5f15e2b4a7fc5951600e3178c1536c4ee4eb30019",
+            "linux_arm64": "64f765af88ed7527d5ef1dc5c8fa9be744a49038542855807ad2c47a7da8ff74",
+            "darwin_amd64": "990d420708d9994cf24a0da5a7bb93793a8ae454252cc474a2513dff7235bed2",
+            "darwin_arm64": "fba33ee832578b3c003e9f6387673101b2aa31ce258db493e83d165b2fbf6e09",
+            "windows_amd64": "98fe15403cd1ffb016063adaf5f6343693f7901d29ba60a5f4e055d5a428df11",
+            "windows_arm64": "db3391019ad96cde5ef8f9b1520afb4eb2143a6d9969cc018ef92991ca3b4382"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.2.1 (2026-10-21)\n\n### Other Changes\n\n* **mise:** update module go:github.com/golangci/golangci-lint/v2/cmd/golangci-lint to v2.15.0 (#26)"
+        },
+        {
+          "version": "0.2.0",
+          "releaseDate": "2026-10-21T13:39:32Z",
+          "downloadUrl": "https://github.com/SemRels/updater-zig/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "1ba690b6a7e5aa5a27081c449134947b4a8dc326d186c3b7f1143062321894a1",
+            "linux_arm64": "372212345b55dad3264ccf0c87361d459be19b7029e1207d4566f855bf06758e",
+            "darwin_amd64": "90c653f04d4b9a6864b92b6e8da0b1ae1c4d0a0044461998983597160fdb6c1e",
+            "darwin_arm64": "dadf0d00d89d645c51350947eeacb4624f23a070d27626265b38336638dff718",
+            "windows_amd64": "9979b88e3a1926ffbaad610f978f0f2adcc3913db90bd30bce0a6cc5f30fd9c2",
+            "windows_arm64": "bcc80d2aea738fd8e88ae416273de334168bd55092868bd4d6e2b64b6745b299"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.2.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* require one approving review on the default branch\n\n### Other Changes\n\n* drop auto-label concurrency and keep container runs from being cancelled\n* **tools:** update github/codeql-action digest to 6f2ac81 (#22)\n* **tools:** update build tools (#25)\n* **mise:** update dependency cosign to v3.1.4 (#23)"
+        },
         {
           "version": "0.1.6",
           "releaseDate": "2026-10-20T14:00:30Z",
@@ -4688,6 +5429,25 @@
       ],
       "versions": [
         {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:47:22Z",
+          "downloadUrl": "https://github.com/SemRels/packager-nfpm/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "6e22425233a12a28a6124772365dfc572847711c717ab2423e749b404ff82315",
+            "linux_arm64": "1b9a12ea20b7a1647064a5c5e37a79407ddfc415f615d257470682bcf5aa5fb4",
+            "darwin_amd64": "07927510613d68c43a5881c3691095e77965f9b7788019127d35be01e0081e31",
+            "darwin_arm64": "80e450ebb86f5cfdca1227496721417ee51356cedf9212db12dc9bbb40c8ebbb",
+            "windows_amd64": "3879239c57a9f666f23a43a8c36502787ff97bb08b38cf5d55eb991ec0ab4cfc",
+            "windows_arm64": "afd3ae818bcb902a0367d9550f0f7382ef4cd67d36071731e3c52e0a3b62cc09"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* remove stale nested .reuse directory\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#29)\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#28)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#23)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#24)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#25)\n* test against stable Go 1.27 instead of the release candidate\\n\\nGo 1.27.0 has been generally available since August 2026 (now at\\n1.27.1). Replace the temporary 1.27rc1 matrix entry with the stable\\n1.27 line so CI resolves and tests against the latest 1.27.x patch\\nrelease, matching the same treatment already applied in the main\\nsemrel repository CI matrix.\\n\\nNo Go 1.28 pre-release exists yet to add (dev cycle started July\\n2026, RC1 not expected before around January 2027).\\n\\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com> (#22)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#21)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#20)\n* sync from plugin-template@ca03fc8 -- .github/workflows/ci.yml .github/workflows/release.yml .github/workflows/security.yml Dockerfile GOVERNANCE.md Makefile SECURITY.md (#16)\n* sync from plugin-template@ff3fd23 -- Dockerfile GOVERNANCE.md Makefile SECURITY.md (#19)\n* **deps:** Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#17)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#18)\n* **schema:** add JSON Schema for editor validation (#6)"
+        },
+        {
           "version": "0.2.0",
           "releaseDate": "2026-07-06T08:58:56Z",
           "downloadUrl": "https://github.com/SemRels/packager-nfpm/releases/download/v0.2.0/plugin-linux-amd64",
@@ -4746,6 +5506,25 @@
       ],
       "versions": [
         {
+          "version": "0.2.0",
+          "releaseDate": "2026-10-21T17:47:18Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-docker/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "f75bf541330de0fe81ebcd49093f7fbc33cecae85002b30024894e9cea9a2b41",
+            "linux_arm64": "4705729aed7280e9d8906e3bcd6f75af2990ac472e0bcefb148b7cb467fdc291",
+            "darwin_amd64": "3c0a907f3efd982fd6479928a7499d5d9a80c5c378ef6ba5cfd9b978eeee9699",
+            "darwin_arm64": "d17bc1464ee29c1d5735b1c42126cab46d719830bd2a1b27e6d9bf3741b3cf3a",
+            "windows_amd64": "25bd5696e53490de316326b2c84800dcd280003ed936489b4c3186bf8b22948d",
+            "windows_arm64": "f5615a0df6392e931b4993992304e5f1396dde56aa3bb0310b9df23921a3da63"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.2.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* **ci:** grant auto-label workflow pull-requests write permission\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#31)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#30)\n* **deps:** Bump reviewdog/action-actionlint from 1.77.0 to 1.80.1 (#29)\n* **deps:** Bump actions/github-script from 8.0.0 to 9.0.0 (#27)\n* automatically label pull requests\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump reviewdog/action-actionlint from 1.74.0 to 1.77.0\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#19)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.0 (#20)\n* **deps:** Bump reviewdog/action-actionlint from 1.73.4 to 1.74.0 (#21)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#22)\n* test against stable Go 1.27 instead of the release candidate (#18)\n* **deps:** Bump reviewdog/action-actionlint from 1.73.2 to 1.73.4 (#17)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#15)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#14)\n* sync from plugin-template@ff3fd23 -- CODE_OF_CONDUCT.md CONTRIBUTING.md Dockerfile Makefile (#13)\n* **deps:** Bump reviewdog/action-actionlint from 1.73.0 to 1.73.2 (#11)\n* **deps:** Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#10)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#12)\n* **deps:** Bump reviewdog/action-actionlint from 1.72.0 to 1.73.0 (#3)\n* **deps:** Bump docker/login-action from 4.5.0 to 4.5.1 (#4)\n* **deps:** Bump docker/metadata-action from 5.9.0 to 6.2.0 (#5)\n* **deps:** Bump actions/checkout from 6.0.3 to 7.0.1 (#6)\n* **deps:** Bump actions/setup-go from 6.4.0 to 7.0.0 (#7)"
+        },
+        {
           "version": "0.1.1",
           "releaseDate": "2026-07-24T21:54:19Z",
           "downloadUrl": "https://github.com/SemRels/publisher-docker/releases/download/v0.1.1/plugin-linux-amd64",
@@ -4785,6 +5564,25 @@
         "artifacts"
       ],
       "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:47:37Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-generic-http/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "ea44e952fc1a6af2bb40c6674806487a40b74a16972766db33e5046a038230d6",
+            "linux_arm64": "9e141185a61a97978faacbdda45201b9f2f3ef5376e7cdf62be44b5b86f8c249",
+            "darwin_amd64": "a3f7107189cf00cbf8c5c1908300f444ef50d52ce7486e45dba61bbe6a9767c4",
+            "darwin_arm64": "f4e2c436a6cbb6235a5b585cf55c2b6cc3056f68cc7a67391497ecc5677d4d54",
+            "windows_amd64": "a17e177ea8f6c5039247ce36e509bf06df727c853924b843b03a36d899e6a9b4",
+            "windows_arm64": "475e012d558de06798d1a2b38bdf178d03589de7307731ec09a351252a9e1c9a"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* remove stale nested .reuse directory\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#27)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#26)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#21)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#22)\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#23)\n* test against stable Go 1.27 instead of the release candidate\\n\\nGo 1.27.0 has been generally available since August 2026 (now at\\n1.27.1). Replace the temporary 1.27rc1 matrix entry with the stable\\n1.27 line so CI resolves and tests against the latest 1.27.x patch\\nrelease, matching the same treatment already applied in the main\\nsemrel repository CI matrix.\\n\\nNo Go 1.28 pre-release exists yet to add (dev cycle started July\\n2026, RC1 not expected before around January 2027).\\n\\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com> (#20)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#19)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#18)\n* **deps:** Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#16)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#17)\n* **schema:** add JSON Schema for editor validation (#6)\n* sync from plugin-template@e9e7179 -- .github/workflows/ci.yml .github/workflows/release.yml .github/workflows/security.yml Dockerfile GOVERNANCE.md Makefile SECURITY.md (#15)"
+        },
         {
           "version": "0.3.1",
           "releaseDate": "2026-08-17T20:49:46Z",
@@ -4863,6 +5661,25 @@
         "registry"
       ],
       "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2026-10-21T17:45:00Z",
+          "downloadUrl": "https://github.com/SemRels/publisher-oci/releases/download/v0.4.0/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "461c46f9a2604ef3004695eee14c40fab72788ba5f2d4b2e506e5fcb4f19c65c",
+            "linux_arm64": "dfb446dc58db4542cc7e58317a08eb9abd2216424257e03ef4689b9ef6f0bfad",
+            "darwin_amd64": "24f73549afc54f19ae6377c623a68b0173ae9a690834f7caaff8daa36a4a0a4a",
+            "darwin_arm64": "263443c93b76e47554e6c89254d6bda2fc8377174d82d11d79dd9b43f7a6a92a",
+            "windows_amd64": "b344a99bfa777c7727251a4a48caa3a3b557815c9267f6da308d341e30ccc3ad",
+            "windows_arm64": "1a9296455fefae3aba0d9d7e2d99f43f74e0dcd4b327c8537673bf65cf4556fe"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          },
+          "changelog": "## v0.4.0 (2026-10-21)\n\n### Features\n\n* release a patch version for dependency updates\n* bump go to 1.27.2 and refresh Dockerfile\n* replace Makefile with Taskfile\n\n### Bug Fixes\n\n* remove commit_changelog:false with no replacement plugin - CHANGELOG.md was never updated\n* resolve OCI digests via jq instead of oras tag lookup (Docker rewrites bare tags to :latest)\n\n### Other Changes\n\n* **docker:** update gcr.io/distroless/static-debian13:nonroot digest to d620678\n* **tools:** update github/codeql-action digest to 9b32540\n* add more allowed rules to semrel config\n* document plugin usage with uses, phase and args\n* pin Dockerfile base images to digests\n* pin workflow actions to the digests used by plugin-template\n* add status badges to the readme\n* **mise:** update build tools\n* drop auto-label concurrency and keep container runs from being cancelled\n* drop required linear history, works with rebase pretty well\n* require one approving review on the default branch\n* remove stale nested .reuse directory\n* configure semrel release pipeline and ignore local state\n* rework release and semrel-release workflows\n* update ci, security, scorecard and auto-label workflows\n* update copyright holder and reuse metadata\n* switch from dependabot to renovate and add repository settings\n* add editorconfig, pre-commit, commitlint and mise tooling\n* fill in community and governance documents\n* automatically label pull requests\n* **deps:** Bump actions/download-artifact from 8.0.1 to 8.0.2 (#29)\n* **deps:** Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#28)\n* **deps:** Bump oras-project/setup-oras from 2.0.1 to 2.0.2\n* **deps:** Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#23)\n* **deps:** Bump docker/build-push-action from 7.3.0 to 7.4.0 (#24)\n* **deps:** Bump docker/setup-qemu-action from 4.3.0 to 4.4.0 (#25)\n* test against stable Go 1.27 instead of the release candidate\\n\\nGo 1.27.0 has been generally available since August 2026 (now at\\n1.27.1). Replace the temporary 1.27rc1 matrix entry with the stable\\n1.27 line so CI resolves and tests against the latest 1.27.x patch\\nrelease, matching the same treatment already applied in the main\\nsemrel repository CI matrix.\\n\\nNo Go 1.28 pre-release exists yet to add (dev cycle started July\\n2026, RC1 not expected before around January 2027).\\n\\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com> (#22)\n* **deps:** Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#21)\n* **deps:** Bump docker/setup-qemu-action from 4.2.0 to 4.3.0 (#20)\n* sync from plugin-template (#16)\n* sync from plugin-template@ff3fd23 -- Dockerfile GOVERNANCE.md Makefile SECURITY.md (#19)\n* **deps:** Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (#17)\n* **deps:** Bump docker/setup-buildx-action from 4.2.0 to 4.3.0 (#18)\n* **schema:** add JSON Schema for editor validation (#6)"
+        },
         {
           "version": "0.2.0",
           "releaseDate": "2026-07-06T09:00:07Z",
