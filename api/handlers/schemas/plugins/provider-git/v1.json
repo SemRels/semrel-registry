@@ -4,6 +4,7 @@
   "title": "provider-git plugin configuration",
   "description": "Schema v1 for the provider-git semrel plugin. Configure via SEMREL_* environment variables.",
   "type": "object",
+  "x-semrel-dry-run": true,
   "properties": {
     "SEMREL_TAG_NAME": {
       "type": "string",
@@ -17,6 +18,17 @@
       "type": "string",
       "default": "origin",
       "description": "Git remote to push to."
+    },
+    "SEMREL_PLUGIN_PUSH_BRANCH": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "default": "true",
+      "description": "When true, push the current branch in addition to the release tag."
     },
     "SEMREL_REMOTE": {
       "type": "string",

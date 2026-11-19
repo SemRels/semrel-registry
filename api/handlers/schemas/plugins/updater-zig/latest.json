@@ -3,6 +3,7 @@
   "$id": "https://registry.semrel.io/schemas/plugins/updater-zig/v1.json",
   "title": "updater-zig plugin configuration",
   "description": "Schema v1 for the updater-zig semrel plugin. Configure via SEMREL_* environment variables.",
+  "x-semrel-dry-run": true,
   "type": "object",
   "properties": {
     "SEMREL_PLUGIN_FILE": {
