@@ -1,0 +1,14 @@
+{
+  "name": "semrel Registry",
+  "short_name": "semrel",
+  "description": "Discover, install, and publish semantic release plugins for semrel.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f13",
+  "theme_color": "#7c3aed",
+  "lang": "en",
+  "icons": [
+    { "src": "/semrel.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/semrel.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
