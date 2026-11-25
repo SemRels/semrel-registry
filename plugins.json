@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T13:10:23.425Z",
+  "generatedAt": "2026-11-25T11:59:09.910Z",
   "plugins": [
     {
       "namespace": "@semrel",
@@ -4850,6 +4850,24 @@
         "updater"
       ],
       "versions": [
+        {
+          "version": "0.5.15",
+          "releaseDate": "2026-11-25T02:49:14Z",
+          "downloadUrl": "https://github.com/SemRels/updater-python/releases/download/v0.5.15/plugin-linux-amd64",
+          "checksums": {
+            "linux_amd64": "c0fa459c349dfdc5b872148b961910db273b689371d6e534a3dc5a506b589a42",
+            "linux_arm64": "f39e423ffdd30056ceb657ff3411096c798ade6e0c7476bf04bdc512bbaab317",
+            "darwin_amd64": "6592015fe1210bcc429cfc3aff55eeda97d15684ff7defa67a94a98547f6f113",
+            "darwin_arm64": "77a4d4f0237d4efbb74a431004aa0e33d45618afa9bec4d8c6f6b26f057209cf",
+            "windows_amd64": "3ca907bf2bef529fb26ada1b43c43207a77f2e410d0a646092f680df89216a4c",
+            "windows_arm64": "055477c40eae637db0b28978219ee25dee32e76075bd4e5e7c51666329f91058"
+          },
+          "prerelease": false,
+          "compatibility": {
+            "minSemrelVersion": "0.15.0",
+            "gRPCVersion": "v1"
+          }
+        },
         {
           "version": "0.5.0",
           "releaseDate": "2026-10-21T17:24:09Z",
